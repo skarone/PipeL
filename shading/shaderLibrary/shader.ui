@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>298</width>
+    <height>432</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="margin">
+    <number>2</number>
+   </property>
+   <item>
+    <widget class="QFrame" name="sdf">
+     <property name="maximumSize">
+      <size>
+       <width>200</width>
+       <height>250</height>
+      </size>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>200</width>
+       <height>250</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Panel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <property name="sizeConstraint">
+       <enum>QLayout::SetFixedSize</enum>
+      </property>
+      <item>
+       <widget class="QCheckBox" name="selectShader_chb">
+        <property name="palette">
+         <palette>
+          <active/>
+          <inactive/>
+          <disabled/>
+         </palette>
+        </property>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>ShaderName</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="imageShader_img">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(255, 255, 255);</string>
+        </property>
+        <property name="lineWidth">
+         <number>6</number>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="deleteShader_btn">
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(170, 0, 0);</string>
+          </property>
+          <property name="text">
+           <string>Delete</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="editShader_btn">
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(170, 170, 0);</string>
+          </property>
+          <property name="text">
+           <string>Edit</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="assignShader_btn">
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(0, 85, 0);</string>
+          </property>
+          <property name="text">
+           <string>Assign</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

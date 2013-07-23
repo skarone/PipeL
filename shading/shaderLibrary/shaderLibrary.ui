@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>dylon_win</class>
+ <widget class="QMainWindow" name="dylon_win">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>607</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>DYLON Shader Library</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QFrame" name="frame">
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(170, 0, 0);</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Select Shader Library:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>275</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="custom_path_rbtn">
+           <property name="text">
+            <string>Custom Path</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string>buttonGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="main_lib_rbtn">
+           <property name="text">
+            <string>Main Library</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string>buttonGroup</string>
+           </attribute>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QLabel" name="image_ui">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="browse_lib_btn">
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QComboBox" name="lib_path_cmb">
+        <property name="minimumSize">
+         <size>
+          <width>500</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QPushButton" name="exportAll_btn">
+        <property name="text">
+         <string>Export Shaders From Scene</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="exportSel_btn">
+        <property name="text">
+         <string>Export Shaders From Selection</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="exportAsset_btn">
+        <property name="text">
+         <string>Export Shaders From Assset </string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>Close Categories</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_6">
+        <property name="text">
+         <string>Open Categories</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="hyperShade_btn">
+        <property name="text">
+         <string>HyperShade</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line_3">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="asd"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>607</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionExplore_Library"/>
+    <addaction name="actionZip_Library"/>
+    <addaction name="actionImport_Selected"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="deleteSelectedShaders"/>
+    <addaction name="actionCreate_Preview"/>
+    <addaction name="actionDelete_Versions"/>
+   </widget>
+   <widget class="QMenu" name="menuPreferences">
+    <property name="title">
+     <string>Preferences</string>
+    </property>
+    <addaction name="actionSetMain_Library"/>
+    <addaction name="actionClear_History"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuPreferences"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionSetMain_Library">
+   <property name="text">
+    <string>Set Main Lirary Path</string>
+   </property>
+  </action>
+  <action name="deleteSelectedShaders">
+   <property name="text">
+    <string>Delete Selected Shader</string>
+   </property>
+  </action>
+  <action name="actionCreate_Preview">
+   <property name="text">
+    <string>Create Preview</string>
+   </property>
+  </action>
+  <action name="actionClear_History">
+   <property name="text">
+    <string>Clear History</string>
+   </property>
+  </action>
+  <action name="actionZip_Library">
+   <property name="text">
+    <string>Zip Library</string>
+   </property>
+  </action>
+  <action name="actionDelete_Versions">
+   <property name="text">
+    <string>Delete Versions</string>
+   </property>
+  </action>
+  <action name="actionExplore_Library">
+   <property name="text">
+    <string>Explore Library</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionImport_Selected">
+   <property name="text">
+    <string>Import Selected</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>custom_path_rbtn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lib_path_cmb</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>499</x>
+     <y>86</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>507</x>
+     <y>294</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>custom_path_rbtn</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>browse_lib_btn</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>499</x>
+     <y>86</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>60</x>
+     <y>296</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+ </buttongroups>
+</ui>

@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="textures">
+    <file>shaderLibrary_flag.png</file>
+  </qresource>
+</RCC>
