@@ -111,6 +111,7 @@ try:
 except:
 	print 'running from outside maya'
 import re
+import sys
 
 """
 SETTINGS:
@@ -136,7 +137,36 @@ def ls( strToSearch = None, **args ):
 	if nodes:
 		return [ Node(n) for n in nodes ]
 
+def listRelatives( strToSearch = None, **args ):
+	"""Node version of list relatives maya command"""
+	cmd = ''
+	if strToSearch:
+		cmd += '"' + strToSearch + '",'
+	for a in args.keys():
+		val = args[a]
+		if isinstance(val, str):
+			cmd += a + '="' + args[a] + '",'
+		else:
+			cmd += a + '=' + str( args[a] ) + ','
+	nodes = eval( "mc.listRelatives(" + cmd + ")" )
+	if nodes:
+		return [ Node(n) for n in nodes ]
 
+def createNode( typeOfNode, **args ):
+	"""mayaNode version of create node"""
+	cmd = ''
+	if typeOfNode:
+		cmd += '"' + typeOfNode + '",'
+	for a in args.keys():
+		val = args[a]
+		if isinstance(val, str):
+			cmd += a + '="' + args[a] + '",'
+		else:
+			cmd += a + '=' + str( args[a] ) + ','
+	node = eval( "mc.createNode(" + cmd + ")" )
+	if node:
+		return Node(node)
+	
 class Node(object):
 	"""base class to handle maya nodes more easy"""
 	def __init__(self, name ):
@@ -302,14 +332,40 @@ class Node(object):
 	def delete(self):
 		"""delete node"""
 		if not self.exists:
-			raise NodeNotFound( self.name )
+			raise NodeNotFound( self.name ), None, sys.exc_info()[2]
 		mc.delete( self.name )
 
+	def listAttr(self, **args):
+		"""list the attributes of the node"""
+		cmd = ''
+		for a in args.keys():
+			val = args[a]
+			if isinstance(val, str):
+				cmd += a + '="' + args[a] + '",'
+			else:
+				cmd += a + '=' + str( args[a] ) + ','
+		attrs = eval( "mc.listAttr( '" + self.name + "'," + cmd + ")" )
+		if attrs:
+			return [ NodeAttribute( self, a ) for a in attrs ]
+
+	@property
+	def shape(self):
+		"""return the shape of the node if there is one"""
+		sha = mn.listRelatives( self.name, s = True, ni = True )
+		if sha:
+			return sha[0]
+		return None
 
 class NodeAttribute(object):
 	def __init__(self, node, attribute):
 		self._node = node
 		self._attribute = attribute
+
+	def __str__(self):
+		return self.fullname
+
+	def __repr__(self):
+		return self.fullname
 
 	@property
 	def fullname(self):
@@ -330,7 +386,7 @@ class NodeAttribute(object):
 	def v(self):
 		"""attribute value"""
 		if not self.exists:
-			raise AttributeNotFound( self._node.name, self._attribute )
+			raise AttributeNotFound( self._node.name, self.name )
 		return mc.getAttr( self.fullname )
 
 	@v.setter
@@ -709,13 +765,15 @@ class Namespace(object):
 class AttributeNotFound( Exception ):
 	def __init__(self, node, attribute ):
 		self._message = "Node '%s' has no attribute '%s'." % ( node, attribute )
+		Exception.__init__(self, self._message)
 
 	def __str__(self):
-		return self._message
+		return repr( self._message )
 
 class NodeNotFound( Exception ):
 	def __init__(self, node ):
-		self._message = "Node '%s' doesn\'t exists." % ( node )
+		self._message = "Node '%s' doesn\'t exists." % ( node ) 
+		Exception.__init__(self, self._message)
 
 	def __str__(self):
 		return self._message
@@ -723,6 +781,7 @@ class NodeNotFound( Exception ):
 class NamespaceNotFound( Exception ):
 	def __init__(self, namespace ):
 		self._message = "Namespace '%s' doesn\'t exists." % ( namespace )
+		Exception.__init__(self, self._message)
 
 	def __str__(self):
 		return self._message 
