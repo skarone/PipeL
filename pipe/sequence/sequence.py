@@ -28,6 +28,7 @@ class Sequence(object):
 		"""return porject object"""
 		return self._project
 
+	@property
 	def exists(self):
 		"""return if the sequence exists"""
 		return os.path.exists( self.path )
@@ -60,3 +61,7 @@ class Sequence(object):
 		sh.create()
 		return sh
 		
+	@property
+	def shots(self):
+		"""return the shots in the sequence"""
+		return [ sht.Shot( a, self ) for a in os.listdir( self.path + '/Shots/' ) ]

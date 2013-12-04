@@ -2,6 +2,7 @@ import general.mayaNode.mayaNode   as mn
 reload( mn)
 import maya.cmds                   as mc
 import general.transform.transform as trf
+import maya.OpenMaya as api
 
 """
 import rigging.stickyControl.stickyControl as stk
@@ -9,8 +10,11 @@ reload( stk )
 stk.createControlForSelection( name = 'controlOnMesh', baseJoint = '' )
 
 import rigging.stickyControl.stickyControl as stk
+import maya.cmds as mc
 reload( stk )
-stk.createControlInRig( mesh = 'defaultShape1' )
+stk.createControlInRig( mesh = 'CabezaBaseShape' )
+mc.group(  mc.ls( '*_joint' ), n = 'joints_grp' )
+mc.group(  mc.ls( '*_rivet' ), n = 'rivets_grp' )
 
 """
 mc.loadPlugin( "C:/Program Files/Autodesk/Maya2013/bin/plug-ins/MayaMuscle.mll" )
@@ -31,7 +35,7 @@ def createControlForSelection( name = 'controlOnMesh', baseJoint = '' ):
 		mesh  = mn.ls( sel[1].name, dag = True, s = True, ni = True )
 		if not mesh:
 			mc.error( 'PLEASE SELECT A TRANSFORM AND A MESH IN THAT ORDER' )
-		control = ControlOnMesh( name = name, baseJoint = baseJoint, position = trans.a.translate.v[0], mesh = mesh[0] )
+		control = ControlOnMesh( name = name, baseJoint = baseJoint, position = trans.worldPosition, mesh = mesh[0] )
 		control.create()
 
 def createControlInRig( mesh = '', baseJoint = '' ):
@@ -40,11 +44,12 @@ def createControlInRig( mesh = '', baseJoint = '' ):
 	conPoints = mn.ls( '*_point' )
 	for c in conPoints:
 		name = c.name.replace( '_point', '' )
-		control = ControlOnMesh( name = name, baseJoint = baseJoint, position = c.a.translate.v[0], mesh = mesh )
+		cPos = c.worldPosition
+		control = ControlOnMesh( name = name, baseJoint = baseJoint, position = cPos, mesh = mesh )
 		control.create()
 		if name.startswith( 'l_' ):
 			name = 'r_' + name[2:]
-			pos  = [-c.a.tx.v, c.a.ty.v, c.a.tz.v]
+			pos  = [-cPos[0], cPos[1], cPos[2]]
 			control = ControlOnMesh( name = name, baseJoint = baseJoint, position = pos, mesh = mesh )
 			control.create()
 
@@ -146,6 +151,19 @@ class ControlOnMesh(object):
 		rivet.a.fixPolyFlip.v = 1
 		rivetPar = rivet.parent
 		self.mesh.a.worldMesh >> rivet.a.surfIn
+		#check if flip is better than not
+		tmpTrans1 = rivet.a.outTranslate.v[0]
+		rivet.a.fixPolyFlip.v = 0
+		tmpTrans2 = rivet.a.outTranslate.v[0]
+		vec1 = api.MVector( self.initPosition[0] - tmpTrans1[0],
+							self.initPosition[0] - tmpTrans1[0],
+							self.initPosition[0] - tmpTrans1[0])
+		vec2 = api.MVector( self.initPosition[0] - tmpTrans2[0],
+							self.initPosition[0] - tmpTrans2[0],
+							self.initPosition[0] - tmpTrans2[0])
+		if vec2.length() > vec1.length():
+			rivet.a.fixPolyFlip.v = 1
+
 		rivet.a.outRotate >> rivetPar.a.rotate
 		rivet.a.outTranslate >> rivetPar.a.translate
 		#need to check if the uv are ok or we have to flip them
