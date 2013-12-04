@@ -7,12 +7,6 @@ Description:
 		-Query states of production
 '''
 import os
-import pipe.mayaFile.mayaFile as mfl
-reload( mfl )
-import pipe.textureFile.textureFile as tfl
-reload( tfl )
-import pipe.dependency.dependency as dp
-reload( dp )
 
 class Asset(object):
 	"""asset production object in the system, files and folders"""
@@ -30,7 +24,6 @@ class Asset(object):
 		"""get the project of the asset"""
 		return self._project
 
-	@property
 	def exists(self):
 		"""check if the asset exists in the project"""
 		return os.path.exists( self.path )
@@ -42,7 +35,7 @@ class Asset(object):
 
 	def create(self):
 		"""create folders and file structure"""
-		if self.exists:
+		if self.exists():
 			raise 'This asset allready ' + self.name + 'exist in the project'
 		struc = [
 			"/" + self.name + "_FINAL.avi",
@@ -108,42 +101,42 @@ class Asset(object):
 	@property
 	def rigPath(self):
 		"""return the path of the rig"""
-		return mfl.mayaFile( self.path + '/Rig/' + self.name + "_RIG.ma" )
+		return self.path + '/Rig/' + self.name + "_RIG.ma"
 
 	@property
 	def hasRig(self):
 		"""return if the asset has a rig"""
-		return os.path.getsize( self.rigPath.path ) != 0
+		return os.path.getsize( self.rigPath ) != 0
 
 	@property
 	def modelPath(self):
 		"""return the path of the model"""
-		return mfl.mayaFile( self.path + '/Model/' + self.name + "_MODEL.ma" )
+		return self.path + '/Model/' + self.name + "_MODEL.ma"
 
 	@property
 	def hasModel(self):
 		"""return if the asset has a model"""
-		return os.path.getsize( self.modelPath.path ) != 0
+		return os.path.getsize( self.modelPath ) != 0
 
 	@property
 	def hairPath(self):
 		"""return hair path of the asset"""
-		return mfl.mayaFile( self.path + '/Hrs/' + self.name + "_HRS.ma" )
+		return self.path + '/Hrs/' + self.name + "_HRS.ma"
 
 	@property
 	def hasHair(self):
 		"""return if the asset has a Hair file"""
-		return os.path.getsize( self.hairPath.path ) != 0
+		return os.path.getsize( self.hairPath ) != 0
 
 	@property
 	def shadingPath(self):
 		"""return shading path of the asset"""
-		return mfl.mayaFile( self.path + '/Shading/Maya/' + self.name + "_SHA.ma" )
+		return self.path + '/Shading/Maya/' + self.name + "_SHA.ma"
 
 	@property
 	def hasShading(self):
 		"""return if the asset has a shading maya file"""
-		return os.path.getsize( self.shadingPath.path ) != 0
+		return os.path.getsize( self.shadingPath ) != 0
 
 	@property
 	def texturesPath(self):
@@ -153,17 +146,12 @@ class Asset(object):
 	@property
 	def textures(self):
 		"""return the textures of the asset"""
-		return [ tfl.textureFile( self.texturesPath + a ) for a in os.listdir( self.texturesPath ) if os.path.isfile( self.texturesPath + a ) ] 
+		return [ a for a in os.listdir( self.texturesPath ) if os.path.isfile( self.texturesPath + a ) ] 
 
 	@property
 	def finalPath(self):
 		"""return the FINAL path for the MA file"""
-		return mfl.mayaFile( self.path + '/' + self.name + "_FINAL.ma" )
-
-	@property
-	def hasFinal(self):
-		"""return if the asset has a final ma"""
-		return os.path.getsize( self.finalPath.path ) != 0
+		return self.path + '/' + self.name + "_FINAL.ma"
 
 	def imp(self, referenced = True):
 		"""import asset to current scene, also can be referenced"""
@@ -171,39 +159,3 @@ class Asset(object):
 			mc.file( self.finalPath, i = True )
 		else:#REFERENCE
 			mc.file( self.finalPath, reference=True, namespace=self.name )
-
-	@property
-	def status(self):
-		"""return an array with the status of the files in the asset,
-		return:
-			-1 : not updated
-			0  : 0k file or not exists
-			1  : updated"""
-		depFiles = [ 
-				[dp.Node( self.modelPath   ),[]],
-				[dp.Node( self.shadingPath ),[ 0 ]],
-				[dp.Node( self.rigPath     ),[ 1, 3 ]],
-				[dp.Node( self.hairPath    ),[ 0 ]],
-				[dp.Node( self.finalPath   ),[ 2, 3 ]]
-				]
-		res = dp.dep_resolvedArray( depFiles )
-		result = []
-		for i,f in enumerate( depFiles ):
-			value = 1
-			if not f[0].name.exists:
-				value = 0
-			elif f[0].name.isZero:
-				value = 0
-			else:
-				for deps in res[i][1]:
-					if not deps.name.exists:
-						continue
-					elif deps.name.isZero:
-						continue
-					isOlder = f[0].name.isOlderThan( deps.name )
-					if isOlder:
-						value = -1
-						break
-			result.append( value )
-
-		return result

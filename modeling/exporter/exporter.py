@@ -181,15 +181,6 @@ class AssetExporter(object):
 	def addObjectsToGroup(self):
 		"""add all the objects to the group"""
 		mc.parent( self.objects, self.grp.name )
-		mc.makeIdentity( self.objects, apply=True,t=1,r=1,s=1,n=2)
-		self.lockObjects()
-
-	def lockObjects(self):
-		for o in self.objects:
-			o = mn.Node( o )
-			o.a.t.locked = True
-			o.a.r.locked = True
-			o.a.s.locked = True
 
 	def setCoordsToMainFromPivot(self):
 		"""set rotation and translate of the main group from the pivot"""
@@ -223,18 +214,18 @@ class AssetExporter(object):
 	def exportGrp(self, referenced = True):
 		"""export grp"""
 		#export and create reference file
-		if not self.asset.exists:
+		if not self.asset.exists():
 			self.project.addAsset( self.asset.name )
 		self.moveToZero()
 		mc.select( self.grp.name )
 		#move referenced file to final position!
 		if referenced:
-			mc.file( self.asset.finalPath.path, type='mayaAscii', namespace=self.asset.name, exportAsReference=referenced, force = True)
+			mc.file( self.asset.finalPath, type='mayaAscii', namespace=self.asset.name, exportAsReference=referenced, force = True)
 			self.grp = self.asset.name + ':' + self.grp.name
 		else:
-			mc.file( self.asset.finalPath.path, type='mayaAscii', es = True, force = True)
+			mc.file( self.asset.finalPath, type='mayaAscii', es = True, force = True)
 		self.setCoordsToMainFromPivot()
-		shutil.copy( self.asset.finalPath.path, self.asset.modelPath.path )
+		shutil.copy( self.asset.finalPath, self.asset.modelPath )
 
 	def saveCoordsForSet(self, setName):
 		"""save the coords of the asset in set.breakdown"""

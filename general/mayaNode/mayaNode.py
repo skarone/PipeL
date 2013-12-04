@@ -135,7 +135,7 @@ def ls( strToSearch = None, **args ):
 			cmd += a + '=' + str( args[a] ) + ','
 	nodes = eval( "mc.ls(" + cmd + ")" )
 	if nodes:
-		return Nodes( nodes )
+		return [ Node(n) for n in nodes ]
 
 def listRelatives( strToSearch = None, **args ):
 	"""Node version of list relatives maya command"""
@@ -150,7 +150,7 @@ def listRelatives( strToSearch = None, **args ):
 			cmd += a + '=' + str( args[a] ) + ','
 	nodes = eval( "mc.listRelatives(" + cmd + ")" )
 	if nodes:
-		return Nodes( nodes )
+		return [ Node(n) for n in nodes ]
 
 def createNode( typeOfNode, **args ):
 	"""mayaNode version of create node"""
@@ -166,49 +166,7 @@ def createNode( typeOfNode, **args ):
 	node = eval( "mc.createNode(" + cmd + ")" )
 	if node:
 		return Node(node)
-
-
-##################################################
-# NODES CLASS
-
-class Nodes(list):
-	"""return array of nodes"""
-	def __init__(self, nodesList):
-		nods = []
-		if not isinstance( nodesList[0], Node ):
-			nods = [ Node(n) for n in nodesList ]
-		else:
-			nods = nodesList
-		super(Nodes, self).__init__( nods )
-
-	@property
-	def nodes(self):
-		"""return the nodes in the array"""
-		try:
-			return [ n for n in self ]
-		except:
-			return None
-
-	@property
-	def names(self):
-		"""return the name of the nodes"""
-		try:
-			return [ n.name for n in self ]
-		except:
-			return None
-
-	@property
-	def a(self):
-		"""return an array of the same attribute for the nodes"""
-		pass
-
-	def select(self):
-		"""select all the nodes"""
-		mc.select( self.names )
-
-##################################################
-# NODE CLASS
-
+	
 class Node(object):
 	"""base class to handle maya nodes more easy"""
 	def __init__(self, name ):
@@ -295,15 +253,7 @@ class Node(object):
 		if c:
 			return [ Node( a ) for a in c ] #check how to handle arrays of nodes
 		else:
-			return []
-
-	@property
-	def allchildren(self):
-		"""return all the children in recursive"""
-		child = self.children
-		for c in child:
-			child.extend( c.allchildren )
-		return child
+			return None
 
 	@property
 	def exists(self):
@@ -357,11 +307,6 @@ class Node(object):
 		return NodeAttribute(self, attribute)
 
 	@property
-	def worldPosition(self):
-		"""return the world position if it is a transform node"""
-		return mc.xform( self.name, q = True, ws = True, rp = True )
-
-	@property
 	def locked(self):
 		"""lock Node"""
 		if not self.exists:
@@ -380,10 +325,9 @@ class Node(object):
 		if not self.exists:
 			raise NodeNotFound( self.name )
 		if newName:
-			newNode = mc.duplicate( self.name, n = newName )
+			mc.duplicate( self.name, n = newName )
 		else:
-			newNode = mc.duplicate( self.name )
-		return Node( newNode[0] )
+			mc.duplicate( self.name )
 
 	def delete(self):
 		"""delete node"""
@@ -407,44 +351,10 @@ class Node(object):
 	@property
 	def shape(self):
 		"""return the shape of the node if there is one"""
-		sha = listRelatives( self.name, s = True, ni = True )
+		sha = mn.listRelatives( self.name, s = True, ni = True )
 		if sha:
 			return sha[0]
 		return None
-
-
-##################################################
-# ATTRIBUTES CLASS
-
-class NodesAttributes(list):
-	"""manage a list of attributes"""
-	def __init__(self, attributes):
-		attrs = []
-		if not isinstance( attributes[0], NodeAttribute ):
-			attrs = [ NodeAttribute( Node(a[:a.index('.')]), a[a.index('.')+1:]) for a in attributes ]
-		else:
-			attrs = attributes
-		super(NodesAttributes, self).__init__( attrs )
-
-	@property
-	def nodes(self):
-		"""return the nodes in the attributes array"""
-		try:
-			return Nodes( [ a.node for a in self ] )
-		except:
-			return []
-
-	@property
-	def values(self):
-		"""return the values of the nodes"""
-		try:
-			return [ a.v for a in self ]
-		except:
-			return None
-
-
-##################################################
-# ATTRIBUTE CLASS
 
 class NodeAttribute(object):
 	def __init__(self, node, attribute):
@@ -515,11 +425,9 @@ class NodeAttribute(object):
 		"""Return children attributes"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
-		tmpAttr = re.sub( '\[\d+\]$', '' , self._attribute )
-		tmpAttr = tmpAttr[tmpAttr.rfind( '.' )+1:]
-		children = mc.attributeQuery( tmpAttr, node = self._node.name, lc = True )
+		children = mc.attributeQuery( self._attribute, node = self._node.name, lc = True )
 		if children:
-			return [ NodeAttribute(self._node, self._attribute + '.' + a) for a in children ]
+			return [ NodeAttribute(self._node, a) for a in children ]
 		return None
 
 	@property
@@ -533,7 +441,6 @@ class NodeAttribute(object):
 	def exists(self):
 		"""attribute exists? """
 		tmpAttr = re.sub( '\[\d+\]$', '' , self._attribute )
-		tmpAttr = tmpAttr[tmpAttr.rfind( '.' )+1:]
 		return mc.attributeQuery( tmpAttr, node=self._node.name, ex=True)
 
 	@property
@@ -541,48 +448,42 @@ class NodeAttribute(object):
 		"""lock attribute"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
-		return mc.getAttr( self.fullname, l = True )
+		return mc.getAttr( self.name, l = True )
 
 	@locked.setter
 	def locked(self, state):
 		"""lock attribute"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
-		mc.setAttr( self.fullname, l = state )
-
-	@property
-	def size(self):
-		"""retur the size of the attribute,
-		usefull for array attributes"""
-		return mc.getAttr( self.fullname, size = True )
+		mc.setAttr( self.name, l = state )
 
 	@property
 	def max(self):
 		"""return max value if it has, else None"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
-		return mc.addAttr( self.fullname, q = True, max = True )
+		return mc.addAttr( self.name, q = True, max = True )
 
 	@max.setter
 	def max(self, value):
 		"""set new max value for attribute"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
-		mc.addAttr( self.fullname, e = True, max = value )
+		mc.addAttr( self.name, e = True, max = value )
 
 	@property
 	def min(self):
 		"""return min value if it has, else None"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
-		return mc.addAttr( self.fullname, q = True, min = True )
+		return mc.addAttr( self.name, q = True, min = True )
 
 	@min.setter
 	def min(self, value):
 		"""set new min value for attribute"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
-		mc.addAttr( self.fullname, e = True, min = value )
+		mc.addAttr( self.name, e = True, min = value )
 
 	@property
 	def default(self):
@@ -596,7 +497,7 @@ class NodeAttribute(object):
 		"""set new default value for attribute"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
-		mc.addAttr( self.fullname, e = True, dv = value )
+		mc.addAttr( self.name, e = True, dv = value )
 
 	@property
 	def input(self):
@@ -607,7 +508,7 @@ class NodeAttribute(object):
 		if con:
 			condata = con[0].split( '.', 1 )
 			return NodeAttribute( Node( condata[0] ), condata[1] )
-		return []
+		return None
 
 	@property
 	def output(self):
@@ -616,10 +517,8 @@ class NodeAttribute(object):
 			raise AttributeNotFound( self._node.name, self._attribute )
 		con = mc.listConnections( self.fullname, p = True, s = True )
 		if con:
-			con = NodesAttributes( [ NodeAttribute( Node( a[:a.index('.')] ), a[a.index('.')+1:] ) for a in con ] )
-			return con
-		else:
-			return []
+			con = [ NodeAttribute(Node(a[:a.index('.')]), a[a.index('.')+1:]) for a in con ]
+		return con
 
 	@property
 	def overrided(self):
@@ -674,13 +573,13 @@ class NodeAttribute(object):
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		if not other:
-			con = self.input
+			con = self.inp
 			if con:
-				mc.disconnectAttr( con, self.fullname )
+				mc.disconnectAttr( con, self.name )
 				return
-		elif not other.exists:
+		if not other.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
-		mc.disconnectAttr( self.fullname, other.fullname )
+		mc.disconnectAttr( self.name, other.name )
 
 	def __or__(self, other):
 		"""is connected ? using | THE PIPE =) """
@@ -703,21 +602,19 @@ class NodeAttribute(object):
 			raise AttributeNotFound( self._node.name, self._attribute )
 		mc.deleteAttr(self._node.name, at=self._attribute)
 
-	def add( self, **args ):
+	def add( self, dataType = None, attributeType = None ):
 		"""add custom attribute"""
-		cmd = ''
-		if args:
-			for a in args.keys():
-				val = args[a]
-				if isinstance(val, str):
-					cmd += a + '="' + args[a] + '",'
-				else:
-					cmd += a + '=' + str( args[a] ) + ','
-		eval( "mc.addAttr( '"+ self._node.name + "', longName = '" + self._attribute + "'," + cmd + ")" )
+		cmd = 'mc.addAttr("' + self._node.name + '", longName = "' + self._attribute + '", k = True '
+		if attributeType:
+			cmd += ' ,attributeType = "' + attributeType + '"'
+		if dataType:
+			cmd += ' ,dataType = "' + dataType + '"'
+		if not dataType and not attributeType:
+			raise KeyError( 'You need to specify the attributeType or the dataType to add this attribute' )
+		cmd += ')'
+		print cmd
+		eval( cmd )
 
-
-##################################################
-# ATTRIBUTES COLLECTION CLASS
 
 class NodeAttributeCollection(object):
 
@@ -727,8 +624,9 @@ class NodeAttributeCollection(object):
     def __getattr__(self, attribute):
         return NodeAttribute(self._node, attribute)
 
-##################################################
-# NAMESPACES
+	def add(self, attribute): #TODO
+		pass
+
 
 class Namespace(object):
 	"""class to control namespaces"""
@@ -863,8 +761,6 @@ class Namespace(object):
 		else:
 			return Namespace( ':'+ node.name[ :p ] )
 
-#####################################################
-#ERRORS
 
 class AttributeNotFound( Exception ):
 	def __init__(self, node, attribute ):

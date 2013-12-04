@@ -29,49 +29,34 @@ import sys
 import os
 from pymel.core import *
 import general.mayaNode.mayaNode as mn
-reload( mn )
-import maya.cmds as mc
 
 """
 import hair.hair as hr
 reload( hr )
 hr.hairSystemAutomator( 'cejas' )
 
-import hair.hair as hr
-import general.mayaNode.mayaNode as mn
-import maya.cmds as mc
-reload( hr )
-sel = mn.ls( sl = True )[0]
-mc.select( sel.children )
-asd = hr.hairSystemAutomator( sysName = sel.name.replace( '_lock_grp', '' ), scalp = 'CabezaBase_hrs' )
-
-
-
 """
 full_path = os.path.realpath(__file__)
 
-mc.loadPlugin( os.path.dirname(full_path) + '/curvesFromMesh.mll' )
+loadPlugin( os.path.dirname(full_path) + '/curvesFromMesh.mll' )
 
+def hairSystemAutomator( sysName = '' ):
+	"""
 
-def hairSystemAutomator( sysName = '', scalp = None ):
-	"""creates a hair system based on selected lock meshes, 
-	if you specify a scalp it will use that to place follicles"""
-	hair_polygons = mn.ls(sl=1)
-	all_grp = mn.Node( mc.group( n = sysName + '_hair_grp', em = True ) )
-	hairSystem = mn.createNode('hairSystem')
-	hairSystemPar = hairSystem.parent
-	hairSystemPar.name = sysName + '_hairSystem'
-	hairSystem = hairSystemPar.shape
-	hairSystemPar.parent = all_grp
-	pfxHair = mn.createNode( 'pfxHair' )
-	pfxHairPar = pfxHair.parent
-	pfxHairPar.name = sysName + '_pfxHair'
-	pfxHairPar.parent = all_grp
-	pfxHair = pfxHairPar.shape
-	foll_grp = mn.Node( mc.group( n = sysName + '_foll_grp', em = True ) )
-	foll_grp.parent = all_grp
-	curve_grp = mn.Node( mc.group( n = sysName + '_crv_grp', em = True ) )
-	curve_grp.parent = all_grp
+	"""
+	hair_polygons = ls(sl=1)
+	val = 0
+	all_grp = group( n = sysName + '_hair_grp', em = True )
+	hairSystem = createNode('hairSystem')
+	hairSystem.getParent().rename( sysName + '_hairSystem' )
+	parent( hairSystem.getParent(), all_grp )
+	pfxHair = createNode('pfxHair')
+	pfxHair.getParent().rename( sysName + '_pfxHairShape' )
+	parent( pfxHair.getParent(), all_grp )
+	foll_grp = group( n = sysName + '_foll_grp', em = True )
+	parent( foll_grp, all_grp )
+	curve_grp = group( n = sysName + '_crv_grp', em = True )
+	parent( curve_grp, all_grp )
 	allFollicles = []
 	allHairCurves = []
 	allFtbHairCurves = []
@@ -79,18 +64,77 @@ def hairSystemAutomator( sysName = '', scalp = None ):
 	plugCount = 0
 	badMesh = []
 	for hair_poly in hair_polygons:
-		hairLock = HairLock( hair_poly, hairSystem, scalp )
-		hairLock.create()
-		for i in range( 5 ):
-			hairLock.follicles[i].parent = foll_grp
-			#if not scalp:
-			hairLock.curves[i].parent    = curve_grp
-	#hairSystem.attr( "clumpFlatness[0].clumpFlatness_Position" ).v = 0
-	#hairSystem.attr( "clumpFlatness[0].clumpFlatness_FloatValue" ).v = 0.5
-	hairSystem.a.simulationMethod.v = 1
-	hairSystem.a.outputRenderHairs >> pfxHair.a.renderHairs
-	ti = mn.Node( 'time1' )
-	ti.a.outTime >> hairSystem.a.currentTime
+		numFace = polyEvaluate( hair_poly, f = True )
+		numVert = polyEvaluate( hair_poly, v = True )
+		numEdge = polyEvaluate( hair_poly, e = True )
+		if not numFace % 2 or not numVert == ( numFace + 3 ):
+			print 'This mesh dosen\'t have odd number of faces', str( hair_poly ), 'SKYPING'
+			badMesh.append( str( hair_poly ) )
+			continue
+		ftb_hairCurve = createNode('curvesFromMesh', n = sysName + '_%i'%plugCount + '_curveMesh')
+		plugCount += 1
+		hair_poly.getShape().outMesh >> ftb_hairCurve.inMesh
+		hair_poly.getShape().worldMatrix[0] >> ftb_hairCurve.inWorldMatrix
+		allFtbHairCurves.append(ftb_hairCurve)
+		
+		for i in range(5):	
+			follicle = createNode('follicle')
+			follicle.getParent().rename(sysName + '_%i'%hairCount + '_foll')
+			parent( follicle.getParent(), foll_grp )
+			hairCurve = createNode('nurbsCurve' )
+			hairCurve.getParent().rename( sysName + '_%i'%hairCount + '_crv' )
+			parent( hairCurve.getParent(), curve_grp )
+			ftb_hairCurve.outCurve[i] >> hairCurve.create
+			hairCurve.worldSpace[0] >> follicle.startPosition
+			follicle.outHair >> hairSystem.inputHair[val]
+			hairSystem.outputHair[val] >> follicle.currentPosition
+			allFollicles.append(follicle)
+			allHairCurves.append(hairCurve)
+			
+			hair_poly.outMesh >> follicle.inputMesh
+			hair_poly.worldMatrix[0] >> follicle.inputWorldMatrix
+			follicle.parameterV.set(0.5)
+			follicle.parameterU.set(0.5)
+			
+		 
+			follicle.overrideDynamics.set(0)
+			follicle.startDirection.set(1)
+		
+			follicle.clumpWidthMult.set(1.5)
+			follicle.densityMult.set(0.5)
+		
+			follicle.sampleDensity.set(1.5)
+		
+			totalDistance = 0.0
+			#segments = 0
+		
+			td = 0.0
+			seg = 1   
+			dist = 0.00000001
+			hairCount += 1   
+			while (dist > 0.0):
+				dist = ftb_hairCurve.outDistance[seg].get()
+				td += dist
+				seg += 1
+				accumulatedDistance = 0.0
+			#print td, seg
+			for n in range(seg):
+				accumulatedDistance += ftb_hairCurve.outDistance[n].get()
+				follicle.clumpWidthScale[n].clumpWidthScale_FloatValue.set(ftb_hairCurve.outRadius[i].get()*2)
+				follicle.clumpWidthScale[n].clumpWidthScale_Position.set(accumulatedDistance/td)
+				follicle.clumpWidthScale[n].clumpWidthScale_Interp.set(1)
+				val += 1
+	
+	hairSystem.clumpFlatness[0].clumpFlatness_Position.set(0)
+	hairSystem.clumpFlatness[0].clumpFlatness_FloatValue.set(0.5)
+	hairSystem.simulationMethod.set(1)
+	hairSystem.outputRenderHairs >> pfxHair.renderHairs
+	ti = PyNode('time1')
+	ti.outTime >> hairSystem.currentTime
+	
+	#group(allFollicles,name='follicle_grp')
+	#group(allHairCurves, name='hairCurves_grp')
+	return hairSystem,pfxHair,allFollicles,allHairCurves,badMesh
 
 
 class HairLock(object):
@@ -114,6 +158,7 @@ class HairLock(object):
 			self._scalp   = scalp
 		else:
 			self._scalp   = mn.Node( scalp )
+		
 
 	@property
 	def mesh(self):
@@ -159,8 +204,7 @@ class HairLock(object):
 		if not numFace % 2 or not numVert == ( numFace + 3 ):
 			print 'This mesh dosen\'t have odd number of faces', self.mesh.name, 'SKYPING'
 			return
-		self._curveMesh = mn.createNode('curvesFromMesh' )
-		self._curveMesh.name = self.mesh.name + '_curveMesh'
+		self._curveMesh = mn.createNode('curvesFromMesh', n = self.mesh.name + '_curveMesh')
 		self.mesh.shape.a.outMesh     >> self._curveMesh.a.inMesh
 		self.mesh.shape.a.worldMatrix >> self._curveMesh.a.inWorldMatrix
 		for i in range(5):	
@@ -172,26 +216,23 @@ class HairLock(object):
 			
 			follicle = mn.createNode('follicle')
 			folliclePar = follicle.parent
-			folliclePar.name = self.mesh.name + '_%i'%i + '_foll'
+			folliclePar.name = self.mesh.name + '_%i'%hairCount + '_foll'
 			follicle = folliclePar.shape
-			hairSustemOutHairSize = self.hairSystem.a.outputHair.size 
-			follicle.a.outHair >> self.hairSystem.attr( 'inputHair[%i'%hairSustemOutHairSize + ']' )
-			#follicle.a.outHair >> self.hairSystem.attr( 'inputHair[%i'%i + ']' )
+			follicle.a.outHair >> self.hairSystem.attr( 'inputHair[%i'%val + ']' )
 			hairCurve.a.worldSpace >> follicle.a.startPosition
-			self.hairSystem.attr( 'outputHair[%i'%hairSustemOutHairSize + ']' ) >> follicle.a.currentPosition
-			self._follicles.append(follicle)
+			self.hairSystem.attr( 'outputHair[%i'%val + ']' ) >> follicle.a.currentPosition
+			self_follicles.append(follicle)
 			self._curves.append(hairCurve)
 			#if there is a scalp mesh use that for the position of the follicle
 			if self.scalp:
 				self.scalp.shape.a.outMesh >> follicle.a.inputMesh
-				self.scalp.a.worldMatrix   >> follicle.a.inputWorldMatrix
+				self.scalp.worldMatrix     >> follicle.a.inputWorldMatrix
 				u,v = self._getUVCoordFromScalpForFollicle( hairCurve )
 				follicle.a.parameterV.v       = v
 				follicle.a.parameterU.v       = u
-				#hairCurveParent.parent        = folliclePar
 			else:
 				self.mesh.shape.a.outMesh  >> follicle.a.inputMesh
-				self.mesh.a.worldMatrix    >> follicle.a.inputWorldMatrix
+				self.mesh.worldMatrix      >> follicle.a.inputWorldMatrix
 				follicle.a.parameterV.v       = 0.5
 				follicle.a.parameterU.v       = 0.5
 			follicle.a.overrideDynamics.v = 0
@@ -199,8 +240,7 @@ class HairLock(object):
 			follicle.a.clumpWidthMult.v   = 1.5
 			follicle.a.densityMult.v      = 0.5
 			follicle.a.sampleDensity.v    = 1.5
-			follicle.a.outTranslate >> follicle.parent.a.translate
-			follicle.a.outRotate >> follicle.parent.a.rotate
+			print 'remember to parent to a group the curves and the follicles to keep clean'
 
 	def _getUVCoordFromScalpForFollicle(self, curve):
 		"""return the closest uv coord for the follicle based on first cv of the curve"""
@@ -215,6 +255,9 @@ class HairLock(object):
 		v = clos.a.parameterV.v
 		clos.delete()
 		return u,v
+
+
+
 
 def hairLockRenamer():
 	"""docstring for hairLockRenamer"""
