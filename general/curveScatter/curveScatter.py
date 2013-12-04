@@ -1,9 +1,27 @@
 """
 Scatter objects allong curve, it will take an array of objects and scatter in the curve.
+
+
+import general.curveScatter.curveScatter as crvScat
+import modeling.curve.curve as crv
+import general.mayaNode.mayaNode as mn
+
+crvScat.CurveScatter( 
+        curve = crv.Curve( 'curveShape1' ), 
+        objects = [mn.Node( 'pSphere1' ),mn.Node( 'pCone1' ),mn.Node( 'pCube1' )],
+        pointsCount = 10, 
+        useTips = True, 
+        keepConnected = True,
+        tangent = 1,
+        rand = 0 )
+
 """
 import random
 import iters.iters as it
 import rigging.utils.pointOnCurve.pointOnCurve as pCrv
+import general.mayaNode.mayaNode as mn
+import general.undo.undo as undo
+import maya.cmds as mc
 
 class CurveScatter(object):
 	"""main class to handle scatter"""
@@ -23,29 +41,34 @@ class CurveScatter(object):
 		startParam = 1.0 / ( pointsCount + val )
 		param      = 0
 		objsIter = it.bicycle( objects )
-		
-		for p in range( pointsCount ):
-			#place transform in param point
-			if not useTips:
-				param += startParam
-			if rand:
-				baseobj = random.choice( objects )
-			else:
-				baseobj = objsIter.next()
-			obj = baseobj.duplicate()
-			pcurve = pCrv.PointOnCurve( curve.name )
-			pcurveNode = pcurve.nodeAt( param )
-			pcurveNode.a.turnOnPercentage.v = 1
-			if keepConnected:
-				pcurveNode.attr( "result.position" ) >> obj.a.t
-				obj.a.parameter.add( k = True )
-				obj.a.parameter.min = 0
-				obj.a.parameter.max = 1
-				obj.a.parameter.v = param
-				if tangent:
-				obj.a.parameter >> pcurveNode.a.parameter
-			else:
-				obj.a.t.v = pcurveNode.attr( "result.position" ).v
-				pcurveNode.delete()
-			if useTips:
-				param += startParam
+		with undo.Undo():
+			for p in range( pointsCount ):
+				#place transform in param point
+				if not useTips:
+					param += startParam
+				if rand:
+					baseobj = random.choice( objects )
+				else:
+					baseobj = objsIter.next()
+				obj = baseobj.duplicate()
+				pcurveNode = mn.Node( mc.pathAnimation( obj.name, su=0.5,  c=curve.name, fm = True, follow=tangent ) )
+				animCurve = pcurveNode.a.uValue.input.node
+				animCurve.delete()
+				if keepConnected:
+					obj.a.parameter.add( k = True )
+					obj.a.parameter.v = param
+					obj.a.parameter.min = 0
+					obj.a.parameter.max = 1
+					obj.a.parameter >> pcurveNode.a.uValue
+				else:
+					if param > 1.0:
+						param = 1
+					pcurveNode.a.uValue.v = param
+					t = obj.a.t.v
+					r = obj.a.r.v
+					pcurveNode.delete()
+					obj.a.t.v = t[0]
+					obj.a.r.v = r[0]
+				if useTips:
+					param += startParam
+

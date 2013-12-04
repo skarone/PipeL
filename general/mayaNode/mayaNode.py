@@ -508,7 +508,7 @@ class NodeAttribute(object):
 				self.locked = False
 			if AUTO_OVERRIDE_ATTR:
 				self.overrided = True
-			mc.setAttr( self.fullname, value )
+			mc.setAttr( self.fullname,  value )
 
 	@property
 	def children(self):
