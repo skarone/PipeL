@@ -10,6 +10,10 @@ Description:
 '''
 import os
 import json
+import pipe.mayaFile.mayaFile as mfl
+reload( mfl )
+import pipe.dependency.dependency as dp
+reload( dp )
 
 class Set(object):
 	"""class to handle sets"""
@@ -32,6 +36,7 @@ class Set(object):
 		"""return the path of the Set"""
 		return self.project.path + '/Sets/' + self.name
 
+	@property
 	def exists(self):
 		"""check if the Set exists"""
 		return os.path.exists( self.path )
@@ -57,6 +62,26 @@ class Set(object):
 				os.makedirs(basedir)
 			if '.' in s:
 				open(s, 'a').close()
+
+	@property
+	def modelPath(self):
+		"""return the path of the model"""
+		return mfl.mayaFile( self.path + '/Model/' + self.name + "_MODEL.ma" )
+
+	@property
+	def hasModel(self):
+		"""return if the asset has a model"""
+		return os.path.getsize( self.modelPath.path ) != 0
+
+	@property
+	def finalPath(self):
+		"""return the FINAL path for the MA file"""
+		return mfl.mayaFile( self.path + '/' + self.name + "_FINAL.ma" )
+
+	@property
+	def hasFinal(self):
+		"""return if the asset has a final ma"""
+		return os.path.getsize( self.finalPath.path ) != 0
 
 	def createBreakdown(self):
 		"""create base file for breakdown"""
@@ -94,3 +119,35 @@ class Set(object):
 		"""save breakdown file"""
 		with open( self.breakdownPath, 'w') as outfile:
 			json.dump( breakdown, outfile, sort_keys=True, indent=4, separators=(',', ': ') )
+
+	@property
+	def status(self):
+		"""return an array with the status of the files in the asset,
+		return:
+			-1 : not updated
+			0  : 0k file or not exists
+			1  : updated"""
+		depFiles = [ 
+				[dp.Node( self.modelPath   ),[]],
+				[dp.Node( self.finalPath   ),[ 0 ]]
+				]
+		res = dp.dep_resolvedArray( depFiles )
+		result = []
+		for i,f in enumerate( depFiles ):
+			value = 1
+			if not f[0].name.exists:
+				value = 0
+			elif f[0].name.isZero:
+				value = 0
+			else:
+				for deps in res[i][1]:
+					if not deps.name.exists:
+						continue
+					elif deps.name.isZero:
+						continue
+					isOlder = f[0].name.isOlderThan( deps.name )
+					if isOlder:
+						value = -1
+						break
+			result.append( value )
+		return result

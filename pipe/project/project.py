@@ -6,6 +6,25 @@ Description:
 		-Create folders and files for the project
 		-Query information about project
 '''
+
+"""
+import pipe.project.project as prj
+reload( prj )
+#checkear texturas en project
+dog = prj.Project( 'DogMendoncaAndPizzaBoy' )
+
+for a in dog.assets:
+    for t in a.finalPath.textures:
+        if not t.exists:
+            print a.name, t.path, 'NO EXISTE!'
+            continue
+        if not t.hasTx:
+            print t.path, 'no tiene tx!'
+            t.createVersions()
+            t.toTx().copy( r'D:/Projects/DogMendoncaFarm/Textures/' )   
+
+"""
+
 import os
 import pipe.asset.asset       as ass
 reload( ass )
@@ -18,7 +37,7 @@ BASE_PATH = 'D:/Projects/'
 
 def projects():
 	"""return all the projects in the BASE_PATH"""
-	return os.listdir( BASE_PATH )
+	return [ a for a in os.listdir( BASE_PATH ) if os.path.isdir( BASE_PATH + a )]
 
 class Project(object):
 	"""project class"""
@@ -35,6 +54,7 @@ class Project(object):
 		"""return the path of the Project"""
 		return BASE_PATH + self.name
 
+	@property
 	def exists(self):
 		"""check if the project exists"""
 		return os.path.exists( self.path )
@@ -42,17 +62,26 @@ class Project(object):
 	@property
 	def assets(self):
 		"""return the assets in the project"""
-		return [ ass.Asset( a, self ) for a in os.listdir( self.path + '/Assets/' ) ]
+		if os.path.exists( self.path + '/Assets/' ):
+			return [ ass.Asset( a, self ) for a in os.listdir( self.path + '/Assets/' ) ]
+		else:
+			return []
 
 	@property
 	def sets(self):
 		"""return the sets in the project"""
-		return [ sets.Set( s, self ) for s in os.listdir( self.path + '/Sets/' ) ]
+		if os.path.exists( self.path + '/Assets/' ):
+			return [ sets.Set( s, self ) for s in os.listdir( self.path + '/Sets/' ) ]
+		else:
+			return []
 
 	@property
 	def sequences(self):
 		"""return the sequences in the project"""
-		return [ seq.Sequence( s, self ) for s in os.listdir( self.path + '/Sequences/' ) ]
+		if os.path.exists( self.path + '/Assets/' ):
+			return [ seq.Sequence( s, self ) for s in os.listdir( self.path + '/Sequences/' ) ]
+		else:
+			return []
 
 	def create(self):
 		"""create folder structure for the project"""
@@ -69,7 +98,7 @@ class Project(object):
 	def addAsset(self, assetName ):
 		"""add an asset name to the project"""
 		asset = ass.Asset( assetName, self )
-		if not asset.exists():
+		if not asset.exists:
 			asset.create()
 		return asset
 

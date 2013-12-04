@@ -32,6 +32,8 @@ import modeling.exporter.exporter as ex
 reload( ex)
 import pipe.asset.asset as ass
 reload( ass)
+import maya.OpenMayaUI as mui
+import sip
 
 try:
 	import maya.cmds as mc
@@ -43,14 +45,21 @@ PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 uifile    = PYFILEDIR + '/exporter.ui'
 fom, base = uic.loadUiType( uifile )
 
+def get_maya_main_window( ):
+	ptr = mui.MQtUtil.mainWindow( )
+	main_win = sip.wrapinstance( long( ptr ), QtCore.QObject )
+	return main_win
+
+
 class ExporterUI(base, fom):
-	def __init__(self):
-		super(base,self).__init__()
+	def __init__(self, parent  = get_maya_main_window(), *args ):
+		super(base,self).__init__( parent )
 		self.setupUi(self)
 		self._projectData()
 		self._fillData()
 		self._makeConnections()
 		self.exporter = ''
+		self.setObjectName( 'exporter_WIN' )
 
 	def _fillData(self):
 		"""add information to UI based on project and scene data"""
@@ -126,7 +135,7 @@ class ExporterUI(base, fom):
 	def _createPivot(self):
 		"""create Pivot for asset"""
 		asset = ass.Asset( self.getAssetName(), prj.Project( self.getProjectName() ) )
-		if asset.exists():
+		if asset.exists:
 			mc.error( 'THIS ASSET ALREADY EXISTS IN THE PROYECT EDIT IT THERE! -->' + asset.name )
 			return
 		selection = mc.ls( sl = True )
@@ -153,3 +162,9 @@ class ExporterUI(base, fom):
 			mc.error( 'THERE IS NO PIVOT CREATED FOR THIS ASSET! -->' + self.getAssetName() )
 		self.exporter.export( self._createReferencedAsset(), self.getSetName() )
 
+def main():
+	"""call this from inside maya"""
+	if mc.window( 'exporter_WIN', q = 1, ex = 1 ):
+		mc.deleteUI( 'exporter_WIN' )
+	expor = ExporterUI()
+	expor.show()

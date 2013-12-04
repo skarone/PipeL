@@ -1,4 +1,4 @@
 *.pyc
 install/libs/
-bin
+bin/
 glTools/

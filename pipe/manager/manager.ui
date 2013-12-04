@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>863</width>
+    <height>696</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Project Manager</string>
+  </property>
+  <property name="tabShape">
+   <enum>QTabWidget::Triangular</enum>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_4">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Project:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="projects_cmb">
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="compareServer_chb">
+        <property name="text">
+         <string>Compare</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Server:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="serverPath_le">
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>\\IGNACIO-PC/Projects/</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="assetsTab">
+       <attribute name="title">
+        <string>Assets</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Search:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="search_asset_le"/>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="assets_tw">
+          <property name="sortingEnabled">
+           <bool>true</bool>
+          </property>
+          <attribute name="horizontalHeaderVisible">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="horizontalHeaderCascadingSectionResizes">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderHighlightSections">
+           <bool>true</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>Name</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Model</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Shading</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Rig</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Hrs</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Final</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="setsTab">
+       <attribute name="title">
+        <string>Sets</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QTableWidget" name="sets_tw">
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>Name</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Model</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Final</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="sequencesTab">
+       <attribute name="title">
+        <string>Sequences</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Search:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="search_shot_le"/>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QSplitter" name="splitter">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <widget class="QListWidget" name="sequences_lw">
+           <property name="maximumSize">
+            <size>
+             <width>150</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
+          <widget class="QTableWidget" name="shots_tw">
+           <column>
+            <property name="text">
+             <string>Shot</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Layout</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Anim</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Hrs</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Vfx</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Sim</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Lit</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Comp</string>
+            </property>
+           </column>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>863</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="actionSet_Projects_Path"/>
+   </widget>
+   <widget class="QMenu" name="menuCreate">
+    <property name="title">
+     <string>Create</string>
+    </property>
+    <addaction name="actionNew_Project"/>
+    <addaction name="actionNew_Asset"/>
+    <addaction name="actionNew_Set"/>
+    <addaction name="separator"/>
+    <addaction name="actionNew_Sequence"/>
+    <addaction name="actionNew_Shot"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionCheck_Red_Items"/>
+    <addaction name="actionCopy_Selected_From_Server"/>
+   </widget>
+   <addaction name="menuCreate"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuSettings"/>
+  </widget>
+  <action name="actionSet_Projects_Path">
+   <property name="text">
+    <string>Set Projects Path</string>
+   </property>
+  </action>
+  <action name="actionNew_Project">
+   <property name="text">
+    <string>New Project</string>
+   </property>
+  </action>
+  <action name="actionNew_Asset">
+   <property name="text">
+    <string>New Asset</string>
+   </property>
+  </action>
+  <action name="actionNew_Sequence">
+   <property name="text">
+    <string>New Sequence</string>
+   </property>
+  </action>
+  <action name="actionNew_Shot">
+   <property name="text">
+    <string>New Shot</string>
+   </property>
+  </action>
+  <action name="actionNew_Set">
+   <property name="text">
+    <string>New Set</string>
+   </property>
+  </action>
+  <action name="actionCopy_Selected_From_Server">
+   <property name="text">
+    <string>Copy Selected From Server</string>
+   </property>
+  </action>
+  <action name="actionCheck_Red_Items">
+   <property name="text">
+    <string>Select Red Items</string>
+   </property>
+  </action>
+ </widget>
+ <tabstops>
+  <tabstop>shots_tw</tabstop>
+  <tabstop>projects_cmb</tabstop>
+  <tabstop>serverPath_le</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>assets_tw</tabstop>
+  <tabstop>sets_tw</tabstop>
+  <tabstop>compareServer_chb</tabstop>
+  <tabstop>sequences_lw</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
