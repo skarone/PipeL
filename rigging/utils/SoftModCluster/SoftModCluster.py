@@ -19,6 +19,20 @@ def createClusterFromSelectedSoft( shape = None ):
 				mc.select( s )
 				mc.percent( clusBase[0], v=weights[s] )
 
+def copyWeightsToJoint( softM, skin, join, mesh ):
+	"""copy the weights of the soft mod node to de joint"""
+	softMoNode = SoftModCluster( softM, mesh )
+	weights = softMoNode.weights
+	for s in weights.keys():
+		mc.skinPercent( skin, s, transformValue=[( join, weights[s])])
+
+def createSoftModForOnSelected( shape ):
+	"""create softMod in the position of the selected objects"""
+	sel = mn.ls( sl = True )
+	for s in sel:
+		softMoNode = SoftModCluster( s.name, shape )
+		softMoNode.create( s.worldPosition )
+
 
 class SoftModCluster(mn.Node):
 	def __init__( self, name, shape ):
@@ -36,10 +50,20 @@ class SoftModCluster(mn.Node):
 		"""return the shape for the softmod"""
 		return self._shape
 	
-	def create( self, position ):
-		"""create a Soft Mod with the name for the specific shape"""
+	def create( self, position = [] ):
+		"""create a Soft Mod with the name for the specific shape,
+		position = use it to create a softMod in a specific location
+		"""
 		mc.select( self.shape )
-		mc.softMod( n = self.name, fc = position, fom = 1 )
+		nodes  = mc.softMod( n = self.name, fc = position, fom = 1 )
+		softM  = mn.Node( nodes[0] )
+		handle  = mn.Node( nodes[1] )
+		handle.a.falloffMode.add( at = "enum", en = "Volume:Surface:", keyable = True )
+		softM.a.falloffMode << handle.a.falloffMode
+		handle.a.falloffRadius.add( min = 0, keyable = True, dv = 5 )
+		softM.a.falloffRadius << handle.a.falloffRadius
+		return handle
+		
 
 	@property
 	def shape(self):

@@ -7,7 +7,7 @@ import maya.OpenMaya as api
 """
 import rigging.stickyControl.stickyControl as stk
 reload( stk )
-stk.createControlForSelection( name = 'controlOnMesh', baseJoint = '' )
+stk.createControlForSelection( mesh = 'baseShape',name = 'controlOnMesh', baseJoint = '' )
 
 import rigging.stickyControl.stickyControl as stk
 import maya.cmds as mc
@@ -19,23 +19,16 @@ mc.group(  mc.ls( '*_rivet' ), n = 'rivets_grp' )
 """
 mc.loadPlugin( "C:/Program Files/Autodesk/Maya2013/bin/plug-ins/MayaMuscle.mll" )
 
-def createControlForSelection( name = 'controlOnMesh', baseJoint = '' ):
+def createControlForSelection( mesh, name = 'controlOnMesh', baseJoint = '' ):
 	"""create a control based on selection...
-	1- Select Transform( locator )
-	2- Select Mesh
+	1- Select Transforms
 	3- You can run procedural with a specific base joint 
-	3- run createControlForSelection()"""
+	3- run createControlForSelection( mesh )"""
 	sel = mn.ls( sl = True )
-	if not sel:
-		mc.error( 'PLEASE SELECT A TRANSFORM AND A MESH IN THAT ORDER' )
-	elif not len(sel) == 2:
-		mc.error( 'PLEASE SELECT A TRANSFORM AND A MESH IN THAT ORDER' )
-	else:
-		trans = sel[0]
-		mesh  = mn.ls( sel[1].name, dag = True, s = True, ni = True )
-		if not mesh:
-			mc.error( 'PLEASE SELECT A TRANSFORM AND A MESH IN THAT ORDER' )
-		control = ControlOnMesh( name = name, baseJoint = baseJoint, position = trans.worldPosition, mesh = mesh[0] )
+	if not mesh:
+		mc.error( 'PLEASE SPECIFY A MESH TO USE' )
+	for i,trans in enumerate( sel ):
+		control = ControlOnMesh( name = name + '%i'%i, baseJoint = baseJoint, position = trans.worldPosition, mesh = mesh )
 		control.create()
 
 def createControlInRig( mesh = '', baseJoint = '' ):

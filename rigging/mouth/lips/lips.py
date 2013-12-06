@@ -1,10 +1,10 @@
 import rigging.utils.SoftModCluster.SoftModCluster as sf
 reload( sf )
-import rigging.utils.pointOnCurve.pointOnCurve as pCrv
 import pipe.mayaFile.mayaFile as mfl
 import os
 import modeling.curve.curve as crv
-reload( crv )
+import general.curveScatter.curveScatter as crvScat
+reload( crvScat )
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 lipsBaseFile = mfl.mayaFile( PYFILEDIR + '/lipsBase.ma' )
@@ -20,29 +20,43 @@ class Lips(object):
 	"""basic rig for lips based on 2 curves
 	it will create sticky joint controls with a default weight from a softMod"""
 	def __init__(self):
-		pass
+		self._scatter = []
 
 	def create(self):
 		"""this will import the face lips helpers curves"""
 		lipsBaseFile.imp()
 	
-	def buildBase(self, shape, controlCount = 3):
+	def buildBase(self):
 		"""buid the system with the controul count"""
-		#controls for bottom curve
-		baseParam = 1.0 / ( controlCount + 1 )
-		param = 0
-		for c in range( controlCount ):
-			param += baseParam 
-			#BOTTOM
-			pcurve = pCrv.PointOnCurve( 'bottom_base_mouth_crvShape' )
-			pcurveNode = pcurve.nodeAt( param )
-			pcurveNode.a.turnOnPercentage.v = 1
-			curv = crv.Curve( 'bottom_lip_base_%i'%c + '_CRV' )
-			curv.create( "sphere" )
-			pcurveNode.attr( "result.position" ) >> curv.a.t
+		#BOTTOM
+		curv = crv.Curve( 'lip' + '_CRV' )
+		curv.create( "sphere" )
+		self._scatter.append( crvScat.CurveScatter( 
+				curve = crv.Curve( 'bottom_base_mouth_crvShape' ), 
+				objects = [curv],
+				pointsCount = 5, 
+				useTips = True, 
+				keepConnected = True,
+				tangent = 1,
+				rand = 0 ) )
+		self._scatter.append( crvScat.CurveScatter( 
+				curve = crv.Curve( 'top_base_mouth_crvShape' ), 
+				objects = [curv],
+				pointsCount = 3, 
+				useTips = False, 
+				keepConnected = True,
+				tangent = 1,
+				rand = 0 ) )
 
-	def buildSystem(self):
+	@property
+	def scatters(self):
+		"""return the scatters for the curves"""
+		return self._scatter
+
+	def buildSystem(self, shape ):
 		"""build the system with the softMods"""
-		softMod = sf.SoftModCluster( 'bottom_lip_%i'%c + '_SFM', shape )
-		softMod.create( pcurveNode.a.position.v[0] )
+		for s in self.scatters:
+			for i,n in enumerate( s._nodes ):
+				softMod = sf.SoftModCluster( 'lip_' + '_%i'%i + '_SFM', shape )
+				softMod.create( n.a.t.v[0] )
 			

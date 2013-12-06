@@ -25,7 +25,7 @@ import maya.cmds as mc
 
 class CurveScatter(object):
 	"""main class to handle scatter"""
-	def __init__(self, curve, objects, pointsCount, useTips = False, keepConnected = True, tangent = False,rand = False  ):
+	def __init__(self, curve, objects, pointsCount, useTips = False, keepConnected = True, tangent = False,rand = False, groupit = False  ):
 		"""creates objects allong curve,
 		curve: Curve Class object that handles the curve
 		objects: Array of one o more transforms objects to position allong curve
@@ -34,6 +34,8 @@ class CurveScatter(object):
 		keepConnected: Keep pointOnCurveInfo connected between transform and curve
 		tangent: Manage rotation on objects also
 		rand: Place the objects in random order"""
+		self._nodes = []
+		self._curve    = curve
 		if useTips:
 			val = -1
 		else:
@@ -41,6 +43,9 @@ class CurveScatter(object):
 		startParam = 1.0 / ( pointsCount + val )
 		param      = 0
 		objsIter = it.bicycle( objects )
+		grp = mn.Node( curve.name + '_grp' )
+		if groupit:
+			mc.group( n = grp.name, em = True )
 		with undo.Undo():
 			for p in range( pointsCount ):
 				#place transform in param point
@@ -51,6 +56,9 @@ class CurveScatter(object):
 				else:
 					baseobj = objsIter.next()
 				obj = baseobj.duplicate()
+				self._nodes.append( obj )
+				if groupit:
+					obj.parent = grp
 				pcurveNode = mn.Node( mc.pathAnimation( obj.name, su=0.5,  c=curve.name, fm = True, follow=tangent ) )
 				animCurve = pcurveNode.a.uValue.input.node
 				animCurve.delete()
@@ -71,4 +79,24 @@ class CurveScatter(object):
 					obj.a.r.v = r[0]
 				if useTips:
 					param += startParam
+
+	@property
+	def nodes(self):
+		"""return the objects created in the scatter"""
+		return self._nodes
+
+	@property
+	def curve(self):
+		"""docstring for curve"""
+		return self._curve
+
+	@property
+	def transformations(self):
+		"""return the transformations( translate and rotate ) of the new nodes"""
+		return [ [n.a.t.v,n.a.r.v] for n in self.nodes ]
+
+	def delete(self):
+		"""delete entire system created by the scatter,
+		This will delete all the nodes"""
+		[ n.delete() for n in self.nodes ]
 
