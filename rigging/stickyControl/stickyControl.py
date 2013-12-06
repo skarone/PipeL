@@ -58,6 +58,8 @@ class ControlOnMesh(object):
 		else:
 			self._mesh     = mn.Node( mesh )
 		self._control      = None
+		self._skinJoint    = ""
+
 
 	@property
 	def mesh(self):
@@ -102,9 +104,9 @@ class ControlOnMesh(object):
 		multi.a.input2.v = [-1,-1,-1]
 		multi.a.output >> nullTrf.a.translate
 		control.a.t >> multi.a.input1
-		control.a.t >> mn.Node( self.skinJoint ).a.t
-		control.a.r >> mn.Node( self.skinJoint ).a.r
-		control.a.s >> mn.Node( self.skinJoint ).a.s
+		control.a.t >> self.skinJoint.a.t
+		control.a.r >> self.skinJoint.a.r
+		control.a.s >> self.skinJoint.a.s
 	
 	def _createControl(self):
 		"""create control object"""
@@ -116,7 +118,7 @@ class ControlOnMesh(object):
 	@property
 	def skinJoint(self):
 		"""return skin Joint name"""
-		return self.name + '_skin'
+		return mn.Node( self._skinJoint )
 
 	@property
 	def baseJoint(self):
@@ -126,10 +128,10 @@ class ControlOnMesh(object):
 	def _createJoint(self):
 		"""create joint on poistion"""
 		mc.select( cl = True )
-		mc.joint( p = self.rivet.a.translate.v[0], o = self.rivet.a.rotate.v[0], n = self.name + '_joint' )
-		mc.joint( p = self.rivet.a.translate.v[0], o = self.rivet.a.rotate.v[0], n = self.skinJoint )
+		jnt = mc.joint( p = self.rivet.a.translate.v[0], o = self.rivet.a.rotate.v[0], n = self.name + '_joint' )
+		self._skinJoint = mc.joint( p = self.rivet.a.translate.v[0], o = self.rivet.a.rotate.v[0], n = self.name + '_skin' )
 		if self._baseJoint != '':
-			mn.Node( self.name + '_joint' ).parent = self._baseJoint
+			mn.Node( jnt ).parent = self._baseJoint
 
 	def _createConstraint(self):
 		"""create constraint to mesh for the control"""

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>273</width>
-    <height>361</height>
+    <width>166</width>
+    <height>304</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,6 +26,25 @@
       </item>
       <item>
        <widget class="QLineEdit" name="systemName_le"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="sysIn_btn">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>&lt;&lt;&lt;</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -51,7 +70,7 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>1</width>
+          <width>30</width>
           <height>0</height>
          </size>
         </property>
@@ -78,7 +97,34 @@
        <widget class="QPushButton" name="meshIn_btn">
         <property name="minimumSize">
          <size>
-          <width>1</width>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>&lt;&lt;&lt;</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>SkinCluster:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="skin_le"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="skinIn_btn">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
           <height>0</height>
          </size>
         </property>
