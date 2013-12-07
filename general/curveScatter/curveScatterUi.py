@@ -7,6 +7,7 @@ import sip
 import maya.mel as mm
 
 import general.curveScatter.curveScatter as crvScat
+reload( crvScat )
 import modeling.curve.curve as crv
 
 """
@@ -34,6 +35,7 @@ class CurveScatterUI(base, fom):
 		self.connect(self.addObject_btn, QtCore.SIGNAL("clicked()"), self.addObject)
 		self.connect(self.removeObject_btn, QtCore.SIGNAL("clicked()"), self.removeObject)
 		self.connect(self.cleanList_btn, QtCore.SIGNAL("clicked()"), self.cleanList)
+		self.connect(self.createScatter_btn, QtCore.SIGNAL("clicked()"), self.createScatter)
 		self.setObjectName( 'curveScatter_WIN' )
 
 	def fillCurveLE(self):
@@ -49,12 +51,34 @@ class CurveScatterUI(base, fom):
 
 	def removeObject(self):
 		"""remove selected object from list"""
-		for SelectedItem in self.objects_lw.ContentList.selectedItems():
-			self.objects_lw.ContentList.takeItem(self.objects_lw.ContentList.row(SelectedItem)
+		for SelectedItem in self.objects_lw.selectedItems():
+			self.objects_lw.takeItem(self.objects_lw.row(SelectedItem) )
 
 	def cleanList(self):
 		"""docstring for fname"""
-		pass
+		self.objects_lw.clean()
+
+	def createScatter(self):
+		"""create scatter based on UI"""
+		curv = str( self.curve_le.text() )
+		objCount = self.controlCount_sbx.value()
+		random = self.random_chb.isChecked()
+		useTip = self.useTips_chb.isChecked()
+		keepConn = self.keepConnected_chb.isChecked()
+		tangent = self.tangent_chb.isChecked()
+		groupIt = self.groupIt_chb.isChecked()
+		objs = []
+		for index in xrange(self.objects_lw.count()):
+			objs.append( mn.Node( str ( self.objects_lw.item(index).text() ) ) )
+		crvScat.CurveScatter( 
+				curve = crv.Curve( curv ), 
+				objects = objs,
+				pointsCount = objCount, 
+				useTips = useTip, 
+				keepConnected = keepConn,
+				tangent = tangent,
+				rand = random,
+				groupit = groupIt)
 		
 
 class Window(QtGui.QMainWindow):
@@ -79,4 +103,6 @@ if __name__=="__main__":
 	PyForm=Window()
 	PyForm.show()
 	sys.exit(a.exec_())
+
+
 

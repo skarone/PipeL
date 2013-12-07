@@ -45,7 +45,7 @@ class CurveScatter(object):
 		objsIter = it.bicycle( objects )
 		grp = mn.Node( curve.name + '_grp' )
 		if groupit:
-			mc.group( n = grp.name, em = True )
+			grp = mn.Node( mc.group( n = grp.name, em = True ) )
 		with undo.Undo():
 			for p in range( pointsCount ):
 				#place transform in param point

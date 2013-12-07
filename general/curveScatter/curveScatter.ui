@@ -91,6 +91,16 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QCheckBox" name="groupIt_chb">
+        <property name="text">
+         <string>Group It</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
