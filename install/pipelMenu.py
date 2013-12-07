@@ -24,12 +24,18 @@ mc.menuItem( l = 'Asset Exporter', c = "import modeling.exporter.exporterUI as e
 mc.setParent('..', menu = True )
 
 #TOOLS
-mc.menuItem( l = 'Tools', sm = True, to = True )
+mc.menuItem( l = 'General', sm = True, to = True )
+mc.menuItem( l = 'Curve Scatter', c = "import general.multiAttribute.multiAttributeUi as maUI; reload( maUI ); maUI.main()" )
 mc.menuItem( l = 'Multi-Attribute', c = "import general.multiAttribute.multiAttributeUi as maUI; reload( maUI ); maUI.main()" )
 mc.menuItem( l = 'Rename Selection', c = "import general.renamer.renamer as rn;reload( rn );rn.renameSelection()" )
 mc.menuItem( l = 'Rename Similar', c = "import general.renamer.renamer as rn;reload( rn );rn.renameSimilarObjects()" )
 mc.setParent('..', menu = True )
 
+
+#RIGGING
+mc.menuItem( l = 'Rigging', sm = True, to = True )
+mc.menuItem( l = 'Curved-Base Tool', c = "import rigging.curveBased.curveBasedUi as crvBaseUI;reload( crvBaseUI );crvBaseUI.main()" )
+mc.setParent('..', menu = True )
 
 #LIGHTING
 mc.menuItem( l = 'Lighting', sm = True, to = True )
