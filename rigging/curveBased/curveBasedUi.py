@@ -6,14 +6,8 @@ import maya.OpenMayaUI as mui
 import sip
 import maya.mel as mm
 
-import general.curveScatter.curveScatter as crvScat
-reload( crvScat )
-import modeling.curve.curve as crv
-reload( crv )
-import rigging.utils.SoftModCluster.SoftModCluster as sf
-reload( sf )
-import rigging.stickyControl.stickyControl as stk
-reload( stk )
+import rigging.curveBased.curveBased as crvBased
+reload( crvBased )
 
 """
 import general.multiAttribute.multiAttributeUi as maUI
@@ -79,27 +73,7 @@ class CurveBasedUI(base, fom):
 		mesh = str( self.mesh_le.text() )
 		softsCount = self.controlCount_sbx.value()
 		useTip = self.useTips_chb.isChecked()
-		space = mn.Namespace( sysName )
-		space.create()
-		with space.set():
-			grp = mn.Node( mc.group( n = sysName + '_grp', em = True ) )
-			grp.a.crvSystem.add( at = "bool" )
-			obj = crv.Curve( sysName + '_CRV' )
-			obj = obj.create( "sphere" )
-			scat = crvScat.CurveScatter( 
-					curve = crv.Curve( curv ), 
-					objects = [obj],
-					pointsCount = softsCount, 
-					useTips = useTip, 
-					keepConnected = True,
-					tangent = 1,
-					rand = 0 )
-			for i,n in enumerate( scat._nodes ):
-				softMod = sf.SoftModCluster( sysName + '_%i'%i + '_SFM', mesh )
-				handle = softMod.create( n.a.t.v[0] )
-				handle.parent = grp
-		scat.delete()
-		obj.delete()
+		crvBased.createSofts( sysName, curv, mesh, softsCount, useTip )
 
 	def createJointsOnSofts(self):
 		"""create joints from the softMods of the system"""
@@ -108,20 +82,12 @@ class CurveBasedUI(base, fom):
 			print "PLEASE SPECIFY A SYSTEM NAME"
 			return
 		mesh = str( self.mesh_le.text() )
-		space = mn.Namespace( sysName )
 		skin = str( self.skin_le.text() )
-		with space.set():
-			for i,s in enumerate( mn.ls( sysName + ':*', typ = 'softModHandle' ) ):
-				trans = s.parent
-				control = stk.ControlOnMesh( name = sysName + '%i'%i, baseJoint = '', position = trans.worldPosition, mesh = mesh )
-				control.create()
-				mc.select( mesh, control.skinJoint.name )
-				mc.skinCluster( skin, e = True, dr = 4, lw = True, wt=0, ai = control.skinJoint.name )
-				control.skinJoint.a.lockInfluenceWeights.v = 0
-				s.a.joint.add( at = "message" )
-				control.skinJoint.a.soft.add( at = "message" )
-				s.a.joint >> control.skinJoint.a.soft
-				sf.copyWeightsToJoint( s.name, skin, control.skinJoint.name, mesh )
+		if skin == '': #THERE IS NO SKIN... CREATE ONE WITH A BASE JOINT
+			mc.select(d=True)
+			mc.joint(p=(0,0,0), n = 'softModBase_jnt')
+			mc.skinCluster( 'softModBase_jnt', mesh, dr=4.5)
+		crvBased.createJointsOnSofts( sysName, mesh, skin )
 
 
 	def deleteSofts(self):
@@ -130,12 +96,9 @@ class CurveBasedUI(base, fom):
 
 	def transferWeightToSel(self):
 		"""transfer weight of selected softmod to their skin joint"""
-		softMo = mn.ls( sl = True, dag = True, typ = 'softModHandle' )
-		if softMo:
-			skin = str( self.skin_le.text() )
-			mesh = str( self.mesh_le.text() )
-			for s in softMo:
-				sf.copyWeightsToJoint( s.name, skin, s.a.joint.output[0].node.name, mesh )
+		skin = str( self.skin_le.text() )
+		mesh = str( self.mesh_le.text() )
+		crvBased.transferWeightToSel( skin, mesh )
 
 
 class Window(QtGui.QMainWindow):
