@@ -25,7 +25,7 @@ mc.setParent('..', menu = True )
 
 #TOOLS
 mc.menuItem( l = 'General', sm = True, to = True )
-mc.menuItem( l = 'Curve Scatter', c = "import general.multiAttribute.multiAttributeUi as maUI; reload( maUI ); maUI.main()" )
+mc.menuItem( l = 'Curve Scatter', c = "import general.curveScatter.curveScatterUi as crvScatterUi;reload( crvScatterUi );crvScatterUi.main()" )
 mc.menuItem( l = 'Multi-Attribute', c = "import general.multiAttribute.multiAttributeUi as maUI; reload( maUI ); maUI.main()" )
 mc.menuItem( l = 'Rename Selection', c = "import general.renamer.renamer as rn;reload( rn );rn.renameSelection()" )
 mc.menuItem( l = 'Rename Similar', c = "import general.renamer.renamer as rn;reload( rn );rn.renameSimilarObjects()" )
