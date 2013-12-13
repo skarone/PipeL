@@ -12,13 +12,15 @@ import rigging.stickyControl.stickyControl as stk
 reload( stk )
 
 
-def createSofts( sysName, curv, mesh, softsCount, useTip ):
+def createSofts( sysName, curv, mesh, softsCount, useTip, groupIt = True, vertexToRemove = [] ):
 	"""docstring for fname"""
 	space = mn.Namespace( sysName )
 	space.create()
+	softs = []
 	with space.set():
-		grp = mn.Node( mc.group( n = sysName + '_grp', em = True ) )
-		grp.a.crvSystem.add( at = "bool" )
+		if groupIt:
+			grp = mn.Node( mc.group( n = sysName + '_grp', em = True ) )
+			grp.a.crvSystem.add( at = "bool" )
 		obj = crv.Curve( sysName + '_CRV' )
 		obj = obj.create( "sphere" )
 		scat = crvScat.CurveScatter( 
@@ -31,26 +33,34 @@ def createSofts( sysName, curv, mesh, softsCount, useTip ):
 				rand = 0 )
 		for i,n in enumerate( scat._nodes ):
 			softMod = sf.SoftModCluster( sysName + '_%i'%i + '_SFM', mesh )
-			handle = softMod.create( n.a.t.v[0] )
-			handle.parent = grp
+			handle = softMod.create( n.a.t.v[0] , vertexToRemove )
+			if groupIt:
+				handle.parent = grp
+			softs.append( handle )
 	scat.delete()
 	obj.delete()
+	return softs
 
 def createJointsOnSofts( sysName, mesh, skin ):
 	"""create joints from the softMods of the system"""
 	space = mn.Namespace( sysName )
 	with space.set():
 		for i,s in enumerate( mn.ls( sysName + ':*', typ = 'softModHandle' ) ):
-			trans = s.parent
-			control = stk.ControlOnMesh( name = sysName + '%i'%i, baseJoint = '', position = trans.worldPosition, mesh = mesh )
-			control.create()
-			mc.select( mesh, control.skinJoint.name )
-			mc.skinCluster( skin, e = True, dr = 4, lw = True, wt=0, ai = control.skinJoint.name )
-			control.skinJoint.a.lockInfluenceWeights.v = 0
-			s.a.joint.add( at = "message" )
-			control.skinJoint.a.soft.add( at = "message" )
-			s.a.joint >> control.skinJoint.a.soft
-			sf.copyWeightsToJoint( s.name, skin, control.skinJoint.name, mesh )
+			softModToSticky( mesh, skin ,s )
+
+def softModToSticky( mesh, skin ,soft ):
+	"""creates a sticky point on the softmod location and transfer their weights"""
+	trans = soft.parent
+	control = stk.ControlOnMesh( name = soft.name.replace( '_SFM', '' ), baseJoint = '', position = trans.worldPosition, mesh = mesh )
+	control.create()
+	mc.select( mesh, control.skinJoint.name )
+	mc.skinCluster( skin, e = True, dr = 4, lw = True, wt=0, ai = control.skinJoint.name )
+	control.skinJoint.a.lockInfluenceWeights.v = 0
+	soft.a.joint.add( at = "message" )
+	control.skinJoint.a.soft.add( at = "message" )
+	soft.a.joint >> control.skinJoint.a.soft
+	sf.copyWeightsToJoint( soft.name, skin, control.skinJoint.name, mesh )
+	return control
 
 
 def deleteSofts():

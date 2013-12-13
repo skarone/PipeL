@@ -60,7 +60,6 @@ class ControlOnMesh(object):
 		self._control      = None
 		self._skinJoint    = ""
 
-
 	@property
 	def mesh(self):
 		"""return the mesh used in the control"""
@@ -128,10 +127,10 @@ class ControlOnMesh(object):
 	def _createJoint(self):
 		"""create joint on poistion"""
 		mc.select( cl = True )
-		jnt = mc.joint( p = self.rivet.a.translate.v[0], o = self.rivet.a.rotate.v[0], n = self.name + '_joint' )
+		self.parentJoint = mn.Node( mc.joint( p = self.rivet.a.translate.v[0], o = self.rivet.a.rotate.v[0], n = self.name + '_joint' ) )
 		self._skinJoint = mc.joint( p = self.rivet.a.translate.v[0], o = self.rivet.a.rotate.v[0], n = self.name + '_skin' )
 		if self._baseJoint != '':
-			mn.Node( jnt ).parent = self._baseJoint
+			self.parentJoint.parent = self._baseJoint
 
 	def _createConstraint(self):
 		"""create constraint to mesh for the control"""
@@ -213,4 +212,10 @@ class ControlOnMesh(object):
 		v = clos.a.parameterV.v
 		clos.delete()
 		return u,v
+
+	def parent(self, parent):
+		"""set the parent for the entire control system"""
+		self.rivet.parent = parent
+		if self._baseJoint == '':
+			self.parentJoint.parent = parent
 

@@ -50,14 +50,17 @@ class SoftModCluster(mn.Node):
 		"""return the shape for the softmod"""
 		return self._shape
 	
-	def create( self, position = [] ):
+	def create( self, position = [], vertexToRemove = [] ):
 		"""create a Soft Mod with the name for the specific shape,
 		position = use it to create a softMod in a specific location
 		"""
 		mc.select( self.shape )
-		nodes  = mc.softMod( n = self.name, fc = position, fom = 1 )
+		nodes  = mc.softMod( n = self.name, fc = position, falloffRadius = 15.165877 ,falloffMode = 0 , falloffBasedOnX = 1 ,falloffBasedOnY = 1 ,falloffBasedOnZ = 1 ,falloffAroundSelection = 0 ,falloffMasking = 1 )
 		softM  = mn.Node( nodes[0] )
 		handle  = mn.Node( nodes[1] )
+		#nodes  = mc.softMod( n = self.name, fc = position, falloffRadius = 15.165877 ,falloffMode = 0 , curveValue = 0 ,curvePoint = 1 ,curveInterpolation = 2 ,falloffBasedOnX = 1 ,falloffBasedOnY = 1 ,falloffBasedOnZ = 1 ,falloffAroundSelection = 0 ,falloffMasking = 1 )
+		if vertexToRemove:
+			mc.sets( vertexToRemove, rm = softM.name + 'Set' )
 		handle.a.falloffMode.add( at = "enum", en = "Volume:Surface:", keyable = True )
 		softM.a.falloffMode << handle.a.falloffMode
 		handle.a.falloffRadius.add( min = 0, keyable = True, dv = 5 )

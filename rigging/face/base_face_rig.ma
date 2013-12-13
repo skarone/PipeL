@@ -1,6 +1,6 @@
 //Maya ASCII 2013 scene
-//Name: base_head_rig.ma
-//Last modified: Tue, Dec 10, 2013 04:35:00 PM
+//Name: base_face_rig.ma
+//Last modified: Tue, Dec 10, 2013 05:30:50 PM
 //Codeset: 1252
 requires maya "2013";
 requires "stereoCamera" "10.0";
@@ -103,42 +103,6 @@ createNode nurbsCurve -n "r_brow_crvShape" -p "r_brow_crv";
 		5.4738081040356947 111.84665758760298 9.4259231310448151
 		6.7381357837704767 110.92590787894136 7.3531934972366031
 		;
-createNode transform -n "l_nose_pnt" -p "base_head_rig_grp";
-	setAttr ".t" -type "double3" 1.2913999557495117 105.93122863769531 10.861171722412109 ;
-createNode locator -n "l_nose_pntShape" -p "l_nose_pnt";
-	setAttr -k off ".v";
-createNode transform -n "c_nose_pnt" -p "base_head_rig_grp";
-	setAttr ".t" -type "double3" 0 105.83322143554687 11.953701019287109 ;
-createNode locator -n "c_nose_pntShape" -p "c_nose_pnt";
-	setAttr -k off ".v";
-createNode transform -n "r_nose_pnt" -p "base_head_rig_grp";
-	setAttr ".t" -type "double3" -1.291 105.93122863769531 10.861171722412109 ;
-createNode locator -n "r_nose_pntShape" -p "r_nose_pnt";
-	setAttr -k off ".v";
-createNode transform -n "c_eyebrows_pnt" -p "base_head_rig_grp";
-	setAttr ".t" -type "double3" 0 111.71549224853516 10.925433158874512 ;
-createNode locator -n "c_eyebrows_pntShape" -p "c_eyebrows_pnt";
-	setAttr -k off ".v";
-createNode transform -n "l_eyeOuter_pnt" -p "base_head_rig_grp";
-	setAttr ".t" -type "double3" 8.4656545848527021 109.02521198848069 4.4409172368433101 ;
-createNode locator -n "l_eyeOuter_pntShape" -p "l_eyeOuter_pnt";
-	setAttr -k off ".v";
-createNode transform -n "r_eyeOuter_pnt" -p "base_head_rig_grp";
-	setAttr ".t" -type "double3" -8.466 109.02521198848069 4.4409172368433101 ;
-createNode locator -n "r_eyeOuter_pntShape" -p "r_eyeOuter_pnt";
-	setAttr -k off ".v";
-createNode transform -n "l_cheekOuter_pnt" -p "base_head_rig_grp";
-	setAttr ".t" -type "double3" 7.0680632964474626 104.71007624030611 6.2532860249582463 ;
-createNode locator -n "l_cheekOuter_pntShape" -p "l_cheekOuter_pnt";
-	setAttr -k off ".v";
-createNode transform -n "r_cheekOuter_pnt" -p "base_head_rig_grp";
-	setAttr ".t" -type "double3" -7.068 104.71007624030611 6.2532860249582463 ;
-createNode locator -n "r_cheekOuter_pntShape" -p "r_cheekOuter_pnt";
-	setAttr -k off ".v";
-createNode transform -n "c_chin_pnt" -p "base_head_rig_grp";
-	setAttr ".t" -type "double3" 0 97.811729431152344 7.5456771850585938 ;
-createNode locator -n "c_chin_pntShape" -p "c_chin_pnt";
-	setAttr -k off ".v";
 createNode transform -n "c_lower_mouth_crv" -p "base_head_rig_grp";
 	addAttr -ci true -sn "controls_count" -ln "controls_count" -dv 1 -min 1 -at "long";
 	addAttr -ci true -sn "use_tips" -ln "use_tips" -min 0 -max 1 -at "bool";
@@ -209,17 +173,53 @@ createNode nurbsCurve -n "c_upper_mouth_crvShape1Orig" -p "c_upper_mouth_crv";
 		1.0580000000000001 102.84263221335118 10.754520798307016
 		1.871 102.5708582990072 10.137053342026432
 		;
+createNode transform -n "l_nose_pnt" -p "base_head_rig_grp";
+	setAttr ".t" -type "double3" 1.2913999557495117 105.93122863769531 10.861171722412109 ;
+createNode locator -n "l_nose_pntShape" -p "l_nose_pnt";
+	setAttr -k off ".v";
+createNode transform -n "c_nose_pnt" -p "base_head_rig_grp";
+	setAttr ".t" -type "double3" 0 105.83322143554687 11.953701019287109 ;
+createNode locator -n "c_nose_pntShape" -p "c_nose_pnt";
+	setAttr -k off ".v";
+createNode transform -n "r_nose_pnt" -p "base_head_rig_grp";
+	setAttr ".t" -type "double3" -1.291 105.93122863769531 10.861171722412109 ;
+createNode locator -n "r_nose_pntShape" -p "r_nose_pnt";
+	setAttr -k off ".v";
+createNode transform -n "c_eyebrows_pnt" -p "base_head_rig_grp";
+	setAttr ".t" -type "double3" 0 111.71549224853516 10.925433158874512 ;
+createNode locator -n "c_eyebrows_pntShape" -p "c_eyebrows_pnt";
+	setAttr -k off ".v";
+createNode transform -n "l_eyeOuter_pnt" -p "base_head_rig_grp";
+	setAttr ".t" -type "double3" 8.4656545848527021 109.02521198848069 4.4409172368433101 ;
+createNode locator -n "l_eyeOuter_pntShape" -p "l_eyeOuter_pnt";
+	setAttr -k off ".v";
+createNode transform -n "r_eyeOuter_pnt" -p "base_head_rig_grp";
+	setAttr ".t" -type "double3" -8.466 109.02521198848069 4.4409172368433101 ;
+createNode locator -n "r_eyeOuter_pntShape" -p "r_eyeOuter_pnt";
+	setAttr -k off ".v";
+createNode transform -n "l_cheekOuter_pnt" -p "base_head_rig_grp";
+	setAttr ".t" -type "double3" 7.0680632964474626 104.71007624030611 6.2532860249582463 ;
+createNode locator -n "l_cheekOuter_pntShape" -p "l_cheekOuter_pnt";
+	setAttr -k off ".v";
+createNode transform -n "r_cheekOuter_pnt" -p "base_head_rig_grp";
+	setAttr ".t" -type "double3" -7.068 104.71007624030611 6.2532860249582463 ;
+createNode locator -n "r_cheekOuter_pntShape" -p "r_cheekOuter_pnt";
+	setAttr -k off ".v";
+createNode transform -n "c_chin_pnt" -p "base_head_rig_grp";
+	setAttr ".t" -type "double3" 0 97.811729431152344 7.5456771850585938 ;
+createNode locator -n "c_chin_pntShape" -p "c_chin_pnt";
+	setAttr -k off ".v";
 select -ne :time1;
 	setAttr ".o" 1;
 	setAttr ".unw" 1;
 select -ne :renderPartition;
-	setAttr -s 4 ".st";
+	setAttr -s 5 ".st";
 select -ne :initialShadingGroup;
 	setAttr ".ro" yes;
 select -ne :initialParticleSE;
 	setAttr ".ro" yes;
 select -ne :defaultShaderList1;
-	setAttr -s 4 ".s";
+	setAttr -s 5 ".s";
 select -ne :postProcessList1;
 	setAttr -s 2 ".p";
 select -ne :defaultRenderingList1;
@@ -232,4 +232,4 @@ select -ne :defaultHardwareRenderGlobals;
 	setAttr ".res" -type "string" "ntsc_4d 646 485 1.333";
 connectAttr "c_lower_mouth_crvShape2Orig.ws" "c_lower_mouth_crvShape.cr";
 connectAttr "c_upper_mouth_crvShape1Orig.ws" "c_upper_mouth_crvShape.cr";
-// End of base_head_rig.ma
+// End of base_face_rig.ma

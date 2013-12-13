@@ -86,7 +86,7 @@ class CurveBasedUI(base, fom):
 		if skin == '': #THERE IS NO SKIN... CREATE ONE WITH A BASE JOINT
 			mc.select(d=True)
 			mc.joint(p=(0,0,0), n = 'softModBase_jnt')
-			mc.skinCluster( 'softModBase_jnt', mesh, dr=4.5)
+			skin = mc.skinCluster( 'softModBase_jnt', mesh, dr=4.5,normalizeWeights = 0)[0]
 		crvBased.createJointsOnSofts( sysName, mesh, skin )
 
 
