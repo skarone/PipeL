@@ -1,7 +1,9 @@
 #save curves shapes for the controls of the rig
 import general.mayaNode.mayaNode as mn
 reload( mn )
+import general.api.apiHelpers as apiHelpers
 import maya.cmds as mc
+import maya.OpenMaya as OpenMaya
 import json
 
 def correctNameForCtlCurves():
@@ -115,6 +117,21 @@ class Curve(mn.Node):
 	def setVertexPosition(self, vertexNumber, newPos, worldSpace = True):
 		"""docstring for setVertexPosition"""
 		mc.xform( self.curve.name + '.cv[%i'%vertexNumber + ']', ws = worldSpace, t = newPos )
+
+	def uParam(self, pnt):
+		"""return u param of the curve based on a position"""
+		point = OpenMaya.MPoint(pnt[0],pnt[1],pnt[2])
+		curveFn = OpenMaya.MFnNurbsCurve( apiHelpers.getDagPath(self.name) )
+		paramUtill=OpenMaya.MScriptUtil()
+		paramPtr=paramUtill.asDoublePtr()
+		isOnCurve = curveFn.isPointOnCurve(point)
+		if isOnCurve == True:
+			curveFn.getParamAtPoint(point , paramPtr,0.001,OpenMaya.MSpace.kObject )
+		else :
+			point = curveFn.closestPoint(point,paramPtr,0.001,OpenMaya.MSpace.kObject)
+			curveFn.getParamAtPoint(point , paramPtr,0.001,OpenMaya.MSpace.kObject )
+		param = paramUtill.getDouble(paramPtr)  
+		return param
 
 	def create(self, shape):
 		"""create a curve with a specific shape"""
