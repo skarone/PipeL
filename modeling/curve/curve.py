@@ -72,12 +72,12 @@ class Curve(mn.Node):
 	@property
 	def degree(self):
 		"""return the degree of the curve"""
-		return self.curve.a.degree.v
+		return self.shape.a.degree.v
 
 	@property
 	def spans(self):
 		"""return the spans of the curve"""
-		return self.curve.a.spans.v
+		return self.shape.a.spans.v
 
 	@property
 	def cvsCount(self):
@@ -111,7 +111,7 @@ class Curve(mn.Node):
 
 	def getVertexPosition(self, vertexNumber, worldSpace = True):
 		"""return the position of a vertex in world space"""
-		vPos = mc.xform( self.curve.name + '.cv[%i'%vertexNumber + ']', q = True, ws = worldSpace, t = True )
+		vPos = mc.xform( self.name + '.cv[%i'%vertexNumber + ']', q = True, ws = worldSpace, t = True )
 		return vPos
 
 	def setVertexPosition(self, vertexNumber, newPos, worldSpace = True):
@@ -132,6 +132,25 @@ class Curve(mn.Node):
 			curveFn.getParamAtPoint(point , paramPtr,0.001,OpenMaya.MSpace.kObject )
 		param = paramUtill.getDouble(paramPtr)  
 		return param
+
+	def pointAtParam( self, param ):
+		"""return the point in world coordinates of a specific u parameter"""
+		param = self.a.max.v * param
+		point = OpenMaya.MPoint( )
+		curveFn = OpenMaya.MFnNurbsCurve( apiHelpers.getDagPath(self.name) )
+		curveFn.getPointAtParam( param, point, OpenMaya.MSpace.kObject )
+		return point[0], point[1], point[2]
+
+	def rebuild(self, basePointsCout = 5, keep = False):
+		"""custom rebuild curve, creating an intermidate curve for the process"""
+		pnts = []
+		for p in range( basePointsCout ):
+			param = float( p ) / float( basePointsCout - 1 )
+			pnts.append( self.pointAtParam( param ) )
+		cur = mc.curve( ep = pnts, d = 3 )
+		finalcur = mc.rebuildCurve( cur, ch = 1, rpo = not (keep), rt = 0, end = 1, kr = 0, kcp = 0, kep = 0, kt = 0, s = 2, d = 3, tol = 0.01 )[0]
+		return Curve( finalcur )
+
 
 	def create(self, shape):
 		"""create a curve with a specific shape"""
@@ -164,5 +183,6 @@ class Curve(mn.Node):
 			print "THERE IS NO CURVE FOR THE SHAPE THAT YOU WANT!"
 		self._name = finalName
 		return Curve( finalName )
+
 
 
