@@ -44,9 +44,9 @@ def createSofts( sysName, curv, mesh, softsCount, useTip, groupIt = True, vertex
 def createJointsOnSofts( sysName, mesh, skin ):
 	"""create joints from the softMods of the system"""
 	space = mn.Namespace( sysName )
-	with space.set():
-		for i,s in enumerate( mn.ls( sysName + ':*', typ = 'softModHandle' ) ):
-			softModToSticky( mesh, skin ,s )
+	#with space.set():
+	for i,s in enumerate( mn.ls( sysName + ':*', typ = 'softModHandle' ) ):
+		softModToSticky( mesh, skin ,s )
 
 def softModToSticky( mesh, skin ,soft ):
 	"""creates a sticky point on the softmod location and transfer their weights"""
@@ -56,8 +56,12 @@ def softModToSticky( mesh, skin ,soft ):
 	mc.select( mesh, control.skinJoint.name )
 	mc.skinCluster( skin, e = True, dr = 4, lw = True, wt=0, ai = control.skinJoint.name )
 	control.skinJoint.a.lockInfluenceWeights.v = 0
-	soft.a.joint.add( at = "message" )
-	control.skinJoint.a.soft.add( at = "message" )
+	if not soft.a.joint.exists:
+		print 'no existe joint attribute'
+		soft.a.joint.add( at = "message" )
+	if not control.skinJoint.a.soft.exists:
+		print 'no existe soft attribute'
+		control.skinJoint.a.soft.add( at = "message" )
 	soft.a.joint >> control.skinJoint.a.soft
 	sf.copyWeightsToJoint( soft.name, skin, control.skinJoint.name, mesh )
 	return control

@@ -15,6 +15,7 @@ import maya.cmds as mc
 mesh = 'Cuerpo1Shape' #MESH TO BE DEFORM
 vertexToRemove = mc.ls( sl = True, fl = True ) #LIST OF VERTECES THAT YOU DONT WONT TO BE MODIFIED BY THE DEFORMERS ( EX: EYELIDS )
 asd = fc.createSoftsOnFace( mesh, vertexToRemove )
+fc.softModsToStickys( )
 """
 
 def createSoftsOnFace( mesh, vertexToRemove = [] ):
@@ -27,8 +28,8 @@ def createSoftsOnFace( mesh, vertexToRemove = [] ):
 	#removeEyeLidsFromSofts( vertex, softs )
 	return softs
 
-def removeEyeLidsFromSofts( vertex, softs ):
-	"""remove eyelids verteces from softs so they don't move them"""
+def removeVertexFromSofts( vertex, softs ):
+	"""remove verteces from softs so they don't move them"""
 	if not vertex:
 		return
 	print 'in remove eyelids softs'
@@ -48,7 +49,7 @@ def createSoftOnFacePoints( mesh, grp, vertexToRemove = [] ):
 	softs = []
 	for l in pnts:
 		softMod = sf.SoftModCluster( l.name.replace( '_pnt','' ) + '_SFM', mesh )
-		handle = softMod.create( l.a.t.v[0], vertexToRemove )
+		handle = softMod.create( l.worldPosition, vertexToRemove )
 		softs.append( handle )
 	return softs
 
@@ -59,7 +60,7 @@ def softModsToStickys( mesh, skin = '' ):
 	if skin == '': #THERE IS NO SKIN... CREATE ONE WITH A BASE JOINT
 		mc.select(d=True)
 		jnt = mn.Node( mc.joint(p=(0,0,0), n = 'faceBase_jnt') )
-		skin = mc.skinCluster( jnt.name, mesh, dr=4.5, normalizeWeights = 2)[0]
+		skin = mc.skinCluster( jnt.name, mesh, dr=4.5, normalizeWeights = 2, par = True )[0]
 		jnt.parent = sticksGrp
 	softs = [c.shape for c in grp.children if c.shape.type == 'softModHandle' ]
 	for i,s in enumerate( softs ):

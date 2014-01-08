@@ -1,5 +1,8 @@
 """
 create a head toon control, to deform head in a toon way
+
+import rigging.head.head as hd
+hd.ToonHead( objs = [], vertices = [] )
 """
 import maya.cmds as mc
 import general.mayaNode.mayaNode as mn

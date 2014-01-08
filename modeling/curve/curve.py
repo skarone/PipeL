@@ -45,9 +45,9 @@ def importRigCurvesShapes( curvesDataPath = ''):
 
 def copyVertexPositionForSelectedCurves( searchAndRelapce = ['l_', 'r_'], mirrorAxis = 'x', worldSpace = True ):
 	"""copy vertex position on the selected curves"""
-	sels = mn.ls( sl = True, dag = True, typ = 'nurbsCurve', ni = True )
+	sels = mn.ls( sl = True, ni = True )
 	for s in sels:
-		copyVertexPositions( s, s.name.replace( searchAndRelapce[0], searchAndRelapce[1], 1 ), mirrorAxis, worldSpace )
+		copyVertexPositions( s.name, s.name.replace( searchAndRelapce[0], searchAndRelapce[1], 1 ), mirrorAxis, worldSpace )
 
 def copyVertexPositions( curveToCopy, curveToPaste, mirrorAxis = 'None', worldSpace = True ):
 	"""copy verteces positions from one curve to another"""
@@ -116,7 +116,7 @@ class Curve(mn.Node):
 
 	def setVertexPosition(self, vertexNumber, newPos, worldSpace = True):
 		"""docstring for setVertexPosition"""
-		mc.xform( self.curve.name + '.cv[%i'%vertexNumber + ']', ws = worldSpace, t = newPos )
+		mc.xform( self.shape.name + '.cv[%i'%vertexNumber + ']', ws = worldSpace, t = newPos )
 
 	def uParam(self, pnt):
 		"""return u param of the curve based on a position"""
