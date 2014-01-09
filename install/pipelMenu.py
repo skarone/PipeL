@@ -35,6 +35,7 @@ mc.setParent('..', menu = True )
 #RIGGING
 mc.menuItem( l = 'Rigging', sm = True, to = True )
 mc.menuItem( l = 'Curved-Base Tool', c = "import rigging.curveBased.curveBasedUi as crvBaseUI;reload( crvBaseUI );crvBaseUI.main()" )
+mc.menuItem( l = 'Wrap To Joints', c = "import rigging.utils.wrapToJoints.nmpWrapToJoints as wrpToJ;wrpToJ.nmpWrapToJoints()" )
 mc.menuItem( l = 'TF Smooth Skin', c = "import rigging.utils.tf_smoothSkinWeight as tf_smoothSkinWeight;tf_smoothSkinWeight.paint()" )
 mc.setParent('..', menu = True )
 

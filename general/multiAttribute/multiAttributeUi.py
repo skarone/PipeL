@@ -29,6 +29,8 @@ class MultiAttributeUI(base, fom):
 		super(base, self).__init__(parent)
 		self.setupUi(self)
 		self.connect(self.select_btn, QtCore.SIGNAL("clicked()"), self.select)
+		self.connect(self.lock_btn, QtCore.SIGNAL("clicked()"), self.lock)
+		self.connect(self.unlock_btn, QtCore.SIGNAL("clicked()"), self.unlock)
 		self.connect(self.apply_btn, QtCore.SIGNAL("clicked()"), self.apply)
 		self.connect(self.remove_btn, QtCore.SIGNAL("clicked()"), self.remove)
 		self.fillByTypeCMB()
@@ -73,6 +75,19 @@ class MultiAttributeUI(base, fom):
 		attr = str( self.attribute_le.text() )
 		for o in self._getObjects():
 			o.attr( attr ).overrided = False
+
+	def lock(self):
+		"""lock attribute"""
+		attr = str( self.attribute_le.text() )
+		for o in self._getObjects():
+			o.attr( attr ).locked = True
+
+	def unlock(self):
+		"""unlock attribute"""
+		attr = str( self.attribute_le.text() )
+		for o in self._getObjects():
+			o.attr( attr ).locked = False
+		
 		
 
 class Window(QtGui.QMainWindow):
