@@ -103,20 +103,20 @@ class RenderLayerExporter(object):
 		"""export custom shaders from scene, ex: shaders for masks etc..."""
 		lays = rlayer.renderlayers()
 		shadersToExport = []
+		finalExport = []
 		for l in lays:
 			if l.overridedShader:
-				shadersToExport.append( l.overridedShader.name )
+				finalExport.append( l.overridedShader )
 			else:
-				shaderToExport.extend( l.overridesWithConnections[1] )
-		if len(shadersToExport) == 0:
+				shadersToExport.extend( l.overridesWithConnections[1] )
+		if not shadersToExport and not finalExport:
 			return False
-		finalExport = []
 		for sg in shadersToExport:
-			mat = mc.listConnections( sg + '.surfaceShader' )
+			mat = mc.listConnections( sg.name + '.surfaceShader' )
 			if len(mat) == 1:
 				lit = [c for c in mc.listConnections( mat[0], sh = 1 ) if mc.objectType( c, isa = 'light' )]
 				if len(lit) <= 0:
-					finalExport.append( sg )
+					finalExport.append( sg.name )
 		if finalExport:
 			mc.select( finalExport, r = 1, ne = 1 )
 			mc.file( self.shaderPath.path, op = "v=0", typ = "mayaAscii", pr = 1, es = 1 )
@@ -148,7 +148,7 @@ class RenderLayerExporter(object):
 			LayersInfo = self.filterLightLinksData( LayersInfo , asset, searchAndReplace )
 		for l in LayersInfo.keys():
 			objsToBreakLink = []
-			for link in litLinks[l]:
+			for link in LayersInfo[l]:
 				if mc.objExists( link ):
 					objsToBreakLink.append( link )
 			mc.lightlink( b = True, light = l, o = objsToBreakLink )
@@ -163,7 +163,7 @@ class RenderLayerExporter(object):
 		"""import aovs into scene"""
 		LayersInfo = pickle.load( open( self.aovsPath.path, "rb") )
 		mc.refresh( su = 1 )
-		for ao in range( len( LayersInfo )):
+		for ao in LayersInfo.keys():
 			aov.create( LayersInfo[ao]['name'], LayersInfo[ao]['type'], LayersInfo[ao]['enabled'] )
 		mc.refresh( su = 0 )
 
@@ -176,7 +176,7 @@ class RenderLayerExporter(object):
 		"""import data from file
 		asset = Only import for the asset that you want
 		searchAndReplace = Change any part of the objects name to another word"""
-		pickleData = pickle.load( open( self.dataPath, "rb" ) )
+		pickleData = pickle.load( open( self.dataPath.path, "rb" ) )
 		layers = [RenderLayerData(l,d) for l,d in pickleData.items()]
 		for l in layers:
 			if not asset == '':
@@ -190,9 +190,10 @@ class RenderLayerData(rlayer.RenderLayer):
 	"""this is RenderLayerData object to handle the data from external files to create the render layer"""
 	def __init__(self, name, data):
 		super(RenderLayerData, self).__init__( name )
-		self._objects   = data[0]
-		self._overrides = data[1]
-		self._overconns = data[2]
+		self._objects   = data[ 'objects' ]
+		self._overrides = data[ 'values'  ]
+		self._overconns = data[ 'conns'   ]
+		self._shader    = data[ 'shader'  ]
 
 	@property
 	def dataObjects(self):
@@ -208,6 +209,11 @@ class RenderLayerData(rlayer.RenderLayer):
 	def dataOverconns(self):
 		"""return the overrided connections"""
 		return self._overconns
+
+	@property
+	def dataShader(self):
+		"""return the overrided shader"""
+		return self._shader
 
 	def filterMe(self, asset = '', sAr = ['', ''] ):
 		"""filter data based on asset name and searchAndReplace data"""
@@ -231,6 +237,10 @@ class RenderLayerData(rlayer.RenderLayer):
 	def makeOverrideConnections(self):
 		"""docstring for makeOverrideConnections"""
 		self.overridesWithConnections = self.dataOverconns
+
+	def makeShaderOverride(self):
+		"""docstring for makeShaderOverride"""
+		self.overridedShader = mn.Node( self.dataShader )
 		
 
 

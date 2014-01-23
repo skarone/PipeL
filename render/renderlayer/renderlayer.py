@@ -134,6 +134,8 @@ class RenderLayer(mn.Node):
 	@overridesWithConnections.setter
 	def overridesWithConnections(self, connectDict):
 		"""make overrides in attributes based on dictionary"""
+		if not connectDict:
+			return
 		for c in connectDict.keys():
 			if not c.exists:
 				continue

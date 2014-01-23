@@ -24,7 +24,7 @@ def addAllAovs():
 
 def create( name ='' , typ = '' , enabled = '' ):
 	"""create Aov Node"""
-	if mc.objExists( name ):
+	if mn.Node( name ).exists:
 		return
 	customAov = pm.createNode( 'aiAOV' )
 	customAov.setAttr( 'name', name       )

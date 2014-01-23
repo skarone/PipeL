@@ -460,8 +460,8 @@ class LighterHelperUI(base,fom):
 			print "Arnold is loaded.\n";
 		else:
 			mc.loadPlugin("C:/solidAngle/mtoadeploy/" + version + "/plug-ins/mtoa.mll")
+		if not mn.Node( 'defaultArnoldRenderOptions' ).exists:
 			cor.createOptions()
-		
 		mc.setAttr("defaultRenderGlobals.currentRenderer", "arnold", type="string")
 
 	###########################
@@ -469,6 +469,8 @@ class LighterHelperUI(base,fom):
 	def exportRenderData(self):
 		"""export render Data from scene"""
 		pathDir = self.getDirForRenderData()
+		if not os.path.exists( pathDir ):
+			os.makedirs( pathDir )
 		rlExporter = rlExp.RenderLayerExporter( pathDir )
 		rlExporter.export(  self.renderLayersOpt_chb.isChecked(), 
 							self.lightsOpt_chb.isChecked(),
@@ -499,7 +501,7 @@ class LighterHelperUI(base,fom):
 	def getDirForRenderData(self):
 		"""get the directory for the render layer data"""
 		if self.useSceneForlder_chb.isChecked():
-			pathDir = mfl.currentFile().dirPath
+			pathDir = mfl.currentFile().dirPath + '/Data/'
 		else:
 			pathDir = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory"))
 		return pathDir
