@@ -3,14 +3,18 @@ from PyQt4 import QtGui,QtCore, uic
 
 import render.renderlayer.renderlayer as rlayer
 reload( rlayer)
+import render.renderLayerExporter.renderLayerExporter as rlExp
+reload( rlExp )
 import maya.cmds as mc
 import maya.mel as mm
 import general.mayaNode.mayaNode as mn
 import render.aov.aov as aov
 reload( aov )
+import mtoa.core as cor
 import maya.OpenMayaUI as mui
 import sip
 from functools import partial
+import pipe.mayaFile.mayaFile as mfl
 
 #load UI FILE
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
@@ -26,6 +30,8 @@ class LighterHelperUI(base,fom):
 	def __init__(self, parent  = get_maya_main_window(), *args ):
 		super(base, self).__init__(parent)
 		self.setupUi(self)
+		#load arnold if it is not loaded
+		self.loadArnold()
 		self.setObjectName( 'ligther_Helper_WIN' )
 		self._makeConnections()
 		self._addAllAovs()
@@ -67,6 +73,7 @@ class LighterHelperUI(base,fom):
 		self.connect( self.aovsOn_btn               , QtCore.SIGNAL("clicked()") , partial( self.aovsSwitch, True ) )
 		self.connect( self.overridesOff_btn         , QtCore.SIGNAL("clicked()") , lambda state=False: self.setOverrides(state) )
 		self.connect( self.overridesOn_btn          , QtCore.SIGNAL("clicked()") , lambda state=True: self.setOverrides(state) )
+		arnoldSettings = mn.Node( 'defaultArnoldRenderOptions' )
 		#SPINBOXES  
 		spinBoxes = [ 
 				self.AASamples_sb,              
@@ -81,6 +88,8 @@ class LighterHelperUI(base,fom):
 				self.autoTransparencyDepth_sb  
 				]
 		for s in spinBoxes:
+			att = arnoldSettings.attr( str( s.objectName() ).replace( '_sb', '' ) )
+			mc.scriptJob( ac = [att.fullname, partial( self.updateLighterUI )], p = 'ligther_Helper_WIN' )
 			self.connect( s, QtCore.SIGNAL("valueChanged(int)") , partial( self.renderSettingsSpinBoxApply, s ) )
 		#CHECBOXES stateChanged
 		chBoxes = [
@@ -99,13 +108,14 @@ class LighterHelperUI(base,fom):
 				self.ignoreMis_chb,         
 				]
 		for c in chBoxes:
+			att = arnoldSettings.attr( str( c.objectName() ).replace( '_chb', '' ) )
+			mc.scriptJob( ac = [att.fullname, partial( self.updateLighterUI )], p = 'ligther_Helper_WIN' )
 			self.connect( c, QtCore.SIGNAL("stateChanged(int)") , partial( self.renderSettingsChecboxApply, c ) )
 		#AOV LIST
 		self.aovs_lw.itemChanged.connect( self.setAovsState )
 		#EXPORT
-		self.connect( self.exportRenderLayers_btn   , QtCore.SIGNAL("clicked()") , self.removeAllObjectsToLayer )
-		self.connect( self.importRenderLayers_btn   , QtCore.SIGNAL("clicked()") , self.removeAllObjectsToLayer )
-
+		self.connect( self.exportRenderLayers_btn   , QtCore.SIGNAL("clicked()") , self.exportRenderData )
+		self.connect( self.importRenderLayers_btn   , QtCore.SIGNAL("clicked()") , self.importRenderData )
 
 	def _addAllAovs(self):
 		"""add all aovs to the scene and in the list"""
@@ -443,9 +453,57 @@ class LighterHelperUI(base,fom):
 		"""custom close"""
 		print 'custom close'
 		event.accept()
-
 	
+	def loadArnold(self):
+		version = mc.about(v = True).split()[0]
+		if mc.pluginInfo('mtoa', q=1, l=1):
+			print "Arnold is loaded.\n";
+		else:
+			mc.loadPlugin("C:/solidAngle/mtoadeploy/" + version + "/plug-ins/mtoa.mll")
+			cor.createOptions()
+		
+		mc.setAttr("defaultRenderGlobals.currentRenderer", "arnold", type="string")
 
+	###########################
+	# EXPORT / IMPORT
+	def exportRenderData(self):
+		"""export render Data from scene"""
+		pathDir = self.getDirForRenderData()
+		rlExporter = rlExp.RenderLayerExporter( pathDir )
+		rlExporter.export(  self.renderLayersOpt_chb.isChecked(), 
+							self.lightsOpt_chb.isChecked(),
+							self.shadersOpt_chb.isChecked(),
+							self.aovsOpt_chb.isChecked()
+							)
+
+	def importRenderData(self):
+		"""import render Data to scene"""
+		asset = ''
+		searchAndReplace = ['','']
+		pathDir = self.getDirForRenderData()
+		if self.onlySelected_chb.isChecked():
+			sel = mc.ls( sl = True )
+			if sel:
+				if ':' in sel[0]:
+					asset = sel[0][ : -len( sel[0].split( ':' )[-1] ) ]
+					searchAndReplace = [str( self.searchAsset_le.text() ), str( self.replaceAsset_le.text() )]
+		rlExporter = rlExp.RenderLayerExporter( pathDir )
+		rlExporter.importAll(  self.renderLayersOpt_chb.isChecked(), 
+							self.lightsOpt_chb.isChecked(),
+							self.shadersOpt_chb.isChecked(),
+							self.aovsOpt_chb.isChecked(),
+							asset,
+							searchAndReplace
+							)
+	
+	def getDirForRenderData(self):
+		"""get the directory for the render layer data"""
+		if self.useSceneForlder_chb.isChecked():
+			pathDir = mfl.currentFile().dirPath
+		else:
+			pathDir = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory"))
+		return pathDir
+		
 
 def main():
 	"""call this from maya"""

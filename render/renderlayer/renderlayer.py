@@ -17,6 +17,11 @@ class RenderLayer(mn.Node):
 	def __init__(self, name):
 		super(RenderLayer, self).__init__( name )
 
+	def create(self):
+		"""create render layer if not exists"""
+		if not self.exists:
+			mc.createRenderLayer( name = self.name, empty = 1 )
+
 	def __repr__(self):
 		"""return the representation"""
 		return "RenderLayer( %s )"%self.name

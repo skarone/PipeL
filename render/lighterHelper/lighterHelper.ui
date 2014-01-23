@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -18,7 +21,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tabWidgetPage1">
        <attribute name="title">
@@ -32,7 +35,7 @@
             <item>
              <widget class="QPushButton" name="addObject_btn">
               <property name="styleSheet">
-               <string notr="true">background-color: rgb(0, 255, 0);</string>
+               <string notr="true">background-color: rgb(0, 230, 0);</string>
               </property>
               <property name="text">
                <string>Add</string>
@@ -1146,6 +1149,52 @@ color: rgb(255, 255, 255);</string>
          </widget>
         </item>
         <item>
+         <widget class="Line" name="line_10">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="onlySelected_chb">
+          <property name="text">
+           <string>only for selected asset</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_22">
+          <item>
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>Search:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="searchAsset_le">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_16">
+            <property name="text">
+             <string>Replace:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="replaceAsset_le">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <widget class="Line" name="line">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -1212,5 +1261,38 @@ color: rgb(255, 255, 255);</string>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>onlySelected_chb</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>searchAsset_le</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>63</x>
+     <y>168</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>117</x>
+     <y>196</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>onlySelected_chb</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>replaceAsset_le</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>144</x>
+     <y>174</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>302</x>
+     <y>202</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

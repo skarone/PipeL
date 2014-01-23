@@ -1,6 +1,6 @@
 import general.mayaNode.mayaNode as mn
 import mtoa.aovs as aovs
-
+import pymel.core as pm
 
 def aovsInScene():
 	"""return all the created aovs in scene"""
@@ -21,3 +21,21 @@ def addAllAovs():
 			continue
 		aovNodeName = inter.addAOV( ao )
 		aovNode.a.enabled.v = False #TURN IT OFF
+
+def create( name ='' , typ = '' , enabled = '' ):
+	"""create Aov Node"""
+	if mc.objExists( name ):
+		return
+	customAov = pm.createNode( 'aiAOV' )
+	customAov.setAttr( 'name', name       )
+	customAov.setAttr( 'enabled', enabled )
+	customAov.setAttr( 'type', typ        )
+	arnoldRenderGlobals = pm.ls( 'defaultArnoldRenderOptions' )[0]
+	if not arnoldRenderGlobals.aovList.getArrayIndices():
+		nextIndex = 0
+	else:
+		nextIndex = max(arnoldRenderGlobals.aovList.getArrayIndices())+1
+	customAov.message >> arnoldRenderGlobals.aovList[nextIndex]
+	customAov.rename( name )
+	return mn.Node( name )
+
