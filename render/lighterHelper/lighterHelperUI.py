@@ -168,6 +168,14 @@ class LighterHelperUI(base,fom):
 		for c in chBoxes:
 			c.setChecked( arnoldSettings.attr( str( c.objectName() ).replace( '_chb', '' ) ).v )
 
+		for v in range( self.aovs_lw.count() ):
+			i = self.aovs_lw.item( v )
+			aovNode = i.data(32).toPyObject()
+			if aovNode.a.enabled.v:
+				i.setCheckState(QtCore.Qt.Checked)
+			else:
+				i.setCheckState(QtCore.Qt.Unchecked)
+
 		mc.undoInfo( swf = True )
 
 	##########################
@@ -475,7 +483,8 @@ class LighterHelperUI(base,fom):
 		rlExporter.export(  self.renderLayersOpt_chb.isChecked(), 
 							self.lightsOpt_chb.isChecked(),
 							self.shadersOpt_chb.isChecked(),
-							self.aovsOpt_chb.isChecked()
+							self.aovsOpt_chb.isChecked(),
+							self.masterSettings_chb.isChecked()
 							)
 
 	def importRenderData(self):
@@ -494,6 +503,7 @@ class LighterHelperUI(base,fom):
 							self.lightsOpt_chb.isChecked(),
 							self.shadersOpt_chb.isChecked(),
 							self.aovsOpt_chb.isChecked(),
+							self.masterSettings_chb.isChecked(),
 							asset,
 							searchAndReplace
 							)

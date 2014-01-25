@@ -1109,6 +1109,16 @@ color: rgb(255, 255, 255);</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
+         <widget class="QCheckBox" name="masterSettings_chb">
+          <property name="text">
+           <string>MasterLayer Settings</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QCheckBox" name="renderLayersOpt_chb">
           <property name="text">
            <string>RenderLayers</string>

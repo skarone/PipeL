@@ -26,6 +26,10 @@ class RenderLayer(mn.Node):
 		"""return the representation"""
 		return "RenderLayer( %s )"%self.name
 
+	def makeCurrent(self):
+		"""make render layer current"""
+		mc.editRenderLayerGlobals( currentRenderLayer = self.name )
+
 	@property
 	def objects(self):
 		"""return the objects in the render layer"""
@@ -66,7 +70,7 @@ class RenderLayer(mn.Node):
 				plg = [ a for a in tw.output if self.name in a.fullname ]
 				if plg:
 					plig = mn.NodeAttribute( self, plg[0].name.replace( '.plug', '.value' ) )
-					print plig.fullname
+					print plig.fullname, plig.v
 					tweaksDict[tw] = plig.v
 				else:
 					tweaksDict[tw] = tw.v
@@ -75,8 +79,11 @@ class RenderLayer(mn.Node):
 	@overridesWithValues.setter
 	def overridesWithValues(self, tweaksDict):
 		"""override values in attributes based on dictionary"""
+		if not tweaksDict:
+			return
+		self.makeCurrent()
 		for tw in tweaksDict.keys():
-			if 'initialShadingGroup' in tw: #FIX TEMPORAL
+			if 'initialShadingGroup' in tw.name: #FIX TEMPORAL
 				continue
 			if not tw.exists:
 				continue
@@ -86,9 +93,10 @@ class RenderLayer(mn.Node):
 			inpt = tw.input
 			if inpt:
 				inpt // tw #disconnect
-			if ( 'surfaceShader' in attrTweaks and isinstance( objTweaks[attrTweaks], str )) or typ == 'message' : # CONNECTION
+			if ( 'surfaceShader' in tw.name and isinstance( tweaksDict[tw], str )) or typ == 'message' : # CONNECTION
 				tw >> tweaksDict[ tw ]
 			else:
+				print tw.fullname,tweaksDict[tw]
 				tw.v = tweaksDict[tw]
 
 	@property
@@ -136,10 +144,12 @@ class RenderLayer(mn.Node):
 		"""make overrides in attributes based on dictionary"""
 		if not connectDict:
 			return
+		self.makeCurrent()
 		for c in connectDict.keys():
 			if not c.exists:
 				continue
 			c()
-			mc.hyperShade( a = connectDict[c] )
+			if connectDict[c].exists:
+				mc.hyperShade( a = connectDict[c] )
 
 

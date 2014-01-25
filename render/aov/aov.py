@@ -22,9 +22,9 @@ def addAllAovs():
 		aovNodeName = inter.addAOV( ao )
 		aovNode.a.enabled.v = False #TURN IT OFF
 
-def create( name ='' , typ = '' , enabled = '' ):
+def create(  customAovName = '' ,name ='' , typ = '' , enabled = '' ):
 	"""create Aov Node"""
-	if mn.Node( name ).exists:
+	if mn.Node( customAovName ).exists:
 		return
 	customAov = pm.createNode( 'aiAOV' )
 	customAov.setAttr( 'name', name       )
@@ -36,6 +36,6 @@ def create( name ='' , typ = '' , enabled = '' ):
 	else:
 		nextIndex = max(arnoldRenderGlobals.aovList.getArrayIndices())+1
 	customAov.message >> arnoldRenderGlobals.aovList[nextIndex]
-	customAov.rename( name )
-	return mn.Node( name )
+	customAov.rename( customAovName )
+	return mn.Node( customAovName )
 

@@ -1,10 +1,12 @@
 import render.renderlayer.renderlayer as rlayer
+reload( rlayer )
 import cPickle as pickle
 import maya.cmds as mc
 import pipe.file.file as fl
 import pipe.mayaFile.mayaFile as mfl
 import render.aov.aov as aov
 reload( aov )
+import general.mayaNode.mayaNode as mn
 
 class RenderLayerExporter(object):
 	"""export information from lighting scene"""
@@ -36,8 +38,13 @@ class RenderLayerExporter(object):
 		"""return the path for the aovs file"""
 		return fl.File( self._path + '/lights.data' )
 
+	@property
+	def masterPath(self):
+		"""return the path for the masterLayer data"""
+		return fl.File( self._path + '/master.data' )
+
 	#EXPORT
-	def export(self, exdata = True, exlights = True, exaovs = True, exshaders = True):
+	def export(self, exdata = True, exlights = True, exaovs = True, exshaders = True, exmaster = True):
 		"""export information of scene to path"""
 		if exdata:
 			self.exportData()
@@ -47,6 +54,21 @@ class RenderLayerExporter(object):
 			self.exportAovs()
 		if exshaders:
 			self.exportShaders()
+		if exmaster:
+			self.exportMasterLayerSettings()
+
+	def exportMasterLayerSettings(self):
+		"""export master layer settings so we can re apply it"""
+		master = rlayer.RenderLayer( 'defaultRenderLayer' )
+		master.makeCurrent()
+		masterData = {}
+		nodes = ['defaultArnoldRenderOptions','defaultResolution','defaultRenderGlobals']
+		mnNodes =[ mn.Node( n ) for n in nodes ]
+		for n in mnNodes:
+			for a in n.listAttr( se = True, v = True, sa = True ):
+				masterData[a] = a.v
+		pickle.dump( masterData, open( self.masterPath.path, "wb" ) )
+		
 
 	def exportData(self):
 		"""export data from scene, objects overrides in renderlayers.. etc"""
@@ -122,7 +144,7 @@ class RenderLayerExporter(object):
 			mc.file( self.shaderPath.path, op = "v=0", typ = "mayaAscii", pr = 1, es = 1 )
 
 	#IMPORT
-	def importAll(self, imdata = True, imlights = True, imaovs = True, imshaders = True, asset = '', searchAndReplace = ['',''] ):
+	def importAll(self, imdata = True, imlights = True, imaovs = True, imshaders = True, immaster = True, asset = '', searchAndReplace = ['',''] ):
 		"""import all data into scene"""
 		if imlights and self.lightPath.exists:
 			self.importLights( asset, searchAndReplace )
@@ -132,6 +154,8 @@ class RenderLayerExporter(object):
 			self.importShaders()
 		if imdata and self.dataPath.exists:
 			self.importData( asset, searchAndReplace )
+		if immaster:
+			self.importMasterSettings()
 
 	def importLights(self, asset = '', searchAndReplace = ['',''] ):
 		"""import lights in scene"""
@@ -164,7 +188,7 @@ class RenderLayerExporter(object):
 		LayersInfo = pickle.load( open( self.aovsPath.path, "rb") )
 		mc.refresh( su = 1 )
 		for ao in LayersInfo.keys():
-			aov.create( LayersInfo[ao]['name'], LayersInfo[ao]['type'], LayersInfo[ao]['enabled'] )
+			aov.create( ao, LayersInfo[ao]['name'], LayersInfo[ao]['type'], LayersInfo[ao]['enabled'] )
 		mc.refresh( su = 0 )
 
 	def importShaders(self):
@@ -185,6 +209,15 @@ class RenderLayerExporter(object):
 			l.addObjects()
 			l.makeOverrides()
 			l.makeOverrideConnections()
+			l.makeShaderOverride()
+
+	def importMasterSettings(self):
+		"""import master settings from data file"""
+		pickleData = pickle.load( open( self.masterPath.path, "rb" ) )
+		master = rlayer.RenderLayer( 'defaultRenderLayer' )
+		master.makeCurrent()
+		for a in pickleData.keys():
+			a.v = pickleData[a]
 
 class RenderLayerData(rlayer.RenderLayer):
 	"""this is RenderLayerData object to handle the data from external files to create the render layer"""
@@ -240,7 +273,8 @@ class RenderLayerData(rlayer.RenderLayer):
 
 	def makeShaderOverride(self):
 		"""docstring for makeShaderOverride"""
-		self.overridedShader = mn.Node( self.dataShader )
+		if self.dataShader:
+			self.overridedShader = self.dataShader
 		
 
 
