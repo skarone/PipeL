@@ -85,7 +85,7 @@ class RenderLayerExporter(object):
 	def exportLights(self):
 		"""export lights from scene"""
 		#TODO! REMOVE CONSTRAINS
-		lights = [a for a in mc.ls( typ=['light','aiAreaLight','aiSkyDomeLight','aiVolumeScattering'], l=1 ) ]
+		lights = mc.ls( typ=['light','aiAreaLight','aiSkyDomeLight','aiVolumeScattering'], l=1 )
 		mc.editRenderLayerGlobals( currentRenderLayer = 'defaultRenderLayer' )
 		litsToExport = []
 		for li in lights:

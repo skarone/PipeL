@@ -9,21 +9,27 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>455</width>
-    <height>587</height>
+    <width>484</width>
+    <height>646</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Lighting Helper</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true">font: 75 8pt &quot;Lucida Sans Unicode&quot;;</string>
+   </property>
    <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>3</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabWidgetPage1">
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
        <attribute name="title">
         <string>Objects</string>
        </attribute>
@@ -35,7 +41,8 @@
             <item>
              <widget class="QPushButton" name="addObject_btn">
               <property name="styleSheet">
-               <string notr="true">background-color: rgb(0, 230, 0);</string>
+               <string notr="true">background-color: rgb(0, 230, 0);
+color: rgb(0, 0, 0);</string>
               </property>
               <property name="text">
                <string>Add</string>
@@ -45,7 +52,8 @@
             <item>
              <widget class="QPushButton" name="removeObject_btn">
               <property name="styleSheet">
-               <string notr="true">background-color: rgb(255, 0, 0);</string>
+               <string notr="true">background-color: rgb(255, 0, 0);
+color: rgb(0, 0, 0);</string>
               </property>
               <property name="text">
                <string>Remove</string>
@@ -334,6 +342,9 @@ color: rgb(255, 255, 255);</string>
        </layout>
       </widget>
       <widget class="QWidget" name="tabWidgetPage2">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(0, 0, 0);</string>
+       </property>
        <attribute name="title">
         <string>Lighting</string>
        </attribute>
@@ -344,15 +355,21 @@ color: rgb(255, 255, 255);</string>
            <layout class="QHBoxLayout" name="horizontalLayout_7">
             <item>
              <widget class="QPushButton" name="isolateObject_btn">
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(0, 170, 127);</string>
+              </property>
               <property name="text">
-               <string>Isolate Object</string>
+               <string>Isolate Objects</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="isolateLight_btn">
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(0, 170, 255);</string>
+              </property>
               <property name="text">
-               <string>Isolate Light</string>
+               <string>Isolate Lights</string>
               </property>
              </widget>
             </item>
@@ -375,6 +392,10 @@ color: rgb(255, 255, 255);</string>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(255, 170, 0);
+color: rgb(0, 0, 0);</string>
+              </property>
               <property name="text">
                <string>Select Objects Illuminated by Light</string>
               </property>
@@ -387,6 +408,9 @@ color: rgb(255, 255, 255);</string>
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(145, 145, 216);</string>
               </property>
               <property name="text">
                <string>Select Lights Illuminating Object</string>
@@ -405,6 +429,9 @@ color: rgb(255, 255, 255);</string>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(0, 170, 0);</string>
+              </property>
               <property name="text">
                <string>Make Light Link</string>
               </property>
@@ -417,6 +444,9 @@ color: rgb(255, 255, 255);</string>
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(188, 55, 22);</string>
               </property>
               <property name="text">
                <string>Break Light Link</string>
@@ -437,12 +467,19 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="label_2">
               <property name="text">
-               <string>Samples</string>
+               <string>Samples:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="lightSamples_sb"/>
+             <widget class="QSpinBox" name="lightSamples_sb">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(255, 255, 255);</string>
+              </property>
+              <property name="minimum">
+               <number>1</number>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QPushButton" name="applyLightSample_btn">
@@ -928,7 +965,8 @@ color: rgb(255, 255, 255);</string>
               <item>
                <widget class="QPushButton" name="aovsOff_btn">
                 <property name="styleSheet">
-                 <string notr="true">background-color: rgb(255, 0, 0);</string>
+                 <string notr="true">background-color: rgb(255, 0, 0);
+color: rgb(0, 0, 0);</string>
                 </property>
                 <property name="text">
                  <string>ALL OFF</string>
@@ -938,7 +976,8 @@ color: rgb(255, 255, 255);</string>
               <item>
                <widget class="QPushButton" name="aovsOn_btn">
                 <property name="styleSheet">
-                 <string notr="true">background-color: rgb(0, 255, 0);</string>
+                 <string notr="true">background-color: rgb(0, 255, 0);
+color: rgb(0, 0, 0);</string>
                 </property>
                 <property name="text">
                  <string>ALL ON</string>
@@ -1076,7 +1115,8 @@ color: rgb(255, 255, 255);</string>
               <item>
                <widget class="QPushButton" name="overridesOff_btn">
                 <property name="styleSheet">
-                 <string notr="true">background-color: rgb(255, 0, 0);</string>
+                 <string notr="true">background-color: rgb(255, 0, 0);
+color: rgb(0, 0, 0);</string>
                 </property>
                 <property name="text">
                  <string>ALL OFF</string>
@@ -1086,7 +1126,8 @@ color: rgb(255, 255, 255);</string>
               <item>
                <widget class="QPushButton" name="overridesOn_btn">
                 <property name="styleSheet">
-                 <string notr="true">background-color: rgb(0, 255, 0);</string>
+                 <string notr="true">background-color: rgb(0, 255, 0);
+color: rgb(0, 0, 0);</string>
                 </property>
                 <property name="text">
                  <string>ALL ON</string>
@@ -1225,6 +1266,10 @@ color: rgb(255, 255, 255);</string>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <widget class="QPushButton" name="exportRenderLayers_btn">
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 139, 62);
+color: rgb(0, 0, 0);</string>
+            </property>
             <property name="text">
              <string>Export</string>
             </property>
@@ -1232,6 +1277,10 @@ color: rgb(255, 255, 255);</string>
           </item>
           <item>
            <widget class="QPushButton" name="importRenderLayers_btn">
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(142, 114, 255);
+color: rgb(0, 0, 0);</string>
+            </property>
             <property name="text">
              <string>Import</string>
             </property>
@@ -1263,12 +1312,78 @@ color: rgb(255, 255, 255);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>455</width>
+     <width>484</width>
      <height>18</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>true</bool>
+   </attribute>
+   <addaction name="actionSpot"/>
+   <addaction name="actionDirectional"/>
+   <addaction name="actionPoint"/>
+   <addaction name="actionAmbient"/>
+   <addaction name="actionArea"/>
+   <addaction name="actionVolume"/>
+   <addaction name="separator"/>
+   <addaction name="actionRenderGlobals"/>
+   <addaction name="actionRenderView"/>
+  </widget>
+  <action name="actionSpot">
+   <property name="text">
+    <string>Spot</string>
+   </property>
+   <property name="toolTip">
+    <string>create spotlight</string>
+   </property>
+  </action>
+  <action name="actionDirectional">
+   <property name="text">
+    <string>Directional</string>
+   </property>
+   <property name="toolTip">
+    <string>create directional light</string>
+   </property>
+  </action>
+  <action name="actionPoint">
+   <property name="text">
+    <string>Point</string>
+   </property>
+  </action>
+  <action name="actionAmbient">
+   <property name="text">
+    <string>Ambient</string>
+   </property>
+  </action>
+  <action name="actionArea">
+   <property name="text">
+    <string>Area</string>
+   </property>
+  </action>
+  <action name="actionVolume">
+   <property name="text">
+    <string>Volume</string>
+   </property>
+  </action>
+  <action name="actionRenderGlobals">
+   <property name="text">
+    <string>RenderGlobals</string>
+   </property>
+  </action>
+  <action name="actionRenderView">
+   <property name="text">
+    <string>RenderView</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections>

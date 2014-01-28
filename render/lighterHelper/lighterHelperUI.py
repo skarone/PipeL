@@ -38,7 +38,19 @@ class LighterHelperUI(base,fom):
 		#create an scriptjob thats update the UI on renderlayer change
 		mc.scriptJob( e = ["renderLayerManagerChange", partial( self.updateLighterUI )], p = 'ligther_Helper_WIN' )
 		self.updateLighterUI()
-	
+		#set icons for toolbar
+		self.actionSpot.setIcon(QtGui.QIcon(":/spotlight.png"))
+		self.actionDirectional.setIcon(QtGui.QIcon(":/directionallight.png"))
+		self.actionPoint.setIcon(QtGui.QIcon(":/pointlight.png"))
+		self.actionAmbient.setIcon(QtGui.QIcon(":/ambientlight.png"))
+		self.actionArea.setIcon(QtGui.QIcon(":/arealight.png"))
+		self.actionVolume.setIcon(QtGui.QIcon(":/volumelight.png"))
+		self.actionRenderGlobals.setIcon(QtGui.QIcon(":/renderGlobals.png"))
+		self.actionRenderView.setIcon(QtGui.QIcon(":/render.png"))
+		#internal variables
+		self.isolatedLights = [] #lights that are beign turn off when we want to isolate others!
+		self.isolatedObjects = [] #objects that are beign turn off when we one to isolate others!
+		
 	def _makeConnections(self):
 		"""make the connections from the controls to de methods"""
 		#OBJECTS
@@ -56,8 +68,8 @@ class LighterHelperUI(base,fom):
 		#RENDER OVERRIDES
 		self.connect( self.applyStatsOverride_btn   , QtCore.SIGNAL("clicked()") , self.applyRenderStats )
 		#LIGHTING
-		self.connect( self.isolateObject_btn        , QtCore.SIGNAL("clicked()") , self.removeAllObjectsToLayer )
-		self.connect( self.isolateLight_btn         , QtCore.SIGNAL("clicked()") , self.removeAllObjectsToLayer )
+		self.connect( self.isolateObject_btn        , QtCore.SIGNAL("clicked()") , self.isolateSelectedObjects )
+		self.connect( self.isolateLight_btn         , QtCore.SIGNAL("clicked()") , self.isolateSelectedLight )
 		self.connect( self.selectObjectByLight_btn  , QtCore.SIGNAL("clicked()") , self.selectObjIllByLight )
 		self.connect( self.selectLightByObject_btn  , QtCore.SIGNAL("clicked()") , self.selectLitIllObj )
 		self.connect( self.makeLightLink_btn        , QtCore.SIGNAL("clicked()") , self.makeLightLink )
@@ -116,6 +128,16 @@ class LighterHelperUI(base,fom):
 		#EXPORT
 		self.connect( self.exportRenderLayers_btn   , QtCore.SIGNAL("clicked()") , self.exportRenderData )
 		self.connect( self.importRenderLayers_btn   , QtCore.SIGNAL("clicked()") , self.importRenderData )
+		#TOOLBAR
+		self.connect( self.actionSpot   , QtCore.SIGNAL("triggered()") , partial( self.createLight, "spotLight" ) )
+		self.connect( self.actionDirectional   , QtCore.SIGNAL("triggered()") , partial( self.createLight, "directionalLight" ) )
+		self.connect( self.actionPoint   , QtCore.SIGNAL("triggered()") , partial( self.createLight, "pointLight" ) )
+		self.connect( self.actionArea   , QtCore.SIGNAL("triggered()") , partial( self.createLight, "areaLight" ) )
+		self.connect( self.actionVolume   , QtCore.SIGNAL("triggered()") , partial( self.createLight, "volumeLight" ) )
+		self.connect( self.actionAmbient   , QtCore.SIGNAL("triggered()") , partial( self.createLight, "ambientLight" ) )
+		self.connect( self.actionRenderGlobals  , QtCore.SIGNAL("triggered()") , self.openRenderSettings )
+		self.connect( self.actionRenderView  , QtCore.SIGNAL("triggered()") , self.openRenderView )
+
 
 	def _addAllAovs(self):
 		"""add all aovs to the scene and in the list"""
@@ -368,7 +390,61 @@ class LighterHelperUI(base,fom):
 
 	###########################
 	#LIGHTING
-	#TODO ISOLATES!
+	def isolateSelectedObjects(self):
+		"""isolate Selecetd objects"""
+		sel = mn.ls( sl = True, dag = True, typ = ['transform'], l = 1 )
+		self.desisolateObjects()
+		if not sel:
+			return
+		self.isolatedObjects = [o for o in mn.ls( typ = 'transform' ) if o.a.v] #only visibile transforms
+		for o in self.isolatedObjects:
+			o.a.v.v = 0
+		for o in sel:
+			o.a.v.v = 1
+
+	def desisolateObjects(self):
+		"""set back objects visibility on"""
+		for o in self.isolatedObjects:
+			o.a.v.v = True
+
+	def isolateSelectedLight(self):
+		"""isolate Selected Light"""
+		sel = mn.ls( sl = True, dag = True, typ = ['light','aiAreaLight','aiSkyDomeLight','aiVolumeScattering'], l = 1 )
+		self.desisolateLight() #back all to normal before we make a light isolated
+		self.isolateLight_btn.setStyleSheet('QPushButton {background-color: rgb(255, 0, 0)}')
+		if not sel:
+			self.isolateLight_btn.setStyleSheet('QPushButton {background-color: rgb(0, 170, 255)}')
+			return
+		self.isolatedLights = [l for l in mn.ls( typ=['light','aiAreaLight','aiSkyDomeLight','aiVolumeScattering'], l=1 ) if l.parent.a.v ] #only visibile lights
+		for l in self.isolatedLights:
+			l.a.v.v = 0
+		for l in sel:
+			l.a.v.v = 1
+
+	def desisolateLight(self):
+		"""desisolate all lights from past isolate"""
+		for l in self.isolatedLights:
+			l.a.v.v = 1
+
+	def createLight(self, light):
+		"""create light on camera position if we can know what camera use"""
+		if light == 'areaLight':
+			lit = mn.Node( mc.shadingNode( light, asLight = True ) )
+		else:
+			lit = mn.Node( mm.eval( light ) ).parent
+		cam = self.getCurrentCamera()
+		if cam:
+			cons = mn.Node( mc.parentConstraint( cam.name, lit.name )[0] )
+			cons.delete()
+		
+	def openRenderSettings(self):
+		"""open render settings ui"""
+		mm.eval( 'unifiedRenderGlobalsWindow' )
+
+	def openRenderView(self):
+		"""open render view ui"""
+		mm.eval( 'RenderViewWindow' )
+
 	def selectObjIllByLight(self):
 		"""select objects illuminated by selected Light"""
 		mm.eval( 'SelectObjectsIlluminatedByLight();' )
@@ -457,9 +533,11 @@ class LighterHelperUI(base,fom):
 			item.setCheckState( state )
 
 	###########################
+	# EXTRAS
 	def closeEvent(self, event):
 		"""custom close"""
 		print 'custom close'
+		self.desisolateLight()
 		event.accept()
 	
 	def loadArnold(self):
@@ -471,6 +549,17 @@ class LighterHelperUI(base,fom):
 		if not mn.Node( 'defaultArnoldRenderOptions' ).exists:
 			cor.createOptions()
 		mc.setAttr("defaultRenderGlobals.currentRenderer", "arnold", type="string")
+
+	def getCurrentCamera(self):
+		pan = mc.getPanel(wf=1)
+		cam = ""
+		if ( "modelPanel" == mc.getPanel(to=pan) ):
+			cam = mc.modelEditor(pan,q=1,camera=1);
+			print cam
+			print mc.nodeType(cam)
+		if(cam == ""):
+			return None
+		return mn.Node( cam );
 
 	###########################
 	# EXPORT / IMPORT
