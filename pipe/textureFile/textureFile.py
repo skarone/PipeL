@@ -47,6 +47,12 @@ class textureFile(fl.File):
 		super(textureFile, self).__init__( path )
 	
 	@property
+	def hasUdim(self):
+		"""check if the path has udim, so we can treat the texture has a group of textures"""
+		return '<udim>' in self.path
+		
+
+	@property
 	def hasTx(self):
 		"""return if there is a tx version"""
 		if self.isTx:
