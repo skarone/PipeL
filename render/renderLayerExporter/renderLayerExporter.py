@@ -65,8 +65,11 @@ class RenderLayerExporter(object):
 		nodes = ['defaultArnoldRenderOptions','defaultResolution','defaultRenderGlobals']
 		mnNodes =[ mn.Node( n ) for n in nodes ]
 		for n in mnNodes:
-			for a in n.listAttr( se = True, v = True, sa = True ):
-				masterData[a] = a.v
+			for a in n.listAttr( se = True, v = True,  w = True ):
+				try:
+					masterData[a] = a.v
+				except:
+					continue
 		pickle.dump( masterData, open( self.masterPath.path, "wb" ) )
 		
 
@@ -85,7 +88,7 @@ class RenderLayerExporter(object):
 	def exportLights(self):
 		"""export lights from scene"""
 		#TODO! REMOVE CONSTRAINS
-		lights = mc.ls( typ=['light','aiAreaLight','aiSkyDomeLight','aiVolumeScattering'], l=1 )
+		lights = mc.ls( typ=['light','aiAreaLight','aiSkyDomeLight','aiVolumeScattering','aiSky'], l=1 )
 		mc.editRenderLayerGlobals( currentRenderLayer = 'defaultRenderLayer' )
 		litsToExport = []
 		for li in lights:
@@ -128,24 +131,30 @@ class RenderLayerExporter(object):
 		finalExport = []
 		for l in lays:
 			if l.overridedShader:
-				finalExport.append( l.overridedShader )
+				finalExport.append( l.overridedShader.name )
 			else:
-				shadersToExport.extend( l.overridesWithConnections[1] )
+				if l.overridesWithConnections[1]:
+					asd = [mn.Node(a) for a in list(set([n.name for n in l.overridesWithConnections[1] if not 'initialShadingGroup' in n.name]))]
+					shadersToExport.extend( asd )
 		if not shadersToExport and not finalExport:
 			return False
 		for sg in shadersToExport:
 			mat = mc.listConnections( sg.name + '.surfaceShader' )
 			if len(mat) == 1:
-				lit = [c for c in mc.listConnections( mat[0], sh = 1 ) if mc.objectType( c, isa = 'light' )]
+				lit = [c for c in mc.listConnections( mat[0], sh = 1 ) if mc.objectType( c, isa = 'light' ) ]
 				if len(lit) <= 0:
-					finalExport.append( sg.name )
+					if not mc.referenceQuery( mat[0], isNodeReferenced = True):
+						finalExport.append( sg.name )
 		if finalExport:
+			print finalExport
 			mc.select( finalExport, r = 1, ne = 1 )
 			mc.file( self.shaderPath.path, op = "v=0", typ = "mayaAscii", pr = 1, es = 1 )
 
 	#IMPORT
 	def importAll(self, imdata = True, imlights = True, imaovs = True, imshaders = True, immaster = True, asset = '', searchAndReplace = ['',''] ):
 		"""import all data into scene"""
+		if immaster:
+			self.importMasterSettings()
 		if imlights and self.lightPath.exists:
 			self.importLights( asset, searchAndReplace )
 		if imaovs and self.aovsPath.exists:
@@ -154,8 +163,6 @@ class RenderLayerExporter(object):
 			self.importShaders()
 		if imdata and self.dataPath.exists:
 			self.importData( asset, searchAndReplace )
-		if immaster:
-			self.importMasterSettings()
 
 	def importLights(self, asset = '', searchAndReplace = ['',''] ):
 		"""import lights in scene"""
@@ -217,7 +224,11 @@ class RenderLayerExporter(object):
 		master = rlayer.RenderLayer( 'defaultRenderLayer' )
 		master.makeCurrent()
 		for a in pickleData.keys():
-			a.v = pickleData[a]
+			print a.name, pickleData[a]
+			try:
+				a.v = pickleData[a]
+			except:
+				continue
 
 class RenderLayerData(rlayer.RenderLayer):
 	"""this is RenderLayerData object to handle the data from external files to create the render layer"""

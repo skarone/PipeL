@@ -117,7 +117,7 @@ class LighterHelperUI(base,fom):
 				self.ignoreSubdivision_chb,
 				self.ignoreBump_chb,        
 				self.ignoreMotionBlur_chb,  
-				self.ignoreMis_chb,         
+				#self.ignoreMis_chb,         
 				]
 		for c in chBoxes:
 			att = arnoldSettings.attr( str( c.objectName() ).replace( '_chb', '' ) )
@@ -185,7 +185,7 @@ class LighterHelperUI(base,fom):
 				self.ignoreSubdivision_chb,
 				self.ignoreBump_chb,        
 				self.ignoreMotionBlur_chb,  
-				self.ignoreMis_chb,         
+				#self.ignoreMis_chb,         
 				]
 		for c in chBoxes:
 			c.setChecked( arnoldSettings.attr( str( c.objectName() ).replace( '_chb', '' ) ).v )
@@ -489,7 +489,7 @@ class LighterHelperUI(base,fom):
 				self.ignoreSubdivision_chb,
 				self.ignoreBump_chb,        
 				self.ignoreMotionBlur_chb,  
-				self.ignoreMis_chb,         
+				#self.ignoreMis_chb,         
 				]
 		for c in chBoxes:
 			c.setChecked( state )
@@ -555,7 +555,6 @@ class LighterHelperUI(base,fom):
 		cam = ""
 		if ( "modelPanel" == mc.getPanel(to=pan) ):
 			cam = mc.modelEditor(pan,q=1,camera=1);
-			print cam
 			print mc.nodeType(cam)
 		if(cam == ""):
 			return None
@@ -571,8 +570,8 @@ class LighterHelperUI(base,fom):
 		rlExporter = rlExp.RenderLayerExporter( pathDir )
 		rlExporter.export(  self.renderLayersOpt_chb.isChecked(), 
 							self.lightsOpt_chb.isChecked(),
-							self.shadersOpt_chb.isChecked(),
 							self.aovsOpt_chb.isChecked(),
+							self.shadersOpt_chb.isChecked(),
 							self.masterSettings_chb.isChecked()
 							)
 

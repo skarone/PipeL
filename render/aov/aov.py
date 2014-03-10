@@ -19,7 +19,7 @@ def addAllAovs():
 		aovNode = mn.Node( 'aiAOV_' + ao )
 		if aovNode.exists:
 			continue
-		aovNodeName = inter.addAOV( ao )
+		aovNodeName = addAOV( ao )
 		aovNode.a.enabled.v = False #TURN IT OFF
 
 def create(  customAovName = '' ,name ='' , typ = '' , enabled = '' ):
@@ -39,3 +39,32 @@ def create(  customAovName = '' ,name ='' , typ = '' , enabled = '' ):
 	customAov.rename( customAovName )
 	return mn.Node( customAovName )
 
+def addAOV( aovName, aovType = None ):
+	"""docstring for addAov"""
+	if aovType is None:
+		aovType = aovs.getAOVTypeMap().get(aovName, 'rgba')
+	if not isinstance(aovType, int):
+		aovType = dict(aovs.TYPES)[aovType]
+	aovNode = pm.createNode('aiAOV', name='aiAOV_' + aovName, skipSelect=True)
+	out = aovNode.attr('outputs')[0]
+
+	pm.connectAttr('defaultArnoldDriver.message', out.driver)
+	filter = aovs.defaultFiltersByName.get(aovName, None)
+	if filter:
+		node = pm.createNode('aiAOVFilter', skipSelect=True)
+		node.aiTranslator.set(filter)
+		filterAttr = node.attr('message')
+		import mtoa.hooks as hooks
+		hooks.setupFilter(filter, aovName)
+	else:
+		filterAttr = 'defaultArnoldFilter.message'
+	pm.connectAttr(filterAttr, out.filter)
+
+	aovNode.attr('name').set(aovName)
+	aovNode.attr('type').set(aovType)
+	base = pm.PyNode('defaultArnoldRenderOptions')
+	aovAttr = base.aovs
+	nextPlug = aovAttr.elementByLogicalIndex(aovAttr.numElements())
+	aovNode.message.connect(nextPlug)
+	aov = aovs.SceneAOV(aovNode, nextPlug)
+	return aov

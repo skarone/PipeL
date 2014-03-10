@@ -70,7 +70,6 @@ class RenderLayer(mn.Node):
 				plg = [ a for a in tw.output if self.name in a.fullname ]
 				if plg:
 					plig = mn.NodeAttribute( self, plg[0].name.replace( '.plug', '.value' ) )
-					print plig.fullname, plig.v
 					tweaksDict[tw] = plig.v
 				else:
 					tweaksDict[tw] = tw.v
@@ -96,7 +95,6 @@ class RenderLayer(mn.Node):
 			if ( 'surfaceShader' in tw.name and isinstance( tweaksDict[tw], str )) or typ == 'message' : # CONNECTION
 				tw >> tweaksDict[ tw ]
 			else:
-				print tw.fullname,tweaksDict[tw]
 				tw.v = tweaksDict[tw]
 
 	@property
