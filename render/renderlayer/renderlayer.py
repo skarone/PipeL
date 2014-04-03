@@ -84,18 +84,21 @@ class RenderLayer(mn.Node):
 		for tw in tweaksDict.keys():
 			if 'initialShadingGroup' in tw.name: #FIX TEMPORAL
 				continue
-			if not tw.exists:
+			try:
+				if not tw.exists:
+					continue
+				tw.overrided = True
+				typ = tw.type
+				#check if the attribute has an input connection
+				inpt = tw.input
+				if inpt:
+					inpt // tw #disconnect
+				if ( 'surfaceShader' in tw.name and isinstance( tweaksDict[tw], str )) or typ == 'message' : # CONNECTION
+					tw >> tweaksDict[ tw ]
+				else:
+					tw.v = tweaksDict[tw]
+			except:
 				continue
-			tw.overrided = True
-			typ = tw.type
-			#check if the attribute has an input connection
-			inpt = tw.input
-			if inpt:
-				inpt // tw #disconnect
-			if ( 'surfaceShader' in tw.name and isinstance( tweaksDict[tw], str )) or typ == 'message' : # CONNECTION
-				tw >> tweaksDict[ tw ]
-			else:
-				tw.v = tweaksDict[tw]
 
 	@property
 	def overridedShader(self):
