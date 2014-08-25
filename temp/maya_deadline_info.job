@@ -1,0 +1,17 @@
+Plugin=MayaBatch
+Name=Vivere_Montana_Rusa_T07_v38 - Chuavechito_Beauty
+Comment=
+Pool=none
+MachineLimit=0
+Priority=50
+OnJobComplete=Nothing
+TaskTimeoutMinutes=0
+MinRenderTimeMinutes=0
+ConcurrentTasks=1
+Department=
+Group=maya_2013
+LimitGroups=
+JobDependencies=
+OutputFilename0=R:/Vivere_Montana_Rusa/T07/Vivere_Montana_Rusa_T07_v38/Chuavechito_Beauty/Chuavechito_Beauty.????.exr
+Frames=56-170
+ChunkSize=1

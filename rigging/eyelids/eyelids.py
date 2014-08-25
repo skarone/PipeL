@@ -15,14 +15,15 @@
 #create smart blink curves
 """
 import rigging.eyelids.eyelids as eyeLids
+import maya.cmds as mc
 reload( eyeLids ) 
-#TopVertex = mc.ls( sl = 1 , fl = True ) 
-#LowVertex = mc.ls( sl = 1 , fl = True ) 
+#TopVertex = mc.ls( fl = True, orderedSelection = True ) 
+#LowVertex = mc.ls( fl = True, orderedSelection = True ) 
 eyelids = eyeLids.EyeLidsRig( 
 topEyelidsVertexList = TopVertex, 
 lowEyelidsVertexList = LowVertex, 
-centerPivot = "cluster1Handle" , 
-mirror = False, 
+centerPivot = "l_ojo_0_jnt" , 
+mirror = True, 
 initialSide = 'L'
 )
 
@@ -39,12 +40,13 @@ reload( crv )
 
 class EyeLidsRig(object):
 	"""create an eyelids rig system"""
-	def __init__(self, topEyelidsVertexList, lowEyelidsVertexList, centerPivot, mirror = True, initialSide = 'L' ):
-		"""topEyelidsVertexList = array of verteces of the border of the upper eyelid
-		lowEyelidsVertexList = array of verteces of the border of the lower eyelid
-		centerPivot = center of the eye( it has to be a sphere )
-		mirror = mirror the system in the X axis
-		initialSide = The side that the system is initialy created"""
+	def __init__(self, topEyelidsVertexList = None, lowEyelidsVertexList = None, centerPivot = '', mirror = True, initialSide = 'L' ):
+		"""
+		:param topEyelidsVertexList: array of verteces of the border of the upper eyelid
+		:param lowEyelidsVertexList: array of verteces of the border of the lower eyelid
+		:param centerPivot: center of the eye( it has to be a sphere )
+		:param mirror: mirror the system in the X axis
+		:param initialSide: The side that the system is initialy created"""
 		self.topEyelidsVertexList = [ mc.xform( v, q = 1, ws = 1, t = 1 ) for v in topEyelidsVertexList ]
 		self.lowEyelidsVertexList = [ mc.xform( v, q = 1, ws = 1, t = 1 ) for v in lowEyelidsVertexList ]
 		self.centerPivot = centerPivot
@@ -67,22 +69,26 @@ class EyeLidsRig(object):
 	def createJoints(self):
 		"""create the joints of the system"""
 		grp = mn.Node( mc.group( n = self.initialSide + "_Eyelid_GRP", em = True ) )
-		locs = self._createBaseJoints( self.topEyelidsVertexList, self.initialSide + "_topEyelid", False, grp ) #TOP
-		curv, crvGrp = self.createCurves( self.topEyelidsVertexList, locs, self.initialSide + "_topEyelid" )
-		crvGrp.parent = grp
-		topControls, topGrp = self.createControls( curv, self.initialSide + "_topEyelid" )
-		topGrp.parent = grp
-		locs = self._createBaseJoints( self.lowEyelidsVertexList, self.initialSide + "_lowEyelid", True, grp ) #BOTTOM
-		curv,crvGrp = self.createCurves( self.lowEyelidsVertexList, locs, self.initialSide + "_lowEyelid" )
-		crvGrp.parent = grp
-		lowControls, lowGrp = self.createControls( curv, self.initialSide + "_lowEyelid" )
-		lowGrp.parent = grp
-		lowControls[0].parent = topControls[0]
-		lowControls[-1].parent = topControls[-1]
-		lowControls[0].a.v.v = 0
-		lowControls[0].a.v.locked = 1
-		lowControls[-1].a.v.v = 0
-		lowControls[-1].a.v.locked = 1
+		if self.topEyelidsVertexList:
+			locs = self._createBaseJoints( self.topEyelidsVertexList, self.initialSide + "_topEyelid", False, grp ) #TOP
+			curv, crvGrp = self.createCurves( self.topEyelidsVertexList, locs, self.initialSide + "_topEyelid" )
+			crvGrp.parent = grp
+			topControls, topGrp, clusGrp = self.createControls( curv, self.initialSide + "_topEyelid" )
+			clusGrp.parent = grp
+			topGrp.parent = grp
+		if self.lowEyelidsVertexList:
+			locs = self._createBaseJoints( self.lowEyelidsVertexList, self.initialSide + "_lowEyelid", True, grp ) #BOTTOM
+			curv,crvGrp = self.createCurves( self.lowEyelidsVertexList, locs, self.initialSide + "_lowEyelid" )
+			crvGrp.parent = grp
+			lowControls, lowGrp, clusGrp = self.createControls( curv, self.initialSide + "_lowEyelid" )
+			clusGrp.parent = grp
+			lowGrp.parent = grp
+			lowControls[0].parent = topControls[0]
+			lowControls[-1].parent = topControls[-1]
+			lowControls[0].a.v.v = 0
+			lowControls[0].a.v.locked = 1
+			lowControls[-1].a.v.v = 0
+			lowControls[-1].a.v.locked = 1
 
 	def _createBaseJoints(self, verteces, baseName, skipTips = False, baseGrp = None ):
 		"""create based joints with the verteces and name it all with baseName"""
@@ -118,7 +124,7 @@ class EyeLidsRig(object):
 		grp = mn.Node( mc.group( n = baseName + '_CRV_GRP', em = True ) )
 		tmp = mn.Node( mc.curve( n = baseName + "High" + '_CRV', d = 1, p = verteces, k = [ i for i in range( len( verteces ) ) ] ) )
 		tmp.name = baseName + "High" + '_CRV'
-		highCurve = crv.Curve( tmp.shape.name )
+		highCurve = crv.Curve( tmp.shape.name.split( '|' )[-1] )
 		highCurve.parent = grp
 		#attach locs to curve
 		for l in locs:
@@ -139,6 +145,7 @@ class EyeLidsRig(object):
 	def createControls(self, curv, baseName ):
 		"""create the controls for the eyelids"""
 		grp = mn.Node( mc.group( n = baseName + '_CTL_GRP', em = True ) )
+		cluGrp = mn.Node( mc.group( n = baseName + '_CLU_GRP', em = True ) )
 		controls = []
 		for i,cvPos in enumerate( curv.cvsPosition ):
 			clus = mn.Node( mc.cluster( curv.name + '.cv[ %i'%i + ' ]', n = curv.name.replace( '_CRV', '_CLU' ) )[1] )
@@ -147,12 +154,15 @@ class EyeLidsRig(object):
 			control.a.t.v = cvPos
 			control.a.s.v = [self.SCALE/20.0]*3
 			mc.makeIdentity( control.name, apply = True, t = 1, r = 1, s = 1, n = 2 )
-			clus.parent = control
+			control.a.t >> clus.a.t
+			control.a.r >> clus.a.r
+			control.a.s >> clus.a.s
+			clus.parent = cluGrp
 			clus.a.v.v = 0
 			clus.a.v.locked = True
 			control.parent = grp
 			controls.append( control )
-		return controls, grp
+		return controls, grp, cluGrp
 
 	def negativeXPoint(self, pnt):
 		"""docstring for negativeXPoint"""

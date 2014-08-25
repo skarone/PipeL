@@ -24,7 +24,11 @@ Description:
 		11-Export World Coordinates( FINAL POSITION ) for the asset
 '''
 
-from PyQt4 import QtGui, QtCore, uic
+import general.ui.pySideHelper as uiH
+reload( uiH )
+uiH.set_qt_bindings()
+from Qt import QtGui,QtCore
+
 import pipe.project.project as prj
 reload( prj)
 import os
@@ -32,8 +36,6 @@ import modeling.exporter.exporter as ex
 reload( ex)
 import pipe.asset.asset as ass
 reload( ass)
-import maya.OpenMayaUI as mui
-import sip
 
 try:
 	import maya.cmds as mc
@@ -43,17 +45,15 @@ except:
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 uifile    = PYFILEDIR + '/exporter.ui'
-fom, base = uic.loadUiType( uifile )
-
-def get_maya_main_window( ):
-	ptr = mui.MQtUtil.mainWindow( )
-	main_win = sip.wrapinstance( long( ptr ), QtCore.QObject )
-	return main_win
+fom, base = uiH.loadUiType( uifile )
 
 
 class ExporterUI(base, fom):
-	def __init__(self, parent  = get_maya_main_window(), *args ):
-		super(base,self).__init__( parent )
+	def __init__(self, parent  = uiH.getMayaWindow(), *args ):
+		if uiH.USEPYQT:
+			super(base, self).__init__(parent)
+		else:
+			super(ExporterUI, self).__init__(parent)
 		self.setupUi(self)
 		self._projectData()
 		self._fillData()

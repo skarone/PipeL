@@ -36,7 +36,7 @@ class Sequence(object):
 	@property
 	def path(self):
 		"""return the path of the sequence"""
-		return self.project.path + '/Sequences/' + self.name
+		return self.project.sequencesPath + self.name
 
 	def create(self):
 		"""create folders structure for sequence"""
@@ -64,4 +64,6 @@ class Sequence(object):
 	@property
 	def shots(self):
 		"""return the shots in the sequence"""
-		return [ sht.Shot( a, self ) for a in os.listdir( self.path + '/Shots/' ) ]
+		if os.path.exists(self.path + '/Shots/'):
+			return [ sht.Shot( a, self ) for a in sorted(os.listdir( self.path + '/Shots/' )) if os.path.isdir( self.path + '/Shots/' + a ) ]
+		return []

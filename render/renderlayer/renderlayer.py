@@ -38,6 +38,14 @@ class RenderLayer(mn.Node):
 		except:
 			return []
 
+	@property
+	def lights(self):
+		"""return the lights in the render layer"""
+		if self.objects:
+			lits = mn.ls( self.objects, typ=['light','aiAreaLight','aiSkyDomeLight','aiVolumeScattering','aiSky'], l=1, dag = True )
+			return lits
+		return None
+
 	def add( self, objs ):
 		"""add objects to the render layer"""
 		for o in objs:
@@ -57,23 +65,29 @@ class RenderLayer(mn.Node):
 	@property
 	def overridesWithValues(self):
 		"""return a dictionary with overrided attributes and their new values"""
-		objsWithOverNoConnInLay = self.a.adjustments.output
-		tweaksDict = {}
-		if not objsWithOverNoConnInLay:
-			return {}
-		for tw in objsWithOverNoConnInLay:
-			if tw.type =='message':
-				cons =  tw.output
-				if cons:
-					tweaksDict[tw] = cons[0].name
-			else:
-				plg = [ a for a in tw.output if self.name in a.fullname ]
-				if plg:
-					plig = mn.NodeAttribute( self, plg[0].name.replace( '.plug', '.value' ) )
-					tweaksDict[tw] = plig.v
-				else:
-					tweaksDict[tw] = tw.v
-		return tweaksDict
+		inpSize = self.a.adjustments.size
+		tweaks = {}
+		for i in range(inpSize):
+			plg = self.attr( 'adjustments[' +str(i) + '].plug' ).input
+			valAttr = self.attr( 'adjustments[' +str(i) + '].value' )
+			if plg:
+				if valAttr.input: #THere is a connection to the value to override
+					tweaks[ plg ] = valAttr.input
+				else: #Store plug and new value
+					if plg.children:
+						count = 0
+						for p in plg.children:
+							if 'Angle' in p.type:
+								tweaks[ p ] = valAttr.v[0][ count ]/0.0174532925 #deg to rad
+							else:
+								tweaks[ p ] = valAttr.v[0][ count ]
+							count += 1
+					else:
+						if 'Angle' in plg.type:
+							tweaks[ plg ] = valAttr.v/0.0174532925 #deg to rad
+						else:
+							tweaks[ plg ] = valAttr.v
+		return tweaks
 
 	@overridesWithValues.setter
 	def overridesWithValues(self, tweaksDict):
@@ -82,37 +96,32 @@ class RenderLayer(mn.Node):
 			return
 		self.makeCurrent()
 		for tw in tweaksDict.keys():
-			if 'initialShadingGroup' in tw.name: #FIX TEMPORAL
+			if not tw.exists:
 				continue
-			try:
-				if not tw.exists:
-					continue
-				tw.overrided = True
-				typ = tw.type
-				#check if the attribute has an input connection
-				inpt = tw.input
-				if inpt:
-					inpt // tw #disconnect
-				if ( 'surfaceShader' in tw.name and isinstance( tweaksDict[tw], str )) or typ == 'message' : # CONNECTION
-					tw >> tweaksDict[ tw ]
-				else:
-					tw.v = tweaksDict[tw]
-			except:
-				continue
+			tw.overrided = True
+			if str( type( tweaksDict[tw] )) ==  "<class 'general.mayaNode.mayaNode.NodeAttribute'>" :
+				if tweaksDict[tw].exists:
+					tweaksDict[tw] >> tw
+			else:
+				tw.v = tweaksDict[tw]
 
 	@property
 	def overridedShader(self):
 		"""return the shader overrided"""
 		shGrp = self.a.shadingGroupOverride.input
 		if shGrp:
-			shader = shGrp.node.a.surfaceShader.input.node
-			return shader
+			try:
+				shader = shGrp.node
+				return shader
+			except:
+				return None
 		else:
 			return None
 
 	@overridedShader.setter
 	def overridedShader(self, shader):
 		"""assign a shader for the layer to override all the shaders"""
+		#shader.a.message >> self.a.shadingGroupOverride
 		mm.eval( 'hookShaderOverride("' + self.name + '", "", "' + shader.name + '");' )
 
 	def removeOverridedShader(self):
@@ -122,23 +131,17 @@ class RenderLayer(mn.Node):
 	@property
 	def overridesWithConnections(self):
 		"""return a dictionary with the overrided attributes and their new connections, and also what shaders to export"""
-		conns = self.a.outAdjustments.output
-		if conns:
-			nds = conns.nodes
-		else:
-			return None, None
-		objsWithOverWithConnInLay = nds
-		connectDict = {}
+		inpSize = self.a.outAdjustments.size
+		tweaks = {}
 		shadersToExport = []
-		for cv in range( 0, len( objsWithOverWithConnInLay ), 2 ):
-			if objsWithOverWithConnInLay[cv + 1].type == 'shadingEngine':
-				connectDict[objsWithOverWithConnInLay[cv]] = objsWithOverWithConnInLay[cv+1]
-				shadersToExport.append( objsWithOverWithConnInLay[cv+1] )	#HERE WE KNOW WHAT SHADERS WE NEED TO EXPORT =)
-			elif objsWithOverWithConnInLay[cv].type == 'shadingEngine':
-				connectDict[objsWithOverWithConnInLay[cv+1]] = objsWithOverWithConnInLay[cv]
-				shadersToExport.append( objsWithOverWithConnInLay[cv] )		#HERE WE KNOW WHAT SHADERS WE NEED TO EXPORT =)
-		shadersToExport = list(set(shadersToExport))
-		return connectDict, shadersToExport
+		for i in range(inpSize):
+			plg = self.attr( 'outAdjustments[' +str(i) + '].outPlug' ).input
+			valAttr = self.attr( 'outAdjustments[' +str(i) + '].outValue' ).output
+			if plg:
+				if valAttr:
+					tweaks[ plg.node ] = valAttr[0].node
+					shadersToExport.append( valAttr[0].node ) 
+		return tweaks, shadersToExport
 
 	@overridesWithConnections.setter
 	def overridesWithConnections(self, connectDict):
@@ -147,10 +150,12 @@ class RenderLayer(mn.Node):
 			return
 		self.makeCurrent()
 		for c in connectDict.keys():
+			if isinstance( c, unicode ):
+				continue
 			if not c.exists:
 				continue
-			c()
 			if connectDict[c].exists:
+				c()
 				mc.hyperShade( a = connectDict[c] )
 
 

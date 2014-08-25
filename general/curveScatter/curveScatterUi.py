@@ -1,9 +1,11 @@
 import os
-from PyQt4 import QtGui,QtCore, uic
+import general.ui.pySideHelper as uiH
+reload( uiH )
+uiH.set_qt_bindings()
+from Qt import QtGui,QtCore
+
 import maya.cmds as mc
 import general.mayaNode.mayaNode as mn
-import maya.OpenMayaUI as mui
-import sip
 import maya.mel as mm
 
 import general.curveScatter.curveScatter as crvScat
@@ -19,17 +21,15 @@ crvScatterUi.main()
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
 uifile = PYFILEDIR + '/curveScatter.ui'
-fom, base = uic.loadUiType( uifile )
-
-def get_maya_main_window( ):
-	ptr = mui.MQtUtil.mainWindow( )
-	main_win = sip.wrapinstance( long( ptr ), QtCore.QObject )
-	return main_win
+fom, base = uiH.loadUiType( uifile )
 
 class CurveScatterUI(base, fom):
 	"""docstring for ProjectCreator"""
-	def __init__(self, parent  = get_maya_main_window(), *args ):
-		super(base, self).__init__(parent)
+	def __init__(self, parent  = uiH.getMayaWindow(), *args ):
+		if uiH.USEPYQT:
+			super(base, self).__init__(parent)
+		else:
+			super(CurveScatterUI, self).__init__(parent)
 		self.setupUi(self)
 		self.connect(self.curveIn_btn, QtCore.SIGNAL("clicked()"), self.fillCurveLE)
 		self.connect(self.addObject_btn, QtCore.SIGNAL("clicked()"), self.addObject)
@@ -37,6 +37,7 @@ class CurveScatterUI(base, fom):
 		self.connect(self.cleanList_btn, QtCore.SIGNAL("clicked()"), self.cleanList)
 		self.connect(self.createScatter_btn, QtCore.SIGNAL("clicked()"), self.createScatter)
 		self.setObjectName( 'curveScatter_WIN' )
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def fillCurveLE(self):
 		"""fill line edit with curve name"""
@@ -67,6 +68,7 @@ class CurveScatterUI(base, fom):
 		keepConn = self.keepConnected_chb.isChecked()
 		tangent = self.tangent_chb.isChecked()
 		groupIt = self.groupIt_chb.isChecked()
+		animated = self.animated_chb.isChecked()
 		objs = []
 		for index in xrange(self.objects_lw.count()):
 			objs.append( mn.Node( str ( self.objects_lw.item(index).text() ) ) )
@@ -78,7 +80,8 @@ class CurveScatterUI(base, fom):
 				keepConnected = keepConn,
 				tangent = tangent,
 				rand = random,
-				groupit = groupIt)
+				groupit = groupIt,
+				animated = animated)
 		
 
 class Window(QtGui.QMainWindow):

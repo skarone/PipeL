@@ -1,5 +1,9 @@
 import os
-from PyQt4 import QtGui,QtCore, uic
+import general.ui.pySideHelper as uiH
+reload( uiH )
+uiH.set_qt_bindings()
+from Qt import QtGui,QtCore
+
 import pipe.project.project   as prj
 import pipe.sequence.sequence as seq
 import pipe.shot.shot as sh
@@ -8,12 +12,15 @@ reload( prj )
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
 uifile = PYFILEDIR + '/shot.ui'
-fom, base = uic.loadUiType( uifile )
+fom, base = uiH.loadUiType( uifile )
 
 class ShotCreator(base, fom):
 	"""docstring for ProjectCreator"""
 	def __init__(self, currentProj, currentSeq ):
-		super(base, self).__init__()
+		if uiH.USEPYQT:
+			super(base, self).__init__()
+		else:
+			super(ShotCreator, self).__init__()
 		self.setupUi(self)
 		self._curProj = currentProj
 		self._curSeq  = currentSeq

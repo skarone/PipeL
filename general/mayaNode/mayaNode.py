@@ -1,7 +1,9 @@
 '''
 File: mayaNodes.py
 Author: Ignacio Urruty
-Description: Handle maya nodes in a more easy way..
+Description: 
+	Handle maya nodes, their attributes and namespaces with this module.
+	Also has some maya functions that return mayaNode objects instead of strings
 
 How to Use:
 Global Methods:
@@ -122,11 +124,46 @@ FORCE_CONNECTION         = True  # automatically break connection if there is on
 AUTO_UNLOCK_ATTR         = False # automatically unlock attribute for connections or for setting value
 AUTO_OVERRIDE_ATTR       = False # automatically override attribute if you set it in a renderLayer different than default
 
-def ls( strToSearch = None, **args ):
-	"""return a list of Nodes"""
+def listHistory( strToSearch = None, **args ):
+	"""same as listHistory but with Nodes
+	
+	:param strToSearch: string or mayaNode object to use in list History.. if None use selection
+	:param **args: extra arguments the same as original command
+	:returns: Nodes object( array of mayaNodes  )"""
 	cmd = ''
 	if strToSearch:
-		cmd += '"' + strToSearch + '",'
+		if str(strToSearch.__class__) == "<class 'general.mayaNode.mayaNode.Nodes'>":
+			cmd += '['
+			for n in strToSearch:
+				cmd += '"' + n.name + '",'
+			cmd += '],'
+		else:
+			cmd += '"' + str( strToSearch ) + '",'
+	for a in args.keys():
+		val = args[a]
+		if isinstance(val, str):
+			cmd += a + '="' + args[a] + '",'
+		else:
+			cmd += a + '=' + str( args[a] ) + ','
+	nodes = eval( "mc.listHistory(" + cmd + ")" )
+	if nodes:
+		return Nodes( nodes )
+
+def ls( strToSearch = None, **args ):
+	"""return a list of Nodes
+	
+	:param strToSearch: string or mayaNode to filter list
+	:param **args: extra arguments the same as original command
+	:returns: Nodes object( array of mayaNodes  )"""
+	cmd = ''
+	if strToSearch:
+		if str(strToSearch.__class__) == "<class 'general.mayaNode.mayaNode.Nodes'>":
+			cmd += '['
+			for n in strToSearch:
+				cmd += '"' + n.name + '",'
+			cmd += '],'
+		else:
+			cmd += '"' + str( strToSearch ) + '",'
 	for a in args.keys():
 		val = args[a]
 		if isinstance(val, str):
@@ -138,7 +175,11 @@ def ls( strToSearch = None, **args ):
 		return Nodes( nodes )
 
 def listRelatives( strToSearch = None, **args ):
-	"""Node version of list relatives maya command"""
+	"""Node version of list relatives maya command
+
+	:param strToSearch: string or mayaNode object to use in list Relatives.. if None use selection
+	:param **args: extra arguments the same as original command
+	:returns: Nodes object( array of mayaNodes  )"""
 	cmd = ''
 	if strToSearch:
 		cmd += '"' + strToSearch + '",'
@@ -153,7 +194,12 @@ def listRelatives( strToSearch = None, **args ):
 		return Nodes( nodes )
 
 def createNode( typeOfNode, **args ):
-	"""mayaNode version of create node"""
+	"""mayaNode version of create node
+	
+	:param typeOfNode: string type of maya node to create
+	:param **args: extra arguments the same as original command
+	:returns: mayaNode object
+	"""
 	cmd = ''
 	if typeOfNode:
 		cmd += '"' + typeOfNode + '",'
@@ -172,7 +218,7 @@ def createNode( typeOfNode, **args ):
 # NODES CLASS
 
 class Nodes(list):
-	"""return array of nodes"""
+	"""return array of mayaNode objects"""
 	def __init__(self, nodesList):
 		nods = []
 		if not isinstance( nodesList[0], Node ):
@@ -183,7 +229,7 @@ class Nodes(list):
 
 	@property
 	def nodes(self):
-		"""return the nodes in the array"""
+		""":returns: array of mayaNode objects"""
 		try:
 			return [ n for n in self ]
 		except:
@@ -191,7 +237,7 @@ class Nodes(list):
 
 	@property
 	def names(self):
-		"""return the name of the nodes"""
+		""":returns: array of mayaNode names (string)"""
 		try:
 			return [ n.name for n in self ]
 		except:
@@ -205,6 +251,11 @@ class Nodes(list):
 	def select(self):
 		"""select all the nodes"""
 		mc.select( self.names )
+
+	def parent(self, newParent):
+		"""parent all nodes to transform"""
+		for n in self.nodes:
+			n.parent = newParent
 
 ##################################################
 # NODE CLASS
@@ -228,7 +279,7 @@ class Node(object):
 
 	@property
 	def name(self):
-		"""return name of node"""
+		""":returns: name of node"""
 		return self._name
 
 	@name.setter
@@ -240,14 +291,14 @@ class Node(object):
 
 	@property
 	def fullname(self):
-		"""return the FullName of the node, if not exists return False"""
+		""":returns: the FullName of the node, if not exists return False"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		return mc.ls( '*' + self._name, l = True )[0]
 
 	@property
 	def parent(self):
-		"""return the parent of the node"""
+		""":returns: the parent of the node"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		p = mc.listRelatives( self._name, p = True )
@@ -258,7 +309,8 @@ class Node(object):
 
 	@parent.setter
 	def parent(self, newParent):
-		"""set a new parent for node, supports string and Node, if newParent = None, set to world"""
+		"""set a new parent for node, supports string and Node, if newParent = None, set to world
+		:param newParent: mayaNode to set for parent for this node"""
 		if not self.exists:
 			raise NodeNotFound( self.name )
 		if not newParent:
@@ -272,7 +324,7 @@ class Node(object):
 
 	@property
 	def allparents(self):
-		"""return all parents of the node... recursive"""
+		""":returns: all parents of the node... recursive"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		p = self.parent
@@ -284,14 +336,14 @@ class Node(object):
 				nods.extend( newNodes )
 		else:
 			return None
-		return nods
+		return Nodes( nods )
 
 	@property
 	def children(self):
-		"""return children of the node"""
+		""":returns: children of the node"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
-		c = mc.listRelatives( self._name, c = True )
+		c = mc.listRelatives( self._name, c = True, f = True )
 		if c:
 			return [ Node( a ) for a in c ] #check how to handle arrays of nodes
 		else:
@@ -299,7 +351,7 @@ class Node(object):
 
 	@property
 	def allchildren(self):
-		"""return all the children in recursive"""
+		""":returns: all the children in recursive"""
 		child = self.children
 		for c in child:
 			child.extend( c.allchildren )
@@ -307,32 +359,32 @@ class Node(object):
 
 	@property
 	def exists(self):
-		"""check if the node really exists"""
+		""":returns: True or False, check if the node really exists"""
 		return mc.objExists( self._name )
 
 	@property
 	def type(self):
-		"""return Node Type"""
+		""":return: Node Type"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		return mc.objectType( self.name )
 
 	def istype(self, typ ):
-		"""check if the node is a specific type"""
+		""":returns: True of False, if the node is a specific type"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		return mc.objectType( self.name, isType = typ )
 
 	@property
 	def a(self):
-		"""Return attribute object to work with =)"""
+		""":returns: attribute object to work with =)"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		return NodeAttributeCollection( self )
 
 	@property
 	def namespace(self):
-		"""return namespace of node"""
+		""":returns: namespace of node"""
 		return Namespace.fromNode( self )
 
 	@namespace.setter
@@ -352,18 +404,19 @@ class Node(object):
 			self.name = oldName.replace( self.namespace.name[1:], newNamespace.name[1:] )
 
 	def attr(self, attribute):
+		""":returns: attribute object to work with =)"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		return NodeAttribute(self, attribute)
 
 	@property
 	def worldPosition(self):
-		"""return the world position if it is a transform node"""
+		""":return: 3 float, the world position if it is a transform node"""
 		return mc.xform( self.name, q = True, ws = True, rp = True )
 
 	@property
 	def locked(self):
-		"""lock Node"""
+		""":returns: True or False, lock state of the Node"""
 		if not self.exists:
 			raise NodeNotFound( self.name )
 		return mc.lockNode( self.name, q = True, l = True )[0]
@@ -376,7 +429,7 @@ class Node(object):
 		mc.lockNode( self.name, l = state )
 
 	def duplicate(self, newName = None):
-		"""duplicate node"""
+		""":returns: new duplicated node"""
 		if not self.exists:
 			raise NodeNotFound( self.name )
 		if newName:
@@ -392,7 +445,7 @@ class Node(object):
 		mc.delete( self.name )
 
 	def listAttr(self, **args):
-		"""list the attributes of the node"""
+		""":returns: list the attributes of the node"""
 		cmd = ''
 		for a in args.keys():
 			val = args[a]
@@ -406,8 +459,8 @@ class Node(object):
 
 	@property
 	def shape(self):
-		"""return the shape of the node if there is one"""
-		sha = listRelatives( self.name, s = True, ni = True )
+		""":returns: the shape of the node if there is one"""
+		sha = listRelatives( self.name, s = True, ni = True, f = True )
 		if sha:
 			return sha[0]
 		return None
@@ -520,7 +573,7 @@ class NodeAttribute(object):
 		children = mc.attributeQuery( tmpAttr, node = self._node.name, lc = True )
 		if children:
 			return [ NodeAttribute(self._node, self._attribute + '.' + a) for a in children ]
-		return None
+		return []
 
 	@property
 	def type(self):
@@ -534,7 +587,10 @@ class NodeAttribute(object):
 		"""attribute exists? """
 		tmpAttr = re.sub( '\[\d+\]$', '' , self._attribute )
 		tmpAttr = tmpAttr[tmpAttr.rfind( '.' )+1:]
-		return mc.attributeQuery( tmpAttr, node=self._node.name, ex=True)
+		if self._node.exists:
+			return mc.attributeQuery( tmpAttr, node=self._node.name, ex=True)
+		else:
+			return False
 
 	@property
 	def locked(self):
@@ -603,7 +659,7 @@ class NodeAttribute(object):
 		"""get input connection if there is one, None if not"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
-		con = mc.listConnections( self.fullname, p = True, d = False )
+		con = mc.listConnections( self.fullname, p = True, d = False, skipConversionNodes = True )
 		if con:
 			condata = con[0].split( '.', 1 )
 			return NodeAttribute( Node( condata[0] ), condata[1] )
@@ -614,7 +670,7 @@ class NodeAttribute(object):
 		"""get output connections if there is one, None if not, this return an array"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
-		con = mc.listConnections( self.fullname, p = True, s = True )
+		con = mc.listConnections( self.fullname, p = True, s = True, skipConversionNodes = True )
 		if con:
 			con = NodesAttributes( [ NodeAttribute( Node( a[:a.index('.')] ), a[a.index('.')+1:] ) for a in con ] )
 			return con
@@ -715,6 +771,10 @@ class NodeAttribute(object):
 					cmd += a + '=' + str( args[a] ) + ','
 		eval( "mc.addAttr( '"+ self._node.name + "', longName = '" + self._attribute + "'," + cmd + ")" )
 
+	def alias(self, newName):
+		"""alias the current attribute with a new name"""
+		mc.aliasAttr( newName, self.fullname )
+
 
 ##################################################
 # ATTRIBUTES COLLECTION CLASS
@@ -795,15 +855,25 @@ class Namespace(object):
 		return None
 
 	@property
+	def firstParent(self):
+		"""return the first namespace of current namespace"""
+		nspace = self.parent
+		if not self.parent.name == ':':
+			nspace = nspace.firstParent
+		else:
+			nspace = self
+		return nspace
+
+	@property
 	def parent(self):
 		"""return the parent of the current namespace"""
 		if not self.exists:
 			raise NamespaceNotFound( self.name )
-		p = namespace.rindex(':')
+		p = self.name.rindex(':')
 		if p == 0:
-			return ':'
+			return Namespace( ':' )
 		else:
-			return namespace[ :p ]
+			return Namespace( self.name[ :p ] )
 
 	@property
 	def empty(self):

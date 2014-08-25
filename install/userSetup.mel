@@ -1,1 +1,1 @@
-python( "import install.pipelMenu as pM; reload( pM );print 'Pipel Loaded'" );
+python( "import install.pipelMenu as pM;print 'Pipel Loaded'" );

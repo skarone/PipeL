@@ -1,0 +1,25 @@
+pipel
+=====
+
+INTRODUCTION
+------------
+`pipel` is a set of tools for a 3d production.
+
+INSTALLATION
+------------
+1- Open powerShell and copy paste this:
+	set-executionpolicy remotesigned
+
+2- Answer YES to question
+
+4- Drag and Drop installPipe.ps1 and hit ENTER... thats all!
+
+INTERNAL INSTALL
+----------------
+1- Download and install Python 2.7.3
+2- Install libraries: 
+	2.a- easy_install httplib2
+	2.b- easy_install mechanize
+	2.c- easy_install poster
+3- Install API box
+

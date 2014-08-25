@@ -1,9 +1,11 @@
 import os
-from PyQt4 import QtGui,QtCore, uic
+import general.ui.pySideHelper as uiH
+reload( uiH )
+uiH.set_qt_bindings()
+from Qt import QtGui,QtCore
+
 import maya.cmds as mc
 import general.mayaNode.mayaNode as mn
-import maya.OpenMayaUI as mui
-import sip
 
 
 """
@@ -15,18 +17,16 @@ maUI.main()
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
 uifile = PYFILEDIR + '/multiAttribute.ui'
-fom, base = uic.loadUiType( uifile )
-
-def get_maya_main_window( ):
-	ptr = mui.MQtUtil.mainWindow( )
-	main_win = sip.wrapinstance( long( ptr ), QtCore.QObject )
-	return main_win
+fom, base = uiH.loadUiType( uifile )
 
 
 class MultiAttributeUI(base, fom):
 	"""docstring for ProjectCreator"""
-	def __init__(self, parent  = get_maya_main_window(), *args ):
-		super(base, self).__init__(parent)
+	def __init__(self, parent  = uiH.getMayaWindow(), *args ):
+		if uiH.USEPYQT:
+			super(base, self).__init__(parent)
+		else:
+			super(MultiAttributeUI, self).__init__(parent)
 		self.setupUi(self)
 		self.connect(self.select_btn, QtCore.SIGNAL("clicked()"), self.select)
 		self.connect(self.lock_btn, QtCore.SIGNAL("clicked()"), self.lock)
@@ -36,6 +36,7 @@ class MultiAttributeUI(base, fom):
 		self.fillByTypeCMB()
 		self.attribute_le.setFocus()
 		self.setObjectName( 'multiAttr_WIN' )
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def fillByTypeCMB(self):
 		"""fill combo box with types"""
@@ -87,7 +88,6 @@ class MultiAttributeUI(base, fom):
 		attr = str( self.attribute_le.text() )
 		for o in self._getObjects():
 			o.attr( attr ).locked = False
-		
 		
 
 class Window(QtGui.QMainWindow):

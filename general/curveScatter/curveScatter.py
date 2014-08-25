@@ -25,7 +25,7 @@ import maya.cmds as mc
 
 class CurveScatter(object):
 	"""main class to handle scatter"""
-	def __init__(self, curve, objects, pointsCount, useTips = False, keepConnected = True, tangent = False,rand = False, groupit = False  ):
+	def __init__(self, curve, objects, pointsCount, useTips = False, keepConnected = True, tangent = False,rand = False, groupit = False, animated = False  ):
 		"""creates objects allong curve,
 		curve: Curve Class object that handles the curve
 		objects: Array of one o more transforms objects to position allong curve
@@ -33,7 +33,8 @@ class CurveScatter(object):
 		useTips: is to position objects in the curve
 		keepConnected: Keep pointOnCurveInfo connected between transform and curve
 		tangent: Manage rotation on objects also
-		rand: Place the objects in random order"""
+		rand: Place the objects in random order
+		animated: Add speed attribute to move objects along curve"""
 		self._nodes = []
 		self._curve    = curve
 		if useTips:
@@ -46,6 +47,8 @@ class CurveScatter(object):
 		grp = mn.Node( curve.name + '_grp' )
 		if groupit:
 			grp = mn.Node( mc.group( n = grp.name, em = True ) )
+			if animated:
+				grp.a.laps.add( k = True )
 		with undo.Undo():
 			for p in range( pointsCount ):
 				#place transform in param point
@@ -59,7 +62,7 @@ class CurveScatter(object):
 				self._nodes.append( obj )
 				if groupit:
 					obj.parent = grp
-				pcurveNode = mn.Node( mc.pathAnimation( obj.name, su=0.5,  c=curve.name, fm = True, follow=tangent ) )
+				pcurveNode = mn.Node( mc.pathAnimation( obj.name, su=0.5,  c=curve.name, fm = True, follow=tangent, followAxis = 'z', upAxis = 'y', worldUpType = 'object', worldUpObject = curve.parent.name ) )
 				animCurve = pcurveNode.a.uValue.input.node
 				animCurve.delete()
 				if keepConnected:
@@ -79,6 +82,9 @@ class CurveScatter(object):
 					obj.a.r.v = r[0]
 				if useTips:
 					param += startParam
+				if animated:
+					cmd = obj.a.parameter.fullname + ' = ( abs( ' + str( obj.a.parameter.v ) + ' + ' + grp.a.laps.fullname + ' ) ) % 1;'
+					mc.expression( s=cmd )
 
 	@property
 	def nodes(self):

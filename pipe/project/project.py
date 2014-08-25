@@ -25,6 +25,8 @@ for a in dog.assets:
 
 """
 
+import sqlite3 as lite
+import sys
 import os
 import pipe.asset.asset       as ass
 reload( ass )
@@ -32,12 +34,33 @@ import pipe.sets.sets         as sets
 reload( sets )
 import pipe.sequence.sequence as seq
 reload( seq )
+import pipe.shot.shot as sh
+reload( sh )
 
-BASE_PATH = 'D:/Projects/'
+BASE_PATH = 'P:/'
+USE_MAYA_SUBFOLDER = False
+
+def shotOrAssetFromFile(mayaFile):
+	"""return from maya File if there is an asset, a shot or what"""
+	split = mayaFile.path.split( '/' )
+	if 'Assets' in mayaFile.path:
+		#P:\Sprite_Gallo\Maya\Assets\Gallo\Gallo_Final.ma
+		area = split[-1].split( '.' )[0][ split[-1].rindex( '_' ):]
+		index = [ass.AREAS.index(i) for i in ass.AREAS if i in area]
+		return ass.Asset( split[4], Project(split[1]), index[0] )
+	elif 'Shots' in mayaFile.path:
+		#P:\Sprite_Gallo\Maya\Sequences\Entrevista\Shots\s001_T01\Anim\s001_T01_ANIM.ma
+		area = split[7]
+		index = [sh.AREAS.index(i) for i in sh.AREAS if i in area]
+		return sh.Shot( split[6], seq.Sequence( split[4], Project( split[1] ) ), index[0] )
+	else:
+		return None
 
 def projects():
 	"""return all the projects in the BASE_PATH"""
-	return [ a for a in os.listdir( BASE_PATH ) if os.path.isdir( BASE_PATH + a )]
+	if os.path.exists( BASE_PATH ):
+		return sorted([ a for a in os.listdir( BASE_PATH ) if os.path.isdir( BASE_PATH + '/' + a )])
+	return []
 
 class Project(object):
 	"""project class"""
@@ -52,7 +75,25 @@ class Project(object):
 	@property
 	def path(self):
 		"""return the path of the Project"""
-		return BASE_PATH + self.name
+		if USE_MAYA_SUBFOLDER:
+			return BASE_PATH + '/' + self.name + '/Maya'
+		else:
+			return BASE_PATH + '/' + self.name
+
+	@property
+	def assetsPath(self):
+		"""return the assets base path"""
+		return self.path + '/Assets/'
+
+	@property
+	def sequencesPath(self):
+		"""return the sequences base path"""
+		return self.path + '/Sequences/'
+
+	@property
+	def setsPath(self):
+		"""return the sets base path"""
+		return self.path + '/Sets/'
 
 	@property
 	def exists(self):
@@ -62,24 +103,24 @@ class Project(object):
 	@property
 	def assets(self):
 		"""return the assets in the project"""
-		if os.path.exists( self.path + '/Assets/' ):
-			return [ ass.Asset( a, self ) for a in os.listdir( self.path + '/Assets/' ) ]
+		if os.path.exists( self.assetsPath ):
+			return [ ass.Asset( a, self ) for a in sorted(os.listdir( self.assetsPath )) if os.path.isdir( self.assetsPath + '/' + a ) ]
 		else:
 			return []
 
 	@property
 	def sets(self):
 		"""return the sets in the project"""
-		if os.path.exists( self.path + '/Assets/' ):
-			return [ sets.Set( s, self ) for s in os.listdir( self.path + '/Sets/' ) ]
+		if os.path.exists( self.setsPath ):
+			return [ sets.Set( s, self ) for s in sorted(os.listdir( self.setsPath )) ]
 		else:
 			return []
 
 	@property
 	def sequences(self):
 		"""return the sequences in the project"""
-		if os.path.exists( self.path + '/Assets/' ):
-			return [ seq.Sequence( s, self ) for s in os.listdir( self.path + '/Sequences/' ) ]
+		if os.path.exists( self.sequencesPath ):
+			return [ seq.Sequence( s, self ) for s in sorted(os.listdir( self.sequencesPath )) if os.path.isdir( self.sequencesPath + s )  ]
 		else:
 			return []
 
@@ -116,4 +157,13 @@ class Project(object):
 			sq.create()
 		return sq
 
+	@property
+	def databasePath(self):
+		"""return the database path"""
+		return self.path + '/' + self.name + '.db'
+
+	@property
+	def database(self):
+		"""return the database to work with"""
+		return lite.connect( self.databasePath )
 

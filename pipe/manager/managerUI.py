@@ -1,32 +1,67 @@
 import os
-from PyQt4 import QtGui,QtCore, uic
+
+import general.ui.pySideHelper as uiH
+reload( uiH )
+uiH.set_qt_bindings()
+from Qt import QtGui,QtCore
+
+import subprocess
+import ConfigParser
 import pipe.project.project   as prj
 reload( prj )
 import pipe.project.projectUI as prjUi
+reload( prjUi )
 import pipe.asset.assetUI as assUi
+reload( assUi )
 import pipe.sets.setsUI as setUi
+reload( setUi )
 import pipe.file.file as fl
 import pipe.mayaFile.mayaFilePropertiesUI as mfp
+reload( mfp )
 import pipe.mayaFile.mayaFile as mfl
+reload( mfl )
 import pipe.sequence.sequence as sq
+reload( sq )
 import pipe.sequence.sequenceUI as sqUI
+reload( sqUI )
 import pipe.shot.shotUI as shUI
+reload( shUI )
+INMAYA = False
+try:
+	import maya.cmds as mc
+	INMAYA = True
+except:
+	pass
 
 #load UI FILE
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 MAYAPATH = 'C:/"Program Files"/Autodesk/Maya2013/bin/maya.exe'
 
 uifile = PYFILEDIR + '/manager.ui'
-fom, base = uic.loadUiType( uifile )
+fom, base = uiH.loadUiType( uifile )
+
+settingsFile =  str( os.getenv('USERPROFILE') ) + '/settings.ini'
+
 
 class ManagerUI(base,fom):
 	"""manager ui class"""
 	def __init__(self):
-		super(base, self).__init__()
+		if INMAYA:
+			if uiH.USEPYQT:
+				super(base, self).__init__(uiH.getMayaWindow())
+			else:
+				super(ManagerUI, self).__init__(uiH.getMayaWindow())
+		else:
+			if uiH.USEPYQT:
+				super(base, self).__init__()
+			else:
+				super(ManagerUI, self).__init__()
 		self.setupUi(self)
+		self.loadProjectsPath()
 		self.fillProjectsCombo()
 		self.fillAssetsTable()
 		self._makeConnections()
+		self._loadConfig()
 		self.assets_tw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.assets_tw.customContextMenuRequested.connect(self.showMenu)
 		
@@ -35,9 +70,80 @@ class ManagerUI(base,fom):
 
 		self.sets_tw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.sets_tw.customContextMenuRequested.connect(self.showMenu)
+		uiH.loadSkin( self, 'QTDarkGreen' )
+
+	def loadProjectsPath(self):
+		"""docstring for loadProjectsPath"""
+		if not os.path.exists( settingsFile ):
+			return
+		Config = ConfigParser.ConfigParser()
+		Config.read( settingsFile )
+		if Config.has_section( "GeneralSettings" ):
+			basePath = Config.get("GeneralSettings", "basepath")
+			if basePath:
+				prj.BASE_PATH = basePath
+
+	def _loadConfig(self):
+		"""load config settings"""
+		if not os.path.exists( settingsFile ):
+			return
+		Config = ConfigParser.ConfigParser()
+		Config.read( settingsFile )
+		lastProject = Config.get("BaseSettings", "lastproject")
+		lastProject = Config.get("BaseSettings", "lastproject")
+		if lastProject:
+			index = self.projects_cmb.findText( lastProject )
+			if not index == -1:
+				self.projects_cmb.setCurrentIndex(index)
+		lastTab = Config.getint("BaseSettings", "lasttab")
+		self.tabWidget.setCurrentIndex( lastTab )
+		lastSequence = Config.get("BaseSettings", "lastsequence")
+		if lastSequence:
+			items = self.sequences_lw.findItems( lastSequence , QtCore.Qt.MatchExactly )
+			if items:
+				items[0].setSelected(True)
+				if uiH.USEPYQT:
+					self.sequences_lw.setItemSelected( items[0], True )
+				self.sequences_lw.setCurrentItem( items[0] )
+				self.sequences_lw.itemActivated.emit( items[0] )
+
+	def _saveConfig(self):
+		Config = ConfigParser.ConfigParser()
+		Config.read( settingsFile )
+		if not Config.has_section( 'BaseSettings' ):
+			Config.add_section( 'BaseSettings' )
+		lastTab = self.tabWidget.currentIndex()
+		lastProj = str(self.projects_cmb.currentText())
+		selItem = self.sequences_lw.selectedItems()
+		lastSeq = ''
+		if selItem:
+			lastSeq = str( selItem[0].text() )
+		Config.set( 'BaseSettings', 'lastproject', lastProj )
+		Config.set( 'BaseSettings', 'lastSequence', lastSeq )
+		Config.set( 'BaseSettings', 'lasttab', lastTab )
+		with open( settingsFile, 'w' ) as cfgfile:
+			Config.write(cfgfile)
+
+	def setProjectsBasePath(self):
+		"""select a base Path for the projects"""
+		fil = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory"))
+		if fil:
+			Config = ConfigParser.ConfigParser()
+			Config.read( settingsFile )
+			if not Config.has_section( 'GeneralSettings' ):
+				Config.add_section( 'GeneralSettings' )
+			Config.set( 'GeneralSettings', 'basepath', fil )
+			with open( settingsFile, 'w' ) as cfgfile:
+				print 'writing config file'
+				Config.write(cfgfile)
+			prj.BASE_PATH = fil
+			self.fillProjectsCombo()
+			self.updateUi()
+
 
 	def _makeConnections(self):
 		"""create the connections in the ui"""
+		self.connect( self.refresh_btn            , QtCore.SIGNAL("clicked()") , self.updateUi )		
 		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self.updateUi )
 		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self.updateUi )
 		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ),self.updateUi )
@@ -47,7 +153,11 @@ class ManagerUI(base,fom):
 		QtCore.QObject.connect( self.actionNew_Sequence, QtCore.SIGNAL( "triggered()" ), self._newSequence )
 		QtCore.QObject.connect( self.actionNew_Shot, QtCore.SIGNAL( "triggered()" ), self._newShot )
 		QtCore.QObject.connect( self.actionCopy_Selected_From_Server, QtCore.SIGNAL( "triggered()" ), self.copySelectedAssetsFromServer )
+		QtCore.QObject.connect( self.actionReference_Selected_Items, QtCore.SIGNAL( "triggered()" ), self.referenceSelected )
+		QtCore.QObject.connect( self.actionSet_Projects_Path, QtCore.SIGNAL( "triggered()" ), self.setProjectsBasePath )
 		QtCore.QObject.connect( self.sequences_lw, QtCore.SIGNAL( "itemClicked( QListWidgetItem* )" ), self.fillShotsTable )
+		QtCore.QObject.connect( self.sequences_lw, QtCore.SIGNAL( "itemActivated( QListWidgetItem* )" ), self.fillShotsTable )
+		QtCore.QObject.connect( self.sequences_lw, QtCore.SIGNAL( "itemPressed( QListWidgetItem* )" ), self.fillShotsTable )
 		#TABLE SIGNALS
 		QtCore.QObject.connect( self.sets_tw, QtCore.SIGNAL( "itemClicked (QTableWidgetItem *)" ), self.setStatusInfo )
 		QtCore.QObject.connect( self.sets_tw, QtCore.SIGNAL( "itemDoubleClicked (QTableWidgetItem *)" ), self.openFile )
@@ -60,7 +170,6 @@ class ManagerUI(base,fom):
 		#search signals
 		QtCore.QObject.connect( self.search_asset_le, QtCore.SIGNAL( "textEdited (const QString&)" ), self.searchAsset )
 		QtCore.QObject.connect( self.search_shot_le, QtCore.SIGNAL( "textEdited (const QString&)" ), self.searchShot )
-
 
 	def updateUi(self):
 		"""update ui"""
@@ -144,17 +253,26 @@ class ManagerUI(base,fom):
 							stat = 0
 						else:
 							stat = 1
-					item.setBackgroundColor( color[ stat ])
+					if uiH.USEPYQT:
+						item.setBackgroundColor( color[ stat ])
+					else:
+						item.setBackground( color[ stat ] )
 					self.assets_tw.setItem( i, v + 1, item )
 			else:
 				for v,f in enumerate(files):
-					item = QtGui.QTableWidgetItem( f.date )
+					if f.exists:
+						item = QtGui.QTableWidgetItem( f.date )
+					else:
+						item = QtGui.QTableWidgetItem( 'Not Exists!' )
 					#item.setFlags(QtCore.Qt.ItemIsEnabled)
 					item.setCheckState(QtCore.Qt.Unchecked )
 					item.setData(32, f )
 					if status[v] == 0:
 						item.setText( '' )
-					item.setBackgroundColor( color[ status[v] ])
+					if uiH.USEPYQT:
+						item.setBackgroundColor( color[ status[v] ])
+					else:
+						item.setBackground( color[ status[v] ] )
 					self.assets_tw.setItem( i, v + 1, item )
 
 	def fillSequenceList(self):
@@ -163,6 +281,7 @@ class ManagerUI(base,fom):
 		if not proj.name:
 			return
 		self.sequences_lw.clear()
+		self.shots_tw.clearContents()
 		seqs = proj.sequences
 		if not seqs:
 			return
@@ -213,16 +332,25 @@ class ManagerUI(base,fom):
 							stat = 0
 						else:
 							stat = 1
-					item.setBackgroundColor( color[ stat ])
+					if uiH.USEPYQT:
+						item.setBackgroundColor( color[ stat ])
+					else:
+						item.setBackground( color[ stat ] )
 					self.shots_tw.setItem( i, v + 1, item )
 			else:
 				for v,f in enumerate(files):
-					item = QtGui.QTableWidgetItem( f.date )
+					if f.exists:
+						item = QtGui.QTableWidgetItem( f.date )
+					else:
+						item = QtGui.QTableWidgetItem( 'Not Exists' )
 					item.setCheckState(QtCore.Qt.Unchecked )
 					item.setData(32, f )
 					if status[v] == 0:
 						item.setText( '' )
-					item.setBackgroundColor( color[ status[v] ])
+					if uiH.USEPYQT:
+						item.setBackgroundColor( color[ status[v] ])
+					else:
+						item.setBackground( color[ status[v] ] )
 					self.shots_tw.setItem( i, v + 1, item )
 
 	def fillSetTable(self):
@@ -269,7 +397,10 @@ class ManagerUI(base,fom):
 							stat = 0
 						else:
 							stat = 1
-					item.setBackgroundColor( color[ stat ])
+					if uiH.USEPYQT:
+						item.setBackgroundColor( color[ stat ])
+					else:
+						item.setBackground( color[ stat ] )
 					self.sets_tw.setItem( i, v + 1, item )
 			else:
 				for v,f in enumerate(files):
@@ -278,7 +409,10 @@ class ManagerUI(base,fom):
 					item.setData(32, f )
 					if status[v] == 0:
 						item.setText( '' )
-					item.setBackgroundColor( color[ status[v] ])
+					if uiH.USEPYQT:
+						item.setBackgroundColor( color[ status[v] ])
+					else:
+						item.setBackground( color[ status[v] ] )
 					self.sets_tw.setItem( i, v + 1, item )
 
 	def _newProject(self):
@@ -331,26 +465,104 @@ class ManagerUI(base,fom):
 	def openFile(self,item):
 		"""open selected Asset"""
 		#item = self.assets_tw.currentItem()
-		asset = item.data(32).toPyObject()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
 		os.system("start "+ str( asset.path ) )
 		self.setStatusBarMessage( str( asset.path ) )
 		#os.popen( MAYAPATH + ' ' + str( asset.path ))
 
 	def setStatusInfo(self, item):
 		"""set the status bar message based on item selected from table"""
-		asset = item.data(32).toPyObject()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
 		self.setStatusBarMessage( str( asset.path ) )
 
 	def showMenu(self, pos):
 		menu=QtGui.QMenu(self)
 		actionProperties = QtGui.QAction("Properties", menu)
 		menu.addAction( actionProperties )
-		actionCopyServer = QtGui.QAction("Copy From Server", menu)
-		menu.addAction(actionCopyServer)
+		self.connect( actionProperties, QtCore.SIGNAL( "triggered()" ), self.properties )
+		actionOpenInExplorer = QtGui.QAction("Open File in explorer", menu)
+		menu.addAction( actionOpenInExplorer )
+		self.connect( actionOpenInExplorer, QtCore.SIGNAL( "triggered()" ), self.openFileLocation )
+		if INMAYA:
+			#COPY TIME SETTINGS
+			actionCopyTime = QtGui.QAction("Copy Time Settings", menu)
+			menu.addAction( actionCopyTime )
+			self.connect( actionCopyTime, QtCore.SIGNAL( "triggered()" ), self.copyTimeSettings )
+			menu.addSeparator()
+			#REFERENCE
+			actionReference = QtGui.QAction("Reference", menu)
+			menu.addAction( actionReference )
+			self.connect( actionReference, QtCore.SIGNAL( "triggered()" ), self.reference )
+			#IMPORT
+			actionImport = QtGui.QAction("Import", menu)
+			menu.addAction( actionImport )
+			self.connect( actionImport, QtCore.SIGNAL( "triggered()" ), self.importFile )
+			#OPEN IN CURRENT MAYA
+			actionOpenInCurrent = QtGui.QAction("Open in This Maya", menu)
+			menu.addAction( actionOpenInCurrent )
+			self.connect( actionOpenInCurrent, QtCore.SIGNAL( "triggered()" ), self.openFileInCurrentMaya )
+			#SAVE IN THIS SCENE
+			actionSaveScene = QtGui.QAction("Save Scene Here!", menu)
+			menu.addAction( actionSaveScene )
+			self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.saveScene )
+
+		#actionCopyServer = QtGui.QAction("Copy From Server", menu)
+		#menu.addAction(actionCopyServer)
+		#self.connect( actionCopyServer, QtCore.SIGNAL( "triggered()" ), self.copyFromServer )
 		tabwid = self._getCurrentTab()
 		menu.popup(tabwid.viewport().mapToGlobal(pos))
-		self.connect( actionProperties, QtCore.SIGNAL( "triggered()" ), self.properties )
-		self.connect( actionCopyServer, QtCore.SIGNAL( "triggered()" ), self.copyFromServer )
+
+	def openFileLocation(self):
+		"""openFile in explorer"""
+		tab = self._getCurrentTab()
+		item = tab.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		subprocess.Popen(r'explorer /select,"'+ asset.path.replace( '/','\\' ) +'"')
+
+	def saveScene(self):
+		"""save scene here"""
+		quit_msg = "Are you sure you want to save in this file?"
+		reply = QtGui.QMessageBox.question(self, 'Message', quit_msg, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+		if reply == QtGui.QMessageBox.Yes:
+			tab = self._getCurrentTab()
+			item = tab.currentItem()
+			if uiH.USEPYQT:
+				asset = item.data(32).toPyObject()
+			else:
+				asset = item.data(32)
+			print asset.name
+			asset.newVersion()
+			asset.save()
+
+	def openFileInCurrentMaya(self):
+		"""docstring for openFileInCurrentMaya"""
+		tab = self._getCurrentTab()
+		item = tab.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		asset.open()
+
+	def importFile(self):
+		"""import file to current Maya"""
+		tab = self._getCurrentTab()
+		item = tab.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		asset.imp()
+		
 
 	def _getCurrentTab(self):
 		"""return the visible table in the ui"""
@@ -363,11 +575,44 @@ class ManagerUI(base,fom):
 			tabwid = self.shots_tw
 		return tabwid
 
+	def copyTimeSettings(self):
+		"""copy time settings from selected scene"""
+		tab = self._getCurrentTab()
+		item = tab.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		tim = asset.time
+		mc.currentUnit( time=tim['tim'], linear = tim['lin'], angle = tim[ 'angle' ] )
+		mc.playbackOptions( min = tim[ 'min' ],
+							ast = tim[ 'ast' ], 
+							max = tim[ 'max' ], 
+							aet = tim[ 'aet' ] )
+
+	def reference(self):
+		"""reference file into scene"""
+		tab = self._getCurrentTab()
+		item = tab.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		asset.reference()
+
+	def referenceSelected(self):
+		"""reference selected items"""
+		for a in self._getSelectedItemsInCurrentTab():
+			a.reference()
+		
 	def properties(self):
 		"""get ui with properties of asset"""
 		tab = self._getCurrentTab()
 		item = tab.currentItem()
-		asset = item.data(32).toPyObject()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
 		props = mfp.MayaFilePropertiesUi(asset,self)
 		props.show()
 
@@ -376,9 +621,13 @@ class ManagerUI(base,fom):
 		serverPath = self.serverPath_le.text()
 		tab = self._getCurrentTab()
 		item = tab.currentItem()
-		asset = item.data(32).toPyObject()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
 		self.copyAssetFromServer( asset )
 		self.updateUi()
+
 
 	def _getSelectedItemsInCurrentTab(self):
 		"""return the selected assets in current Tab"""
@@ -387,9 +636,12 @@ class ManagerUI(base,fom):
 		for r in range( tab.rowCount() ):
 			for c in range( tab.columnCount() ):
 				item = tab.item( r, c )
-				asset = item.data(32).toPyObject()
 				if item.checkState() == 2:
-					assets.append( item.data(32).toPyObject())
+					if uiH.USEPYQT:
+						asset = item.data(32).toPyObject()
+					else:
+						asset = item.data(32)
+					assets.append(asset)
 		return assets
 
 	def copySelectedAssetsFromServer(self):
@@ -412,10 +664,13 @@ class ManagerUI(base,fom):
 			serverFile = fl.File( filePath.replace( prj.BASE_PATH, serverPath ) )
 			serverFile.copy( str( asset.path ))
 
-		
 	def setStatusBarMessage(self, message):
 		"""docstring for setStatusBarMessage"""
 		self.statusbar.showMessage( message )
+
+	def closeEvent(self, event):
+		self._saveConfig()
+
 	
 
 def main():

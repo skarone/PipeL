@@ -48,12 +48,12 @@ class RenderLayerExporter(object):
 		"""export information of scene to path"""
 		if exdata:
 			self.exportData()
+		if exshaders:
+			self.exportShaders()
 		if exlights:
 			self.exportLights()
 		if exaovs:
 			self.exportAovs()
-		if exshaders:
-			self.exportShaders()
 		if exmaster:
 			self.exportMasterLayerSettings()
 
@@ -78,6 +78,8 @@ class RenderLayerExporter(object):
 		lays = rlayer.renderlayers()
 		data = {}
 		for l in lays:
+			if l.name == 'defaultRenderLayer':
+				continue
 			data[l.name] = {'objects':l.objects,                  # OBJECTS IN LAYER
 							'values' :l.overridesWithValues,      # OVERRIDED ATTRIBUTES ONLY CHANGED VALUES
 							'conns'  :l.overridesWithConnections[0], # OVERRIDED ATTRIBUTES CHANGED CONNECTIONS
@@ -127,27 +129,27 @@ class RenderLayerExporter(object):
 	def exportShaders(self):
 		"""export custom shaders from scene, ex: shaders for masks etc..."""
 		lays = rlayer.renderlayers()
-		shadersToExport = []
 		finalExport = []
 		for l in lays:
+			if l.name == 'defaultRenderLayer':
+				continue
 			if l.overridedShader:
-				finalExport.append( l.overridedShader.name )
+				finalExport.append( l.overridedShader )
 			else:
 				if l.overridesWithConnections[1]:
-					asd = [mn.Node(a) for a in list(set([n.name for n in l.overridesWithConnections[1] if not 'initialShadingGroup' in n.name]))]
-					shadersToExport.extend( asd )
-		if not shadersToExport and not finalExport:
-			return False
-		for sg in shadersToExport:
-			mat = mc.listConnections( sg.name + '.surfaceShader' )
-			if len(mat) == 1:
-				lit = [c for c in mc.listConnections( mat[0], sh = 1 ) if mc.objectType( c, isa = 'light' ) ]
-				if len(lit) <= 0:
-					if not mc.referenceQuery( mat[0], isNodeReferenced = True):
-						finalExport.append( sg.name )
+					finalExport.extend( l.overridesWithConnections[1] )
 		if finalExport:
-			print finalExport
-			mc.select( finalExport, r = 1, ne = 1 )
+			shadersToExport = []
+			for i in finalExport:
+				if mc.referenceQuery( i, inr = True ) or i in shadersToExport: #is a referenced node
+					continue
+				if mc.referenceQuery( i.a.surfaceShader.input, inr = True ): #check if shader is a reference
+					continue
+				if i.a.displacementShader.input:
+					if mc.referenceQuery( i.a.displacementShader.input, inr = True ): #check if displacement is a reference
+						continue
+				shadersToExport.append( i )
+			mc.select( shadersToExport, r = 1, ne = 1 )
 			mc.file( self.shaderPath.path, op = "v=0", typ = "mayaAscii", pr = 1, es = 1 )
 
 	#IMPORT
@@ -208,9 +210,9 @@ class RenderLayerExporter(object):
 		asset = Only import for the asset that you want
 		searchAndReplace = Change any part of the objects name to another word"""
 		pickleData = pickle.load( open( self.dataPath.path, "rb" ) )
-		layers = [RenderLayerData(l,d) for l,d in pickleData.items()]
+		layers = [RenderLayerData(l,d) for l,d in pickleData.items() if not ':' in l]
 		for l in layers:
-			if not asset == '':
+			if not searchAndReplace [0]== '' or not searchAndReplace[1] == '':
 				l.filterMe( asset, searchAndReplace )
 			l.create()
 			l.addObjects()
@@ -224,7 +226,6 @@ class RenderLayerExporter(object):
 		master = rlayer.RenderLayer( 'defaultRenderLayer' )
 		master.makeCurrent()
 		for a in pickleData.keys():
-			print a.name, pickleData[a]
 			try:
 				a.v = pickleData[a]
 			except:
@@ -262,11 +263,11 @@ class RenderLayerData(rlayer.RenderLayer):
 	def filterMe(self, asset = '', sAr = ['', ''] ):
 		"""filter data based on asset name and searchAndReplace data"""
 		if self._objects:
-			self._objects = [ mn.Node( o.name.replace( sAr[0], sAr[1] ) ) for o in self._objects if asset in o ]
+			self._objects = [ mn.Node( o.name.replace( sAr[0], sAr[1] ) ) for o in self._objects ]
 		if self._overrides:
-			self._overrides = dict( [ (a.replace( sAr[0], sAr[1] ), self._overrides[a] ) for a in self._overrides.keys() if asset in a ] )
+			self._overrides = dict( [ (mn.Node( a.name.replace( sAr[0], sAr[1] )), self._overrides[a] ) for a in self._overrides.keys() ] )
 		if self._overconns:
-			self._overconns = dict( [(a.replace( sAr[0], sAr[1] ), self._overconns[a].replace( sAr[0], sAr[1] )) for a in self._overconns.keys() if asset in a] )
+			self._overconns = dict( [(mn.Node(a.name.replace( sAr[0], sAr[1] )), mn.Node(self._overconns[a].name.replace( sAr[0], sAr[1] ))) for a in self._overconns.keys() ] )
 
 	def addObjects(self):
 		"""docstring for addObjects"""
@@ -285,7 +286,7 @@ class RenderLayerData(rlayer.RenderLayer):
 	def makeShaderOverride(self):
 		"""docstring for makeShaderOverride"""
 		if self.dataShader:
-			self.overridedShader = self.dataShader
+			self.overridedShader = self.dataShader.a.surfaceShader.input.node
 		
 
 

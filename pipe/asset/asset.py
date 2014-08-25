@@ -13,12 +13,50 @@ import pipe.textureFile.textureFile as tfl
 reload( tfl )
 import pipe.dependency.dependency as dp
 reload( dp )
+try:
+	import general.mayaNode.mayaNode as mn
+except:
+	pass
+
+AREAS = [
+		'Model',
+		'Shading',
+		'Hrs',
+		'Rig',
+		'Final'
+		]
+
+def getAssetsFromSelection( project ):
+	"""return the assets from selection, also return the index of the area (Shading, Modeling, Rigging...)"""
+	sel = mn.ls( sl = True )
+	assets = []
+	if sel:
+		for s in sel:
+			ass = getAssetFromNode(s, project)
+			if not ass in assets:
+				assets.append( ass )
+	return assets
+
+def getAssetFromNode(s, project):
+	"""return the asset from a selected Node based on node name"""
+	assetName = s.namespace.firstParent.name[1:]
+	area = assetName[ assetName.rindex( '_' ):]
+	index = [AREAS.index(i) for i in AREAS if i in area]
+	if not index:
+		index.append(0)
+	return Asset( assetName[ :assetName.rindex( '_' )], project, index[0] ) 
 
 class Asset(object):
 	"""asset production object in the system, files and folders"""
-	def __init__(self, name, project):
+	def __init__(self, name, project, area = 0):
 		self._name    = name
 		self._project = project
+		self._area = AREAS[ area ]
+
+	@property
+	def type(self):
+		"""return type"""
+		return 'asset'
 
 	@property
 	def name(self):
@@ -38,54 +76,54 @@ class Asset(object):
 	@property
 	def path(self):
 		"""return the path of the asset"""
-		return self.project.path + '/Assets/' + self.name
+		return self.project.assetsPath + self.name
 
 	def create(self):
 		"""create folders and file structure"""
 		if self.exists:
 			raise 'This asset allready ' + self.name + 'exist in the project'
 		struc = [
-			"/" + self.name + "_FINAL.avi",
-			"/" + self.name + "_FINAL.ma",
-			"/" + self.name + "_FINAL.png",
-			"/" + self.name + "_FINAL.ass",
+			"/" + self.name + "_" + AREAS[ 4 ] + ".mov",
+			"/" + self.name + "_" + AREAS[ 4 ] + ".ma",
+			"/" + self.name + "_" + AREAS[ 4 ] + ".png",
+			"/" + self.name + "_" + AREAS[ 4 ] + ".ass",
 			#HRS
-			"/Hrs/",
-			"/Hrs/" + self.name + "_HRS.ma",
-			"/Hrs/Data/",
-			"/Hrs/Versions/",
+			"/" + AREAS[ 2 ] + "/",
+			"/" + AREAS[ 2 ] + "/" + self.name + "_" + AREAS[ 2 ] + ".ma",
+			"/" + AREAS[ 2 ] + "/Data/",
+			"/" + AREAS[ 2 ] + "/Versions/",
 			#MODEL
-			"/Model/",
-			"/Model/" + self.name + "_MODEL.ma",
-			"/Model/Data/",
-			"/Model/Data/" + self.name + "_Front_Blueprint.jpg",
-			"/Model/Data/" + self.name + "_Left_Blueprint.jpg",
-			"/Model/Data/" + self.name + "_Top_Blueprint.jpg",
-			"/Model/Versions/",
-			"/Model/Zbrush/",
-			"/Model/Zbrush/" + self.name + "_Zbrush.ztl",
-			"/Model/Zbrush/Data/",
-			"/Model/Zbrush/Versions/",
+			"/" + AREAS[ 0 ] + "/",
+			"/" + AREAS[ 0 ] + "/" + self.name + "_" + AREAS[ 0 ] + ".ma",
+			"/" + AREAS[ 0 ] + "/Data/",
+			"/" + AREAS[ 0 ] + "/Data/" + self.name + "_Front_Blueprint.jpg",
+			"/" + AREAS[ 0 ] + "/Data/" + self.name + "_Left_Blueprint.jpg",
+			"/" + AREAS[ 0 ] + "/Data/" + self.name + "_Top_Blueprint.jpg",
+			"/" + AREAS[ 0 ] + "/Versions/",
+			"/" + AREAS[ 0 ] + "/Zbrush/",
+			"/" + AREAS[ 0 ] + "/Zbrush/" + self.name + "_Zbrush.ztl",
+			"/" + AREAS[ 0 ] + "/Zbrush/Data/",
+			"/" + AREAS[ 0 ] + "/Zbrush/Versions/",
 			#RIG
-			"/Rig/",
-			"/Rig/" + self.name + "_RIG.ma",
-			"/Rig/Data/",
-			"/Rig/Versions/",
+			"/" + AREAS[ 3 ] + "/",
+			"/" + AREAS[ 3 ] + "/" + self.name + "_" + AREAS[ 3 ] + ".ma",
+			"/" + AREAS[ 3 ] + "/Data/",
+			"/" + AREAS[ 3 ] + "/Versions/",
 			#SHADING
-			"/Shading/",
-			"/Shading/Data/",
-			"/Shading/Mary/",
-			"/Shading/Mary/" + self.name + "_MARY.mr",
-			"/Shading/Mary/Data/",
-			"/Shading/Mary/Versions/",
-			"/Shading/Maya/",
-			"/Shading/Maya/" + self.name + "_SHA.ma",
-			"/Shading/Maya/Data/",
-			"/Shading/Maya/Versions/",
-			"/Shading/Zbrush/",
-			"/Shading/Zbrush/" + self.name + "_Zbrush.ztl",
-			"/Shading/Zbrush/Data/",
-			"/Shading/Zbrush/Versions/",
+			"/" + AREAS[ 1 ] + "/",
+			"/" + AREAS[ 1 ] + "/Data/",
+			"/" + AREAS[ 1 ] + "/Mary/",
+			"/" + AREAS[ 1 ] + "/Mary/" + self.name + "_MARY.mr",
+			"/" + AREAS[ 1 ] + "/Mary/Data/",
+			"/" + AREAS[ 1 ] + "/Mary/Versions/",
+			"/" + AREAS[ 1 ] + "/Maya/",
+			"/" + AREAS[ 1 ] + "/Maya/" + self.name + "_" + AREAS[ 1 ] + ".ma",
+			"/" + AREAS[ 1 ] + "/Maya/Data/",
+			"/" + AREAS[ 1 ] + "/Maya/Versions/",
+			"/" + AREAS[ 1 ] + "/Zbrush/",
+			"/" + AREAS[ 1 ] + "/Zbrush/" + self.name + "_Zbrush.ztl",
+			"/" + AREAS[ 1 ] + "/Zbrush/Data/",
+			"/" + AREAS[ 1 ] + "/Zbrush/Versions/",
 			#TEXTURES
 			"/Textures/",
 			"/Textures/Data/",
@@ -104,6 +142,16 @@ class Asset(object):
 				os.makedirs(basedir)
 			if '.' in s:
 				open(s, 'a').close()
+		#Add asset to database
+
+	def addToDatabase(self):
+		"""add asset to database"""
+		with self.project.database:
+			c = conn.cursor()
+			sql = 'CREATE TABLE Friends(Id INTEGER PRIMARY KEY, Name TEXT);'
+			c.execute(sql)
+			sql = "INSERT INTO Assets(Name) VALUES ('" + self.name + "');"
+			cur.execute(sql)
 
 	@property
 	def rigPath(self):
@@ -118,7 +166,7 @@ class Asset(object):
 	@property
 	def modelPath(self):
 		"""return the path of the model"""
-		return mfl.mayaFile( self.path + '/Model/' + self.name + "_MODEL.ma" )
+		return mfl.mayaFile( self.path + '/' + AREAS[ 0 ] + '/' + self.name + "_" + AREAS[ 0 ] + ".ma" )
 
 	@property
 	def hasModel(self):
@@ -128,7 +176,7 @@ class Asset(object):
 	@property
 	def hairPath(self):
 		"""return hair path of the asset"""
-		return mfl.mayaFile( self.path + '/Hrs/' + self.name + "_HRS.ma" )
+		return mfl.mayaFile( self.path + '/' + AREAS[ 2 ] + '/' + self.name + "_" + AREAS[ 2 ] + ".ma" )
 
 	@property
 	def hasHair(self):
@@ -138,7 +186,7 @@ class Asset(object):
 	@property
 	def shadingPath(self):
 		"""return shading path of the asset"""
-		return mfl.mayaFile( self.path + '/Shading/Maya/' + self.name + "_SHA.ma" )
+		return mfl.mayaFile( self.path + '/' + AREAS[ 1 ] + '/Maya/' + self.name + "_" + AREAS[ 1 ] + ".ma" )
 
 	@property
 	def hasShading(self):
@@ -158,7 +206,7 @@ class Asset(object):
 	@property
 	def finalPath(self):
 		"""return the FINAL path for the MA file"""
-		return mfl.mayaFile( self.path + '/' + self.name + "_FINAL.ma" )
+		return mfl.mayaFile( self.path + '/' + self.name + "_" + AREAS[ 4 ] + ".ma" )
 
 	@property
 	def hasFinal(self):
@@ -168,9 +216,10 @@ class Asset(object):
 	def imp(self, referenced = True):
 		"""import asset to current scene, also can be referenced"""
 		if not referenced:#IMPORT
-			mc.file( self.finalPath, i = True )
+			nodes = mc.file( self.finalPath, i = True, rnn = True, namespace=self.name )
 		else:#REFERENCE
-			mc.file( self.finalPath, reference=True, namespace=self.name )
+			nodes = mc.file( self.finalPath, reference=True,rnn = True , namespace=self.name )
+		return mn.Nodes( nodes )
 
 	@property
 	def status(self):
@@ -205,5 +254,28 @@ class Asset(object):
 						value = -1
 						break
 			result.append( value )
-
 		return result
+
+	def areaState(self, area):
+		"""return the current state of the asset in the area, for example In Progress, o pending"""
+		pass
+
+	def setAreaState(self, area, state):
+		"""set the state of the asset in the area"""
+		pass
+
+	def areaNotes(self, area):
+		"""return the notes for the asset in the area"""
+		pass
+
+	def addAreaNote(self, note, area):
+		"""add a note to an asset in the specific area"""
+		pass
+
+	def assignUserToArea(self, user, area):
+		"""assign a user to for the asset to a specific area"""
+		pass
+
+	def assignedUserInArea(self, area):
+		"""return the assigned used for this asset in the specific area"""
+		pass

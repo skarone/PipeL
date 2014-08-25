@@ -34,7 +34,7 @@ class Set(object):
 	@property
 	def path(self):
 		"""return the path of the Set"""
-		return self.project.path + '/Sets/' + self.name
+		return self.project.setsPath + self.name
 
 	@property
 	def exists(self):

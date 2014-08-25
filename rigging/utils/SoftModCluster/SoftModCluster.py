@@ -2,6 +2,8 @@ import pymel.core as pm
 import general.mayaNode.mayaNode as mn
 import maya.cmds as mc
 import maya.OpenMaya as om
+import rigging.utils.utils as rut
+reload(rut)
 
 def createClusterFromSelectedSoft( shape = None ):
 	softMo = mn.ls( sl = True, dag = True, typ = 'softModHandle' )
@@ -19,12 +21,24 @@ def createClusterFromSelectedSoft( shape = None ):
 				mc.select( s )
 				mc.percent( clusBase[0], v=weights[s] )
 
-def copyWeightsToJoint( softM, skin, join, mesh ):
+def copyWeightsToJointFromSelection():
+	"""select the soft, then de joint and then the mesh and run me :)"""
+	sel = mc.ls( sl = True )
+	if not len( sel ) == 3:
+		print 'select the soft, then de joint and then the mesh and run me :)'
+		return
+	skins = rut.getSkinFromGeo( sel[2] )
+	copyWeightsToJoint( sel[0], skins[0], sel[1], sel[2] )
+
+def copyWeightsToJoint( softM, skin, join, mesh, finalMesh = '' ):
 	"""copy the weights of the soft mod node to de joint"""
 	softMoNode = SoftModCluster( softM, mesh )
 	weights = softMoNode.weights
 	for s in weights.keys():
-		mc.skinPercent( skin, s, transformValue=[( join, weights[s])])
+		sfinal = s
+		if finalMesh != '':
+			sfinal = finalMesh +  s[s.rfind( '.' ):]
+		mc.skinPercent( skin, sfinal, transformValue=[( join, weights[s])])
 
 def createSoftModForOnSelected( shape ):
 	"""create softMod in the position of the selected objects"""
@@ -55,6 +69,7 @@ class SoftModCluster(mn.Node):
 		position = use it to create a softMod in a specific location
 		"""
 		mc.select( self.shape )
+		print self.name
 		nodes  = mc.softMod( n = self.name, fc = position, falloffRadius = 15.165877 ,falloffMode = 0 , falloffBasedOnX = 1 ,falloffBasedOnY = 1 ,falloffBasedOnZ = 1 ,falloffAroundSelection = 0 ,falloffMasking = 1 )
 		softM  = mn.Node( nodes[0] )
 		handle  = mn.Node( nodes[1] )

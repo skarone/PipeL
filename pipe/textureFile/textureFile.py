@@ -1,4 +1,5 @@
-import pipe.file.file            as fl
+
+import pipe.file.file as fl
 reload( fl )
 try:
 	import maya.cmds as mc
@@ -60,6 +61,14 @@ class textureFile(fl.File):
 		return textureFile( self.path.replace( self.extension, '.tx' ) ).exists
 
 	@property
+	def hasPng(self):
+		"""return if there is a png version"""
+		if self.isPng:
+			return True
+		return textureFile( self.path.replace( self.extension, '.png' ) ).exists
+
+
+	@property
 	def hasLow(self):
 		"""return if the texture has low version"""
 		return self.toLow().exists
@@ -88,6 +97,13 @@ class textureFile(fl.File):
 			return 'MID'
 		else:
 			return 'HIGH'
+
+	@property
+	def isPng(self):
+		"""
+		return if the texture is in png
+		"""
+		return self.extension == '.png'
 
 	@property
 	def isHigh(self):
@@ -138,6 +154,16 @@ class textureFile(fl.File):
 		else:
 			return textureFile( self.path.replace( self.extension, '.tx' ) )
 
+	def toPng(self):
+		"""
+		return png version of textureFile
+		"""
+		if self.isPng:
+			return self
+		else:
+			return textureFile( self.path.replace( self.extension, '.png' ) )
+
+
 	@property
 	def width(self):
 		"""return the width of the texture"""
@@ -154,7 +180,8 @@ class textureFile(fl.File):
 			return False
 		if force or not self.hasTx:
 			print 'Converting >> ' + self.path + ' to TX!'
-			os.popen( MAKETXPATH + ' "' + self.path + '"' ) 
+			finalCMD =  MAKETXPATH + ' "' + self.path + '"'
+			os.popen( finalCMD ) 
 
 	def makeMid(self, force = False):
 		"""make Mid version of texture"""
@@ -171,7 +198,7 @@ class textureFile(fl.File):
 		newFile = textureFile( self.dirPath + newName + self.extension )
 		cmd = '"' + self.path + '"  -resize ' + str( percent ) + '%  "' + newFile.path + '"'
 		if force or not newFile.exists:
-			os.popen( IMAGEMAGICPATH + 'convert.exe ' + cmd )
+			os.popen(  IMAGEMAGICPATH + 'convert.exe ' + cmd  )
 		return newFile
 
 	def createVersions(self, force = False):

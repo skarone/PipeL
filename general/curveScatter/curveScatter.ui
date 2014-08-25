@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>306</width>
-    <height>384</height>
+    <width>360</width>
+    <height>539</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -105,6 +105,13 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QCheckBox" name="animated_chb">
+        <property name="text">
+         <string>Animatable</string>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QCheckBox" name="keepConnected_chb">
         <property name="text">

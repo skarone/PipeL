@@ -10,6 +10,11 @@ reload( stk )
 stk.createControlForSelection( mesh = 'baseShape',name = 'controlOnMesh', baseJoint = '' )
 
 import rigging.stickyControl.stickyControl as stk
+reload( stk )
+#CREATE RIVET FOR SELECTED TRANSFORMS
+stk.createRivetOnMesh( mesh = 'Chuavechito_PantalonShape',name = 'boton' )
+
+import rigging.stickyControl.stickyControl as stk
 import maya.cmds as mc
 reload( stk )
 stk.createControlInRig( mesh = 'CabezaBaseShape' )
@@ -30,6 +35,20 @@ def createControlForSelection( mesh, name = 'controlOnMesh', baseJoint = '' ):
 	for i,trans in enumerate( sel ):
 		control = ControlOnMesh( name = name + '%i'%i, baseJoint = baseJoint, position = trans.worldPosition, mesh = mesh )
 		control.create()
+
+def createRivetOnMesh(name = 'rivetOnMesh' ):
+	"""
+	create rivet on mesh
+	"""
+	sel = mn.ls( sl = True )
+	mesh = sel[-1].shape
+	sel.remove( sel[-1] )
+	rivets = []
+	for i,trans in enumerate( sel ):
+		control = ControlOnMesh( name = name + '%i'%i, baseJoint = '', position = trans.worldPosition, mesh = mesh )
+		rivet = control._createConstraint()
+		rivets.append( rivet )
+	return rivets
 
 def createControlInRig( mesh = '', baseJoint = '' ):
 	"""create a control based on control points setted on rig,
@@ -138,6 +157,7 @@ class ControlOnMesh(object):
 		rebuild,loft  = self._loftFromEdges( edge1, edge2 )
 		u,v = self._uvParamFromPositionOnLoft( rebuild )
 		rivet = mn.createNode( 'cMuscleSurfAttach' )
+		rivet.a.v.v = 0
 		rivet.a.uLoc.v = u
 		rivet.a.vLoc.v = v
 		rivet.a.edgeIdx1.v = edge1

@@ -1,5 +1,9 @@
 import os
-from PyQt4 import QtGui,QtCore, uic
+
+import general.ui.pySideHelper as uiH
+reload( uiH )
+uiH.set_qt_bindings()
+from Qt import QtGui,QtCore
 
 import render.renderlayer.renderlayer as rlayer
 reload( rlayer)
@@ -11,24 +15,22 @@ import general.mayaNode.mayaNode as mn
 import render.aov.aov as aov
 reload( aov )
 import mtoa.core as cor
-import maya.OpenMayaUI as mui
-import sip
 from functools import partial
 import pipe.mayaFile.mayaFile as mfl
+reload( mfl )
 
 #load UI FILE
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 uifile = PYFILEDIR + '/lighterHelper.ui'
-fom, base = uic.loadUiType( uifile )
+fom, base = uiH.loadUiType( uifile )
 
-def get_maya_main_window( ):
-	ptr = mui.MQtUtil.mainWindow( )
-	main_win = sip.wrapinstance( long( ptr ), QtCore.QObject )
-	return main_win
 
 class LighterHelperUI(base,fom):
-	def __init__(self, parent  = get_maya_main_window(), *args ):
-		super(base, self).__init__(parent)
+	def __init__(self, parent  = uiH.getMayaWindow(), *args ):
+		if uiH.USEPYQT:
+			super(base, self).__init__(parent)
+		else:
+			super(LighterHelperUI, self).__init__(parent)
 		self.setupUi(self)
 		#load arnold if it is not loaded
 		self.loadArnold()
@@ -47,9 +49,11 @@ class LighterHelperUI(base,fom):
 		self.actionVolume.setIcon(QtGui.QIcon(":/volumelight.png"))
 		self.actionRenderGlobals.setIcon(QtGui.QIcon(":/renderGlobals.png"))
 		self.actionRenderView.setIcon(QtGui.QIcon(":/render.png"))
+		self.actionLookThrough.setIcon(QtGui.QIcon(":/fileTextureView.png"))
 		#internal variables
 		self.isolatedLights = [] #lights that are beign turn off when we want to isolate others!
 		self.isolatedObjects = [] #objects that are beign turn off when we one to isolate others!
+		uiH.loadSkin( self, 'QTDarkGreen' )
 		
 	def _makeConnections(self):
 		"""make the connections from the controls to de methods"""
@@ -60,6 +64,7 @@ class LighterHelperUI(base,fom):
 		#SHADING
 		self.connect( self.blackNoAlpha_btn         , QtCore.SIGNAL("clicked()") , lambda shader=["BLACK_NO_ALPHA",[0,0,0,0]]: self.createAssignColor(shader) )
 		self.connect( self.color_btn                , QtCore.SIGNAL("clicked()") , self.createColorShaderUI )
+		self.connect( self.aiStandard_btn           , QtCore.SIGNAL("clicked()") , self.createAssignAiStandard )
 		self.connect( self.occ_btn                  , QtCore.SIGNAL("clicked()") , self.createAssignOcclusion )
 		self.connect( self.uv_btn                   , QtCore.SIGNAL("clicked()") , self.createAssignUv )
 		self.connect( self.shadow_btn               , QtCore.SIGNAL("clicked()") , self.createAssignShadow )
@@ -71,6 +76,7 @@ class LighterHelperUI(base,fom):
 		self.connect( self.isolateObject_btn        , QtCore.SIGNAL("clicked()") , self.isolateSelectedObjects )
 		self.connect( self.isolateLight_btn         , QtCore.SIGNAL("clicked()") , self.isolateSelectedLight )
 		self.connect( self.selectObjectByLight_btn  , QtCore.SIGNAL("clicked()") , self.selectObjIllByLight )
+		self.connect( self.selectLightsInLayer_btn  , QtCore.SIGNAL("clicked()") , self.selectLightsInLayer )
 		self.connect( self.selectLightByObject_btn  , QtCore.SIGNAL("clicked()") , self.selectLitIllObj )
 		self.connect( self.makeLightLink_btn        , QtCore.SIGNAL("clicked()") , self.makeLightLink )
 		self.connect( self.breakLightLink_btn       , QtCore.SIGNAL("clicked()") , self.breakLightLink )
@@ -137,11 +143,13 @@ class LighterHelperUI(base,fom):
 		self.connect( self.actionAmbient   , QtCore.SIGNAL("triggered()") , partial( self.createLight, "ambientLight" ) )
 		self.connect( self.actionRenderGlobals  , QtCore.SIGNAL("triggered()") , self.openRenderSettings )
 		self.connect( self.actionRenderView  , QtCore.SIGNAL("triggered()") , self.openRenderView )
-
+		self.connect( self.actionLookThrough  , QtCore.SIGNAL("triggered()") , self.lookThroughSelected)
 
 	def _addAllAovs(self):
 		"""add all aovs to the scene and in the list"""
 		aov.addAllAovs()
+		if not mn.Node( 'aiAOV_motionvector' ).a.defaultValue.input:
+			aov.createMotionVectorAov()
 		aovs = aov.aovsInScene()
 		for ao in aovs:
 			item = QtGui.QListWidgetItem( ao.a.name.v )
@@ -192,7 +200,10 @@ class LighterHelperUI(base,fom):
 
 		for v in range( self.aovs_lw.count() ):
 			i = self.aovs_lw.item( v )
-			aovNode = i.data(32).toPyObject()
+			if uiH.USEPYQT:
+				aovNode = i.data(32).toPyObject()
+			else:
+				aovNode = i.data(32)
 			if aovNode.a.enabled.v:
 				i.setCheckState(QtCore.Qt.Checked)
 			else:
@@ -277,6 +288,14 @@ class LighterHelperUI(base,fom):
 			shaderNode = mn.createNode( 'aiAmbientOcclusion', n = 'OCC_MAT' )
 		self.applyShaderToSel( shaderNode, sels )
 
+	def createAssignAiStandard(self):
+		"""docstring for createAssignAiStandard"""
+		sels = mn.ls( sl = True )
+		shaderNode = mn.Node( 'aiStandard_MAT' )
+		if not shaderNode.exists:
+			shaderNode = mn.createNode( 'aiStandard', n = 'aiStandard_MAT' )
+		self.applyShaderToSel( shaderNode, sels )
+
 	def applyShaderToSel( self, shader, sels ):
 		rlay = rlayer.current()
 		if not sels:
@@ -284,6 +303,26 @@ class LighterHelperUI(base,fom):
 		else:
 			sels.select()
 			mc.hyperShade( a = shader.name )
+		self.applyShaderToHair( shader, sels )
+	
+	def applyShaderToHair(self,shader, sels):
+		"""docstring for applyShaderToHair"""
+		hairSel = []
+		if sels:
+			for s in sels:
+				hai = mn.listRelatives( s.name, type = ['hairSystem', 'shaveHair' ], ad = True )
+				if hai:
+					hairSel.extend( hai )
+		else:
+			hairSel = mn.ls( typ = ['hairSystem','shaveHair'] )
+		if not hairSel:
+			return
+		for h in hairSel:
+			h.a.aiHairShader.overrided = True
+			try:
+				shader.a.outColor >> h.a.aiHairShader
+			except:
+				continue
 
 	def createAssignUv(self):
 		"""docstring for fname"""
@@ -445,6 +484,12 @@ class LighterHelperUI(base,fom):
 		"""open render view ui"""
 		mm.eval( 'RenderViewWindow' )
 
+	def selectLightsInLayer(self):
+		"""select lights in render layer"""
+		lits = rlayer.current().lights
+		if lits:
+			lits.select()
+
 	def selectObjIllByLight(self):
 		"""select objects illuminated by selected Light"""
 		mm.eval( 'SelectObjectsIlluminatedByLight();' )
@@ -518,7 +563,10 @@ class LighterHelperUI(base,fom):
 	def setAovsState(self, item):
 		"""change state in aovs"""
 		over = self.overrideRenderSettings_chb.isChecked()
-		aovNode = item.data(32).toPyObject()
+		if uiH.USEPYQT:
+			aovNode = item.data(32).toPyObject()
+		else:
+			aovNode = item.data(32)
 		aovNode.a.enabled.overrided = over
 		aovNode.a.enabled.v = item.checkState() == QtCore.Qt.Checked
 
@@ -549,6 +597,21 @@ class LighterHelperUI(base,fom):
 		if not mn.Node( 'defaultArnoldRenderOptions' ).exists:
 			cor.createOptions()
 		mc.setAttr("defaultRenderGlobals.currentRenderer", "arnold", type="string")
+		mc.setAttr( "defaultViewColorManager.imageColorProfile", 2 )
+		mc.setAttr( "defaultArnoldRenderOptions.display_gamma", 1 )
+		mc.setAttr( "defaultArnoldRenderOptions.shader_gamma" ,1 )
+		mc.setAttr( "defaultArnoldRenderOptions.texture_gamma", 1 )
+		mc.setAttr( "defaultArnoldRenderOptions.range_type" ,0 )
+		mc.setAttr( "defaultArnoldDriver.halfPrecision", 1 )
+		mc.setAttr( "defaultArnoldDriver.preserveLayerName", 1)
+		mc.setAttr( "defaultRenderGlobals.extensionPadding", 4)
+		mc.setAttr( "defaultRenderGlobals.animation", 1)
+		mc.setAttr( "defaultRenderGlobals.outFormatControl", 0 )
+		mc.setAttr( "defaultRenderGlobals.putFrameBeforeExt", 1 )
+		mc.setAttr( "defaultRenderGlobals.periodInExt", 1)
+		mc.setAttr( "defaultArnoldRenderOptions.use_existing_tiled_textures", 1 )
+		
+		
 
 	def getCurrentCamera(self):
 		pan = mc.getPanel(wf=1)
@@ -578,14 +641,14 @@ class LighterHelperUI(base,fom):
 	def importRenderData(self):
 		"""import render Data to scene"""
 		asset = ''
-		searchAndReplace = ['','']
+		searchAndReplace = [str( self.searchAsset_le.text() ), str( self.replaceAsset_le.text() )]
+		print searchAndReplace
 		pathDir = self.getDirForRenderData()
 		if self.onlySelected_chb.isChecked():
 			sel = mc.ls( sl = True )
 			if sel:
 				if ':' in sel[0]:
 					asset = sel[0][ : -len( sel[0].split( ':' )[-1] ) ]
-					searchAndReplace = [str( self.searchAsset_le.text() ), str( self.replaceAsset_le.text() )]
 		rlExporter = rlExp.RenderLayerExporter( pathDir )
 		rlExporter.importAll(  self.renderLayersOpt_chb.isChecked(), 
 							self.lightsOpt_chb.isChecked(),
@@ -604,6 +667,10 @@ class LighterHelperUI(base,fom):
 			pathDir = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory"))
 		return pathDir
 		
+
+	def lookThroughSelected(self):
+		"""look Through To selected object"""
+		mc.lookThru( mc.ls(sl = True)[0], nc=1.0, fc=5000.0)
 
 def main():
 	"""call this from maya"""

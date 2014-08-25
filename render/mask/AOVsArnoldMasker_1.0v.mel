@@ -1,0 +1,140 @@
+/*
+AOVsArnoldMasker 1.0v.mel
+Evchin Ivan 2014.01.17
+ivanevchin@gmail.com
+*/
+
+
+// GUI
+if(`window -ex "AAM"`) {    deleteUI "AAM";    }
+	
+window -title "AOVsArnoldMasker" -s 0 -w 250 -h 300 "AAM";
+	
+		columnLayout -columnAttach "both" 15 -rowSpacing 10 -columnWidth 265;
+            
+            text " ";
+            text "Create AOVs masks from selected Sets";
+            text " ";
+			button -bgc 1 1 1 -label "CREATE" -w 200 -h 50 -c "create_aov()";
+			
+			text " ";
+			text "Delete AOVs and other nodes from selected Sets";
+			text " ";
+			button -bgc 1 1 1 -label "DELETE" -w 200 -h 50 -c "delete_aov()";
+			text " ";
+
+showWindow;
+global proc create_aov()
+{
+    int $j;
+    int $f;
+    int $l;
+    
+    string $sel[] = `ls -sl`;
+    string $set[];
+    
+    for($f=0;$f<size($sel);$f++)
+    {
+            $set[$f] = $sel[$f];
+            int $count = 0;
+            int $sh_count = 0;    
+            string $name = $set[$f];
+            
+            int $p=0;
+            
+        if(`objectType $set[$f]` == "objectSet")
+        { 
+            if(!`objExists ($name+"_Utility")`)
+            {    
+                select `sets -q $set[$f]`;
+                select -hierarchy;
+                
+                string $jransforms[] = `ls -sl -typ "mesh"`;
+                string $shave_s[] = `ls -sl -typ "shaveHair" -typ "pfxHair"`;
+                
+                string $str[];                
+                
+                // shave, hair
+                for($l=0;$l<size($shave_s);$l++)
+                {
+                   select $shave_s[$l];
+                    
+                   $p = (size($jransforms));
+                   string $sel_t[] = `ls -sl`;
+                   $jransforms[$p] = $sel_t[0]; 
+                }
+                
+                                
+                // create nodes and connections
+                createNode "aiUtility" -n ($name+"_Utility");
+                setAttr ($name+"_Utility.shadeMode") 2;
+                
+                createNode "aiUserDataColor" -n ($name+"_DataColor");
+                setAttr ($name+"_DataColor.defaultValue") -type double3 1 1 1;
+                
+                shadingNode -au "tripleShadingSwitch" -n ($name+"_TripleSwitch");
+                setAttr ($name+"_TripleSwitch.default") -type double3 0 0 0;
+                
+                connectAttr -force ($name+"_TripleSwitch.output") ($name+"_Utility.color");
+                
+                
+                
+                for($j=0;$j<size($jransforms);$j++)
+                {  
+                    connectAttr -f ($jransforms[$j]+".instObjGroups[0]") ($name+"_TripleSwitch.input[" +$j+ "].inShape");
+                    connectAttr -f ($name+"_DataColor.outColor") ($name+"_TripleSwitch.input["+ $j +"].inTriple");       
+                }
+                
+                
+                // create AOV and connect to it
+                string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+                
+                createNode "aiAOV" -n ("aiAOV_Mask_"+$name);
+                connectAttr -f ("aiAOV_Mask_"+$name+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+                
+                setAttr ("aiAOV_Mask_"+$name+".type") 5;
+                setAttr -type "string" ("aiAOV_Mask_"+$name+".name") $name;
+                
+                connectAttr -f "defaultArnoldDriver.message" ("aiAOV_Mask_"+ $name +".outputs[0].driver");
+                connectAttr -f "defaultArnoldFilter.message" ("aiAOV_Mask_"+ $name +".outputs[0].filter");
+                
+                
+                connectAttr -f ($name+"_Utility.outColor") ("aiAOV_Mask_"+ $name +".defaultValue");
+            
+                select -cl;
+                
+             } else { error "Mask is already created!"; }
+        } else { error "This is not a Set!"; }
+    }
+}
+
+// delete AOVs and nodes
+global proc delete_aov()
+{   
+    string $sel[] = `ls -sl`;
+    string $set[];
+    
+    string $name = $sel[0];
+    
+    int $f;
+    
+    if(`objExists ($name+"_Utility")`)
+    {
+        for($f=0;$f<size($sel);$f++)
+        {
+            $set[$f] = $sel[$f];
+            
+            string $name = $set[$f];
+            
+            
+            select ($name+"_Utility");
+            select -tgl ($name+"_DataColor");
+            select -tgl ($name+"_TripleSwitch");
+            select -tgl ("aiAOV_Mask_"+$name);
+            
+            delete; 
+            
+            select -cl;  
+        }   
+    } else { error "Did not created a mask for Set or it was renamed, maybe..."; }
+}

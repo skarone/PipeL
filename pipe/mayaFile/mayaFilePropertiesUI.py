@@ -1,18 +1,27 @@
 import os
-from PyQt4 import QtGui,QtCore, uic
+
+import general.ui.pySideHelper as uiH
+reload( uiH )
+uiH.set_qt_bindings()
+from Qt import QtGui,QtCore
+
 import pipe.project.project   as prj
 import pipe.asset.asset as ass
+reload( ass )
 reload( prj )
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
 uifile = PYFILEDIR + '/mayaFileProperties.ui'
-fom, base = uic.loadUiType( uifile )
+fom, base = uiH.loadUiType( uifile )
 
 class MayaFilePropertiesUi(base, fom):
 	"""docstring for ProjectCreator"""
 	def __init__(self, fil,parent=None):
-		super(base, self).__init__(parent)
+		if uiH.USEPYQT:
+			super(base, self).__init__(parent)
+		else:
+			super(MayaFilePropertiesUi, self).__init__(parent)
 		self.setupUi(self)
 		self._file = fil
 		self.filepath_la.setText( str(fil.path) )
@@ -22,6 +31,11 @@ class MayaFilePropertiesUi(base, fom):
 		if fil.isZero:
 			return
 		self.filedate_la.setText( str(fil.date))
+		tim = fil.time
+		self.time_startbase_la.setText( str(tim['ast']) )
+		self.time_start_la.setText( str(tim['min']) )
+		self.time_end_la.setText( str(tim['max']) )
+		self.time_endbase_la.setText( str(tim['aet']) )
 		self.updateUi()
 		self.connect(self.makeTx_btn, QtCore.SIGNAL("clicked()"), self.makeTx)
 
@@ -56,7 +70,7 @@ class MayaFilePropertiesUi(base, fom):
 			item.setData(32, t )
 			self.textures_tw.setItem( i, 0, item )
 			#SIZE
-			item = QtGui.QTableWidgetItem( str( t.size ) )
+			item = QtGui.QTableWidgetItem( "%0.2f MB" %t.size )
 			self.textures_tw.setItem( i, 1, item )
 			#HASTX
 			item = QtGui.QTableWidgetItem( '' )

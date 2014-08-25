@@ -12,10 +12,20 @@ def allAovs():
 	aovList = list(set(aovs.getRegisteredAOVs(builtin = True)))
 	return aovList
 
+def createMotionVectorAov( name = 'mBlur' ):
+	"""create motion vector aov"""
+	#mblur = create( 'aiAOV_' + name, name, 5, False  )
+	mblur = mn.Node( 'aiAOV_motionvector' )
+	mBlurShader = mn.createNode( 'aiMotionVector' )
+	mBlurShader.a.raw.v = 1
+	mBlurShader.a.outColor >> mblur.a.defaultValue
+
 def addAllAovs():
 	"""add all the aovs nodes to the scene"""
 	inter = aovs.AOVInterface()
 	for ao in allAovs():
+		if not ao:
+			continue
 		aovNode = mn.Node( 'aiAOV_' + ao )
 		if aovNode.exists:
 			continue

@@ -48,7 +48,7 @@ def createJointsOnSofts( sysName, mesh, skin ):
 	for i,s in enumerate( mn.ls( sysName + ':*', typ = 'softModHandle' ) ):
 		softModToSticky( mesh, skin ,s )
 
-def softModToSticky( mesh, skin ,soft ):
+def softModToSticky( mesh, skin ,soft, finalMesh = '' ):
 	"""creates a sticky point on the softmod location and transfer their weights"""
 	trans = soft.parent
 	control = stk.ControlOnMesh( name = soft.name.replace( '_SFM', '' ), baseJoint = '', position = trans.worldPosition, mesh = mesh )
@@ -63,7 +63,7 @@ def softModToSticky( mesh, skin ,soft ):
 		print 'no existe soft attribute'
 		control.skinJoint.a.soft.add( at = "message" )
 	soft.a.joint >> control.skinJoint.a.soft
-	sf.copyWeightsToJoint( soft.name, skin, control.skinJoint.name, mesh )
+	sf.copyWeightsToJoint( soft.name, skin, control.skinJoint.name, mesh, finalMesh )
 	return control
 
 

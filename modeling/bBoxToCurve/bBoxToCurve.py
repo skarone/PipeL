@@ -13,7 +13,7 @@ def BBoxToSel():
 	for s in sel:
 		BBoxToCurve( s.name )
 
-def BBoxToCurve( obj ):
+def BBoxToCurve( obj, autoParent = False ):
 	bbinfo = mc.exactWorldBoundingBox( obj ) # xmin, ymin, zmin, xmax, ymax, zmax
 	point1 = [bbinfo[0],bbinfo[1],bbinfo[2]]
 	point2 = [bbinfo[3],bbinfo[4],bbinfo[5]]
@@ -34,9 +34,10 @@ def BBoxToCurve( obj ):
 			 point1,
 			 [ point1[0], point2[1], point1[2] ])
 	bbox = mc.curve( d = 1, p = coords, k = [ a for a in range(len(coords))], n = "cube#" )
-	shape = mc.listRelatives( bbox, f = True, s = True )
-	mc.select( shape, obj )
-	mc.parent( add = True, shape = True )
-	mc.delete( bbox )
+	if autoParent:
+		shape = mc.listRelatives( bbox, f = True, s = True )
+		mc.select( shape, obj )
+		mc.parent( add = True, shape = True )
+		mc.delete( bbox )
 	return bbox
 

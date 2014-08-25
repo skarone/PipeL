@@ -23,7 +23,7 @@ def batcher(modules = [], functions = [], mayaFiles = [],makeBckp = False,makeLo
 	helpText += '\tIf the function has the same name of the module,\n'
 	helpText += '\tYou can leave the item in the function array empty-->\'\'\n'
 	helpText += 'USAGE Ex:\n'
-	helpText += '\tbatchFiles(\n'
+	helpText += '\tbatcher(\n'
 	helpText += '\tmodules = [\'t:/lay/ftb_lay_importExportCamaraFromLayout\',\'t:/mel/ftb_mel_cameraSequence.mel\']\n'
 	helpText += '\t,functions = [\'ftb_lay_importExportCamaraFromLayout.fixThisCameraScene()\',\'cameraSequence\']\n'
 	helpText += '\t,mayaFiles = [\'C:/pol/270ride010a_lay_camera_v003.ma\',\'C:/skarone/666ride666a_lay_camera_v666.ma\']\n'
@@ -55,9 +55,11 @@ def batcher(modules = [], functions = [], mayaFiles = [],makeBckp = False,makeLo
 	cmd +='python (\\"import sys\\");' 
 	for n,mod in enumerate(modules):
 		#module exists???
+		"""
 		if not os.path.exists(mod):
 			print '>>can\'t find module',mod
 			return False;
+		"""
 		#detect if it is mel or python
 		if(os.path.isfile(mod)):
 			#probably is a mel
@@ -105,7 +107,7 @@ def batcher(modules = [], functions = [], mayaFiles = [],makeBckp = False,makeLo
 		finalcmd +='print (\\"done!\\n\\");'
 		
 		batch = ''
-		batch +='C:\\Program Files\\Autodesk\\Maya2012\\bin\\mayabatch.exe -file "'+fileName+'" '
+		batch +='C:\\Program Files\\Autodesk\\Maya2013\\bin\\mayabatch.exe -file "'+fileName+'" '
 		batch +='-command "'+finalcmd+'" '
 		
 		if(makeLog):

@@ -4,13 +4,30 @@ import json
 import pipe.mayaFile.mayaFile as mfl
 import pipe.file.file as fl
 import pipe.dependency.dependency as dp
+import pipe.cacheFile.cacheFile as cfl
+reload(cfl)
 reload( dp )
+
+AREAS = [ 'Lay',
+			'Anim',
+			'Hrs',
+			'Vfx',
+			'Sim',
+			'Lit',
+			'Comp'
+		]
 
 class Shot(object):
 	"""main shot object"""
-	def __init__(self, name, seq):
+	def __init__(self, name, seq, area = 0):
 		self._name  = name
 		self._sequence   = seq
+		self._area = AREAS[0]
+
+	@property
+	def type(self):
+		"""return shot type"""
+		return 'shot'
 
 	@property
 	def name(self):
@@ -144,6 +161,35 @@ class Shot(object):
 		"""return if the shot exists"""
 		return os.path.exists( self.path )
 
+	@property
+	def animCachesPath(self):
+		"""docstring for animCachesDir"""
+		return self.path + '/Pool/Anim/'
+
+	@property
+	def simCachesPath(self):
+		"""docstring for animCachesDir"""
+		return self.path + '/Pool/Sim/'
+
+	@property
+	def vfxCachesPath(self):
+		"""docstring for animCachesDir"""
+		return self.path + '/Pool/Vfx/'
+
+	@property
+	def caches(self):
+		"""return the caches in the scene"""
+		animCaches = self._cachesInPath( self.animCachesPath )
+		simCaches  = self._cachesInPath( self.simCachesPath )
+		vfxCaches  = self._cachesInPath( self.vfxCachesPath )
+		return {'anim':animCaches, 'sim':simCaches, 'vfx':vfxCaches}
+
+	def _cachesInPath(self, path ):
+		"""return caches in path"""
+		if os.path.exists( path ):
+			return [ cfl.CacheFile( path + a ) for a in os.listdir( path ) if '.abc' in a]
+		return []
+
 	def create(self):
 		"""create folder structure"""
 		struc = [
@@ -152,7 +198,7 @@ class Shot(object):
 				'/Anim',
 				'/Anim/Versions',
 				'/Anim/Data',
-				'/Anim/' + self.name + '_ANIM.avi',
+				'/Anim/' + self.name + '_ANIM.mov',
 				'/Anim/' + self.name + '_ANIM.ma',
 				#ASSETS
 				'/Assets',
@@ -189,6 +235,8 @@ class Shot(object):
 				'/Pool/Sim/Versions',
 				'/Pool/Vfx',
 				'/Pool/Vfx/Versions',
+				'/Pool/Sets',
+				'/Pool/Sets/Versions',
 				#SIM
 				'/Sim',
 				'/Sim/Versions',
@@ -214,6 +262,18 @@ class Shot(object):
 				open(s, 'a').close()
 
 	@property
+	def setsPath(self):
+		"""return sets path of the pool"""
+		return self.path + '/Pool/Sets/'
+
+	@property
+	def sets(self):
+		"""return the sets exported in the pool"""
+		if os.path.exists( self.setsPath ):
+			return [ mfl.mayaFile( self.setsPath + o ) for o in os.listdir( self.setsPath ) if '.ma' in o ]
+		return []
+
+	@property
 	def breakdownPath(self):
 		"""return the path of the breakdown"""
 		return self.path + '/' + self.name + '.breakdown'
@@ -232,4 +292,38 @@ class Shot(object):
 		with open( self.breakdownPath, 'w') as outfile:
 			json.dump( breakdown, outfile, sort_keys=True, indent=4, separators=(',', ': ') )
 
-		
+	def areaState(self, area):
+		"""return the current state of the asset in the area, for example In Progress, o pending"""
+		pass
+
+	def setAreaState(self, area, state):
+		"""set the state of the asset in the area"""
+		pass
+
+	def areaNotes(self, area):
+		"""return the notes for the asset in the area"""
+		pass
+
+	def addAreaNote(self, note, area):
+		"""add a note to an asset in the specific area"""
+		pass
+
+	def assignUserToArea(self, user, area):
+		"""assign a user to for the asset to a specific area"""
+		pass
+
+	def assignedUserInArea(self, area):
+		"""return the assigned used for this asset in the specific area"""
+		pass
+
+	@property
+	def poolCamPath(self):
+		""""""
+		return self.path + '/Pool/Cam/' + self.name + '_CAM.ma'
+
+	@property
+	def poolCam(self):
+		"""return pool camera file"""
+		return mfl.mayaFile( self.poolCamPath )
+
+

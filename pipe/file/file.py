@@ -6,6 +6,18 @@ import time
 #	check os... methods
 #
 
+def filesInDir(root, scanSubFolders = True):
+	"""return the files that are in the directory"""
+	fils = []
+	count = 0
+	for path, subdirs, files in os.walk(root):
+		if not scanSubFolders and count > 0:
+			break
+		for name in files:
+			fils.append( File( os.path.join(path, name) ) )
+		count += 1
+	return fils
+
 class File(object):
 	versInFolds = True #the versions are collected in a folder
 	paddingNum  = 3
@@ -13,7 +25,7 @@ class File(object):
 
 	def __init__(self, path):
 		"""init file node with full path"""
-		self._path = path
+		self._path =  path
 
 	def __repr__(self):
 		"""return the path"""
@@ -26,7 +38,7 @@ class File(object):
 	@property
 	def path(self):
 		"""return full path of the file"""
-		return self._path
+		return  self._path
 
 	@property
 	def exists(self):
@@ -48,7 +60,7 @@ class File(object):
 		"""return the size of the file in bytes"""
 		if not self.exists:
 			return 0
-		return os.path.getsize( self.path )#TODO check this method
+		return os.path.getsize( self.path ) / ( 1024 * 1024.0 )#TODO check this method
 
 	@property
 	def basename(self):
@@ -108,16 +120,21 @@ class File(object):
 	def copy(self, newPath):
 		"""copy file to new path,
 		   newPath could be a directory path or a complete path and it will rename the file"""
+		finalFile = ''
 		if not os.path.exists( os.path.dirname( newPath ) ):
 			os.makedirs( os.path.dirname( newPath ) )
 		if os.path.isdir( newPath ):
-			shutil.copy2( self.path, newPath + self.fullName )
+			finalFile = newPath + '/' + self.fullName
+			shutil.copy2( self.path, finalFile )
 		else:
+			finalFile = newPath
 			shutil.copy2( self.path, newPath )
+		return File( finalFile )
 	
 	def rename(self, newName):
 		"""rename filename newName"""
 		os.rename( self.path, self.dirPath + newName )
+		self._path = self.dirPath + newName
 		
 	def newVersion(self):
 		"""create a new Version of the file"""
@@ -159,3 +176,10 @@ class File(object):
 		with open( self.path ) as f:
 			file_str = f.readlines()
 		return file_str
+
+	def write(self, data):
+		"""write data to file"""
+		if not os.path.exists(self.dirPath):
+			os.makedirs(self.dirPath)
+		with open( self.path, "w" ) as f:
+			f.write( data )
