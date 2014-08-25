@@ -164,13 +164,19 @@ class CacheManagerUI(base,fom):
 			for v in xrange(self.caches_lw.count()):
 				i = self.caches_lw.item(v)
 				if i.checkState() == 2:
-					n = i.data(32).toPyObject()
+					if uiH.USEPYQT:
+						n = i.data(32).toPyObject()
+					else:
+						n = i.data( 32 )
 					n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), n.name, not importAsset )
 		elif tabNum == 1:
 			for v in xrange(self.files_lw.count()):
 				i = self.files_lw.item(v)
 				if i.checkState() == 2:
-					n = i.data(32).toPyObject()
+					if uiH.USEPYQT:
+						n = i.data(32).toPyObject()
+					else:
+						n = i.data( 32 )
 					n.reference()
 
 
