@@ -143,7 +143,7 @@ class File(object):
 
 	def delete(self):
 		"""delete file"""
-		os.delete( self.path )
+		os.remove( self.path )
 
 	def move(self, newPath):
 		"""move file to newPath, same as copy but instead it will delete the original file"""
