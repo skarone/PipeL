@@ -43,8 +43,8 @@ class CacheManagerUI(base,fom):
 			super(base, self).__init__()
 		self.setupUi(self)
 		self._makeConnections()
-		self._loadConfig()
 		self._fillUi()
+		self._loadConfig()
 		self.setObjectName( 'cacheManager_WIN' )
 
 	def _loadConfig(self):
@@ -69,7 +69,7 @@ class CacheManagerUI(base,fom):
 		if Config.has_section( "GeneralSettings" ):
 			basePath = Config.get("GeneralSettings", "basepath")
 			if basePath:
-				prj.BASE_PATH = basePath
+				prj.BASE_PATH = basePath.replace( '\\', '/' )
 		lastProject = Config.get("BaseSettings", "lastproject")
 		if lastProject:
 			index = self.projects_cmb.findText( lastProject )

@@ -81,7 +81,9 @@ class ManagerUI(base,fom):
 		if Config.has_section( "GeneralSettings" ):
 			basePath = Config.get("GeneralSettings", "basepath")
 			if basePath:
-				prj.BASE_PATH = basePath
+				if basePath.endswith( '\\' ):
+					basePath = basePath[:-1]
+				prj.BASE_PATH = basePath.replace( '\\', '/' )
 
 	def _loadConfig(self):
 		"""load config settings"""
