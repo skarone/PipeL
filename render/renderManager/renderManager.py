@@ -63,6 +63,7 @@ class RenderManagerUI(base,fom):
 		renderGlobals = mn.Node( 'defaultRenderGlobals' )
 		self.filePath_le.setText( str( renderGlobals.a.imageFilePrefix.v ))
 		assOrShot = prj.shotOrAssetFromFile( mfl.currentFile() )
+		self._project = ''
 		if assOrShot:
 			if assOrShot.type == 'asset':
 				versionNumber = self._getVersionNumber( 'R:/' + assOrShot.project.name + '/Asset/' + assOrShot.name )
@@ -71,6 +72,7 @@ class RenderManagerUI(base,fom):
 				versionNumber = self._getVersionNumber( 'R:/' + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name )
 				pat = 'R:/' + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name + '/v' + str(versionNumber).zfill( 4 ) + '/' + '<RenderLayer>' + '/<RenderLayer>'
 				renderGlobals.a.imageFilePrefix.v = str( pat )
+			self._project = assOrShot.project.name
 			self.filePath_le.setText( str( pat ))
 		self.frameRange_le.setText( str( int( renderGlobals.a.startFrame.v ) ) + "-" + str( int(  renderGlobals.a.endFrame.v ) ) )
 		self._fillLayers()
@@ -123,6 +125,9 @@ class RenderManagerUI(base,fom):
 			if w.overFrameRange_chb.isChecked():
 				frames =  str( w.frameRange_le.text() )
 			filename = mc.renderSettings( lyr = w.layer.name, gin = ('?'*pad) )[0]
+			name = ''
+			if self._project:
+				name = self._project + ' - '
 			Job = dl.Job( w.layer.name,
 						{	'Group'     : group,
 							'Pool'     : pool,
@@ -130,7 +135,7 @@ class RenderManagerUI(base,fom):
 							'Comment'  : comments,
 							'InitialStatus' : InitialStatus,
 							'Whitelist'     : whiteList,
-							'Name'      : mfl.currentFile().name + ' - ' + w.layer.name,
+							'Name'      : name + mfl.currentFile().name + ' - ' + w.layer.name,
 							'OutputFilename0' : filename,
 							'Priority': priority,
 							'ChunkSize':taskSize

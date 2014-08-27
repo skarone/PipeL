@@ -13,6 +13,7 @@ AREAS = [ 'Lay',
 			'Hrs',
 			'Vfx',
 			'Sim',
+			'SkinFix',
 			'Lit',
 			'Comp'
 		]
@@ -63,6 +64,16 @@ class Shot(object):
 	def animPath(self):
 		"""return the anim file"""
 		return mfl.mayaFile( self.path + '/Anim/' + self.name + '_ANIM.ma' )
+
+	@property
+	def skinfixPath(self):
+		"""return the skin fix file"""
+		return mfl.mayaFile( self.path + '/SkinFix/' + self.name + '_SKINFIX.ma' )
+
+	@property
+	def hasSkinFix(self):
+		"""docstring for hasSkinFix"""
+		return os.path.getsize( self.skinfixPath.path ) != 0
 
 	@property
 	def hasAnim(self):
@@ -222,6 +233,11 @@ class Shot(object):
 				'/Lit/Versions',
 				'/Lit/Data',
 				'/Lit/' + self.name + '_LIT.ma',
+				#SKINFIX
+				'/SkinFix',
+				'/SkinFix/Versions',
+				'/SkinFix/Data',
+				'/SkinFix/' + self.name + '_SKINFIX.ma',
 				#POOL
 				'/Pool',
 				'/Pool/Anim',
