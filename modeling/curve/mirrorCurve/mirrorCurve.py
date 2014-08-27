@@ -25,6 +25,7 @@ class MirrorCurveUi(base, fom):
 		self.setupUi(self)
 		self.setObjectName( 'MirrorCurveUi' )
 		self.connect(self.mirror_btn, QtCore.SIGNAL("clicked()"), self.mirror)
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def mirror(self):
 		"""mirror select curve"""

@@ -60,6 +60,7 @@ class ExporterUI(base, fom):
 		self._makeConnections()
 		self.exporter = ''
 		self.setObjectName( 'exporter_WIN' )
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def _fillData(self):
 		"""add information to UI based on project and scene data"""

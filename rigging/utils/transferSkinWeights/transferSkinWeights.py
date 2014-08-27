@@ -4,13 +4,11 @@ reload( uiH )
 uiH.set_qt_bindings()
 from Qt import QtGui,QtCore
 
-INMAYA = False
 try:
 	import general.mayaNode.mayaNode as mn
 	import maya.cmds as mc
 	import rigging.utils.utils as utls
 	reload( utls )
-	INMAYA = True
 except:
 	pass
 
@@ -22,16 +20,14 @@ fom, base = uiH.loadUiType( uifile )
 class TransferSkinWeightsUi(base,fom):
 	"""manager ui class"""
 	def __init__(self):
-		if INMAYA:
-			if uiH.USEPYQT:
-				super(base, self).__init__(uiH.getMayaWindow())
-			else:
-				super(TransferSkinWeightsUi, self).__init__(uiH.getMayaWindow())
+		if uiH.USEPYQT:
+			super(base, self).__init__(uiH.getMayaWindow())
 		else:
-			super(base, self).__init__()
+			super(TransferSkinWeightsUi, self).__init__(uiH.getMayaWindow())
 		self.setupUi(self)
 		self._makeConnections()
 		self.setObjectName( 'TransferSkinWeightsUi' )
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def _makeConnections(self):
 		"""docstring for _makeConnections"""
@@ -84,13 +80,4 @@ def main():
 	PyForm=TransferSkinWeightsUi()
 	PyForm.show()
 
-
-if __name__=="__main__":
-	import sys
-	a = QtGui.QApplication(sys.argv)
-	global PyForm
-	a.setStyle('plastique')
-	PyForm=TransferSkinWeightsUi()
-	PyForm.show()
-	sys.exit(a.exec_())
 

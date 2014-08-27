@@ -21,6 +21,7 @@ class ProjectCreator(base, fom):
 			super(ProjectCreator, self).__init__()
 		self.setupUi(self)
 		self.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), self.createProject)
+		uiH.loadSkin( self, 'QTDarkGreen' )
 	
 	def createProject(self):
 		"""create New Project Based on new project name"""

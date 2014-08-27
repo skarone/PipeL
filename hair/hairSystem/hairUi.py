@@ -24,6 +24,7 @@ class hairUi(base,fom):
 		self.setupUi(self)
 		self._makeConnections()
 		self.setObjectName( 'hairUi' )
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def _makeConnections(self):
 		"""docstring for _makeConnections"""

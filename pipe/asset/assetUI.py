@@ -23,6 +23,7 @@ class AssetCreator(base, fom):
 		self.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), self.createAsset)
 		self.fillProjectsCMB()
 		self.asset_le.setFocus()
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def fillProjectsCMB(self):
 		"""fill combo box with projects"""

@@ -46,6 +46,7 @@ class CacheManagerUI(base,fom):
 		self._fillUi()
 		self._loadConfig()
 		self.setObjectName( 'cacheManager_WIN' )
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def _loadConfig(self):
 		"""load config settings"""

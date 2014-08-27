@@ -38,6 +38,7 @@ class checkModelSceneUi(base,fom):
 		self._makeConnections()
 		self.checkScene()
 		self.setObjectName( 'modelSceneCheck_WIN' )
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def _makeConnections(self):
 		"""create connection in the UI"""

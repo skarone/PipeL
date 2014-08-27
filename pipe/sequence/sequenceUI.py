@@ -25,6 +25,7 @@ class SequenceCreator(base, fom):
 		self.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), self.createSequence)
 		self.fillProjectsCMB()
 		self.sequence_le.setFocus()
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def fillProjectsCMB(self):
 		"""fill combo box with projects"""

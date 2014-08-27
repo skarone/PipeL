@@ -1,9 +1,10 @@
 import os
-from PyQt4 import QtGui,QtCore, uic
+import general.ui.pySideHelper as uiH
+reload( uiH )
+uiH.set_qt_bindings()
+from Qt import QtGui,QtCore
 import maya.cmds as mc
 import general.mayaNode.mayaNode as mn
-import maya.OpenMayaUI as mui
-import sip
 import maya.mel as mm
 
 import rigging.curveBased.curveBased as crvBased
@@ -18,18 +19,16 @@ maUI.main()
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
 uifile = PYFILEDIR + '/curveBased.ui'
-fom, base = uic.loadUiType( uifile )
-
-def get_maya_main_window( ):
-	ptr = mui.MQtUtil.mainWindow( )
-	main_win = sip.wrapinstance( long( ptr ), QtCore.QObject )
-	return main_win
+fom, base = uiH.loadUiType( uifile )
 
 
 class CurveBasedUI(base, fom):
 	"""docstring for ProjectCreator"""
-	def __init__(self, parent  = get_maya_main_window(), *args ):
-		super(base, self).__init__(parent)
+	def __init__(self, parent  = uiH.getMayaWindow(), *args ):
+		if uiH.USEPYQT:
+			super(base, self).__init__(parent)
+		else:
+			super(CurveBasedUI, self).__init__(parent)
 		self.setupUi(self)
 		self.connect(self.sysIn_btn, QtCore.SIGNAL("clicked()"), self.fillSystemLE)
 		self.connect(self.curveIn_btn, QtCore.SIGNAL("clicked()"), self.fillCurveLE)
@@ -40,6 +39,7 @@ class CurveBasedUI(base, fom):
 		self.connect(self.deleteSoft_btn, QtCore.SIGNAL("clicked()"), self.deleteSofts)
 		self.connect(self.transWOnSel_btn, QtCore.SIGNAL("clicked()"), self.transferWeightToSel)
 		self.setObjectName( 'cuveBasedRig_WIN' )
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def fillSystemLE(self):
 		"""fill the system line edit"""

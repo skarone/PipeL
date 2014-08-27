@@ -45,6 +45,7 @@ class RenderManagerUI(base,fom):
 		self._makeConnections()
 		self.setObjectName( 'RenderManagerUI' )
 		self._fillUi()
+		uiH.loadSkin( self, 'QTDarkGreen' )
 		
 
 	def _makeConnections(self):
@@ -162,6 +163,7 @@ class RenderLayerUI(baseLay,fomLay):
 		self._layer = renderLayerNode
 		self._makeConnections()
 		self._updateUi()
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def _makeConnections(self):
 		"""docstring for _makeConnections"""

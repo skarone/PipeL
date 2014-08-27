@@ -12,13 +12,11 @@ reload(tfl)
 import maya.OpenMayaUI as mui
 import maya.cmds as mc
 
-
 #load UI FILE
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
 uifile = PYFILEDIR + '/textureManager.ui'
 fom, base = uiH.loadUiType( uifile )
-
 
 class ManagerUI(base,fom):
 	"""manager ui class"""
@@ -32,6 +30,7 @@ class ManagerUI(base,fom):
 		self.manager = tm.Manager()
 		self.fillTextures()
 		self.setObjectName( 'textureManager_WIN' )
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def _makeConnections(self):
 		QtCore.QObject.connect( self.searchPath_le, QtCore.SIGNAL( "textEdited (const QString&)" ), self.searchTexture )
@@ -196,15 +195,12 @@ class ManagerUI(base,fom):
 			elif result == 'Stop':
 				return
 		self.fillTextures()
-			
-		
 
 class Window(QtGui.QMainWindow):
 	def __init__(self):
 		QtGui.QMainWindow.__init__(self)
 		dia = MultiAttributeUI()
 		dia.exec_()
-
 
 def main():
 	"""use this to create project in maya"""

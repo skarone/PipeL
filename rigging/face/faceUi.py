@@ -32,6 +32,7 @@ class faceRigUi(base, fom):
 		self.connect(self.fillVertecesToIgnore_btn, QtCore.SIGNAL("clicked()"), self.fillVertecesToIgnore)
 		self.connect(self.fillMeshToSkin_btn, QtCore.SIGNAL("clicked()"), self.fillMeshToSkin)
 		self.connect(self.createSofts_btn, QtCore.SIGNAL("clicked()"), self.createSofts)
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def fillMeshToDeform(self):
 		"""docstring for fname"""

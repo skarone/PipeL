@@ -24,6 +24,7 @@ class SetCreator(base, fom):
 		self.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), self.createSet)
 		self.fillProjectsCMB()
 		self.set_le.setFocus()
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def fillProjectsCMB(self):
 		"""fill combo box with projects"""

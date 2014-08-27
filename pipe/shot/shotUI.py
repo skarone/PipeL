@@ -28,6 +28,7 @@ class ShotCreator(base, fom):
 		self.fillProjectsCMB()
 		self.fillSequencesCMB()
 		self.shot_le.setFocus()
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	@property
 	def curProj(self):

@@ -40,6 +40,7 @@ class spiderWebCreatorUi(base,fom):
 		self.setupUi(self)
 		self._makeConnections()
 		self.setObjectName( 'spiderWebCreatorUi_WIN' )
+		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def _makeConnections(self):
 		"""create connection in the UI"""
