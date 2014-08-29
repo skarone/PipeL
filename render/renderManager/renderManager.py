@@ -191,9 +191,9 @@ class RenderLayerUI(baseLay,fomLay):
 		startFrame = ''
 		endFrame   = ''
 		for o in tw.keys():
-			if 'defaultRenderGlobals.startFrame' == str( o ):
+			if 'defaultRenderGlobals.startFrame' == o.fullname:
 				startFrame = tw[o]*TIMEUNIT
-			elif 'defaultRenderGlobals.endFrame' == str( o ):
+			elif 'defaultRenderGlobals.endFrame' == o.fullname:
 				endFrame = tw[o]*TIMEUNIT
 		renderGlobals = mn.Node( 'defaultRenderGlobals' )
 		if startFrame or endFrame:

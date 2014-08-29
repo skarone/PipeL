@@ -610,6 +610,12 @@ class LighterHelperUI(base,fom):
 		mc.setAttr( "defaultRenderGlobals.putFrameBeforeExt", 1 )
 		mc.setAttr( "defaultRenderGlobals.periodInExt", 1)
 		mc.setAttr( "defaultArnoldRenderOptions.use_existing_tiled_textures", 1 )
+		try:
+			for c in mn.ls( typ = 'camera' ):
+				c.a.aiShutterEnd.v = 0
+				c.a.motionBlurOverride.v = 1
+		except:
+			pass
 		
 		
 
