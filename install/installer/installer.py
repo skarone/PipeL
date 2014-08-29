@@ -44,6 +44,10 @@ class InstallerUI(base, fom):
 		if not self.serverPath or self.serverPath == 'Please Fill ME!':
 			self.server_le.setText( 'Please Fill ME!' )
 			return
+		userDir      = os.path.expanduser( '~' )
+		maya2014Path = userDir + '\\maya\\2014-x64\\scripts'
+		maya2015Path = userDir + '\\maya\\2015-x64\\scripts'
+		nukePath     = userDir + '\\.nuke'
 		print 'installing client'
 
 	def fillServerPath(self):
