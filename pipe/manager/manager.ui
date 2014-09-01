@@ -274,6 +274,11 @@
            </column>
            <column>
             <property name="text">
+             <string>SkinFix</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
              <string>Hrs</string>
             </property>
            </column>
@@ -342,9 +347,15 @@
     <addaction name="separator"/>
     <addaction name="actionReference_Selected_Items"/>
    </widget>
+   <widget class="QMenu" name="menuHistory">
+    <property name="title">
+     <string>History</string>
+    </property>
+   </widget>
    <addaction name="menuCreate"/>
    <addaction name="menuEdit"/>
    <addaction name="menuSettings"/>
+   <addaction name="menuHistory"/>
   </widget>
   <widget class="QDockWidget" name="dockWidget_3">
    <property name="floating">

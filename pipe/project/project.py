@@ -38,7 +38,7 @@ import pipe.shot.shot as sh
 reload( sh )
 
 BASE_PATH = 'P:/'
-USE_MAYA_SUBFOLDER = False
+USE_MAYA_SUBFOLDER = True
 
 def shotOrAssetFromFile(mayaFile):
 	"""return from maya File if there is an asset, a shot or what"""
@@ -75,10 +75,13 @@ class Project(object):
 	@property
 	def path(self):
 		"""return the path of the Project"""
+		base = BASE_PATH
+		if base.endswith( '/' ):
+			base = base[:-1]
 		if USE_MAYA_SUBFOLDER:
-			return BASE_PATH + '/' + self.name + '/Maya'
+			return base + '/' + self.name + '/Maya'
 		else:
-			return BASE_PATH + '/' + self.name
+			return base + '/' + self.name
 
 	@property
 	def assetsPath(self):
