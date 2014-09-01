@@ -195,16 +195,49 @@
             <property name="text">
              <string>Import Shading instead of reference it</string>
             </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
          </layout>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QListWidget" name="caches_lw"/>
-          </item>
-         </layout>
+         <widget class="QTabWidget" name="caches_tw">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="tab_3">
+           <attribute name="title">
+            <string>Anim</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QListWidget" name="animCaches_lw"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tab_4">
+           <attribute name="title">
+            <string>SkinFix</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QListWidget" name="skinFixCaches_lw"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tab_5">
+           <attribute name="title">
+            <string>Sim</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item>
+             <widget class="QListWidget" name="simCaches_lw"/>
+            </item>
+           </layout>
+          </widget>
+         </widget>
         </item>
        </layout>
       </widget>

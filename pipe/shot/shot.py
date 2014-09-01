@@ -183,17 +183,17 @@ class Shot(object):
 		return self.path + '/Pool/Sim/'
 
 	@property
-	def vfxCachesPath(self):
+	def skinFixCachesPath(self):
 		"""docstring for animCachesDir"""
-		return self.path + '/Pool/Vfx/'
+		return self.path + '/Pool/SkinFix/'
 
 	@property
 	def caches(self):
 		"""return the caches in the scene"""
 		animCaches = self._cachesInPath( self.animCachesPath )
 		simCaches  = self._cachesInPath( self.simCachesPath )
-		vfxCaches  = self._cachesInPath( self.vfxCachesPath )
-		return {'anim':animCaches, 'sim':simCaches, 'vfx':vfxCaches}
+		skinFixCaches  = self._cachesInPath( self.skinFixCachesPath )
+		return {'anim':animCaches, 'sim':simCaches, 'skin':skinFixCaches}
 
 	def _cachesInPath(self, path ):
 		"""return caches in path"""

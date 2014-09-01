@@ -10,6 +10,7 @@ import pipe.sequence.sequence as sq
 reload( sq )
 import pipe.asset.asset as ass
 import pipe.shot.shot as sh
+reload( sh )
 INMAYA = False
 import pipe.mayaFile.mayaFile as mfl
 import pipe.cacheFile.cacheFile as cfl
@@ -43,6 +44,12 @@ class CacheManagerUI(base,fom):
 			super(base, self).__init__()
 		self.setupUi(self)
 		self._makeConnections()
+		Config = ConfigParser.ConfigParser()
+		Config.read( settingsFile )
+		if Config.has_section( "GeneralSettings" ):
+			basePath = Config.get("GeneralSettings", "basepath")
+			if basePath:
+				prj.BASE_PATH = basePath.replace( '\\', '/' )
 		self._fillUi()
 		self._loadConfig()
 		self.setObjectName( 'cacheManager_WIN' )
@@ -67,10 +74,6 @@ class CacheManagerUI(base,fom):
 			return
 		Config = ConfigParser.ConfigParser()
 		Config.read( settingsFile )
-		if Config.has_section( "GeneralSettings" ):
-			basePath = Config.get("GeneralSettings", "basepath")
-			if basePath:
-				prj.BASE_PATH = basePath.replace( '\\', '/' )
 		lastProject = Config.get("BaseSettings", "lastproject")
 		if lastProject:
 			index = self.projects_cmb.findText( lastProject )
@@ -147,10 +150,17 @@ class CacheManagerUI(base,fom):
 	def _getCurrentTab(self):
 		"""return the visible table in the ui"""
 		currentTab = self.tabWidget.currentIndex()
+		return currentTab
+
+	def _getCurrentCacheTab(self):
+		"""return the visible table in the ui"""
+		currentTab = self.caches_tw.currentIndex()
 		if currentTab == 0:
-			tabwid = self.caches_lw
+			tabwid = self.animCaches_lw
 		elif currentTab == 1:
-			tabwid = self.files_lw
+			tabwid = self.skinFixCaches_lw
+		elif currentTab == 2:
+			tabwid = self.simCaches_lw
 		return tabwid, currentTab
 
 	def loadExternalCache(self):
@@ -159,11 +169,12 @@ class CacheManagerUI(base,fom):
 
 	def loadSelectedCache(self):
 		"""docstring for fname"""
-		tab, tabNum = self._getCurrentTab()
+		tabNum = self._getCurrentTab()
 		importAsset = self.importShading_chb.isChecked()
 		if tabNum == 0:
-			for v in xrange(self.caches_lw.count()):
-				i = self.caches_lw.item(v)
+			cacheTab, cacheTabNum = self._getCurrentCacheTab()
+			for v in xrange( cacheTab.count()):
+				i = cacheTab.item(v)
 				if i.checkState() == 2:
 					if uiH.USEPYQT:
 						n = i.data(32).toPyObject()
@@ -222,15 +233,21 @@ class CacheManagerUI(base,fom):
 	def _fillCacheList(self):
 		"""fill list from caches in shot"""
 		caches = self._selectedShot.caches
-		self.caches_lw.clear()
+		self.animCaches_lw.clear()
+		self.skinFixCaches_lw.clear()
+		self.simCaches_lw.clear()
 		for s in caches.keys():
 			for f in caches[s]:
 				item = QtGui.QListWidgetItem( f.name + ' - ' + s )
 				#item.setFlags(QtCore.Qt.ItemIsEnabled)
 				item.setCheckState(QtCore.Qt.Unchecked )
 				item.setData(32, f )
-				self.caches_lw.addItem( item )
-		#self.caches_lw.addItems( [  ( f.name + ' - ' + s ) for s in caches.keys() for f in caches[s] ])
+				if s == 'anim':
+					self.animCaches_lw.addItem( item )
+				elif s == 'skin':
+					self.skinFixCaches_lw.addItem( item )
+				elif s == 'sim':
+					self.simCaches_lw.addItem( item )
 
 	def _fillFileList(self):
 		"""docstring for _fillFileList"""
@@ -245,7 +262,13 @@ class CacheManagerUI(base,fom):
 	def fileNameForCache(self, exportAsset = False):
 		"""set the filename for the cache"""
 		if self.useShotFolder_chb.isChecked() and exportAsset:
-			pathDir = self._selectedShot.animCachesPath 
+			cacheTab, cacheTabNum = self._getCurrentCacheTab()
+			if cacheTabNum == 0:
+				pathDir = self._selectedShot.animCachesPath 
+			elif cacheTabNum == 1:
+				pathDir = self._selectedShot.skinFixCachesPath
+			elif cacheTabNum == 2:
+				pathDir = self._selectedShot.simCachesPath 
 		else:
 			pathDir = QtGui.QFileDialog.getSaveFileName(self, 'Save Cache', self._selectedShot.animCachesPath, selectedFilter='*.abc')
 		return str( pathDir )

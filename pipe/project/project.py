@@ -38,7 +38,7 @@ import pipe.shot.shot as sh
 reload( sh )
 
 BASE_PATH = 'P:/'
-USE_MAYA_SUBFOLDER = True
+USE_MAYA_SUBFOLDER = False
 
 def shotOrAssetFromFile(mayaFile):
 	"""return from maya File if there is an asset, a shot or what"""
