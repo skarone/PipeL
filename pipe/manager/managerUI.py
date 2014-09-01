@@ -26,6 +26,8 @@ import pipe.sequence.sequenceUI as sqUI
 reload( sqUI )
 import pipe.shot.shotUI as shUI
 reload( shUI )
+import pipe.settings.settings as sti
+reload( sti )
 INMAYA = False
 try:
 	import maya.cmds as mc
@@ -39,8 +41,6 @@ MAYAPATH = 'C:/"Program Files"/Autodesk/Maya2013/bin/maya.exe'
 
 uifile = PYFILEDIR + '/manager.ui'
 fom, base = uiH.loadUiType( uifile )
-
-settingsFile =  str( os.getenv('USERPROFILE') ) + '/settings.ini'
 
 
 class ManagerUI(base,fom):
@@ -57,6 +57,7 @@ class ManagerUI(base,fom):
 			else:
 				super(ManagerUI, self).__init__()
 		self.setupUi(self)
+		self.settings = sti.Settings()
 		self.loadProjectsPath()
 		self.fillProjectsCombo()
 		self.fillAssetsTable()
@@ -74,12 +75,9 @@ class ManagerUI(base,fom):
 
 	def loadProjectsPath(self):
 		"""docstring for loadProjectsPath"""
-		if not os.path.exists( settingsFile ):
-			return
-		Config = ConfigParser.ConfigParser()
-		Config.read( settingsFile )
-		if Config.has_section( "GeneralSettings" ):
-			basePath = Config.get("GeneralSettings", "basepath")
+		gen = self.settings.General
+		if gen:
+			basePath = gen[ "basepath" ]
 			if basePath:
 				if basePath.endswith( '\\' ):
 					basePath = basePath[:-1]
@@ -87,61 +85,59 @@ class ManagerUI(base,fom):
 
 	def _loadConfig(self):
 		"""load config settings"""
-		if not os.path.exists( settingsFile ):
-			return
-		Config = ConfigParser.ConfigParser()
-		Config.read( settingsFile )
-		lastProject = Config.get("BaseSettings", "lastproject")
-		lastProject = Config.get("BaseSettings", "lastproject")
-		if lastProject:
-			index = self.projects_cmb.findText( lastProject )
-			if not index == -1:
-				self.projects_cmb.setCurrentIndex(index)
-		lastTab = Config.getint("BaseSettings", "lasttab")
-		self.tabWidget.setCurrentIndex( lastTab )
-		lastSequence = Config.get("BaseSettings", "lastsequence")
-		if lastSequence:
-			items = self.sequences_lw.findItems( lastSequence , QtCore.Qt.MatchExactly )
-			if items:
-				items[0].setSelected(True)
-				if uiH.USEPYQT:
-					self.sequences_lw.setItemSelected( items[0], True )
-				self.sequences_lw.setCurrentItem( items[0] )
-				self.sequences_lw.itemActivated.emit( items[0] )
+		his = self.settings.History
+		if his:
+			if 'lastproject' in his:
+				lastProject = his[ "lastproject" ]
+				if lastProject:
+					index = self.projects_cmb.findText( lastProject )
+					if not index == -1:
+						self.projects_cmb.setCurrentIndex(index)
+			if 'lasttab' in his:
+				lastTab = his[ "lasttab" ]
+				self.tabWidget.setCurrentIndex( int( lastTab ))
+			if 'lastsequence' in his:
+				lastSequence = his[ "lastsequence" ]
+				if lastSequence:
+					items = self.sequences_lw.findItems( lastSequence , QtCore.Qt.MatchExactly )
+					if items:
+						items[0].setSelected(True)
+						if uiH.USEPYQT:
+							self.sequences_lw.setItemSelected( items[0], True )
+						self.sequences_lw.setCurrentItem( items[0] )
+						self.sequences_lw.itemActivated.emit( items[0] )
+		self._loadHistoryFiles()
+
+	def _loadHistoryFiles(self):
+		"""docstring for _loadHistoryFiles"""
+		his = self.settings.History
+		if his:
+			self.menuHistory.clear()
+			if "lastfiles" in his:
+				lastFiles = his[ "lastfiles" ]
+				for l in lastFiles.split( ',' ):
+					if l:
+						self.addFileToHistoryMenu( l )
 
 	def _saveConfig(self):
-		Config = ConfigParser.ConfigParser()
-		Config.read( settingsFile )
-		if not Config.has_section( 'BaseSettings' ):
-			Config.add_section( 'BaseSettings' )
 		lastTab = self.tabWidget.currentIndex()
 		lastProj = str(self.projects_cmb.currentText())
 		selItem = self.sequences_lw.selectedItems()
 		lastSeq = ''
 		if selItem:
 			lastSeq = str( selItem[0].text() )
-		Config.set( 'BaseSettings', 'lastproject', lastProj )
-		Config.set( 'BaseSettings', 'lastSequence', lastSeq )
-		Config.set( 'BaseSettings', 'lasttab', lastTab )
-		with open( settingsFile, 'w' ) as cfgfile:
-			Config.write(cfgfile)
+		self.settings.write( 'History', 'lastproject', lastProj )
+		self.settings.write( 'History', 'lastSequence', lastSeq )
+		self.settings.write( 'History', 'lasttab', lastTab )
 
 	def setProjectsBasePath(self):
 		"""select a base Path for the projects"""
 		fil = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory"))
 		if fil:
-			Config = ConfigParser.ConfigParser()
-			Config.read( settingsFile )
-			if not Config.has_section( 'GeneralSettings' ):
-				Config.add_section( 'GeneralSettings' )
-			Config.set( 'GeneralSettings', 'basepath', fil )
-			with open( settingsFile, 'w' ) as cfgfile:
-				print 'writing config file'
-				Config.write(cfgfile)
+			self.settings.write( 'General', 'basepath', fil )
 			prj.BASE_PATH = fil
 			self.fillProjectsCombo()
 			self.updateUi()
-
 
 	def _makeConnections(self):
 		"""create the connections in the ui"""
@@ -473,6 +469,7 @@ class ManagerUI(base,fom):
 		else:
 			asset = item.data(32)
 		os.system("start "+ str( asset.path ) )
+		self.addFileToHistory( asset )
 		self.setStatusBarMessage( str( asset.path ) )
 		#os.popen( MAYAPATH + ' ' + str( asset.path ))
 
@@ -529,7 +526,40 @@ class ManagerUI(base,fom):
 			asset = item.data(32).toPyObject()
 		else:
 			asset = item.data(32)
+		self.addFileToHistory( asset )
 		subprocess.Popen(r'explorer /select,"'+ asset.path.replace( '/','\\' ) +'"')
+
+	def addFileToHistory(self, asset):
+		"""docstring for addFileToHistory"""
+		#ADD TO HISTORY opened FILE
+		his = self.settings.History
+		lastFiles = ''
+		if his:
+			if "lastfiles" in his:
+				savedFiles = his[ "lastfiles" ]
+				savedFiles = savedFiles.replace( asset.path + ',', '' )
+				historyCount = 10
+				for a in savedFiles.split( ',' ):
+					if historyCount == 0:
+						break
+					if not a:
+						continue
+					lastFiles += a + ','
+					historyCount -= 1
+		self.settings.write( 'History', 'lastfiles', asset.path + ',' + lastFiles )
+		self._loadHistoryFiles()
+
+	def addFileToHistoryMenu(self, path):
+		"""docstring for addFileToHistoryMenu"""
+		asset = mfl.mayaFile( path )
+		actionOpenHistory = QtGui.QAction( asset.path, self.menuHistory )
+		self.menuHistory.addAction( actionOpenHistory )
+		self.connect( actionOpenHistory, QtCore.SIGNAL( "triggered()" ), lambda val = asset : self.openHistoryFile(val) )
+
+	def openHistoryFile(self, asset):
+		"""docstring for openHistoryFile"""
+		self.addFileToHistory( asset )
+		asset.open()
 
 	def saveScene(self):
 		"""save scene here"""
@@ -554,6 +584,7 @@ class ManagerUI(base,fom):
 			asset = item.data(32).toPyObject()
 		else:
 			asset = item.data(32)
+		self.addFileToHistory( asset )
 		asset.open()
 
 	def importFile(self):
