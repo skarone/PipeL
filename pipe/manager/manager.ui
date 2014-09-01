@@ -274,6 +274,11 @@
            </column>
            <column>
             <property name="text">
+             <string>SkinFix</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
              <string>Hrs</string>
             </property>
            </column>

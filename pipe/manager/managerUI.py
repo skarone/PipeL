@@ -303,9 +303,10 @@ class ManagerUI(base,fom):
 			item.setCheckState(QtCore.Qt.Unchecked )
 			item.setData(32, s )
 			self.shots_tw.setItem( i, 0, item )
-			files = [
+			files = [ #THIS MUST HAVE THE ORDER OF THE TABLE COLUMNS
 				s.layPath,
 				s.animPath,
+				s.skinFixPath,
 				s.hrsPath,
 				s.vfxPath,
 				s.simPath,
@@ -672,8 +673,6 @@ class ManagerUI(base,fom):
 
 	def closeEvent(self, event):
 		self._saveConfig()
-
-	
 
 def main():
 	global PyForm

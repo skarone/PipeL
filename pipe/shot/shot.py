@@ -138,13 +138,14 @@ class Shot(object):
 			0  : 0k file or not exists
 			1  : updated"""
 		depFiles = [ 
-				[dp.Node( self.layPath   ),[]],
-				[dp.Node( self.animPath  ),[ 0 ]],
-				[dp.Node( self.hrsPath   ),[ 1 ]],
-				[dp.Node( self.vfxPath   ),[ 1 ]],
-				[dp.Node( self.simPath   ),[ 1 ]],
-				[dp.Node( self.litPath   ),[ 1, 2, 3, 4 ]],
-				[dp.Node( self.compPath  ),[ 5 ]]
+				[dp.Node( self.layPath      ),[]],
+				[dp.Node( self.animPath     ),[ 0 ]],
+				[dp.Node( self.skinFixPath  ),[ 1 ]],
+				[dp.Node( self.hrsPath      ),[ 1 ]],
+				[dp.Node( self.vfxPath      ),[ 1 ]],
+				[dp.Node( self.simPath      ),[ 1 ]],
+				[dp.Node( self.litPath      ),[ 1, 2, 3, 4, 5 ]],
+				[dp.Node( self.compPath     ),[ 6 ]]
 				]
 		res = dp.dep_resolvedArray( depFiles )
 		result = []
@@ -171,6 +172,17 @@ class Shot(object):
 	def exists(self):
 		"""return if the shot exists"""
 		return os.path.exists( self.path )
+
+	@property
+	def skinFixPath(self):
+		"""docstring for skinFixPath"""
+		return mfl.mayaFile( self.path + '/SkinFix/' + self.name + '_SKIN.ma' )
+
+	@property
+	def hasSkin(self):
+		"""docstring for hasSkin"""
+		return os.path.getsize( self.skinFixPath.path ) != 0
+	
 
 	@property
 	def animCachesPath(self):
@@ -237,7 +249,7 @@ class Shot(object):
 				'/SkinFix',
 				'/SkinFix/Versions',
 				'/SkinFix/Data',
-				'/SkinFix/' + self.name + '_SKINFIX.ma',
+				'/SkinFix/' + self.name + '_SKIN.ma',
 				#POOL
 				'/Pool',
 				'/Pool/Anim',

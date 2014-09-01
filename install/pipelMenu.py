@@ -42,6 +42,11 @@ mc.menuItem( l = 'Mirror Selected Curve', c = "import modeling.curve.mirrorCurve
 mc.menuItem( l = 'Spider Web Creator', c = "import modeling.spiderWebCreator.spiderWebCreatorUi as spw; reload( spw ); spw.main();" )
 mc.setParent('..', menu = True )
 
+#ANIMATION
+mc.menuItem( l = 'Animation', sm = True, to = True )
+mc.menuItem( l = 'Playblast', c = "import animation.playblast.playblast as plb; plb.playblastCurrentFile();" )
+mc.setParent('..', menu = True )
+
 #HAIR
 mc.menuItem( l = 'Hair', sm = True, to = True )
 mc.menuItem( l = 'Hair System Creator', c = "import hair.hairSystem.hairUi as hru;reload( hru );hru.main();" )
