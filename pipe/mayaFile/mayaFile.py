@@ -155,6 +155,7 @@ class mayaFile(fl.File):
 				finalbase = block[1]
 		BasePath = self.path[:base]
 		finalBasePath = newPathFile.path[:finalbase]
+		print finalBasePath
 		self.copyTextures( newPathFile, BasePath, finalBasePath )
 		self.copyCaches( newPathFile, BasePath, finalBasePath )
 		self.copyReferences( newPathFile, BasePath, finalBasePath )
@@ -162,26 +163,27 @@ class mayaFile(fl.File):
 	def copyTextures( self, newPathFile, BasePath, finalBasePath ):
 		"""docstring for copyTextures"""
 		for t in newPathFile.textures:
-			origTexture = tfl.textureFile( t.path.replace( finalBasePath, BasePath ) )
-			if not origTexture.exists:
+			print t.path, finalBasePath, BasePath
+			origTexture = tfl.textureFile( t.path.replace( BasePath, finalBasePath ) )
+			if not t.exists:
 				continue
-			if t.exists:
-				if not t.isOlderThan( origTexture ):
+			if origTexture.exists:
+				if not origTexture.isOlderThan( t ):
 					continue
-			print 'copiando ', origTexture.path, t.path
-			origTexture.copy( t.path )
+			print 'copiando ', t.path, origTexture.path
+			t.copy( origTexture.path )
 
 	def copyReferences(self, newPathFile, BasePath, finalBasePath ):
 		"""copy references from file, recursive"""
 		for r in newPathFile.references:
-			origRef = mayaFile( r.path.replace( finalBasePath, BasePath ) )
-			if not origRef.exists:
+			origRef = mayaFile( r.path.replace( BasePath, finalBasePath ) )
+			if not r.exists:
 				continue
-			if r.exists:
-				if not r.isOlderThan( origRef ):
+			if origRef.exists:
+				if not origRef.isOlderThan( r ):
 					continue
-			print 'copiando ', origRef.path, r.path
-			origRef.copyAll( r.path )
+			print 'copiando ', r.path, origRef.path
+			r.copyAll( origRef.path )
 
 	@property
 	def caches(self):
@@ -196,14 +198,14 @@ class mayaFile(fl.File):
 	def copyCaches(self, newPathFile, BasePath, finalBasePath ):
 		"""copy all the caches in the file"""
 		for r in newPathFile.caches:
-			origRef = mayaFile( r.path.replace( finalBasePath, BasePath ) )
-			if not origRef.exists:
+			origRef = mayaFile( r.path.replace( BasePath, finalBasePath ) )
+			if not r.exists:
 				continue
-			if r.exists:
-				if not r.isOlderThan( origRef ):
+			if origRef.exists:
+				if not origRef.isOlderThan( r ):
 					continue
-			print 'copiando ', origRef.path, r.path
-			origRef.copy( r.path )
+			print 'copiando ', r.path, origRef.path
+			r.copy( origRef.path )
 
 	def setRes(self, newRes, path ):
 		tex = tfl.textureFile( path )

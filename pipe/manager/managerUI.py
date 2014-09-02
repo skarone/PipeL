@@ -142,9 +142,7 @@ class ManagerUI(base,fom):
 	def _makeConnections(self):
 		"""create the connections in the ui"""
 		self.connect( self.refresh_btn            , QtCore.SIGNAL("clicked()") , self.updateUi )		
-		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self.updateUi )
-		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self.updateUi )
-		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ),self.updateUi )
+		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "activated( const QString& )" ), self.updateUi )
 		QtCore.QObject.connect( self.actionNew_Project, QtCore.SIGNAL( "triggered()" ), self._newProject )
 		QtCore.QObject.connect( self.actionNew_Asset, QtCore.SIGNAL( "triggered()" ), self._newAsset )
 		QtCore.QObject.connect( self.actionNew_Set, QtCore.SIGNAL( "triggered()" ), self._newSet )
@@ -164,13 +162,20 @@ class ManagerUI(base,fom):
 		QtCore.QObject.connect( self.shots_tw, QtCore.SIGNAL( "itemDoubleClicked (QTableWidgetItem *)" ), self.openFile )
 		QtCore.QObject.connect( self.shots_tw, QtCore.SIGNAL( "itemClicked (QTableWidgetItem *)" ), self.setStatusInfo )
 		#SERVER SIGNALS
-		QtCore.QObject.connect( self.compareServer_chb, QtCore.SIGNAL( "stateChanged  (int)" ), self.updateUi )
+		QtCore.QObject.connect( self.compareServer_chb, QtCore.SIGNAL( "stateChanged  (int)" ), self.updateFullUi )
 		#search signals
 		QtCore.QObject.connect( self.search_asset_le, QtCore.SIGNAL( "textEdited (const QString&)" ), self.searchAsset )
 		QtCore.QObject.connect( self.search_shot_le, QtCore.SIGNAL( "textEdited (const QString&)" ), self.searchShot )
 
 	def updateUi(self):
 		"""update ui"""
+		self.fillAssetsTable()
+		self.fillSequenceList()
+		self.fillSetTable()
+
+	def updateFullUi(self):
+		"""docstring for updateFullUi"""
+		self.fillProjectsCombo()
 		self.fillAssetsTable()
 		self.fillSequenceList()
 		self.fillSetTable()
@@ -199,22 +204,53 @@ class ManagerUI(base,fom):
 
 	def fillProjectsCombo(self):
 		"""fill projects combo with projects in local disc"""
+		lastProj = str(self.projects_cmb.currentText())
 		self.projects_cmb.clear()
-		self.projects_cmb.addItems( prj.projects() )
+		localProjects = prj.projects( prj.BASE_PATH )
+		projects = []
+		if self.compareServer_chb.isChecked(): #SERVER MODE ON
+			serverPath = str( self.serverPath_le.text() )
+			serverProjects = prj.projects( serverPath )
+			for s in serverProjects:
+				if any( l == s for l in localProjects ):
+					continue
+				projects.append( s )
+		projects.extend( localProjects )
+		self.projects_cmb.addItems( projects )
+		index = self.projects_cmb.findText( lastProj )
+		if not index == -1:
+			self.projects_cmb.setCurrentIndex(index)
 
 	def fillAssetsTable(self):
 		"""fill the table with the assets in the project"""
-		proj = prj.Project( str( self.projects_cmb.currentText()) )
+		proj = prj.Project( str( self.projects_cmb.currentText()), prj.BASE_PATH )
 		if not proj.name:
 			return
 		assets = proj.assets
+		color = [QtGui.QColor( "#CACAD4" ),
+				QtGui.QColor( "green" ),    
+				QtGui.QColor( "red" ),
+				QtGui.QColor( "#000000" )    #FILE NOT EXISTS
+				]
+		serverComColor = [QtGui.QColor( "#CACAD4" ), #BOTH IN ZERO
+						QtGui.QColor( "#00CC00" ),   #BOTH IN SINCRO
+						QtGui.QColor( "#FF0000" ),   #NEEDS DOWNLOAD
+						QtGui.QColor( "#CC66FF" ),   #NEEDS UPLOAD
+						QtGui.QColor( "#000000" )    #FILE NOT EXISTS
+						]
+		if self.compareServer_chb.isChecked(): #SERVER MODE ON
+			serverPath = self.serverPath_le.text()
+			serverProj = prj.Project( str( self.projects_cmb.currentText()), serverPath )
+			serverAssets = serverProj.assets
+			finalAssets = []
+			for a in serverAssets:
+				if any( b.name == a.name for b in assets ):
+					continue
+				finalAssets.append( a )
+			assets.extend( finalAssets )
 		self.assets_tw.setRowCount( len( assets ) )
-		color = [QtGui.QColor( "grey" ),
-				QtGui.QColor( "green" ),
-				QtGui.QColor( "red" )]
 		if not assets:
 			return
-		serverPath = self.serverPath_le.text()
 		for i,a in enumerate( assets ):
 			item = QtGui.QTableWidgetItem( a.name )
 			#item.setFlags(QtCore.Qt.ItemIsEnabled)
@@ -228,35 +264,53 @@ class ManagerUI(base,fom):
 				a.hairPath,
 				a.finalPath
 				]
-			status = a.status
 			if self.compareServer_chb.isChecked(): #SERVER MODE ON
 				for v,f in enumerate(files):
-					item = QtGui.QTableWidgetItem( f.date )
-					#item.setFlags(QtCore.Qt.ItemIsEnabled)
+					if f.exists:
+						item = QtGui.QTableWidgetItem( f.date )
+					else:
+						item = QtGui.QTableWidgetItem( 'No Exists' )
 					item.setCheckState(QtCore.Qt.Unchecked )
 					item.setData(32, f )
 					filePath = str( f.path )
-					serverFile = fl.File( filePath.replace( prj.BASE_PATH, serverPath ) )
-					if status[v] == 0:
-						item.setText( '' )
-					stat = status[v]
-					if serverFile.exists and f.exists:
-						if not serverFile.isZero:
-							if f.isOlderThan( serverFile ):
-								item.setText( f.date + '||' + serverFile.date )
-								stat = -1
-							else:
-								stat = 1
-						elif f.isZero:
-							stat = 0
+					stat = 0
+					if serverPath in f.path:                                      # THIS FILE IS ONLY ON SERVER
+						if f.exists:
+							stat = 2
+							if f.isZero:
+								stat = 0
 						else:
-							stat = 1
-					if uiH.USEPYQT:
-						item.setBackgroundColor( color[ stat ])
+							stat = 4
 					else:
-						item.setBackground( color[ stat ] )
+						serverFile = fl.File( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
+						if not serverFile.exists and f.exists:                    # LOCAL EXISTS SERVER NOT
+							stat = 3
+						elif serverFile.exists and not f.exists:
+							stat = 2
+							if serverFile.isZero:
+								stat = 0
+						elif serverFile.exists and f.exists:
+							print serverFile.path, f.path
+							if serverFile.isZero and f.isZero:                      # BOTH ARE ZERO
+								stat = 0
+							else:
+								if f.isOlderThan( serverFile ):                     # LOCAL OLDER THAN SERVER
+									item.setText( f.date + '||' + serverFile.date )
+									stat = 2
+								elif serverFile.isOlderThan( f ):                   # SERVER OLDER THAN LOCAL
+									item.setText( f.date + '||' + serverFile.date )
+									stat = 3
+								else:                                               # BOTH IN SINCRO
+									stat = 1
+						else:
+							stat = 4                                                # FILE NOT EXISTS!
+					if uiH.USEPYQT:
+						item.setBackgroundColor( serverComColor[ stat ])
+					else:
+						item.setBackground( serverComColor[ stat ] )
 					self.assets_tw.setItem( i, v + 1, item )
 			else:
+				status = a.status
 				for v,f in enumerate(files):
 					if f.exists:
 						item = QtGui.QTableWidgetItem( f.date )
@@ -275,26 +329,53 @@ class ManagerUI(base,fom):
 
 	def fillSequenceList(self):
 		"""fill list of sequence"""
-		proj = prj.Project( self.projects_cmb.currentText() )
+		proj = prj.Project( str( self.projects_cmb.currentText() ), prj.BASE_PATH )
 		if not proj.name:
 			return
 		self.sequences_lw.clear()
 		self.shots_tw.clearContents()
 		seqs = proj.sequences
+		if self.compareServer_chb.isChecked(): #SERVER MODE ON
+			serverPath = self.serverPath_le.text()
+			serverProj = prj.Project( str( self.projects_cmb.currentText()), serverPath )
+			finalSeqs = []
+			for s in serverProj.sequences:
+				if any( s.name == b.name for b in seqs ):
+					continue
+				finalSeqs.append( s )
+			seqs.extend( finalSeqs )
 		if not seqs:
 			return
 		self.sequences_lw.addItems( [s.name for s in seqs ])
 		
 	def fillShotsTable(self):
 		"""fill the tables with the shots of the selected sequence"""
-		proj      = prj.Project( str( self.projects_cmb.currentText() ))
+		proj = prj.Project( str( self.projects_cmb.currentText()), prj.BASE_PATH )
 		sequence  = sq.Sequence( str( self.sequences_lw.selectedItems()[0].text() ), proj )
-		self.shots_tw.setRowCount( len( sequence.shots ) )
+		shots = sequence.shots
 		color = [QtGui.QColor( "grey" ),
 				QtGui.QColor( "green" ),
 				QtGui.QColor( "red" )]
-		serverPath = self.serverPath_le.text()
-		for i,s in enumerate( sequence.shots ):
+		serverComColor = [QtGui.QColor( "#CACAD4" ), #BOTH IN ZERO
+						QtGui.QColor( "#00CC00" ),   #BOTH IN SINCRO
+						QtGui.QColor( "#FF0000" ),   #NEEDS DOWNLOAD
+						QtGui.QColor( "#CC66FF" ),   #NEEDS UPLOAD
+						QtGui.QColor( "#000000" )    #FILE NOT EXISTS
+						]
+		if self.compareServer_chb.isChecked(): #SERVER MODE ON
+			serverPath = self.serverPath_le.text()
+			serverProj = prj.Project( str( self.projects_cmb.currentText()), serverPath )
+			serverSequence  = sq.Sequence( str( self.sequences_lw.selectedItems()[0].text() ), serverProj )
+			serverShots = serverSequence.shots
+			finalShots = []
+			for a in serverShots:
+				if any( b.name == a.name for b in shots ):
+					continue
+				finalShots.append( a )
+			shots.extend( finalShots )
+		self.shots_tw.setRowCount( len( shots ) )
+		for i,s in enumerate( shots ):
+			print s.name
 			item = QtGui.QTableWidgetItem( s.name )
 			item.setCheckState(QtCore.Qt.Unchecked )
 			item.setData(32, s )
@@ -312,29 +393,48 @@ class ManagerUI(base,fom):
 			status = s.status
 			if self.compareServer_chb.isChecked(): #SERVER MODE ON
 				for v,f in enumerate(files):
-					item = QtGui.QTableWidgetItem( f.date )
+					if f.exists:
+						item = QtGui.QTableWidgetItem( f.date )
+					else:
+						item = QtGui.QTableWidgetItem( 'No Exists' )
 					item.setCheckState(QtCore.Qt.Unchecked )
 					item.setData(32, f )
 					filePath = str( f.path )
-					serverFile = fl.File( filePath.replace( prj.BASE_PATH, serverPath ) )
-					if status[v] == 0:
-						item.setText( '' )
-					stat = status[v]
-					if serverFile.exists and f.exists:
-						if not serverFile.isZero:
-							if f.isOlderThan( serverFile ):
-								item.setText( f.date + '||' + serverFile.date )
-								stat = -1
-							else:
-								stat = 1
-						elif f.isZero:
-							stat = 0
+					stat = 0
+					if serverPath in f.path:                                      # THIS FILE IS ONLY ON SERVER
+						if f.exists:
+							stat = 2
+							if f.isZero:
+								stat = 0
 						else:
-							stat = 1
-					if uiH.USEPYQT:
-						item.setBackgroundColor( color[ stat ])
+							stat = 4
 					else:
-						item.setBackground( color[ stat ] )
+						serverFile = fl.File( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
+						if not serverFile.exists and f.exists:                    # LOCAL EXISTS SERVER NOT
+							stat = 3
+						elif serverFile.exists and not f.exists:
+							stat = 2
+							if serverFile.isZero:
+								stat = 0
+						elif serverFile.exists and f.exists:
+							print serverFile.path, f.path
+							if serverFile.isZero and f.isZero:                      # BOTH ARE ZERO
+								stat = 0
+							else:
+								if f.isOlderThan( serverFile ):                     # LOCAL OLDER THAN SERVER
+									item.setText( f.date + '||' + serverFile.date )
+									stat = 2
+								elif serverFile.isOlderThan( f ):                   # SERVER OLDER THAN LOCAL
+									item.setText( f.date + '||' + serverFile.date )
+									stat = 3
+								else:                                               # BOTH IN SINCRO
+									stat = 1
+						else:
+							stat = 4                                                # FILE NOT EXISTS!
+					if uiH.USEPYQT:
+						item.setBackgroundColor( serverComColor[ stat ])
+					else:
+						item.setBackground( serverComColor[ stat ] )
 					self.shots_tw.setItem( i, v + 1, item )
 			else:
 				for v,f in enumerate(files):
@@ -489,12 +589,16 @@ class ManagerUI(base,fom):
 		actionOpenInExplorer = QtGui.QAction("Open File in explorer", menu)
 		menu.addAction( actionOpenInExplorer )
 		self.connect( actionOpenInExplorer, QtCore.SIGNAL( "triggered()" ), self.openFileLocation )
+		menu.addSeparator()
+		actionCopyServer = QtGui.QAction("Copy From Server", menu)
+		menu.addAction(actionCopyServer)
+		self.connect( actionCopyServer, QtCore.SIGNAL( "triggered()" ), self.copyFromServer )
+		menu.addSeparator()
 		if INMAYA:
 			#COPY TIME SETTINGS
 			actionCopyTime = QtGui.QAction("Copy Time Settings", menu)
 			menu.addAction( actionCopyTime )
 			self.connect( actionCopyTime, QtCore.SIGNAL( "triggered()" ), self.copyTimeSettings )
-			menu.addSeparator()
 			#REFERENCE
 			actionReference = QtGui.QAction("Reference", menu)
 			menu.addAction( actionReference )
@@ -512,9 +616,6 @@ class ManagerUI(base,fom):
 			menu.addAction( actionSaveScene )
 			self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.saveScene )
 
-		#actionCopyServer = QtGui.QAction("Copy From Server", menu)
-		#menu.addAction(actionCopyServer)
-		#self.connect( actionCopyServer, QtCore.SIGNAL( "triggered()" ), self.copyFromServer )
 		tabwid = self._getCurrentTab()
 		menu.popup(tabwid.viewport().mapToGlobal(pos))
 
@@ -688,15 +789,23 @@ class ManagerUI(base,fom):
 
 	def copyAssetFromServer(self, asset):
 		"""main function to copy asset from server"""
-		serverPath = self.serverPath_le.text()
+		serverPath = str( self.serverPath_le.text() )
 		filePath = str( asset.path )
 		if asset.path.endswith( '.ma' ):# MAYA FILE
 			#COPY TEXTURES AND REFERENCES RECURSIVE
-			serverFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH, serverPath ) )
-			serverFile.copy( str( asset.path ))
+			if serverPath in filePath:
+				localFile = mfl.mayaFile( filePath.replace( serverPath, prj.BASE_PATH + '/' ) )
+				asset.copyAll( str( localFile.path ))
+			else:
+				localFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
+				localFile.copyAll( asset.path )
 		else:
-			serverFile = fl.File( filePath.replace( prj.BASE_PATH, serverPath ) )
-			serverFile.copy( str( asset.path ))
+			if serverPath in filePath:
+				localFile = fl.File( filePath.replace( serverPath, prj.BASE_PATH + '/' ) )
+				asset.copy( str( localFile.path ))
+			else:
+				localFile = fl.File( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
+				localFile.copy( str( asset.path ))
 
 	def setStatusBarMessage(self, message):
 		"""docstring for setStatusBarMessage"""

@@ -56,16 +56,18 @@ def shotOrAssetFromFile(mayaFile):
 	else:
 		return None
 
-def projects():
-	"""return all the projects in the BASE_PATH"""
-	if os.path.exists( BASE_PATH ):
-		return sorted([ a for a in os.listdir( BASE_PATH ) if os.path.isdir( BASE_PATH + '/' + a )])
+def projects( basePath = BASE_PATH):
+	"""return all the projects in the basePath"""
+	print basePath
+	if os.path.exists( basePath ):
+		return sorted([ a for a in os.listdir( basePath ) if os.path.isdir( basePath + '/' + a )])
 	return []
 
 class Project(object):
 	"""project class"""
-	def __init__(self, name):
+	def __init__(self, name, basePath = BASE_PATH ):
 		self._name = name
+		self._basePath = basePath
 	
 	@property
 	def name(self):
@@ -75,7 +77,7 @@ class Project(object):
 	@property
 	def path(self):
 		"""return the path of the Project"""
-		base = BASE_PATH
+		base = self._basePath
 		if base.endswith( '/' ):
 			base = base[:-1]
 		if USE_MAYA_SUBFOLDER:

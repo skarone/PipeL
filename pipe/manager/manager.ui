@@ -57,7 +57,7 @@
       <item>
        <widget class="QCheckBox" name="compareServer_chb">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="text">
          <string>Compare</string>
@@ -85,7 +85,7 @@
            </size>
           </property>
           <property name="text">
-           <string>\\IGNACIO-PC/Projects/</string>
+           <string>P:/</string>
           </property>
          </widget>
         </item>
