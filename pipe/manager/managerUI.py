@@ -93,6 +93,7 @@ class ManagerUI(base,fom):
 					index = self.projects_cmb.findText( lastProject )
 					if not index == -1:
 						self.projects_cmb.setCurrentIndex(index)
+						self.updateUi()
 			if 'lasttab' in his:
 				lastTab = his[ "lasttab" ]
 				self.tabWidget.setCurrentIndex( int( lastTab ))
