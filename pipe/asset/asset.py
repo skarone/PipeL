@@ -225,9 +225,10 @@ class Asset(object):
 	def status(self):
 		"""return an array with the status of the files in the asset,
 		return:
-			-1 : not updated
-			0  : 0k file or not exists
-			1  : updated"""
+			0  : 0k file
+			1  : updated
+			2  : not Updated
+			3  : not exists"""
 		depFiles = [ 
 				[dp.Node( self.modelPath   ),[]],
 				[dp.Node( self.shadingPath ),[ 0 ]],
@@ -240,7 +241,7 @@ class Asset(object):
 		for i,f in enumerate( depFiles ):
 			value = 1
 			if not f[0].name.exists:
-				value = 0
+				value = 3
 			elif f[0].name.isZero:
 				value = 0
 			else:
@@ -251,7 +252,7 @@ class Asset(object):
 						continue
 					isOlder = f[0].name.isOlderThan( deps.name )
 					if isOlder:
-						value = -1
+						value = 2
 						break
 			result.append( value )
 		return result

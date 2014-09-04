@@ -63,6 +63,7 @@ class ManagerUI(base,fom):
 		self.fillAssetsTable()
 		self._makeConnections()
 		self._loadConfig()
+		self.serverHelp_wg.hide()
 		self.assets_tw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.assets_tw.customContextMenuRequested.connect(self.showMenu)
 		
@@ -286,12 +287,13 @@ class ManagerUI(base,fom):
 						serverFile = fl.File( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
 						if not serverFile.exists and f.exists:                    # LOCAL EXISTS SERVER NOT
 							stat = 3
+							if f.isZero:
+								stat = 0
 						elif serverFile.exists and not f.exists:
 							stat = 2
 							if serverFile.isZero:
 								stat = 0
 						elif serverFile.exists and f.exists:
-							print serverFile.path, f.path
 							if serverFile.isZero and f.isZero:                      # BOTH ARE ZERO
 								stat = 0
 							else:
@@ -376,7 +378,6 @@ class ManagerUI(base,fom):
 			shots.extend( finalShots )
 		self.shots_tw.setRowCount( len( shots ) )
 		for i,s in enumerate( shots ):
-			print s.name
 			item = QtGui.QTableWidgetItem( s.name )
 			item.setCheckState(QtCore.Qt.Unchecked )
 			item.setData(32, s )
@@ -418,7 +419,6 @@ class ManagerUI(base,fom):
 							if serverFile.isZero:
 								stat = 0
 						elif serverFile.exists and f.exists:
-							print serverFile.path, f.path
 							if serverFile.isZero and f.isZero:                      # BOTH ARE ZERO
 								stat = 0
 							else:
@@ -594,6 +594,9 @@ class ManagerUI(base,fom):
 		actionCopyServer = QtGui.QAction("Copy From Server", menu)
 		menu.addAction(actionCopyServer)
 		self.connect( actionCopyServer, QtCore.SIGNAL( "triggered()" ), self.copyFromServer )
+		actionToServer = QtGui.QAction("Copy To Server", menu)
+		menu.addAction(actionToServer)
+		self.connect( actionToServer, QtCore.SIGNAL( "triggered()" ), self.copyToServer )
 		menu.addSeparator()
 		if INMAYA:
 			#COPY TIME SETTINGS
@@ -699,7 +702,6 @@ class ManagerUI(base,fom):
 			asset = item.data(32)
 		asset.imp()
 		
-
 	def _getCurrentTab(self):
 		"""return the visible table in the ui"""
 		currentTab = self.tabWidget.currentIndex()
@@ -753,8 +755,7 @@ class ManagerUI(base,fom):
 		props.show()
 
 	def copyFromServer(self):
-		"""copy selected asset from serrver"""
-		serverPath = self.serverPath_le.text()
+		"""copy selected asset from server"""
 		tab = self._getCurrentTab()
 		item = tab.currentItem()
 		if uiH.USEPYQT:
@@ -764,6 +765,16 @@ class ManagerUI(base,fom):
 		self.copyAssetFromServer( asset )
 		self.updateUi()
 
+	def copyToServer(self):
+		"""copy selected asset to server"""
+		tab = self._getCurrentTab()
+		item = tab.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		self.copyAssetToServer( asset )
+		self.updateUi()
 
 	def _getSelectedItemsInCurrentTab(self):
 		"""return the selected assets in current Tab"""
@@ -783,7 +794,6 @@ class ManagerUI(base,fom):
 	def copySelectedAssetsFromServer(self):
 		"""copy all the assets from server"""
 		assets = self._getSelectedItemsInCurrentTab()
-		serverPath = self.serverPath_le.text()
 		for a in assets:
 			self.copyAssetFromServer( a )
 		self.updateUi()
@@ -807,6 +817,32 @@ class ManagerUI(base,fom):
 			else:
 				localFile = fl.File( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
 				localFile.copy( str( asset.path ))
+
+
+	def copySelectedAssetsToServer(self):
+		"""copy all the assets from server"""
+		assets = self._getSelectedItemsInCurrentTab()
+		for a in assets:
+			self.copyAssetToServer( a )
+		self.updateUi()
+
+	def copyAssetToServer(self, asset):
+		"""main function to copy asset to server"""
+		serverPath = str( self.serverPath_le.text() )
+		filePath = str( asset.path )
+		if asset.path.endswith( '.ma' ):# MAYA FILE
+			#COPY TEXTURES AND REFERENCES RECURSIVE
+			if serverPath in filePath: #THIS FILE ONLY EXISTS IN SERVER SO THERE IS NO NEED
+				return
+			else:
+				localFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
+				asset.copyAll( localFile.path )
+		else:
+			if serverPath in filePath: #THIS FILE ONLY EXISTS IN SERVER SO THERE IS NO NEED
+				return
+			else:
+				localFile = fl.File( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
+				asset.copy( str( localFile.path ))
 
 	def setStatusBarMessage(self, message):
 		"""docstring for setStatusBarMessage"""

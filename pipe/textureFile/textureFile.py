@@ -26,6 +26,12 @@ for n in mn.ls( typ = ['file', 'aiImage' ] ):
         toTx = f.toTx()
         n.attr( attr ).v = toTx.path
 
+#import pipe.project.project as prj
+def projectToTx( proj = 'DogMendoncaAndPizzaBoy' ):
+	proj = prj.Project( proj )
+	for a in proj.assets:
+		for t in a.textures:
+			t.makeTx()
 """
 
 MAKETXPATH     = 'C:/solidangle/mtoadeploy/2013/bin/maketx.exe'
@@ -33,14 +39,6 @@ dirname, filename = os.path.split(os.path.abspath(__file__))
 dirname = dirname.split( 'pipe' )[0]
 IMAGEMAGICPATH = dirname + 'bin/ImageMagick/'
 
-#import pipe.project.project as prj
-"""
-def projectToTx( proj = 'DogMendoncaAndPizzaBoy' ):
-	proj = prj.Project( proj )
-	for a in proj.assets:
-		for t in a.textures:
-			t.makeTx()
-"""
 
 class textureFile(fl.File):
 	"""docstring for textureFile"""

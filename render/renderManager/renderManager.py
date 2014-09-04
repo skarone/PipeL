@@ -23,6 +23,9 @@ fom, base = uiH.loadUiType( uifile )
 uiLayfile = PYFILEDIR + '/renderLayer.ui'
 fomLay, baseLay = uiH.loadUiType( uiLayfile )
 
+import pipe.mayaFile.mayaFile as mfl
+reload(mfl)
+
 import maya.cmds as mc
 frameUnits = { 
     'game': 15,
@@ -47,7 +50,6 @@ class RenderManagerUI(base,fom):
 		self._fillUi()
 		uiH.loadSkin( self, 'QTDarkGreen' )
 		
-
 	def _makeConnections(self):
 		"""create connection for ui"""
 		self.connect( self.render_btn, QtCore.SIGNAL("clicked()") , self.render )
@@ -101,6 +103,10 @@ class RenderManagerUI(base,fom):
 
 	def render(self):
 		"""docstring for render"""
+		if self.autoSave_chb.isChecked():
+			curFile = mfl.currentFile()
+			curFile.newVersion()
+			curFile.save()
 		dead     = dl.Deadline()
 		group    = str(self.groups_cmb.currentText())
 		pool     = str(self.pools_cmb.currentText())

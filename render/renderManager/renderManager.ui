@@ -31,6 +31,16 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QCheckBox" name="autoSave_chb">
+        <property name="text">
+         <string>AutoSave</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>

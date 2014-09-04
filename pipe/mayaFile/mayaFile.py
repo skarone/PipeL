@@ -136,17 +136,14 @@ class mayaFile(fl.File):
 			newPath = newPath.replace( srchAndRep[0], srchAndRep[1] )
 		return matchobj.group( 0 ).replace( path, newPath )
 
-	def copyAll( self, newPath ):
+	def copyAll( self, newPath, changePaths = True ):
 		"""custom copy"""
 		super( mayaFile, self ).copy( newPath )
 		print 'copiando ', self.path, newPath
 		#COPY TEXTURES AND FILES
-		self.copyDependences( mayaFile( newPath ) )
-
-	def copyDependences( self, newPathFile ):
-		"""copy all the dependences of the newPathFile... it will read from newFile instead of original"""
 		lon = 0
 		base = 0
+		newPathFile = mayaFile( newPath )
 		s = difflib.SequenceMatcher( None, self.path, newPathFile.path )
 		for block in s.get_matching_blocks():
 			if block[2] > lon:
@@ -155,7 +152,13 @@ class mayaFile(fl.File):
 				finalbase = block[1]
 		BasePath = self.path[:base]
 		finalBasePath = newPathFile.path[:finalbase]
-		print finalBasePath
+		self.copyDependences( newPathFile, BasePath, finalBasePath )
+		if changePaths:
+			newPathFile.changePaths( srchAndRep = [BasePath, finalBasePath] )
+
+
+	def copyDependences( self, newPathFile, BasePath, finalBasePath ):
+		"""copy all the dependences of the newPathFile... it will read from newFile instead of original"""
 		self.copyTextures( newPathFile, BasePath, finalBasePath )
 		self.copyCaches( newPathFile, BasePath, finalBasePath )
 		self.copyReferences( newPathFile, BasePath, finalBasePath )
@@ -172,6 +175,8 @@ class mayaFile(fl.File):
 					continue
 			print 'copiando ', t.path, origTexture.path
 			t.copy( origTexture.path )
+			#AUTO CREATE TX TODO!
+			origTexture.makeTx( True )
 
 	def copyReferences(self, newPathFile, BasePath, finalBasePath ):
 		"""copy references from file, recursive"""
