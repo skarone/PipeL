@@ -26,6 +26,7 @@ class File(object):
 	def __init__(self, path):
 		"""init file node with full path"""
 		self._path =  path
+		self._data = None
 
 	def __repr__(self):
 		"""return the path"""
@@ -166,9 +167,10 @@ class File(object):
 	@property
 	def data(self):
 		"""return the data if the file"""
-		with open( self.path ) as f:
-			file_str = f.read()
-		return file_str
+		if not self._data:
+			with open( self.path ) as f:
+				self._data = f.read()
+		return self._data
 
 	@property
 	def lines(self):

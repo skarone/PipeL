@@ -241,7 +241,7 @@ class ManagerUI(base,fom):
 						QtGui.QColor( "#000000" )    #FILE NOT EXISTS
 						]
 		if self.compareServer_chb.isChecked(): #SERVER MODE ON
-			serverPath = self.serverPath_le.text()
+			serverPath = str( self.serverPath_le.text() )
 			serverProj = prj.Project( str( self.projects_cmb.currentText()), serverPath )
 			serverAssets = serverProj.assets
 			finalAssets = []
@@ -339,7 +339,7 @@ class ManagerUI(base,fom):
 		self.shots_tw.clearContents()
 		seqs = proj.sequences
 		if self.compareServer_chb.isChecked(): #SERVER MODE ON
-			serverPath = self.serverPath_le.text()
+			serverPath = str( self.serverPath_le.text() )
 			serverProj = prj.Project( str( self.projects_cmb.currentText()), serverPath )
 			finalSeqs = []
 			for s in serverProj.sequences:
@@ -366,7 +366,7 @@ class ManagerUI(base,fom):
 						QtGui.QColor( "#000000" )    #FILE NOT EXISTS
 						]
 		if self.compareServer_chb.isChecked(): #SERVER MODE ON
-			serverPath = self.serverPath_le.text()
+			serverPath = str( self.serverPath_le.text() )
 			serverProj = prj.Project( str( self.projects_cmb.currentText()), serverPath )
 			serverSequence  = sq.Sequence( str( self.sequences_lw.selectedItems()[0].text() ), serverProj )
 			serverShots = serverSequence.shots
@@ -465,7 +465,7 @@ class ManagerUI(base,fom):
 				QtGui.QColor( "red" )]
 		if not sets:
 			return
-		serverPath = self.serverPath_le.text()
+		serverPath = str( self.serverPath_le.text() )
 		for i,a in enumerate( sets ):
 			item = QtGui.QTableWidgetItem( a.name )
 			item.setCheckState(QtCore.Qt.Unchecked )
@@ -767,14 +767,17 @@ class ManagerUI(base,fom):
 
 	def copyToServer(self):
 		"""copy selected asset to server"""
-		tab = self._getCurrentTab()
-		item = tab.currentItem()
-		if uiH.USEPYQT:
-			asset = item.data(32).toPyObject()
-		else:
-			asset = item.data(32)
-		self.copyAssetToServer( asset )
-		self.updateUi()
+		quit_msg = "Are you sure you want to copy this file to SERVER?"
+		reply = QtGui.QMessageBox.question(self, 'Message', quit_msg, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+		if reply == QtGui.QMessageBox.Yes:
+			tab = self._getCurrentTab()
+			item = tab.currentItem()
+			if uiH.USEPYQT:
+				asset = item.data(32).toPyObject()
+			else:
+				asset = item.data(32)
+			self.copyAssetToServer( asset )
+			self.updateUi()
 
 	def _getSelectedItemsInCurrentTab(self):
 		"""return the selected assets in current Tab"""
@@ -817,7 +820,6 @@ class ManagerUI(base,fom):
 			else:
 				localFile = fl.File( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
 				localFile.copy( str( asset.path ))
-
 
 	def copySelectedAssetsToServer(self):
 		"""copy all the assets from server"""

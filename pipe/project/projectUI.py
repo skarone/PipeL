@@ -6,6 +6,8 @@ from Qt import QtGui,QtCore
 
 import pipe.project.project   as prj
 reload( prj )
+import pipe.settings.settings as sti
+reload( sti )
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
@@ -21,12 +23,24 @@ class ProjectCreator(base, fom):
 			super(ProjectCreator, self).__init__()
 		self.setupUi(self)
 		self.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), self.createProject)
+		self.settings = sti.Settings()
+		self.loadProjectsPath()
 		uiH.loadSkin( self, 'QTDarkGreen' )
+
+	def loadProjectsPath(self):
+		"""docstring for loadProjectsPath"""
+		gen = self.settings.General
+		if gen:
+			basePath = gen[ "basepath" ]
+			if basePath:
+				if basePath.endswith( '\\' ):
+					basePath = basePath[:-1]
+				prj.BASE_PATH = basePath.replace( '\\', '/' )
 	
 	def createProject(self):
 		"""create New Project Based on new project name"""
 		projName = self.project_le.text()
-		newProject = prj.Project( str( projName ) )
+		newProject = prj.Project( str( projName ), prj.BASE_PATH )
 		if not newProject.exists:
 			newProject.create()
 			print 'New Project Created : ', newProject.name

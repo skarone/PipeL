@@ -64,13 +64,18 @@ class mayaFile(fl.File):
 		for m in match:
 			textures.append( tfl.textureFile( m[-1] ) )
 		return textures
+
+	def changePathsBrutForce(self, srchAndRep = []):
+		"""change all Paths in file but with brut force, instead of search textures or caches, just search paths to replace"""
+		file_str = re.sub( '(?:.+")' + srchAndRep[0] + '(?:".+)', srchAndRep[1], self.data )
+		self.write( file_str )
 		
 	def changePaths(self,newDir = '', srchAndRep = []):
 		"""change textures, references, and caches to new path"""
 		#TEXTURES
 		file_str = re.sub( '(?:.+".ftn" -type "string" ")(?P<Path>.+)(?:")', partial( self._changeTexture, newDir, '', '', srchAndRep ), self.data )
 		#REFERENCES
-		file_str = re.sub( '(:?file -r[d]*[i]*\s*[12]* .+[\n]?[\t]* ")(?P<Path>.+)";', partial( self._changeReferences, newDir, srchAndRep ), file_str )
+		file_str = re.sub( '(:?file -r[d]*[i]*\s*[12]* .+[\n]?[\t]* (-shd )?")(?P<Path>.+)";', partial( self._changeReferences, newDir, srchAndRep ), file_str )
 		#CACHES
 		file_str = re.sub( '(:?.+".fn" .+[\n]?[\t]* ")(?P<Path>.+abc)";', partial( self._changeCache, newDir, srchAndRep ), file_str )
 		self.write( file_str )
@@ -97,7 +102,7 @@ class mayaFile(fl.File):
 
 	def changeReferences(self,newDir = '', srchAndRep = []):
 		"""change References Paths"""
-		file_str = re.sub( '(:?file -r[d]*[i]*\s*[12]* .+[\n]?[\t]* ")(?P<Path>.+)";', partial( self._changeReferences, newDir, srchAndRep ), self.data )
+		file_str = re.sub( '(:?file -r[d]*[i]*\s*[12]* .+[\n]?[\t]* (-shd )?")(?P<Path>.+)";', partial( self._changeReferences, newDir, srchAndRep ), self.data )
 		# do stuff with file_str
 		self.write( file_str )
 
@@ -154,8 +159,7 @@ class mayaFile(fl.File):
 		finalBasePath = newPathFile.path[:finalbase]
 		self.copyDependences( newPathFile, BasePath, finalBasePath )
 		if changePaths:
-			newPathFile.changePaths( srchAndRep = [BasePath, finalBasePath] )
-
+			newPathFile.changePathsBrutForce( srchAndRep = [BasePath, finalBasePath] )
 
 	def copyDependences( self, newPathFile, BasePath, finalBasePath ):
 		"""copy all the dependences of the newPathFile... it will read from newFile instead of original"""
@@ -166,7 +170,6 @@ class mayaFile(fl.File):
 	def copyTextures( self, newPathFile, BasePath, finalBasePath ):
 		"""docstring for copyTextures"""
 		for t in newPathFile.textures:
-			print t.path, finalBasePath, BasePath
 			origTexture = tfl.textureFile( t.path.replace( BasePath, finalBasePath ) )
 			if not t.exists:
 				continue
@@ -197,7 +200,6 @@ class mayaFile(fl.File):
 		match =  re.findall( '(:?.+".fn" .+[\n]?[\t]* ")(?P<Path>.+abc)";', self.data )
 		for m in match:
 			caches.append( fl.File( m[-1] ) )
-		print caches
 		return caches
 
 	def copyCaches(self, newPathFile, BasePath, finalBasePath ):
