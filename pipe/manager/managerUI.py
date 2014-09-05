@@ -37,7 +37,6 @@ except:
 
 #load UI FILE
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
-MAYAPATH = 'C:/"Program Files"/Autodesk/Maya2013/bin/maya.exe'
 
 uifile = PYFILEDIR + '/manager.ui'
 fom, base = uiH.loadUiType( uifile )

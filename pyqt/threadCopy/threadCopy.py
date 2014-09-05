@@ -1,18 +1,22 @@
-class ProgressDialog(QtGui.QDialog):
+import os
+import general.ui.pySideHelper as uiH
+reload( uiH )
+uiH.set_qt_bindings()
+from Qt import QtGui,QtCore
 
-    def __init__(self, parent, source, destination):
-        QtGui.QDialog.__init__(self, parent)
+class ProgressDialog(QtGui.QProgressDialog):
+
+    def __init__(self, source, destination, parent = None):
+        QtGui.QProgressDialog.__init__(self, uiH.getMayaWindow())
         self.parent = parent
         self.source = source
         self.destination = destination
-        self.add_diag = progress_diag.Ui_Dialog()
-        self.add_diag.setupUi(self)
 
-        self.add_diag.infoLabel.setText("Copying: %s" % (self.source))
+        self.setLabelText("Copying: %s" % (self.source))
 
-        self.add_diag.progressBar.setMinimum(0)
-        self.add_diag.progressBar.setMaximum(100)
-        self.add_diag.progressBar.setValue(0)
+        self.setMinimum(0)
+        self.setMaximum(100)
+        self.setValue(0)
 
         self.show()
         self.copy()
@@ -25,7 +29,7 @@ class ProgressDialog(QtGui.QDialog):
         copy_thread.start()
 
     def update_progress(self, progress):
-        self.add_diag.progressBar.setValue(progress)
+        self.setValue(progress)
 
     def finished_copy(self, state):
         self.close()
@@ -35,7 +39,7 @@ class CopyThread(QtCore.QThread):
     procDone = QtCore.pyqtSignal(bool)
     procPartDone = QtCore.pyqtSignal(int)
 
-    def __init__(self, parent, source, destination):
+    def __init__(self, parent, source, destination ):
         QtCore.QThread.__init__(self, parent)
         self.source = source
         self.destination = destination

@@ -16,6 +16,12 @@ import pipe.mayaFile.mayaFile as mfl
 import pipe.cacheFile.cacheFile as cfl
 reload( cfl )
 try:
+	import maya.cmds as mc
+	mc.loadPlugin( 'AbcImport' )
+except:
+	pass
+
+try:
 	import general.mayaNode.mayaNode as mn
 	import maya.cmds as mc
 	INMAYA = True

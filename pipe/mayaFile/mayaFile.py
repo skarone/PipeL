@@ -67,7 +67,7 @@ class mayaFile(fl.File):
 
 	def changePathsBrutForce(self, srchAndRep = []):
 		"""change all Paths in file but with brut force, instead of search textures or caches, just search paths to replace"""
-		file_str = self.data.replace( srchAndRep[0], srchAndRep[1] )
+		file_str = self.data.replace( srchAndRep[0].replace( '\\', '/' ), srchAndRep[1].replace( '\\', '/' ) )
 		self.write( file_str )
 		
 	def changePaths(self,newDir = '', srchAndRep = []):
@@ -102,7 +102,7 @@ class mayaFile(fl.File):
 
 	def changeReferences(self,newDir = '', srchAndRep = []):
 		"""change References Paths"""
-		file_str = re.sub( '(:?file -r[d]*[i]*\s*[12]* .+[\n]?[\t]* (-shd )?")(?P<Path>.+)";', partial( self._changeReferences, newDir, srchAndRep ), self.data )
+		file_str = re.sub( '(?:file -r[d]*[i]*\s*[12]* .+[\n]?[\t]* (?:-shd )?")(?P<Path>.+)";', partial( self._changeReferences, newDir, srchAndRep ), self.data )
 		# do stuff with file_str
 		self.write( file_str )
 
@@ -120,10 +120,32 @@ class mayaFile(fl.File):
 	def references(self):
 		"""return the references in the scene"""
 		references = []
-		match =  re.findall( '(:?file -rdi [12] .+[\n]?[\t]* ")(?P<Path>.+)";', self.data )
+		refsPaths = []
+		match =  re.findall( '(:?file -r[d]*[i]*\s*[12]* .+[\n]?[\t]* ")(?P<Path>\S+ma)";', self.data )
 		for m in match:
+			if m[-1] in refsPaths:
+				continue
+			refsPaths.append( m[-1])
 			references.append( mayaFile( m[-1] ) )
 		return references
+
+	def allReferences(self):
+		"""return all references in a recursive way
+		import pipe.mayaFile.mayaFile as mfl
+		fi = mfl.mayaFile( r'D:\Projects\Pony_Halloween_Fantasmas\Maya\Sequences\Terror\Shots\s007_T07\Lit\s007_T07_LIT.ma' )
+		print fi.allReferences()"""
+		allreferences = []
+		for f in self.references:
+			allreferences.append( f )
+			allreferences.extend( f.allReferences() )
+		return allreferences
+
+	def allTextures(self):
+		"""return all the textures from file and references"""
+		textures = self.textures
+		for r in self.allReferences():
+			textures.extend( r.textures )
+		return textures
 
 	def changeCaches(self,newDir = '', srchAndRep = []):
 		"""change References Paths"""

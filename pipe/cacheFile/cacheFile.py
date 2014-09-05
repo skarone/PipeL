@@ -1,6 +1,5 @@
 try:
 	import maya.cmds as mc
-	mc.loadPlugin( 'AbcImport' )
 except:
 	pass
 import general.mayaNode.mayaNode as mn
