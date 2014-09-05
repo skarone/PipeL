@@ -816,9 +816,11 @@ class ManagerUI(base,fom):
 		else:
 			if serverPath in filePath:
 				localFile = fl.File( filePath.replace( serverPath, prj.BASE_PATH + '/' ) )
+				localFile.newVersion()
 				asset.copy( str( localFile.path ))
 			else:
 				localFile = fl.File( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
+				localFile.newVersion()
 				localFile.copy( str( asset.path ))
 
 	def copySelectedAssetsToServer(self):
@@ -838,6 +840,7 @@ class ManagerUI(base,fom):
 				return
 			else:
 				localFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
+				localFile.newVersion()
 				asset.copyAll( localFile.path )
 		else:
 			if serverPath in filePath: #THIS FILE ONLY EXISTS IN SERVER SO THERE IS NO NEED

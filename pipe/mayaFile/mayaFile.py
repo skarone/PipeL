@@ -67,7 +67,7 @@ class mayaFile(fl.File):
 
 	def changePathsBrutForce(self, srchAndRep = []):
 		"""change all Paths in file but with brut force, instead of search textures or caches, just search paths to replace"""
-		file_str = re.sub( '(?:.+")' + srchAndRep[0] + '(?:".+)', srchAndRep[1], self.data )
+		file_str = self.data.replace( srchAndRep[0], srchAndRep[1] )
 		self.write( file_str )
 		
 	def changePaths(self,newDir = '', srchAndRep = []):
@@ -143,12 +143,13 @@ class mayaFile(fl.File):
 
 	def copyAll( self, newPath, changePaths = True ):
 		"""custom copy"""
+		newPathFile = mayaFile( newPath )
+		newPathFile.newVersion()
 		super( mayaFile, self ).copy( newPath )
 		print 'copiando ', self.path, newPath
 		#COPY TEXTURES AND FILES
 		lon = 0
 		base = 0
-		newPathFile = mayaFile( newPath )
 		s = difflib.SequenceMatcher( None, self.path, newPathFile.path )
 		for block in s.get_matching_blocks():
 			if block[2] > lon:
@@ -212,6 +213,7 @@ class mayaFile(fl.File):
 				if not origRef.isOlderThan( r ):
 					continue
 			print 'copiando ', r.path, origRef.path
+			origRef.newVersion()
 			r.copy( origRef.path )
 
 	def setRes(self, newRes, path ):
