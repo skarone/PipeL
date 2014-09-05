@@ -5,6 +5,8 @@ reload( uiH )
 uiH.set_qt_bindings()
 from Qt import QtGui,QtCore
 
+import pyqt.threadCopy.threadCopy as trC
+
 import subprocess
 import ConfigParser
 import pipe.project.project   as prj
@@ -808,6 +810,7 @@ class ManagerUI(base,fom):
 			#COPY TEXTURES AND REFERENCES RECURSIVE
 			if serverPath in filePath:
 				localFile = mfl.mayaFile( filePath.replace( serverPath, prj.BASE_PATH + '/' ) )
+				
 				asset.copyAll( str( localFile.path ))
 			else:
 				localFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
