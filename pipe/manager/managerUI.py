@@ -810,11 +810,16 @@ class ManagerUI(base,fom):
 			#COPY TEXTURES AND REFERENCES RECURSIVE
 			if serverPath in filePath:
 				localFile = mfl.mayaFile( filePath.replace( serverPath, prj.BASE_PATH + '/' ) )
-				
-				asset.copyAll( str( localFile.path ))
+				localFile.newVersion()
+				deps = self.getDependenciesToCopy( asset )
+				toCopy = filesToCopy( deps, serverPath, prj.BASE_PATH + '/' )
+				trhC.MultiProgressDialog( toCopy, serverPath, prj.BASE_PATH + '/', self )
 			else:
-				localFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
-				localFile.copyAll( asset.path )
+				serverFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
+				serverFile.newVersion()
+				deps = self.getDependenciesToCopy( serverFile )
+				toCopy = filesToCopy( deps, serverPath, prj.BASE_PATH + '/' )
+				trhC.MultiProgressDialog( toCopy, serverPath, prj.BASE_PATH + '/', self )
 		else:
 			if serverPath in filePath:
 				localFile = fl.File( filePath.replace( serverPath, prj.BASE_PATH + '/' ) )
@@ -822,7 +827,7 @@ class ManagerUI(base,fom):
 				asset.copy( str( localFile.path ))
 			else:
 				localFile = fl.File( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
-				localFile.newVersion()
+				asset.newVersion()
 				localFile.copy( str( asset.path ))
 
 	def copySelectedAssetsToServer(self):
@@ -831,6 +836,30 @@ class ManagerUI(base,fom):
 		for a in assets:
 			self.copyAssetToServer( a )
 		self.updateUi()
+
+	def filesToCopy(self, fils, serverPath, localPath):
+		"""return files that really need to be copied to local or if they allready exists"""
+		filesToC = []
+		for f in fils:
+			fToCopy = fl.File( f.path.replace( serverPath, localPath ) )
+			if fToCopy.isOlderThan( f ):
+				filesToC.append( f )
+		return filesToC
+
+	def getDependenciesToCopy(self, asset):
+		"""return the textures, reference and caches from file"""
+		result = []
+		refs = asset.allReferences()
+		textures = []
+		for r in refs:
+			textures.extend( r.textures )
+		caches = asset.caches
+		result.extend( refs )
+		result.extend( textures )
+		result.extend( caches )
+		return result
+		
+
 
 	def copyAssetToServer(self, asset):
 		"""main function to copy asset to server"""

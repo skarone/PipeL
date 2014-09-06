@@ -220,7 +220,7 @@ class mayaFile(fl.File):
 	def caches(self):
 		"""return the caches in the scene"""
 		caches = []
-		match =  re.findall( '(:?.+".fn" .+[\n]?[\t]* ")(?P<Path>.+abc)";', self.data )
+		match =  re.findall( '(:?.+".fn" .+[\n]?[\t]* ")(?P<Path>\S+abc)";', self.data )
 		for m in match:
 			caches.append( fl.File( m[-1] ) )
 		return caches
