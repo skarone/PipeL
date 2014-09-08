@@ -1,10 +1,11 @@
 import os
 from PyQt4 import QtGui,QtCore, uic
 import pyregistry as rg
+from xml.etree.ElementTree import parse, SubElement
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
-uifile = PYFILEDIR + '/thanks.ui'
+uifile = QtCore.QFile(":/ui/thanks.ui")
 fom, base = uic.loadUiType( uifile )
 
 class ThanksUI(base, fom):

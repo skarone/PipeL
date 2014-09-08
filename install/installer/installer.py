@@ -1,10 +1,11 @@
 import os
 from PyQt4 import QtGui,QtCore, uic
 import pyregistry as rg
+from xml.etree.ElementTree import parse, SubElement
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
-uifile = PYFILEDIR + '/install.ui'
+uifile = QtCore.QFile(":/ui/installer.ui")
 fom, base = uic.loadUiType( uifile )
 
 class InstallerUI(base, fom):

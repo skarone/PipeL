@@ -30,6 +30,8 @@ import pipe.shot.shotUI as shUI
 reload( shUI )
 import pipe.settings.settings as sti
 reload( sti )
+import pipe.settings.settingsUi as stiUi
+reload( stiUi )
 INMAYA = False
 try:
 	import maya.cmds as mc
@@ -152,6 +154,7 @@ class ManagerUI(base,fom):
 		QtCore.QObject.connect( self.actionNew_Sequence, QtCore.SIGNAL( "triggered()" ), self._newSequence )
 		QtCore.QObject.connect( self.actionNew_Shot, QtCore.SIGNAL( "triggered()" ), self._newShot )
 		QtCore.QObject.connect( self.actionCopy_Selected_From_Server, QtCore.SIGNAL( "triggered()" ), self.copySelectedAssetsFromServer )
+		QtCore.QObject.connect( self.actionGlobal_Settings, QtCore.SIGNAL( "triggered()" ), self.loadSettingsUi )
 		QtCore.QObject.connect( self.actionReference_Selected_Items, QtCore.SIGNAL( "triggered()" ), self.referenceSelected )
 		QtCore.QObject.connect( self.actionSet_Projects_Path, QtCore.SIGNAL( "triggered()" ), self.setProjectsBasePath )
 		QtCore.QObject.connect( self.sequences_lw, QtCore.SIGNAL( "itemClicked( QListWidgetItem* )" ), self.fillShotsTable )
@@ -204,6 +207,11 @@ class ManagerUI(base,fom):
 					match = True
 					break
 			self.assets_tw.setRowHidden( i, not match )
+
+	def loadSettingsUi(self):
+		"""docstring for fname"""
+		setUi = stiUi.Settings()
+		setUi.show()
 
 	def fillProjectsCombo(self):
 		"""fill projects combo with projects in local disc"""

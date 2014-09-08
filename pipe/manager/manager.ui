@@ -524,14 +524,14 @@
      <x>0</x>
      <y>0</y>
      <width>1032</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
      <string>Settings</string>
     </property>
-    <addaction name="actionSet_Projects_Path"/>
+    <addaction name="actionGlobal_Settings"/>
    </widget>
    <widget class="QMenu" name="menuCreate">
     <property name="title">
@@ -979,6 +979,11 @@
   <action name="actionReference_Selected_Items">
    <property name="text">
     <string>Reference Selected Items</string>
+   </property>
+  </action>
+  <action name="actionGlobal_Settings">
+   <property name="text">
+    <string>Global Settings</string>
    </property>
   </action>
  </widget>
