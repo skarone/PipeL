@@ -163,7 +163,9 @@ class File(object):
 
 	def isOlderThan(self, fileToCompare):
 		"""compare to File objects to see if the current one is older than"""
-		return os.path.getmtime( fileToCompare.path ) - os.path.getmtime( self.path ) > File.threshold
+		fToCtime = round( os.path.getmtime(fileToCompare.path) )
+		origFTime   = round( os.path.getmtime(self.path) )
+		return fToCtime < origFTime
 
 	def isBiggerThan(self, fileToCompare):
 		"""compare File object size with another File object"""
@@ -181,6 +183,9 @@ class File(object):
 			with open( self.path ) as f:
 				self._data = f.read()
 		return self._data
+
+	def __eq__(self, other):
+		return self.path == other.path
 
 	@property
 	def lines(self):

@@ -140,7 +140,10 @@ class ManagerUI(base,fom):
 			#HASTX
 			item = QtGui.QTableWidgetItem( '' )
 			if f.hasTx:
-				colVal = 0
+				if f.toTx().isOlderThan(f):
+					colVal = 1
+				else:
+					colVal = 0
 			else:
 				colVal = 1
 			if uiH.USEPYQT:

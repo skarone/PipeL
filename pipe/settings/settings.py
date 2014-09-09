@@ -3,8 +3,9 @@ import pipe.file.file as fl
 import os
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
-skinsDir = PYFILEDIR.replace( 'pipe/settings','general/ui/skins' )
+skinsDir = PYFILEDIR.replace( 'pipe\\settings','general/ui/skins' )
 SKINS = sorted([ a.split('.')[0] for a in os.listdir( skinsDir ) if a.endswith( '.stylesheet')])
+SKINS.insert( 0, 'None' )
 
 settingsFile =  str( os.getenv('USERPROFILE') ) + '/settings.ini'
 

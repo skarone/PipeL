@@ -5,7 +5,8 @@ reload( uiH )
 uiH.set_qt_bindings()
 from Qt import QtGui,QtCore
 
-import pyqt.threadCopy.threadCopy as trC
+import pyqt.threadCopy.threadCopy as trhC
+reload( trhC )
 
 import subprocess
 import ConfigParser
@@ -18,6 +19,7 @@ reload( assUi )
 import pipe.sets.setsUI as setUi
 reload( setUi )
 import pipe.file.file as fl
+reload( fl )
 import pipe.mayaFile.mayaFilePropertiesUI as mfp
 reload( mfp )
 import pipe.mayaFile.mayaFile as mfl
@@ -60,7 +62,10 @@ class ManagerUI(base,fom):
 			else:
 				super(ManagerUI, self).__init__()
 		self.setupUi(self)
+		self.serverPath = ''
 		self.settings = sti.Settings()
+		if not self.settings.exists:
+			self.loadSettingsUi()
 		self.loadProjectsPath()
 		self.fillProjectsCombo()
 		self.fillAssetsTable()
@@ -75,7 +80,11 @@ class ManagerUI(base,fom):
 
 		self.sets_tw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.sets_tw.customContextMenuRequested.connect(self.showMenu)
-		uiH.loadSkin( self, 'QTDarkGreen' )
+		gen = self.settings.General
+		if gen:
+			skin = gen[ "skin" ]
+			if skin:
+				uiH.loadSkin( self, skin )
 
 	def loadProjectsPath(self):
 		"""docstring for loadProjectsPath"""
@@ -86,6 +95,17 @@ class ManagerUI(base,fom):
 				if basePath.endswith( '\\' ):
 					basePath = basePath[:-1]
 				prj.BASE_PATH = basePath.replace( '\\', '/' )
+			serverPath = gen[ "serverpath" ]
+			if serverPath:
+				self.serverPath = serverPath
+			useMayaSubFolder = gen[ "usemayasubfolder" ]
+			if useMayaSubFolder == 'True':
+				prj.USE_MAYA_SUBFOLDER = True
+			else:
+				prj.USE_MAYA_SUBFOLDER = False
+			skin = gen[ "skin" ]
+			if skin:
+				uiH.loadSkin( self, skin )
 
 	def _loadConfig(self):
 		"""load config settings"""
@@ -210,8 +230,13 @@ class ManagerUI(base,fom):
 
 	def loadSettingsUi(self):
 		"""docstring for fname"""
-		setUi = stiUi.Settings()
+		setUi = stiUi.Settings( self )
 		setUi.show()
+		res = setUi.exec_()
+		if res:
+			self.loadProjectsPath()
+			self.updateFullUi()
+			self._loadConfig()
 
 	def fillProjectsCombo(self):
 		"""fill projects combo with projects in local disc"""
@@ -220,8 +245,7 @@ class ManagerUI(base,fom):
 		localProjects = prj.projects( prj.BASE_PATH )
 		projects = []
 		if self.compareServer_chb.isChecked(): #SERVER MODE ON
-			serverPath = str( self.serverPath_le.text() )
-			serverProjects = prj.projects( serverPath )
+			serverProjects = prj.projects( self.serverPath )
 			for s in serverProjects:
 				if any( l == s for l in localProjects ):
 					continue
@@ -250,8 +274,7 @@ class ManagerUI(base,fom):
 						QtGui.QColor( "#000000" )    #FILE NOT EXISTS
 						]
 		if self.compareServer_chb.isChecked(): #SERVER MODE ON
-			serverPath = str( self.serverPath_le.text() )
-			serverProj = prj.Project( str( self.projects_cmb.currentText()), serverPath )
+			serverProj = prj.Project( str( self.projects_cmb.currentText()), self.serverPath )
 			serverAssets = serverProj.assets
 			finalAssets = []
 			for a in serverAssets:
@@ -285,7 +308,7 @@ class ManagerUI(base,fom):
 					item.setData(32, f )
 					filePath = str( f.path )
 					stat = 0
-					if serverPath in f.path:                                      # THIS FILE IS ONLY ON SERVER
+					if self.serverPath in f.path:                                      # THIS FILE IS ONLY ON SERVER
 						if f.exists:
 							stat = 2
 							if f.isZero:
@@ -293,7 +316,7 @@ class ManagerUI(base,fom):
 						else:
 							stat = 4
 					else:
-						serverFile = fl.File( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
+						serverFile = fl.File( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
 						if not serverFile.exists and f.exists:                    # LOCAL EXISTS SERVER NOT
 							stat = 3
 							if f.isZero:
@@ -348,8 +371,7 @@ class ManagerUI(base,fom):
 		self.shots_tw.clearContents()
 		seqs = proj.sequences
 		if self.compareServer_chb.isChecked(): #SERVER MODE ON
-			serverPath = str( self.serverPath_le.text() )
-			serverProj = prj.Project( str( self.projects_cmb.currentText()), serverPath )
+			serverProj = prj.Project( str( self.projects_cmb.currentText()), self.serverPath )
 			finalSeqs = []
 			for s in serverProj.sequences:
 				if any( s.name == b.name for b in seqs ):
@@ -375,8 +397,7 @@ class ManagerUI(base,fom):
 						QtGui.QColor( "#000000" )    #FILE NOT EXISTS
 						]
 		if self.compareServer_chb.isChecked(): #SERVER MODE ON
-			serverPath = str( self.serverPath_le.text() )
-			serverProj = prj.Project( str( self.projects_cmb.currentText()), serverPath )
+			serverProj = prj.Project( str( self.projects_cmb.currentText()), self.serverPath )
 			serverSequence  = sq.Sequence( str( self.sequences_lw.selectedItems()[0].text() ), serverProj )
 			serverShots = serverSequence.shots
 			finalShots = []
@@ -412,7 +433,7 @@ class ManagerUI(base,fom):
 					item.setData(32, f )
 					filePath = str( f.path )
 					stat = 0
-					if serverPath in f.path:                                      # THIS FILE IS ONLY ON SERVER
+					if self.serverPath in f.path:                                      # THIS FILE IS ONLY ON SERVER
 						if f.exists:
 							stat = 2
 							if f.isZero:
@@ -420,7 +441,7 @@ class ManagerUI(base,fom):
 						else:
 							stat = 4
 					else:
-						serverFile = fl.File( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
+						serverFile = fl.File( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
 						if not serverFile.exists and f.exists:                    # LOCAL EXISTS SERVER NOT
 							stat = 3
 						elif serverFile.exists and not f.exists:
@@ -474,7 +495,6 @@ class ManagerUI(base,fom):
 				QtGui.QColor( "red" )]
 		if not sets:
 			return
-		serverPath = str( self.serverPath_le.text() )
 		for i,a in enumerate( sets ):
 			item = QtGui.QTableWidgetItem( a.name )
 			item.setCheckState(QtCore.Qt.Unchecked )
@@ -491,7 +511,7 @@ class ManagerUI(base,fom):
 					item.setCheckState(QtCore.Qt.Unchecked )
 					item.setData(32, f )
 					filePath = str( f.path )
-					serverFile = fl.File( filePath.replace( prj.BASE_PATH, serverPath ) )
+					serverFile = fl.File( filePath.replace( prj.BASE_PATH, self.serverPath ) )
 					if status[v] == 0:
 						item.setText( '' )
 					stat = status[v]
@@ -526,14 +546,14 @@ class ManagerUI(base,fom):
 
 	def _newProject(self):
 		"""create new project ui"""
-		dia = prjUi.ProjectCreator()
+		dia = prjUi.ProjectCreator(self)
 		res = dia.exec_()
 		if res:
 			self.fillProjectsCombo()
 
 	def _newAsset(self):
 		"""creates new Asset"""
-		dia = assUi.AssetCreator()
+		dia = assUi.AssetCreator( self )
 		dia.show()
 		index = self.projects_cmb.currentIndex()
 		dia.projects_cmb.setCurrentIndex(index)
@@ -543,7 +563,7 @@ class ManagerUI(base,fom):
 
 	def _newSet(self):
 		"""create a new set"""
-		dia = setUi.SetCreator()
+		dia = setUi.SetCreator(self)
 		dia.show()
 		index = self.projects_cmb.currentIndex()
 		dia.projects_cmb.setCurrentIndex(index)
@@ -553,7 +573,7 @@ class ManagerUI(base,fom):
 
 	def _newSequence(self):
 		"""creates a new sequence"""
-		dia = sqUI.SequenceCreator()
+		dia = sqUI.SequenceCreator(self)
 		dia.show()
 		index = self.projects_cmb.currentIndex()
 		dia.projects_cmb.setCurrentIndex(index)
@@ -563,7 +583,7 @@ class ManagerUI(base,fom):
 
 	def _newShot(self):
 		"""creates a new Shot"""
-		dia = shUI.ShotCreator( self.projects_cmb.currentText(), self.sequences_lw.selectedItems()[0].text() )
+		dia = shUI.ShotCreator( self.projects_cmb.currentText(), self.sequences_lw.selectedItems()[0].text(), self )
 		dia.show()
 		index = self.projects_cmb.currentIndex()
 		dia.projects_cmb.setCurrentIndex(index)
@@ -812,29 +832,32 @@ class ManagerUI(base,fom):
 
 	def copyAssetFromServer(self, asset):
 		"""main function to copy asset from server"""
-		serverPath = str( self.serverPath_le.text() )
 		filePath = str( asset.path )
 		if asset.path.endswith( '.ma' ):# MAYA FILE
 			#COPY TEXTURES AND REFERENCES RECURSIVE
-			if serverPath in filePath:
-				localFile = mfl.mayaFile( filePath.replace( serverPath, prj.BASE_PATH + '/' ) )
+			if self.serverPath in filePath:
+				localFile = mfl.mayaFile( filePath.replace( self.serverPath, prj.BASE_PATH + '/' ) )
 				localFile.newVersion()
-				deps = self.getDependenciesToCopy( asset )
-				toCopy = filesToCopy( deps, serverPath, prj.BASE_PATH + '/' )
-				trhC.MultiProgressDialog( toCopy, serverPath, prj.BASE_PATH + '/', self )
+				asset.copy( localFile.path )
+				deps = self.getDependenciesToCopy( localFile )
+				toCopy = self.filesToCopy( deps, self.serverPath, prj.BASE_PATH + '/' )
+				if toCopy:
+					trhC.MultiProgressDialog( toCopy, self.serverPath, prj.BASE_PATH + '/', self )
 			else:
-				serverFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
-				serverFile.newVersion()
-				deps = self.getDependenciesToCopy( serverFile )
-				toCopy = filesToCopy( deps, serverPath, prj.BASE_PATH + '/' )
-				trhC.MultiProgressDialog( toCopy, serverPath, prj.BASE_PATH + '/', self )
+				serverFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
+				asset.newVersion()
+				serverFile.copy( asset.path )
+				deps = self.getDependenciesToCopy( asset )
+				toCopy = self.filesToCopy( deps, self.serverPath, prj.BASE_PATH + '/' )
+				if toCopy:
+					trhC.MultiProgressDialog( toCopy, self.serverPath, prj.BASE_PATH + '/', self )
 		else:
-			if serverPath in filePath:
-				localFile = fl.File( filePath.replace( serverPath, prj.BASE_PATH + '/' ) )
+			if self.serverPath in filePath:
+				localFile = fl.File( filePath.replace( self.serverPath, prj.BASE_PATH + '/' ) )
 				localFile.newVersion()
 				asset.copy( str( localFile.path ))
 			else:
-				localFile = fl.File( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
+				localFile = fl.File( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
 				asset.newVersion()
 				localFile.copy( str( asset.path ))
 
@@ -849,16 +872,22 @@ class ManagerUI(base,fom):
 		"""return files that really need to be copied to local or if they allready exists"""
 		filesToC = []
 		for f in fils:
+			if not f.exists:
+				continue
 			fToCopy = fl.File( f.path.replace( serverPath, localPath ) )
-			if fToCopy.isOlderThan( f ):
-				filesToC.append( f )
+			if fToCopy.path in filesToC:
+				continue
+			if fToCopy.exists:
+				if not fToCopy.isOlderThan( f ):
+					continue
+			filesToC.append( f.path )
 		return filesToC
 
 	def getDependenciesToCopy(self, asset):
 		"""return the textures, reference and caches from file"""
 		result = []
 		refs = asset.allReferences()
-		textures = []
+		textures = asset.textures
 		for r in refs:
 			textures.extend( r.textures )
 		caches = asset.caches
@@ -867,25 +896,22 @@ class ManagerUI(base,fom):
 		result.extend( caches )
 		return result
 		
-
-
 	def copyAssetToServer(self, asset):
 		"""main function to copy asset to server"""
-		serverPath = str( self.serverPath_le.text() )
 		filePath = str( asset.path )
 		if asset.path.endswith( '.ma' ):# MAYA FILE
 			#COPY TEXTURES AND REFERENCES RECURSIVE
-			if serverPath in filePath: #THIS FILE ONLY EXISTS IN SERVER SO THERE IS NO NEED
+			if self.serverPath in filePath: #THIS FILE ONLY EXISTS IN SERVER SO THERE IS NO NEED
 				return
 			else:
-				localFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
+				localFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
 				localFile.newVersion()
 				asset.copyAll( localFile.path )
 		else:
-			if serverPath in filePath: #THIS FILE ONLY EXISTS IN SERVER SO THERE IS NO NEED
+			if self.serverPath in filePath: #THIS FILE ONLY EXISTS IN SERVER SO THERE IS NO NEED
 				return
 			else:
-				localFile = fl.File( filePath.replace( prj.BASE_PATH + '/', serverPath ) )
+				localFile = fl.File( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
 				asset.copy( str( localFile.path ))
 
 	def setStatusBarMessage(self, message):
@@ -899,7 +925,6 @@ def main():
 	global PyForm
 	PyForm=ManagerUI()
 	PyForm.show()
-
 
 if __name__=="__main__":
 	import sys

@@ -15,6 +15,9 @@ INMAYA = False
 import pipe.mayaFile.mayaFile as mfl
 import pipe.cacheFile.cacheFile as cfl
 reload( cfl )
+import pipe.settings.settings as sti
+reload( sti )
+
 try:
 	import maya.cmds as mc
 	mc.loadPlugin( 'AbcImport' )
@@ -50,16 +53,25 @@ class CacheManagerUI(base,fom):
 			super(base, self).__init__()
 		self.setupUi(self)
 		self._makeConnections()
-		Config = ConfigParser.ConfigParser()
-		Config.read( settingsFile )
-		if Config.has_section( "GeneralSettings" ):
-			basePath = Config.get("GeneralSettings", "basepath")
+		self.settings = sti.Settings()
+		gen = self.settings.General
+		if gen:
+			basePath = gen[ "basepath" ]
 			if basePath:
 				prj.BASE_PATH = basePath.replace( '\\', '/' )
+			useMayaSubFolder = gen[ "usemayasubfolder" ]
+			if useMayaSubFolder == 'True':
+				prj.USE_MAYA_SUBFOLDER = True
+			else:
+				prj.USE_MAYA_SUBFOLDER = False
 		self._fillUi()
 		self._loadConfig()
 		self.setObjectName( 'cacheManager_WIN' )
-		uiH.loadSkin( self, 'QTDarkGreen' )
+		if gen:
+			skin = gen[ "skin" ]
+			if skin:
+				uiH.loadSkin( self, skin )
+		
 
 	def _loadConfig(self):
 		"""load config settings"""
@@ -78,13 +90,14 @@ class CacheManagerUI(base,fom):
 				return
 		if not os.path.exists( settingsFile ):
 			return
-		Config = ConfigParser.ConfigParser()
-		Config.read( settingsFile )
-		lastProject = Config.get("BaseSettings", "lastproject")
-		if lastProject:
-			index = self.projects_cmb.findText( lastProject )
-			if not index == -1:
-				self.projects_cmb.setCurrentIndex(index)
+		his = self.settings.History
+		if his:
+			if 'lastproject' in his:
+				lastProject = his[ "lastproject" ]
+				if lastProject:
+					index = self.projects_cmb.findText( lastProject )
+					if not index == -1:
+						self.projects_cmb.setCurrentIndex(index)
 
 	def _makeConnections(self):
 		"""create connection in the UI"""

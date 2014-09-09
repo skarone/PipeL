@@ -17,18 +17,17 @@ fom, base = uiH.loadUiType( uifile )
 
 class AssetCreator(base, fom):
 	"""docstring for ProjectCreator"""
-	def __init__(self):
+	def __init__(self, parent = None):
 		if uiH.USEPYQT:
-			super(base, self).__init__()
+			super(base, self).__init__(parent)
 		else:
-			super(AssetCreator, self).__init__()
+			super(AssetCreator, self).__init__(parent)
 		self.setupUi(self)
 		self.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), self.createAsset)
 		self.settings = sti.Settings()
 		self.loadProjectsPath()
 		self.fillProjectsCMB()
 		self.asset_le.setFocus()
-		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	def loadProjectsPath(self):
 		"""docstring for loadProjectsPath"""

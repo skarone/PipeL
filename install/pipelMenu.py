@@ -2,6 +2,11 @@ import maya.mel as mm
 import maya.cmds as mc
 import os
 
+import pipe.manager.managerUI as manUI
+reload( manUI )
+import pipe.settings.settings as sti
+reload( sti )
+
 """
 #reload menu
 import install.pipelMenu as pM
@@ -89,10 +94,17 @@ mc.menuItem( divider = True )
 mc.menuItem( l = 'Reload Menu', c = "import install.pipelMenu as pM;reload ( pM )" )
 mc.setParent('..', menu = True )
 
+sett = sti.Settings()
+gen = sett.General
+if gen:
+	if gen.has_key( 'autoload' ):
+		autoLoad = gen[ "autoload" ]
+		if autoLoad == 'True': 
+			manUI.main()
+if not sett.exists:
+	manUI.main()
 
-import pipe.manager.managerUI as manUI
-reload( manUI )
-manUI.main()
+
 
 
 

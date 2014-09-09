@@ -60,35 +60,12 @@
          <bool>true</bool>
         </property>
         <property name="text">
-         <string>Compare</string>
+         <string>Compare with SERVER</string>
         </property>
        </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Server:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="serverPath_le">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>200</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>P:/</string>
-          </property>
-         </widget>
-        </item>
         <item>
          <widget class="QPushButton" name="refresh_btn">
           <property name="text">
@@ -524,7 +501,7 @@
      <x>0</x>
      <y>0</y>
      <width>1032</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSettings">
@@ -990,7 +967,6 @@
  <tabstops>
   <tabstop>shots_tw</tabstop>
   <tabstop>projects_cmb</tabstop>
-  <tabstop>serverPath_le</tabstop>
   <tabstop>tabWidget</tabstop>
   <tabstop>assets_tw</tabstop>
   <tabstop>sets_tw</tabstop>

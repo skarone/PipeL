@@ -58,7 +58,6 @@ def shotOrAssetFromFile(mayaFile):
 
 def projects( basePath = BASE_PATH):
 	"""return all the projects in the basePath"""
-	print basePath
 	if os.path.exists( basePath ):
 		return sorted([ a for a in os.listdir( basePath ) if os.path.isdir( basePath + '/' + a )])
 	return []

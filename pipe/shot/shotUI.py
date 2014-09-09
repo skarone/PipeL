@@ -18,11 +18,11 @@ fom, base = uiH.loadUiType( uifile )
 
 class ShotCreator(base, fom):
 	"""docstring for ProjectCreator"""
-	def __init__(self, currentProj, currentSeq ):
+	def __init__(self, currentProj, currentSeq, parent = None ):
 		if uiH.USEPYQT:
-			super(base, self).__init__()
+			super(base, self).__init__(parent)
 		else:
-			super(ShotCreator, self).__init__()
+			super(ShotCreator, self).__init__(parent)
 		self.setupUi(self)
 		self._curProj = currentProj
 		self._curSeq  = currentSeq
@@ -32,7 +32,6 @@ class ShotCreator(base, fom):
 		self.fillProjectsCMB()
 		self.fillSequencesCMB()
 		self.shot_le.setFocus()
-		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	@property
 	def curProj(self):

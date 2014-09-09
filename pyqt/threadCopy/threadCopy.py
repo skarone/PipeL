@@ -40,9 +40,12 @@ class ProgressDialog(QtGui.QProgressDialog):
 		self.close()
 
 class CopyThread(QtCore.QThread):
-
-	procDone = QtCore.Signal(bool)
-	procPartDone = QtCore.Signal(int)
+	if uiH.USEPYQT:
+		procDone = QtCore.pyqtSignal(bool)
+		procPartDone = QtCore.pyqtSignal(int)
+	else:
+		procDone = QtCore.Signal(bool)
+		procPartDone = QtCore.Signal(int)
 
 	def __init__(self, parent, source, destination ):
 		QtCore.QThread.__init__(self, parent)
@@ -80,33 +83,39 @@ class MultiProgressDialog(base, fom):
 		self.setupUi(self)
 		
 		self.parent = parent
-		self.sources = source
+		self.sources = sources
 		self.basePath = basePath
 		self.finalPath = finalPath
-
+		self.show()
 		self.copy()
 
 	def copy(self):
-		copy_thread = MultiCopyThread(self, self.parent, self.sources, self.basePath, self.finalPath )
-		copy_thread.procPartDone.connect(self.update_progressFile)
-		copy_thread.procFileDone.connect(self.update_progressFiles)
-		copy_thread.procDone.connect(self.finished_copy)
-		copy_thread.start()
+		self.copy_thread = MultiCopyThread(self, self.sources, self.basePath, self.finalPath )
+		self.copy_thread.procPartDone.connect(self.update_progressFile)
+		self.copy_thread.procFileDone.connect(self.update_progressFiles)
+		self.copy_thread.procDone.connect(self.finished_copy)
+		self.copy_thread.start()
 
-	def update_progressFile(self, progress):
+	def update_progressFile(self, progress, targetFile ):
 		self.file_pb.setValue(progress)
+		self.file_lbl.setText( targetFile )
 
-	def update_progressFiles(self, progress):
-		self.files_pb.setValue(progress)
+	def update_progressFiles(self, count ,lenSources ):
+		self.files_pb.setValue(count * 100 / lenSources)
+		self.filesNumber_lbl.setText( str( count ) + '/' + str( lenSources ) )
 
 	def finished_copy(self, state):
 		self.close()
 
 class MultiCopyThread(QtCore.QThread):
-
-	procDone = QtCore.Signal(bool)
-	procPartDone = QtCore.Signal(int)
-	procFileDone = QtCore.Signal(int)
+	if uiH.USEPYQT:
+		procDone = QtCore.pyqtSignal(bool)
+		procPartDone = QtCore.pyqtSignal(int, str)
+		procFileDone = QtCore.pyqtSignal(int, int)
+	else:
+		procDone = QtCore.Signal(bool)
+		procPartDone = QtCore.Signal(int, str)
+		procFileDone = QtCore.Signal(int, int)
 
 	def __init__(self, parent, sources, basePath, finalPath ):
 		QtCore.QThread.__init__(self, parent)
@@ -122,24 +131,31 @@ class MultiCopyThread(QtCore.QThread):
 		lenSources = len(self.sources)
 		count = 0
 		for s in self.sources:
-			if not os.path.exists(  os.path.dirname( s.replace( self.basePath, self.finalPath ) ) ):
-				os.makedirs( os.path.dirname( s.replace( self.basePath, self.finalPath ) ) )
-			source_size = os.stat(s).st_size
+			if not os.path.exists( s ):
+				continue
+			if not self.basePath in s:
+				print '<-- Bad File Path!',s
+				continue
+			targetFile = s.replace( self.basePath, self.finalPath )
+			stinfo = os.stat( s )
+			if not os.path.exists(  os.path.dirname( targetFile ) ):
+				os.makedirs( os.path.dirname( targetFile ) )
+			source_size = stinfo.st_size
 			copied = 0
-			source = open(s, "rb")
-			target = open(s.replace( self.basePath, self.finalPath ), "wb")
-
-			while True:
-				chunk = source.read(1024)
-				if not chunk:
-					break
-				target.write(chunk)
-				copied += len(chunk)
-				self.procPartDone.emit(copied * 100 / source_size)
-
-			source.close()
-			target.close()
-			self.procFileDone.emit(count * 100 / lenSources)
+			with open(s, 'rb') as source:
+				with open(targetFile, "wb") as  target:
+					try:
+						while True:
+							chunk = source.read(1024)
+							if not chunk:
+								break
+							target.write(chunk)
+							copied += len(chunk)
+							self.procPartDone.emit(copied * 100 / source_size, targetFile )
+					except:
+						pass
+			self.procFileDone.emit(count ,lenSources )
+			os.utime( targetFile,(stinfo.st_atime, stinfo.st_mtime))
 			count += 1
 
 

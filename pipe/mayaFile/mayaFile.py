@@ -56,13 +56,24 @@ class mayaFile(fl.File):
 	def textures(self):
 		"""return the textures on the maya File"""
 		textures = []
-		for l in self.lines:
-			match =  re.search( '(:?.+".ftn" -type "string" ")(?P<Path>.+)"', l )
-			if match:
-				textures.append( tfl.textureFile( match.group("Path") ) )
-		match =  re.findall( '(:?.+"fileTextureName".+[\n]?[\t]*" -type \\\\"string\\\\" \\\\")(?P<Path>.+)\\\\""', self.data )
-		for m in match:
-			textures.append( tfl.textureFile( m[-1] ) )
+		pat = re.compile( '(:?".ftn" -type "string" ")(?P<Path>.+)"' )
+		search = pat.search
+		matches = (search(line) for line in file(self.path, "rb"))
+		refs = [match.group('Path') for match in matches if match]
+		for r in refs:
+			r = tfl.textureFile( r )
+			if r in textures:
+				continue
+			textures.append( r )
+		pat = re.compile( '(:?"fileTextureName".+[\n]?[\t]*" -type \\\\"string\\\\" \\\\")(?P<Path>.+)\\\\""' )
+		search = pat.search
+		matches = (search(line) for line in file(self.path, "rb"))
+		refs = [match.group('Path') for match in matches if match]
+		for r in refs:
+			r = tfl.textureFile( r )
+			if r in textures:
+				continue
+			textures.append( r )
 		return textures
 
 	def changePathsBrutForce(self, srchAndRep = []):
@@ -118,16 +129,18 @@ class mayaFile(fl.File):
 
 	@property
 	def references(self):
-		"""return the references in the scene"""
-		references = []
-		refsPaths = []
-		match =  re.findall( '(:?file -r[d]*[i]*\s*[12]* .+[\n]?[\t]* ")(?P<Path>\S+ma)";', self.data )
-		for m in match:
-			if m[-1] in refsPaths:
+		"""docstring for foo"""
+		pat = re.compile( '"(?P<Path>\S+\.ma)"' )
+		search = pat.search
+		matches = (search(line) for line in file(self.path, "rb") if 'ma' in line)
+		references = [match.group('Path') for match in matches if match]
+		finalRefs = []
+		for r in references:
+			r = mayaFile( r )
+			if r in finalRefs:
 				continue
-			refsPaths.append( m[-1])
-			references.append( mayaFile( m[-1] ) )
-		return references
+			finalRefs.append( r )
+		return finalRefs
 
 	def allReferences(self):
 		"""return all references in a recursive way
@@ -136,10 +149,15 @@ class mayaFile(fl.File):
 		print fi.allReferences()"""
 		allreferences = []
 		for f in self.references:
+			if f in allreferences:
+				continue
 			allreferences.append( f )
-			allreferences.extend( f.allReferences() )
+			for a in f.allReferences():
+				if a in allreferences:
+					continue
+				allreferences.append(a )
 		return allreferences
-
+	
 	def allTextures(self):
 		"""return all the textures from file and references"""
 		textures = self.textures
@@ -219,11 +237,17 @@ class mayaFile(fl.File):
 	@property
 	def caches(self):
 		"""return the caches in the scene"""
-		caches = []
-		match =  re.findall( '(:?.+".fn" .+[\n]?[\t]* ")(?P<Path>\S+abc)";', self.data )
-		for m in match:
-			caches.append( fl.File( m[-1] ) )
-		return caches
+		pat = re.compile( '"(?P<Path>\S+\.abc)"' )
+		search = pat.search
+		matches = (search(line) for line in file(self.path, "rb") if 'abc' in line)
+		references = [match.group('Path') for match in matches if match]
+		finalRefs = []
+		for r in references:
+			r = fl.File( r )
+			if r in finalRefs:
+				continue
+			finalRefs.append( r )
+		return finalRefs
 
 	def copyCaches(self, newPathFile, BasePath, finalBasePath ):
 		"""copy all the caches in the file"""

@@ -14,11 +14,11 @@ fom, base = uiH.loadUiType( uifile )
 
 class Settings(base, fom):
 	"""docstring for ProjectCreator"""
-	def __init__(self):
+	def __init__(self, parent = None):
 		if uiH.USEPYQT:
-			super(base, self).__init__()
+			super(base, self).__init__(parent)
 		else:
-			super(Settings, self).__init__()
+			super(Settings, self).__init__(parent)
 		self.setupUi(self)
 		self._makeConection()
 		self.settings = sti.Settings()
@@ -36,44 +36,68 @@ class Settings(base, fom):
 		"""docstring for _loadConfig"""
 		gen = self.settings.General
 		if gen:
-			basePath = gen[ "basepath" ]
-			self.localPath_le.setText( basePath )
-			serverPath = gen[ "serverpath" ]
-			self.serverPath_le.setText( serverPath )
-			renderPath = gen[ "renderpath" ]
-			self.serverPath_le.setText( serverPath )
-			autoLoad = gen[ "autoLoad" ]
-			if autoLoad: 
-				state = QtCore.Qt.Checked 
-			else: 
-				state = QtCore.Qt.Unchecked
-			self.autoLoadManager_chb.setCheckState( state )
-			usemayasubfolder = gen[ "usemayasubfolder" ]
-			if usemayasubfolder: 
-				state = QtCore.Qt.Checked 
-			else: 
-				state = QtCore.Qt.Unchecked
-			self.useMayaSubFolder_chb.setCheckState( state )
-			skin = gen[ "skin" ]
-			index = self.skin_cmb.findText( skin )
-			if not index == -1:
-				self.skin_cmb.setCurrentIndex(index)
+			if gen.has_key( 'basepath' ):
+				basePath = gen[ "basepath" ]
+				self.localPath_le.setText( basePath )
+			if gen.has_key( 'serverpath' ):
+				serverPath = gen[ "serverpath" ]
+				self.serverPath_le.setText( serverPath )
+			if gen.has_key( 'renderpath' ):
+				renderPath = gen[ "renderpath" ]
+				self.renderPath_le.setText( renderPath )
+			if gen.has_key( 'autoload' ):
+				autoLoad = gen[ "autoload" ]
+				if autoLoad == 'True': 
+					state = QtCore.Qt.Checked 
+				else: 
+					state = QtCore.Qt.Unchecked
+				self.autoLoadManager_chb.setCheckState( state )
+			if gen.has_key( 'usemayasubfolder' ):
+				usemayasubfolder = gen[ "usemayasubfolder" ]
+				if usemayasubfolder == 'True': 
+					state = QtCore.Qt.Checked 
+				else: 
+					state = QtCore.Qt.Unchecked
+				self.useMayaSubFolder_chb.setCheckState( state )
+			if gen.has_key( 'skin' ):
+				skin = gen[ "skin" ]
+				index = self.skin_cmb.findText( skin )
+				if not index == -1:
+					self.skin_cmb.setCurrentIndex(index)
 
 	def setLocal(self):
 		"""docstring for setLocal"""
-		pass
-
+		fil = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Local Projects Path"))
+		if fil:
+			self.localPath_le.setText( fil.replace( '\\', '/' ) )
+		
 	def setServer(self):
 		"""docstring for setServer"""
-		pass
-
+		fil = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Local Projects Path"))
+		if fil:
+			self.serverPath_le.setText( fil.replace( '\\', '/' ) )
+		
 	def setRender(self):
 		"""docstring for setRender"""
-		pass
-
+		fil = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Local Projects Path"))
+		if fil:
+			self.renderPath_le.setText( fil.replace( '\\', '/' ) )
+		
 	def save(self):
 		"""docstring for save"""
-		pass
+		self.settings.write( 'General', 'basepath', str( self.localPath_le.text() ))
+		self.settings.write( 'General', 'serverpath', str( self.serverPath_le.text() ))
+		self.settings.write( 'General', 'renderpath', str( self.renderPath_le.text() ))
+		self.settings.write( 'General', 'autoload', self.autoLoadManager_chb.isChecked() )
+		self.settings.write( 'General', 'usemayasubfolder', self.useMayaSubFolder_chb.isChecked() )
+		self.settings.write( 'General', 'skin', str( self.skin_cmb.currentText() ))
+		QtGui.QDialog.accept(self)
+		
+
+def main():
+	global PyFormSettings
+	PyFormSettings=Settings()
+	PyFormSettings.show()
 
 
 
