@@ -144,16 +144,13 @@ class MultiCopyThread(QtCore.QThread):
 			copied = 0
 			with open(s, 'rb') as source:
 				with open(targetFile, "wb") as  target:
-					try:
-						while True:
-							chunk = source.read(1024)
-							if not chunk:
-								break
-							target.write(chunk)
-							copied += len(chunk)
-							self.procPartDone.emit(copied * 100 / source_size, targetFile )
-					except:
-						pass
+					while True:
+						chunk = source.read(1024)
+						if not chunk:
+							break
+						target.write(chunk)
+						copied += len(chunk)
+						self.procPartDone.emit(copied * 100 / source_size, targetFile )
 			self.procFileDone.emit(count ,lenSources )
 			os.utime( targetFile,(stinfo.st_atime, stinfo.st_mtime))
 			count += 1
