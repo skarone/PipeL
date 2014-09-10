@@ -81,11 +81,10 @@ class ManagerUI(base,fom):
 		self.sets_tw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.sets_tw.customContextMenuRequested.connect(self.showMenu)
 		gen = self.settings.General
-		if gen:
-			skin = gen[ "skin" ]
-			if skin:
-				uiH.loadSkin( self, skin )
+		self.changeInternalPaths = False
 
+	###################################
+	#LOAD SETTINGS
 	def loadProjectsPath(self):
 		"""docstring for loadProjectsPath"""
 		gen = self.settings.General
@@ -103,6 +102,9 @@ class ManagerUI(base,fom):
 				prj.USE_MAYA_SUBFOLDER = True
 			else:
 				prj.USE_MAYA_SUBFOLDER = False
+			changeInternalPaths = gen[ "changeinternalpaths" ]
+			if useMayaSubFolder == 'True':
+				self.changeInternalPaths = changeInternalPaths
 			skin = gen[ "skin" ]
 			if skin:
 				uiH.loadSkin( self, skin )
@@ -164,6 +166,45 @@ class ManagerUI(base,fom):
 			self.fillProjectsCombo()
 			self.updateUi()
 
+	def loadSettingsUi(self):
+		"""docstring for fname"""
+		setUi = stiUi.Settings( self )
+		setUi.show()
+		res = setUi.exec_()
+		if res:
+			self.loadProjectsPath()
+			self.updateFullUi()
+			self._loadConfig()
+
+	#
+	###################################
+	#UI STUFF
+	def _getSelectedItemsInCurrentTab(self):
+		"""return the selected assets in current Tab"""
+		tab = self._getCurrentTab()
+		assets = []
+		for r in range( tab.rowCount() ):
+			for c in range( tab.columnCount() ):
+				item = tab.item( r, c )
+				if item.checkState() == 2:
+					if uiH.USEPYQT:
+						asset = item.data(32).toPyObject()
+					else:
+						asset = item.data(32)
+					assets.append(asset)
+		return assets
+
+	def _getCurrentTab(self):
+		"""return the visible table in the ui"""
+		currentTab = self.tabWidget.currentIndex()
+		if currentTab == 0:
+			tabwid = self.assets_tw
+		elif currentTab == 1:
+			tabwid = self.sets_tw
+		elif currentTab == 2:
+			tabwid = self.shots_tw
+		return tabwid
+
 	def _makeConnections(self):
 		"""create the connections in the ui"""
 		self.connect( self.refresh_btn            , QtCore.SIGNAL("clicked()") , self.updateUi )		
@@ -193,18 +234,13 @@ class ManagerUI(base,fom):
 		QtCore.QObject.connect( self.search_asset_le, QtCore.SIGNAL( "textEdited (const QString&)" ), self.searchAsset )
 		QtCore.QObject.connect( self.search_shot_le, QtCore.SIGNAL( "textEdited (const QString&)" ), self.searchShot )
 
-	def updateUi(self):
-		"""update ui"""
-		self.fillAssetsTable()
-		self.fillSequenceList()
-		self.fillSetTable()
-
-	def updateFullUi(self):
-		"""docstring for updateFullUi"""
-		self.fillProjectsCombo()
-		self.fillAssetsTable()
-		self.fillSequenceList()
-		self.fillSetTable()
+	def setStatusInfo(self, item):
+		"""set the status bar message based on item selected from table"""
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		self.setStatusBarMessage( str( asset.path ) )
 
 	def searchShot(self, fil):
 		"""search asset based on line edit string"""
@@ -215,6 +251,47 @@ class ManagerUI(base,fom):
 			if item.text().contains(fil):
 				match = True
 			self.shots_tw.setRowHidden( i, not match )
+
+	def showMenu(self, pos):
+		menu=QtGui.QMenu(self)
+		actionProperties = QtGui.QAction("Properties", menu)
+		menu.addAction( actionProperties )
+		self.connect( actionProperties, QtCore.SIGNAL( "triggered()" ), self.properties )
+		actionOpenInExplorer = QtGui.QAction("Open File in explorer", menu)
+		menu.addAction( actionOpenInExplorer )
+		self.connect( actionOpenInExplorer, QtCore.SIGNAL( "triggered()" ), self.openFileLocation )
+		menu.addSeparator()
+		actionCopyServer = QtGui.QAction("Copy From Server", menu)
+		menu.addAction(actionCopyServer)
+		self.connect( actionCopyServer, QtCore.SIGNAL( "triggered()" ), self.copyFromServer )
+		actionToServer = QtGui.QAction("Copy To Server", menu)
+		menu.addAction(actionToServer)
+		self.connect( actionToServer, QtCore.SIGNAL( "triggered()" ), self.copyToServer )
+		menu.addSeparator()
+		if INMAYA:
+			#COPY TIME SETTINGS
+			actionCopyTime = QtGui.QAction("Copy Time Settings", menu)
+			menu.addAction( actionCopyTime )
+			self.connect( actionCopyTime, QtCore.SIGNAL( "triggered()" ), self.copyTimeSettings )
+			#REFERENCE
+			actionReference = QtGui.QAction("Reference", menu)
+			menu.addAction( actionReference )
+			self.connect( actionReference, QtCore.SIGNAL( "triggered()" ), self.reference )
+			#IMPORT
+			actionImport = QtGui.QAction("Import", menu)
+			menu.addAction( actionImport )
+			self.connect( actionImport, QtCore.SIGNAL( "triggered()" ), self.importFile )
+			#OPEN IN CURRENT MAYA
+			actionOpenInCurrent = QtGui.QAction("Open in This Maya", menu)
+			menu.addAction( actionOpenInCurrent )
+			self.connect( actionOpenInCurrent, QtCore.SIGNAL( "triggered()" ), self.openFileInCurrentMaya )
+			#SAVE IN THIS SCENE
+			actionSaveScene = QtGui.QAction("Save Scene Here!", menu)
+			menu.addAction( actionSaveScene )
+			self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.saveScene )
+
+		tabwid = self._getCurrentTab()
+		menu.popup(tabwid.viewport().mapToGlobal(pos))
 
 	def searchAsset(self, fil):
 		"""search asset based on line edit string"""
@@ -228,15 +305,28 @@ class ManagerUI(base,fom):
 					break
 			self.assets_tw.setRowHidden( i, not match )
 
-	def loadSettingsUi(self):
-		"""docstring for fname"""
-		setUi = stiUi.Settings( self )
-		setUi.show()
-		res = setUi.exec_()
-		if res:
-			self.loadProjectsPath()
-			self.updateFullUi()
-			self._loadConfig()
+	def setStatusBarMessage(self, message):
+		"""docstring for setStatusBarMessage"""
+		self.statusbar.showMessage( message )
+
+	def closeEvent(self, event):
+		self._saveConfig()
+
+	#
+	###################################
+	#FILL UI
+	def updateUi(self):
+		"""update ui"""
+		self.fillAssetsTable()
+		self.fillSequenceList()
+		self.fillSetTable()
+
+	def updateFullUi(self):
+		"""docstring for updateFullUi"""
+		self.fillProjectsCombo()
+		self.fillAssetsTable()
+		self.fillSequenceList()
+		self.fillSetTable()
 
 	def fillProjectsCombo(self):
 		"""fill projects combo with projects in local disc"""
@@ -544,6 +634,9 @@ class ManagerUI(base,fom):
 						item.setBackground( color[ status[v] ] )
 					self.sets_tw.setItem( i, v + 1, item )
 
+	#
+	###################################
+	#CREATE
 	def _newProject(self):
 		"""create new project ui"""
 		dia = prjUi.ProjectCreator(self)
@@ -591,78 +684,9 @@ class ManagerUI(base,fom):
 		if res:
 			self.fillShotsTable()
 
-	def openFile(self,item):
-		"""open selected Asset"""
-		#item = self.assets_tw.currentItem()
-		if uiH.USEPYQT:
-			asset = item.data(32).toPyObject()
-		else:
-			asset = item.data(32)
-		os.system("start "+ str( asset.path ) )
-		self.addFileToHistory( asset )
-		self.setStatusBarMessage( str( asset.path ) )
-		#os.popen( MAYAPATH + ' ' + str( asset.path ))
-
-	def setStatusInfo(self, item):
-		"""set the status bar message based on item selected from table"""
-		if uiH.USEPYQT:
-			asset = item.data(32).toPyObject()
-		else:
-			asset = item.data(32)
-		self.setStatusBarMessage( str( asset.path ) )
-
-	def showMenu(self, pos):
-		menu=QtGui.QMenu(self)
-		actionProperties = QtGui.QAction("Properties", menu)
-		menu.addAction( actionProperties )
-		self.connect( actionProperties, QtCore.SIGNAL( "triggered()" ), self.properties )
-		actionOpenInExplorer = QtGui.QAction("Open File in explorer", menu)
-		menu.addAction( actionOpenInExplorer )
-		self.connect( actionOpenInExplorer, QtCore.SIGNAL( "triggered()" ), self.openFileLocation )
-		menu.addSeparator()
-		actionCopyServer = QtGui.QAction("Copy From Server", menu)
-		menu.addAction(actionCopyServer)
-		self.connect( actionCopyServer, QtCore.SIGNAL( "triggered()" ), self.copyFromServer )
-		actionToServer = QtGui.QAction("Copy To Server", menu)
-		menu.addAction(actionToServer)
-		self.connect( actionToServer, QtCore.SIGNAL( "triggered()" ), self.copyToServer )
-		menu.addSeparator()
-		if INMAYA:
-			#COPY TIME SETTINGS
-			actionCopyTime = QtGui.QAction("Copy Time Settings", menu)
-			menu.addAction( actionCopyTime )
-			self.connect( actionCopyTime, QtCore.SIGNAL( "triggered()" ), self.copyTimeSettings )
-			#REFERENCE
-			actionReference = QtGui.QAction("Reference", menu)
-			menu.addAction( actionReference )
-			self.connect( actionReference, QtCore.SIGNAL( "triggered()" ), self.reference )
-			#IMPORT
-			actionImport = QtGui.QAction("Import", menu)
-			menu.addAction( actionImport )
-			self.connect( actionImport, QtCore.SIGNAL( "triggered()" ), self.importFile )
-			#OPEN IN CURRENT MAYA
-			actionOpenInCurrent = QtGui.QAction("Open in This Maya", menu)
-			menu.addAction( actionOpenInCurrent )
-			self.connect( actionOpenInCurrent, QtCore.SIGNAL( "triggered()" ), self.openFileInCurrentMaya )
-			#SAVE IN THIS SCENE
-			actionSaveScene = QtGui.QAction("Save Scene Here!", menu)
-			menu.addAction( actionSaveScene )
-			self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.saveScene )
-
-		tabwid = self._getCurrentTab()
-		menu.popup(tabwid.viewport().mapToGlobal(pos))
-
-	def openFileLocation(self):
-		"""openFile in explorer"""
-		tab = self._getCurrentTab()
-		item = tab.currentItem()
-		if uiH.USEPYQT:
-			asset = item.data(32).toPyObject()
-		else:
-			asset = item.data(32)
-		self.addFileToHistory( asset )
-		subprocess.Popen(r'explorer /select,"'+ asset.path.replace( '/','\\' ) +'"')
-
+	#
+	###################################
+	#HISTORY
 	def addFileToHistory(self, asset):
 		"""docstring for addFileToHistory"""
 		#ADD TO HISTORY opened FILE
@@ -695,6 +719,43 @@ class ManagerUI(base,fom):
 		self.addFileToHistory( asset )
 		asset.open()
 
+	#
+	###################################
+	#
+	def openFile(self,item):
+		"""open selected Asset"""
+		#item = self.assets_tw.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		os.system("start "+ str( asset.path ) )
+		self.addFileToHistory( asset )
+		self.setStatusBarMessage( str( asset.path ) )
+		#os.popen( MAYAPATH + ' ' + str( asset.path ))
+
+	def openFileLocation(self):
+		"""openFile in explorer"""
+		tab = self._getCurrentTab()
+		item = tab.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		self.addFileToHistory( asset )
+		subprocess.Popen(r'explorer /select,"'+ asset.path.replace( '/','\\' ) +'"')
+
+	def openFileInCurrentMaya(self):
+		"""docstring for openFileInCurrentMaya"""
+		tab = self._getCurrentTab()
+		item = tab.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		self.addFileToHistory( asset )
+		asset.open()
+
 	def saveScene(self):
 		"""save scene here"""
 		quit_msg = "Are you sure you want to save in this file?"
@@ -710,17 +771,6 @@ class ManagerUI(base,fom):
 			asset.newVersion()
 			asset.save()
 
-	def openFileInCurrentMaya(self):
-		"""docstring for openFileInCurrentMaya"""
-		tab = self._getCurrentTab()
-		item = tab.currentItem()
-		if uiH.USEPYQT:
-			asset = item.data(32).toPyObject()
-		else:
-			asset = item.data(32)
-		self.addFileToHistory( asset )
-		asset.open()
-
 	def importFile(self):
 		"""import file to current Maya"""
 		tab = self._getCurrentTab()
@@ -730,17 +780,6 @@ class ManagerUI(base,fom):
 		else:
 			asset = item.data(32)
 		asset.imp()
-		
-	def _getCurrentTab(self):
-		"""return the visible table in the ui"""
-		currentTab = self.tabWidget.currentIndex()
-		if currentTab == 0:
-			tabwid = self.assets_tw
-		elif currentTab == 1:
-			tabwid = self.sets_tw
-		elif currentTab == 2:
-			tabwid = self.shots_tw
-		return tabwid
 
 	def copyTimeSettings(self):
 		"""copy time settings from selected scene"""
@@ -783,6 +822,9 @@ class ManagerUI(base,fom):
 		props = mfp.MayaFilePropertiesUi(asset,self)
 		props.show()
 
+	#
+	###################################
+	#SERVER/LOCAL
 	def copyFromServer(self):
 		"""copy selected asset from server"""
 		tab = self._getCurrentTab()
@@ -808,21 +850,6 @@ class ManagerUI(base,fom):
 			self.copyAssetToServer( asset )
 			self.updateUi()
 
-	def _getSelectedItemsInCurrentTab(self):
-		"""return the selected assets in current Tab"""
-		tab = self._getCurrentTab()
-		assets = []
-		for r in range( tab.rowCount() ):
-			for c in range( tab.columnCount() ):
-				item = tab.item( r, c )
-				if item.checkState() == 2:
-					if uiH.USEPYQT:
-						asset = item.data(32).toPyObject()
-					else:
-						asset = item.data(32)
-					assets.append(asset)
-		return assets
-
 	def copySelectedAssetsFromServer(self):
 		"""copy all the assets from server"""
 		assets = self._getSelectedItemsInCurrentTab()
@@ -835,22 +862,33 @@ class ManagerUI(base,fom):
 		filePath = str( asset.path )
 		if asset.path.endswith( '.ma' ):# MAYA FILE
 			#COPY TEXTURES AND REFERENCES RECURSIVE
+			print self.changeInternalPaths
 			if self.serverPath in filePath:
 				localFile = mfl.mayaFile( filePath.replace( self.serverPath, prj.BASE_PATH + '/' ) )
 				localFile.newVersion()
 				asset.copy( localFile.path )
 				deps = self.getDependenciesToCopy( localFile )
 				toCopy = self.filesToCopy( deps, self.serverPath, prj.BASE_PATH + '/' )
+				if self.changeInternalPaths:
+					self.changeIntPaths( [localFile.path ], self.serverPath, prj.BASE_PATH + '/' )
 				if toCopy:
-					trhC.MultiProgressDialog( toCopy, self.serverPath, prj.BASE_PATH + '/', self )
+					res = trhC.MultiProgressDialog( toCopy, self.serverPath, prj.BASE_PATH + '/', self )
+					if res and self.changeInternalPaths:
+						self.changeIntPaths( toCopy, self.serverPath, prj.BASE_PATH + '/' )
 			else:
 				serverFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
 				asset.newVersion()
 				serverFile.copy( asset.path )
 				deps = self.getDependenciesToCopy( asset )
 				toCopy = self.filesToCopy( deps, self.serverPath, prj.BASE_PATH + '/' )
+				if self.changeInternalPaths:
+					self.changeIntPaths( [asset.path ], self.serverPath, prj.BASE_PATH + '/' )
 				if toCopy:
-					trhC.MultiProgressDialog( toCopy, self.serverPath, prj.BASE_PATH + '/', self )
+					res = trhC.MultiProgressDialog( toCopy, self.serverPath, prj.BASE_PATH + '/', self )
+					print res
+					if res and self.changeInternalPaths:
+						print 'in changeintpath'
+						self.changeIntPaths( toCopy, self.serverPath, prj.BASE_PATH + '/' )
 		else:
 			if self.serverPath in filePath:
 				localFile = fl.File( filePath.replace( self.serverPath, prj.BASE_PATH + '/' ) )
@@ -860,6 +898,16 @@ class ManagerUI(base,fom):
 				localFile = fl.File( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
 				asset.newVersion()
 				localFile.copy( str( asset.path ))
+
+	def changeIntPaths( self, files, serverPath, localPath ):
+		"""docstring for changeIntPaths"""
+		for f in files:
+			if not f.endswith( '.ma' ):
+				continue
+			localFile = mfl.mayaFile( f.replace( serverPath, localPath ) )
+			stinfo = os.stat( localFile.path )
+			localFile.changePathsBrutForce( srchAndRep =  [ serverPath, localPath ] )
+			os.utime( localFile.path,(stinfo.st_atime, stinfo.st_mtime))
 
 	def copySelectedAssetsToServer(self):
 		"""copy all the assets from server"""
@@ -904,9 +952,17 @@ class ManagerUI(base,fom):
 			if self.serverPath in filePath: #THIS FILE ONLY EXISTS IN SERVER SO THERE IS NO NEED
 				return
 			else:
-				localFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
-				localFile.newVersion()
-				asset.copyAll( localFile.path )
+				serverFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
+				serverFile.newVersion()
+				asset.copy( serverFile.path )
+				deps = self.getDependenciesToCopy( asset )
+				toCopy = self.filesToCopy( deps,  prj.BASE_PATH + '/', self.serverPath )
+				if self.changeInternalPaths:
+					self.changeIntPaths( [asset.path ], prj.BASE_PATH + '/', self.serverPath )
+				if toCopy:
+					res = trhC.MultiProgressDialog( toCopy, prj.BASE_PATH + '/', self.serverPath, self )
+					if res and self.changeInternalPaths:
+						self.changeIntPaths( toCopy, prj.BASE_PATH + '/', self.serverPath )
 		else:
 			if self.serverPath in filePath: #THIS FILE ONLY EXISTS IN SERVER SO THERE IS NO NEED
 				return
@@ -914,12 +970,9 @@ class ManagerUI(base,fom):
 				localFile = fl.File( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
 				asset.copy( str( localFile.path ))
 
-	def setStatusBarMessage(self, message):
-		"""docstring for setStatusBarMessage"""
-		self.statusbar.showMessage( message )
-
-	def closeEvent(self, event):
-		self._saveConfig()
+	#
+	###################################
+	#
 
 def main():
 	global PyForm

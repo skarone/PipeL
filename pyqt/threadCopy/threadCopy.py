@@ -105,6 +105,7 @@ class MultiProgressDialog(base, fom):
 		self.filesNumber_lbl.setText( str( count ) + '/' + str( lenSources ) )
 
 	def finished_copy(self, state):
+		QtGui.QDialog.accept(self)
 		self.close()
 
 class MultiCopyThread(QtCore.QThread):

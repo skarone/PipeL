@@ -50,6 +50,8 @@ class Job(object):
 				'InitialStatus'                      : "Suspended"
 				}
 		version = mc.about( version=True )
+		if version == '2015':
+			version  = '2011'
 		if version == '2014':
 			version  = '2012'
 		self._pluginDic = {

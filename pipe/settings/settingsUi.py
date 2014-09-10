@@ -59,6 +59,13 @@ class Settings(base, fom):
 				else: 
 					state = QtCore.Qt.Unchecked
 				self.useMayaSubFolder_chb.setCheckState( state )
+			if gen.has_key( 'changeinternalpaths' ):
+				changeinternalpaths = gen[ "changeinternalpaths" ]
+				if changeinternalpaths == 'True': 
+					state = QtCore.Qt.Checked 
+				else: 
+					state = QtCore.Qt.Unchecked
+				self.changeInternalPaths_chb.setCheckState( state )
 			if gen.has_key( 'skin' ):
 				skin = gen[ "skin" ]
 				index = self.skin_cmb.findText( skin )
@@ -90,6 +97,7 @@ class Settings(base, fom):
 		self.settings.write( 'General', 'renderpath', str( self.renderPath_le.text() ))
 		self.settings.write( 'General', 'autoload', self.autoLoadManager_chb.isChecked() )
 		self.settings.write( 'General', 'usemayasubfolder', self.useMayaSubFolder_chb.isChecked() )
+		self.settings.write( 'General', 'changeinternalpaths', self.changeInternalPaths_chb.isChecked() )
 		self.settings.write( 'General', 'skin', str( self.skin_cmb.currentText() ))
 		QtGui.QDialog.accept(self)
 		

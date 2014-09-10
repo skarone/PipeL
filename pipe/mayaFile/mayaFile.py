@@ -53,6 +53,53 @@ class mayaFile(fl.File):
 		mc.file( s = True, type='mayaAscii' )
 	
 	@property
+	def caches(self):
+		"""return the caches in the scene"""
+		pat = re.compile( '"(?P<Path>\S+\.abc)"' )
+		search = pat.search
+		matches = (search(line) for line in file(self.path, "rb") if 'abc' in line)
+		references = [match.group('Path') for match in matches if match]
+		finalRefs = []
+		for r in references:
+			r = fl.File( r )
+			if r in finalRefs:
+				continue
+			finalRefs.append( r )
+		return finalRefs
+
+	@property
+	def references(self):
+		"""docstring for foo"""
+		pat = re.compile( '"(?P<Path>\S+\.ma)"' )
+		search = pat.search
+		matches = (search(line) for line in file(self.path, "rb") if 'ma' in line)
+		references = [match.group('Path') for match in matches if match]
+		finalRefs = []
+		for r in references:
+			r = mayaFile( r )
+			if r in finalRefs:
+				continue
+			finalRefs.append( r )
+		return finalRefs
+
+	@property
+	def time(self):
+		"""return time setted in the file"""
+		t =  re.search( '(:?currentUnit -l )(?P<Linear>.+)(:? -a )(?P<Angle>.+)(:? -t )(?P<Time>.+);', self.data )
+		if t:
+			lin = str( t.group('Linear') )
+			angle = str( t.group('Angle') )
+			tim = str( t.group('Time') )
+		m =  re.search( '(:?.+playbackOptions -min )(?P<Min>.+)(:? -max )(?P<Max>.+)(:? -ast )(?P<Ast>.+)(:? -aet )(?P<Aet>.+) ";', self.data )
+		if m:
+			amin = int( m.group('Min') )
+			amax = int( m.group('Max') )
+			aast = int( m.group('Ast') )
+			aaet = int( m.group('Aet') )
+			return {'min':amin,'max':amax,'ast':aast,'aet':aaet, 'lin':lin,'angle':angle,'tim':tim}
+		return {'lin':lin,'angle':angle,'tim':tim}
+
+	@property
 	def textures(self):
 		"""return the textures on the maya File"""
 		textures = []
@@ -126,21 +173,6 @@ class mayaFile(fl.File):
 		if srchAndRep:
 			newPath = newPath.replace( srchAndRep[0], srchAndRep[1] )
 		return matchobj.group( 0 ).replace( path, newPath )
-
-	@property
-	def references(self):
-		"""docstring for foo"""
-		pat = re.compile( '"(?P<Path>\S+\.ma)"' )
-		search = pat.search
-		matches = (search(line) for line in file(self.path, "rb") if 'ma' in line)
-		references = [match.group('Path') for match in matches if match]
-		finalRefs = []
-		for r in references:
-			r = mayaFile( r )
-			if r in finalRefs:
-				continue
-			finalRefs.append( r )
-		return finalRefs
 
 	def allReferences(self):
 		"""return all references in a recursive way
@@ -234,21 +266,6 @@ class mayaFile(fl.File):
 			print 'copiando ', r.path, origRef.path
 			r.copyAll( origRef.path )
 
-	@property
-	def caches(self):
-		"""return the caches in the scene"""
-		pat = re.compile( '"(?P<Path>\S+\.abc)"' )
-		search = pat.search
-		matches = (search(line) for line in file(self.path, "rb") if 'abc' in line)
-		references = [match.group('Path') for match in matches if match]
-		finalRefs = []
-		for r in references:
-			r = fl.File( r )
-			if r in finalRefs:
-				continue
-			finalRefs.append( r )
-		return finalRefs
-
 	def copyCaches(self, newPathFile, BasePath, finalBasePath ):
 		"""copy all the caches in the file"""
 		for r in newPathFile.caches:
@@ -287,24 +304,6 @@ class mayaFile(fl.File):
 			namespa = self.name
 		nodes = mc.file( self.path, r = True, type = "mayaAscii", gl = True, loadReferenceDepth = "all",rnn = True, shd = ["renderLayersByName", "shadingNetworks"] , mergeNamespacesOnClash = False, namespace = namespa, options = "v=0;" )
 		return mn.Nodes(nodes)
-
-	@property
-	def time(self):
-		"""return time setted in the file"""
-		t =  re.search( '(:?currentUnit -l )(?P<Linear>.+)(:? -a )(?P<Angle>.+)(:? -t )(?P<Time>.+);', self.data )
-		if t:
-			lin = str( t.group('Linear') )
-			angle = str( t.group('Angle') )
-			tim = str( t.group('Time') )
-		m =  re.search( '(:?.+playbackOptions -min )(?P<Min>.+)(:? -max )(?P<Max>.+)(:? -ast )(?P<Ast>.+)(:? -aet )(?P<Aet>.+) ";', self.data )
-		if m:
-			amin = int( m.group('Min') )
-			amax = int( m.group('Max') )
-			aast = int( m.group('Ast') )
-			aaet = int( m.group('Aet') )
-			return {'min':amin,'max':amax,'ast':aast,'aet':aaet, 'lin':lin,'angle':angle,'tim':tim}
-		return {'lin':lin,'angle':angle,'tim':tim}
-		
 
 	def open(self):
 		"""open file in current maya"""
