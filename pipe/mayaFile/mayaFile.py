@@ -70,9 +70,9 @@ class mayaFile(fl.File):
 	@property
 	def references(self):
 		"""docstring for foo"""
-		pat = re.compile( '"(?P<Path>\S+\.ma)"' )
+		pat = re.compile( '"(?P<Path>\S+/.+\.ma)"' )
 		search = pat.search
-		matches = (search(line) for line in file(self.path, "rb") if 'ma' in line)
+		matches = (search(line) for line in file(self.path, "rb") )
 		references = [match.group('Path') for match in matches if match]
 		finalRefs = []
 		for r in references:
