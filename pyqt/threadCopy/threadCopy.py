@@ -104,6 +104,7 @@ class MultiProgressDialog(base, fom):
 		self.filesNumber_lbl.setText( str( count ) + '/' + str( lenSources ) )
 
 	def finished_copy(self, state):
+		self.copy_thread.exit()
 		QtGui.QDialog.accept(self)
 		self.close()
 
@@ -151,9 +152,9 @@ class MultiCopyThread(QtCore.QThread):
 						target.write(chunk)
 						copied += len(chunk)
 						self.procPartDone.emit(copied * 100 / source_size, targetFile )
-			self.procFileDone.emit(count ,lenSources )
 			os.utime( targetFile,(stinfo.st_atime, stinfo.st_mtime))
 			count += 1
+			self.procFileDone.emit(count ,lenSources )
 
 
 
