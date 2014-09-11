@@ -465,6 +465,12 @@ class Node(object):
 			return sha[0]
 		return None
 
+	@property
+	def outputs(self):
+		"""return all the outputs connections from node"""
+		cons = [ NodeAttribute( Node( a.split('.')[0] ), a.split('.')[1] ) for a in mc.listConnections( self.name, sh = True, s = False, scn = True, p = True, c = True )]
+		return [cons[n:n+2] for n in range(0, len(cons), 2)]
+		
 
 ##################################################
 # ATTRIBUTES CLASS

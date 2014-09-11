@@ -86,7 +86,6 @@ class MultiProgressDialog(base, fom):
 		self.sources = sources
 		self.basePath = basePath
 		self.finalPath = finalPath
-		self.show()
 		self.copy()
 
 	def copy(self):

@@ -66,6 +66,7 @@ class ManagerUI(base,fom):
 		self.settings = sti.Settings()
 		if not self.settings.exists:
 			self.loadSettingsUi()
+		self.changeInternalPaths = False
 		self.loadProjectsPath()
 		self.fillProjectsCombo()
 		self.fillAssetsTable()
@@ -81,7 +82,6 @@ class ManagerUI(base,fom):
 		self.sets_tw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.sets_tw.customContextMenuRequested.connect(self.showMenu)
 		gen = self.settings.General
-		self.changeInternalPaths = False
 
 	###################################
 	#LOAD SETTINGS
@@ -248,7 +248,7 @@ class ManagerUI(base,fom):
 		for i in range( self.shots_tw.rowCount() ):
 			match = False
 			item = self.shots_tw.item( i, 0 )
-			if item.text().contains(fil):
+			if fil in str( item.text() ):
 				match = True
 			self.shots_tw.setRowHidden( i, not match )
 
@@ -300,7 +300,7 @@ class ManagerUI(base,fom):
 			match = False
 			for j in range( self.assets_tw.columnCount() ):
 				item = self.assets_tw.item( i, j )
-				if item.text().contains(fil):
+				if fil in str( item.text() ):
 					match = True
 					break
 			self.assets_tw.setRowHidden( i, not match )
@@ -862,7 +862,6 @@ class ManagerUI(base,fom):
 		filePath = str( asset.path )
 		if asset.path.endswith( '.ma' ):# MAYA FILE
 			#COPY TEXTURES AND REFERENCES RECURSIVE
-			print self.changeInternalPaths
 			if self.serverPath in filePath:
 				localFile = mfl.mayaFile( filePath.replace( self.serverPath, prj.BASE_PATH + '/' ) )
 				localFile.newVersion()
@@ -872,7 +871,9 @@ class ManagerUI(base,fom):
 				if self.changeInternalPaths:
 					self.changeIntPaths( [localFile.path ], self.serverPath, prj.BASE_PATH + '/' )
 				if toCopy:
-					res = trhC.MultiProgressDialog( toCopy, self.serverPath, prj.BASE_PATH + '/', self )
+					dia = trhC.MultiProgressDialog( toCopy, self.serverPath, prj.BASE_PATH + '/', self )
+					dia.show()
+					res = dia.exec_()
 					if res and self.changeInternalPaths:
 						self.changeIntPaths( toCopy, self.serverPath, prj.BASE_PATH + '/' )
 			else:
@@ -884,10 +885,10 @@ class ManagerUI(base,fom):
 				if self.changeInternalPaths:
 					self.changeIntPaths( [asset.path ], self.serverPath, prj.BASE_PATH + '/' )
 				if toCopy:
-					res = trhC.MultiProgressDialog( toCopy, self.serverPath, prj.BASE_PATH + '/', self )
-					print res
+					dia = trhC.MultiProgressDialog( toCopy, self.serverPath, prj.BASE_PATH + '/', self )
+					dia.show()
+					res = dia.exec_()
 					if res and self.changeInternalPaths:
-						print 'in changeintpath'
 						self.changeIntPaths( toCopy, self.serverPath, prj.BASE_PATH + '/' )
 		else:
 			if self.serverPath in filePath:
@@ -960,7 +961,9 @@ class ManagerUI(base,fom):
 				if self.changeInternalPaths:
 					self.changeIntPaths( [asset.path ], prj.BASE_PATH + '/', self.serverPath )
 				if toCopy:
-					res = trhC.MultiProgressDialog( toCopy, prj.BASE_PATH + '/', self.serverPath, self )
+					dia = trhC.MultiProgressDialog( toCopy, prj.BASE_PATH + '/', self.serverPath, self )
+					dia.show()
+					res = dia.exec_()
 					if res and self.changeInternalPaths:
 						self.changeIntPaths( toCopy, prj.BASE_PATH + '/', self.serverPath )
 		else:
