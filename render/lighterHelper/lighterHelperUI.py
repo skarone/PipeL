@@ -310,11 +310,21 @@ class LighterHelperUI(base,fom):
 		hairSel = []
 		if sels:
 			for s in sels:
-				hai = mn.listRelatives( s.name, type = ['hairSystem', 'shaveHair' ], ad = True )
+				hai = mn.listRelatives( s.name, type = 'hairSystem', ad = True )
 				if hai:
 					hairSel.extend( hai )
+				try:
+					hai = mn.listRelatives( s.name, type = 'shaveHair', ad = True )
+					if hai:
+						hairSel.extend( hai )
+				except:
+					pass
 		else:
-			hairSel = mn.ls( typ = ['hairSystem','shaveHair'] )
+			hairSel = mn.ls( typ = 'hairSystem' )
+			try:
+				hairSel.extend( mn.ls( typ = 'shaveHair' ) )
+			except:
+				pass
 		if not hairSel:
 			return
 		for h in hairSel:

@@ -12,6 +12,8 @@ reload( dl )
 import pipe.mayaFile.mayaFile as mfl
 import pipe.project.project as prj
 import general.mayaNode.mayaNode as mn
+import pipe.settings.settings as sti
+reload( sti )
 
 import socket
 
@@ -62,7 +64,7 @@ class RenderManagerUI(base,fom):
 		dead = dl.Deadline()
 		self.groups_cmb.addItems( dead.groups ) 
 		settings = sti.Settings()
-		gen = self.settings.General
+		gen = settings.General
 		renderPath = 'R:/'
 		if gen:
 			renderPath = gen[ "renderpath" ]
@@ -122,7 +124,7 @@ class RenderManagerUI(base,fom):
 		filePrefix= str( self.filePath_le.text())
 		priority = str( self.priority_spb.value() )
 		taskSize = str( self.taskSize_spb.value() )
-		projPath = str( self.filePath_le.text() )
+		projPath = str( self.projectPath_le.text() )
 		InitialStatus = "Active"
 		if self.submitSuspended_chb.isChecked():
 			InitialStatus = "Suspended"
