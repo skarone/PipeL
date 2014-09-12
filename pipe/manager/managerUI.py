@@ -81,7 +81,6 @@ class ManagerUI(base,fom):
 
 		self.sets_tw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.sets_tw.customContextMenuRequested.connect(self.showMenu)
-		gen = self.settings.General
 
 	###################################
 	#LOAD SETTINGS
@@ -479,7 +478,9 @@ class ManagerUI(base,fom):
 		shots = sequence.shots
 		color = [QtGui.QColor( "grey" ),
 				QtGui.QColor( "green" ),
-				QtGui.QColor( "red" )]
+				QtGui.QColor( "red" ),
+				QtGui.QColor( "#000000" )    #FILE NOT EXISTS
+				]
 		serverComColor = [QtGui.QColor( "#CACAD4" ), #BOTH IN ZERO
 						QtGui.QColor( "#00CC00" ),   #BOTH IN SINCRO
 						QtGui.QColor( "#FF0000" ),   #NEEDS DOWNLOAD

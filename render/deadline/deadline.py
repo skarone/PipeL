@@ -59,6 +59,7 @@ class Job(object):
 				'Build'                     : '64bit',
 				'StrictErrorChecking'       : 'False',
 				'LocalRendering'            : 'False',
+				'ProjectPath'               : '',
 				'MaxProcessors'             : '0',
 				'Renderer'                  : 'File',
 				'CommandLineOptions'        : '',

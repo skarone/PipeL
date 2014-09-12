@@ -20,14 +20,14 @@
       <item>
        <widget class="QLabel" name="label_9">
         <property name="text">
-         <string>Base Path:</string>
+         <string>Project Path:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="basePath_le">
+       <widget class="QLineEdit" name="projectPath_le">
         <property name="text">
-         <string>R:/</string>
+         <string/>
         </property>
        </widget>
       </item>

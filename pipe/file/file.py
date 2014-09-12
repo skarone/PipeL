@@ -165,7 +165,7 @@ class File(object):
 		"""compare to File objects to see if the current one is older than"""
 		fToCtime = round( os.path.getmtime(fileToCompare.path) )
 		origFTime   = round( os.path.getmtime(self.path) )
-		return fToCtime < origFTime
+		return fToCtime > origFTime
 
 	def isBiggerThan(self, fileToCompare):
 		"""compare File object size with another File object"""

@@ -61,18 +61,26 @@ class RenderManagerUI(base,fom):
 		"""fill ui"""
 		dead = dl.Deadline()
 		self.groups_cmb.addItems( dead.groups ) 
+		settings = sti.Settings()
+		gen = self.settings.General
+		renderPath = 'R:/'
+		if gen:
+			renderPath = gen[ "renderpath" ]
+			if not renderPath.endswith( '/' ):
+				renderPath += '/'
 		self.pools_cmb.addItems( dead.pools ) 
 		renderGlobals = mn.Node( 'defaultRenderGlobals' )
 		self.filePath_le.setText( str( renderGlobals.a.imageFilePrefix.v ))
 		assOrShot = prj.shotOrAssetFromFile( mfl.currentFile() )
+		self.projectPath_le.setText( mc.workspace( q = True, fullName = True ) )
 		self._project = ''
 		if assOrShot:
 			if assOrShot.type == 'asset':
-				versionNumber = self._getVersionNumber( 'R:/' + assOrShot.project.name + '/Asset/' + assOrShot.name )
-				pat = 'R:/' + assOrShot.project.name + '/Asset/' + assOrShot.name + '/v' + str(versionNumber).zfill( 4 ) + '/' + '<RenderLayer>' + '/<RenderLayer>'
+				versionNumber = self._getVersionNumber( renderPath + assOrShot.project.name + '/Asset/' + assOrShot.name )
+				pat = renderPath + assOrShot.project.name + '/Asset/' + assOrShot.name + '/v' + str(versionNumber).zfill( 4 ) + '/' + '<RenderLayer>' + '/<RenderLayer>'
 			elif assOrShot.type == 'shot':
-				versionNumber = self._getVersionNumber( 'R:/' + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name )
-				pat = 'R:/' + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name + '/v' + str(versionNumber).zfill( 4 ) + '/' + '<RenderLayer>' + '/<RenderLayer>'
+				versionNumber = self._getVersionNumber( renderPath + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name )
+				pat = renderPath + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name + '/v' + str(versionNumber).zfill( 4 ) + '/' + '<RenderLayer>' + '/<RenderLayer>'
 				renderGlobals.a.imageFilePrefix.v = str( pat )
 			self._project = assOrShot.project.name
 			self.filePath_le.setText( str( pat ))
@@ -114,6 +122,7 @@ class RenderManagerUI(base,fom):
 		filePrefix= str( self.filePath_le.text())
 		priority = str( self.priority_spb.value() )
 		taskSize = str( self.taskSize_spb.value() )
+		projPath = str( self.filePath_le.text() )
 		InitialStatus = "Active"
 		if self.submitSuspended_chb.isChecked():
 			InitialStatus = "Suspended"
@@ -135,20 +144,21 @@ class RenderManagerUI(base,fom):
 			if self._project:
 				name = self._project + ' - '
 			Job = dl.Job( w.layer.name,
-						{	'Group'     : group,
-							'Pool'     : pool,
-							'Frames'   : frames,
-							'Comment'  : comments,
-							'InitialStatus' : InitialStatus,
-							'Whitelist'     : whiteList,
-							'Name'      : name + mfl.currentFile().name + ' - ' + w.layer.name,
+						{	'Group'           : group,
+							'Pool'            : pool,
+							'Frames'          : frames,
+							'Comment'         : comments,
+							'InitialStatus'   : InitialStatus,
+							'Whitelist'       : whiteList,
+							'Name'            : name + mfl.currentFile().name + ' - ' + w.layer.name,
 							'OutputFilename0' : filename,
-							'Priority': priority,
-							'ChunkSize':taskSize
-							},{'CommandLineOptions':  '-rl ' + w.layer.name,
-								'UsingRenderLayers': 1,
-								'RenderLayer': w.layer.name,
-								'OutputFilePrefix': filePrefix,
+							'Priority'        : priority,
+							'ChunkSize'       : taskSize
+							},{'CommandLineOptions' : '-rl ' + w.layer.name,
+								'UsingRenderLayers' : 1,
+								'ProjectPath'       : projPath,
+								'RenderLayer'       : w.layer.name,
+								'OutputFilePrefix'  : filePrefix,
 							}, mfl.currentFile() )
 			Job.write()
 			dead.runMayaJob( Job )
@@ -158,7 +168,6 @@ class RenderManagerUI(base,fom):
 		if not os.path.exists( path ):
 			return 1
 		return len( [a for a in os.listdir( path ) if os.path.isdir( path + '/' + a ) ] ) + 1
-
 
 	def _getLayersWidgets(self):
 		"""return the layerswidgets items"""

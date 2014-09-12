@@ -92,16 +92,15 @@ class Settings(base, fom):
 		
 	def save(self):
 		"""docstring for save"""
-		self.settings.write( 'General', 'basepath', str( self.localPath_le.text() ))
-		self.settings.write( 'General', 'serverpath', str( self.serverPath_le.text() ))
-		self.settings.write( 'General', 'renderpath', str( self.renderPath_le.text() ))
+		self.settings.write( 'General', 'basepath', str( self.localPath_le.text().replace( '\\', '/' ) ))
+		self.settings.write( 'General', 'serverpath', str( self.serverPath_le.text().replace( '\\', '/' ) ))
+		self.settings.write( 'General', 'renderpath', str( self.renderPath_le.text().replace( '\\', '/' ) ))
 		self.settings.write( 'General', 'autoload', self.autoLoadManager_chb.isChecked() )
 		self.settings.write( 'General', 'usemayasubfolder', self.useMayaSubFolder_chb.isChecked() )
 		self.settings.write( 'General', 'changeinternalpaths', self.changeInternalPaths_chb.isChecked() )
 		self.settings.write( 'General', 'skin', str( self.skin_cmb.currentText() ))
 		QtGui.QDialog.accept(self)
 		
-
 def main():
 	global PyFormSettings
 	PyFormSettings=Settings()
