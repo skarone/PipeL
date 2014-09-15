@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\install.ui'
 #
-# Created: Sun Sep 07 03:14:53 2014
+# Created: Mon Sep 15 14:26:05 2014
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -58,7 +58,7 @@ class Ui_MainWindow(object):
         self.close_btn.setStyleSheet(_fromUtf8("border:none;"))
         self.close_btn.setText(_fromUtf8(""))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8("images/close.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/close.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.close_btn.setIcon(icon)
         self.close_btn.setIconSize(QtCore.QSize(30, 30))
         self.close_btn.setFlat(True)
@@ -139,7 +139,7 @@ class Ui_MainWindow(object):
 "     border-radius: 10px;"))
         self.serverInstall_btn.setText(_fromUtf8(""))
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(_fromUtf8("images/arrow.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(_fromUtf8(":/images/arrow.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.serverInstall_btn.setIcon(icon1)
         self.serverInstall_btn.setIconSize(QtCore.QSize(100, 100))
         self.serverInstall_btn.setFlat(False)
@@ -191,13 +191,4 @@ class Ui_MainWindow(object):
         self.label_2.setText(_translate("MainWindow", "Server", None))
         self.label_3.setText(_translate("MainWindow", "Client", None))
 
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    MainWindow = QtGui.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
-
+#import images_rc

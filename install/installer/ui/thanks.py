@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '.\thanks.ui'
 #
-# Created: Sun Sep 07 03:15:20 2014
+# Created: Mon Sep 15 14:26:26 2014
 #      by: PyQt4 UI code generator 4.10.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -83,14 +83,4 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "PipeL Installer", None))
         self.label_5.setText(_translate("MainWindow", "1.0", None))
         self.label.setText(_translate("MainWindow", "<html><head/><body><p>Thanks for Installing PipeL</p></body></html>", None))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    MainWindow = QtGui.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
 
