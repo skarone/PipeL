@@ -21,6 +21,16 @@ class _ToolsDock(QtGui.QWidget):
 		self.installerHelper.procStart.connect( self.inputconnection )
 		self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 
+	def mousePressEvent(self, event):
+		self.offset = event.pos()
+
+	def mouseMoveEvent(self, event):
+		x=event.globalX()
+		y=event.globalY()
+		x_w = self.offset.x()
+		y_w = self.offset.y()
+		self.move(x-x_w, y-y_w)
+
 	def inputconnection(self, action):
 		"""docstring for inputconnection"""
 		if action == 'Installed':

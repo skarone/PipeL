@@ -73,8 +73,8 @@ color: rgb(225, 225, 225);
            <string/>
           </property>
           <property name="icon">
-           <iconset>
-            <normaloff>images/close.png</normaloff>images/close.png</iconset>
+           <iconset resource="../images.qrc">
+            <normaloff>:/images/close.png</normaloff>:/images/close.png</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -276,8 +276,8 @@ border:none;
            <string/>
           </property>
           <property name="icon">
-           <iconset>
-            <normaloff>images/arrow.png</normaloff>images/arrow.png</iconset>
+           <iconset resource="../images.qrc">
+            <normaloff>:/images/arrow.png</normaloff>:/images/arrow.png</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -354,8 +354,8 @@ border:none;
            <string/>
           </property>
           <property name="icon">
-           <iconset>
-            <normaloff>images/arrow.png</normaloff>images/arrow.png</iconset>
+           <iconset resource="../images.qrc">
+            <normaloff>:/images/arrow.png</normaloff>:/images/arrow.png</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -405,7 +405,9 @@ border:none;
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="../images.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>close_btn</sender>
