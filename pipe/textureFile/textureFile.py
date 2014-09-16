@@ -6,6 +6,8 @@ try:
 except:
 	print 'outside maya'
 import os
+import pipe.settings.settings as sti
+reload( sti )
 
 
 #TODO... hasUdim Property
@@ -34,7 +36,6 @@ def projectToTx( proj = 'DogMendoncaAndPizzaBoy' ):
 			t.makeTx()
 """
 
-MAKETXPATH     = 'C:/solidangle/mtoadeploy/2013/bin/maketx.exe'
 dirname, filename = os.path.split(os.path.abspath(__file__))
 dirname = dirname.split( 'pipe' )[0]
 IMAGEMAGICPATH = dirname + 'bin/ImageMagick/'
@@ -174,12 +175,22 @@ class textureFile(fl.File):
 
 	def makeTx(self, force = False ):
 		"""make Tx version of the texture"""
+		if not self.exists:
+			return False
 		if self.isTx:
 			return False
-		if force or not self.hasTx:
-			print 'Converting >> ' + self.path + ' to TX!'
-			finalCMD =  MAKETXPATH + ' "' + self.path + '"'
-			os.popen( finalCMD ) 
+		if self.hasTx:
+			if not self.toTx().isOlderThan( self ) and not force:
+				return False
+		print 'Converting >> ' + self.path + ' to TX!'
+		MAKETXPATH     = 'C:/solidangle/mtoadeploy/2014/bin/maketx.exe'
+		settings = sti.Settings()
+		gen = settings.General
+		maketxpath = gen[ "maketxpath" ]
+		if maketxpath:
+			MAKETXPATH = maketxpath
+		finalCMD =  MAKETXPATH + ' "' + self.path + '"'
+		os.popen( finalCMD ) 
 
 	def makeMid(self, force = False):
 		"""make Mid version of texture"""

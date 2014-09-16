@@ -55,10 +55,7 @@ class mayaFile(fl.File):
 	@property
 	def caches(self):
 		"""return the caches in the scene"""
-		pat = re.compile( '"(?P<Path>\S+\.abc)"' )
-		search = pat.search
-		matches = (search(line) for line in file(self.path, "rb") if 'abc' in line)
-		references = [match.group('Path') for match in matches if match]
+		references = [r for r in self.files if '.abc' in r]
 		finalRefs = []
 		for r in references:
 			r = fl.File( r )
@@ -69,11 +66,8 @@ class mayaFile(fl.File):
 
 	@property
 	def references(self):
-		"""docstring for foo"""
-		pat = re.compile( '"(?P<Path>\S+/.+\.ma)"' )
-		search = pat.search
-		matches = (search(line) for line in file(self.path, "rb") )
-		references = [match.group('Path') for match in matches if match]
+		"""return references that has the file"""
+		references = [r for r in self.files if '.ma' in r]
 		finalRefs = []
 		for r in references:
 			r = mayaFile( r )
@@ -81,6 +75,15 @@ class mayaFile(fl.File):
 				continue
 			finalRefs.append( r )
 		return finalRefs
+
+	@property
+	def files(self):
+		"""return all the internal files in the mayaFile"""
+		pat = re.compile( '"(?P<Path>\S+\/\S+\.[a-zA-Z]+)"' )
+		search = pat.search
+		matches = (search(line) for line in file(self.path, "rb") )
+		references = [match.group('Path') for match in matches if match]
+		return references
 
 	@property
 	def time(self):

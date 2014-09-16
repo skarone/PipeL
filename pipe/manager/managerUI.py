@@ -34,6 +34,8 @@ import pipe.settings.settings as sti
 reload( sti )
 import pipe.settings.settingsUi as stiUi
 reload( stiUi )
+import pipe.textureFile.textureFile as tfl
+reload( tfl )
 INMAYA = False
 try:
 	import maya.cmds as mc
@@ -67,6 +69,7 @@ class ManagerUI(base,fom):
 		if not self.settings.exists:
 			self.loadSettingsUi()
 		self.changeInternalPaths = False
+		self.autoMakeTx = False
 		self.loadProjectsPath()
 		self.fillProjectsCombo()
 		self.fillAssetsTable()
@@ -103,7 +106,11 @@ class ManagerUI(base,fom):
 				prj.USE_MAYA_SUBFOLDER = False
 			changeInternalPaths = gen[ "changeinternalpaths" ]
 			if useMayaSubFolder == 'True':
-				self.changeInternalPaths = changeInternalPaths
+				self.changeInternalPaths = True
+			if gen.has_key( 'automaketx' ):
+				autoMakeTx = gen[ "automaketx" ]
+				if autoMakeTx == 'True':
+					self.autoMakeTx = True
 			skin = gen[ "skin" ]
 			if skin:
 				uiH.loadSkin( self, skin )
@@ -867,30 +874,36 @@ class ManagerUI(base,fom):
 				localFile = mfl.mayaFile( filePath.replace( self.serverPath, prj.BASE_PATH + '/' ) )
 				localFile.newVersion()
 				asset.copy( localFile.path )
-				deps = self.getDependenciesToCopy( localFile )
-				toCopy = self.filesToCopy( deps, self.serverPath, prj.BASE_PATH + '/' )
 				if self.changeInternalPaths:
+					deps, textures = self.getDependenciesToCopy( localFile )
 					self.changeIntPaths( [localFile.path ], self.serverPath, prj.BASE_PATH + '/' )
-				if toCopy:
-					dia = trhC.MultiProgressDialog( toCopy, self.serverPath, prj.BASE_PATH + '/', self )
-					dia.show()
-					res = dia.exec_()
-					if res and self.changeInternalPaths:
-						self.changeIntPaths( toCopy, self.serverPath, prj.BASE_PATH + '/' )
+					toCopy = self.filesToCopy( deps, self.serverPath, prj.BASE_PATH + '/' )
+					if toCopy:
+						dia = trhC.MultiProgressDialog( toCopy, self.serverPath, prj.BASE_PATH + '/', self )
+						dia.show()
+						res = dia.exec_()
+						if res:
+							self.changeIntPaths( toCopy, self.serverPath, prj.BASE_PATH + '/' )
+							if self.autoMakeTx:
+								for t in textures:
+									self.makeTxForTexture( t, self.serverPath, prj.BASE_PATH + '/' )
 			else:
 				serverFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
 				asset.newVersion()
 				serverFile.copy( asset.path )
-				deps = self.getDependenciesToCopy( asset )
-				toCopy = self.filesToCopy( deps, self.serverPath, prj.BASE_PATH + '/' )
 				if self.changeInternalPaths:
+					deps, textures = self.getDependenciesToCopy( asset )
 					self.changeIntPaths( [asset.path ], self.serverPath, prj.BASE_PATH + '/' )
-				if toCopy:
-					dia = trhC.MultiProgressDialog( toCopy, self.serverPath, prj.BASE_PATH + '/', self )
-					dia.show()
-					res = dia.exec_()
-					if res and self.changeInternalPaths:
-						self.changeIntPaths( toCopy, self.serverPath, prj.BASE_PATH + '/' )
+					toCopy = self.filesToCopy( deps, self.serverPath, prj.BASE_PATH + '/' )
+					if toCopy:
+						dia = trhC.MultiProgressDialog( toCopy, self.serverPath, prj.BASE_PATH + '/', self )
+						dia.show()
+						res = dia.exec_()
+						if res:
+							self.changeIntPaths( toCopy, self.serverPath, prj.BASE_PATH + '/' )
+							if self.autoMakeTx:
+								for t in textures:
+									self.makeTxForTexture( t, self.serverPath, prj.BASE_PATH + '/' )
 		else:
 			if self.serverPath in filePath:
 				localFile = fl.File( filePath.replace( self.serverPath, prj.BASE_PATH + '/' ) )
@@ -944,7 +957,7 @@ class ManagerUI(base,fom):
 		result.extend( refs )
 		result.extend( textures )
 		result.extend( caches )
-		return result
+		return result, textures
 		
 	def copyAssetToServer(self, asset):
 		"""main function to copy asset to server"""
@@ -957,16 +970,20 @@ class ManagerUI(base,fom):
 				serverFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
 				serverFile.newVersion()
 				asset.copy( serverFile.path )
-				deps = self.getDependenciesToCopy( asset )
-				toCopy = self.filesToCopy( deps,  prj.BASE_PATH + '/', self.serverPath )
 				if self.changeInternalPaths:
+					deps, textures = self.getDependenciesToCopy( asset )
 					self.changeIntPaths( [asset.path ], prj.BASE_PATH + '/', self.serverPath )
-				if toCopy:
-					dia = trhC.MultiProgressDialog( toCopy, prj.BASE_PATH + '/', self.serverPath, self )
-					dia.show()
-					res = dia.exec_()
-					if res and self.changeInternalPaths:
-						self.changeIntPaths( toCopy, prj.BASE_PATH + '/', self.serverPath )
+					toCopy = self.filesToCopy( deps,  prj.BASE_PATH + '/', self.serverPath )
+					if toCopy:
+						dia = trhC.MultiProgressDialog( toCopy, prj.BASE_PATH + '/', self.serverPath, self )
+						dia.show()
+						res = dia.exec_()
+						if res and self.changeInternalPaths:
+							self.changeIntPaths( toCopy, prj.BASE_PATH + '/', self.serverPath )
+							if self.autoMakeTx:
+								for t in textures:
+									self.makeTxForTexture( t, prj.BASE_PATH + '/', self.serverPath )
+
 		else:
 			if self.serverPath in filePath: #THIS FILE ONLY EXISTS IN SERVER SO THERE IS NO NEED
 				return
@@ -974,6 +991,9 @@ class ManagerUI(base,fom):
 				localFile = fl.File( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
 				asset.copy( str( localFile.path ))
 
+	def makeTxForTexture(self, texture, serverPath, localPath  ):
+		newTextFile = tfl.textureFile( texture.path.replace( serverPath, localPath ) )
+		newTextFile.makeTx()
 	#
 	###################################
 	#

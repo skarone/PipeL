@@ -115,6 +115,16 @@ except:
 import re
 import sys
 
+import install.pyregistry.pyregistry as pr
+try:
+	test = pr.queryValue('HKCU', r'Software\Pipel', 'key' )
+	if test != '1561532593':
+		print 'Are you stealing PipeL? :( Im Shame of You'
+		quit()
+except:
+	print 'Are you stealing PipeL? :( Im Shame of You'
+	quit()
+
 """
 SETTINGS:
 	Here we can setup some global settings =)

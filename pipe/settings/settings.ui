@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>420</width>
-    <height>192</height>
+    <width>544</width>
+    <height>288</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -78,6 +78,31 @@
     </layout>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_7">
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Make Tx Path:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="makeTxPath_le">
+       <property name="text">
+        <string>C:/solidangle/mtoadeploy/2014/bin/maketx.exe</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="makeTxPath_btn">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <widget class="QCheckBox" name="autoLoadManager_chb">
@@ -122,10 +147,10 @@
      <item>
       <widget class="QCheckBox" name="changeInternalPaths_chb">
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This will change the internal paths in the maya files to match your local path when download from server, and change to server path when you upload from local&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This will download/upload all the dependencies of the file (&amp;quot;References&amp;quot;, &amp;quot;Textures&amp;quot;, &amp;quot;Caches&amp;quot;, etc..) and change the internal paths in the maya files to match your local path when download from server, and change to server path when you upload from local&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
-        <string>Change Internal Paths when Upload/Download Files</string>
+        <string>Upload/Download Dependences and Change Internal Paths</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -160,6 +185,16 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
+      <widget class="QCheckBox" name="makeTx_chb">
+       <property name="text">
+        <string>Make Tx When Upload/Download Textures</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -184,5 +219,22 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>changeInternalPaths_chb</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>makeTx_chb</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>109</x>
+     <y>224</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>107</x>
+     <y>259</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

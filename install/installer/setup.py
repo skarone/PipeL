@@ -13,7 +13,7 @@ DATA=[('imageformats',['C:\\Python27/Lib/site-packages/PyQt4/plugins/imageformat
 
 setup(
     options = {'py2exe': { 'compressed': True,"includes":["sip"]}},
-    windows = [{'script': "install.py"}],
+    console = [{'script': "install.py"}],
     zipfile = None,
     data_files = DATA,
 )

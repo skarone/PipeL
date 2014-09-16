@@ -30,6 +30,7 @@ class Settings(base, fom):
 		self.connect(self.localPath_btn, QtCore.SIGNAL("clicked()"), self.setLocal)
 		self.connect(self.serverPath_btn, QtCore.SIGNAL("clicked()"), self.setServer)
 		self.connect(self.renderPath_btn, QtCore.SIGNAL("clicked()"), self.setRender)
+		self.connect(self.makeTxPath_btn, QtCore.SIGNAL("clicked()"), self.setMakeTx)
 		self.connect(self.save_btn, QtCore.SIGNAL("clicked()"), self.save)
 
 	def _loadConfig(self):
@@ -89,15 +90,24 @@ class Settings(base, fom):
 		fil = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Local Projects Path"))
 		if fil:
 			self.renderPath_le.setText( fil.replace( '\\', '/' ) )
+
+	def setMakeTx(self):
+		"""docstring for fname"""
+		fil = QtGui.QFileDialog.getOpenFileName(self, 'Select Make Tx Path', '', selectedFilter='*.exe')
+		if fil:
+			fil = fil[0]
+			self.makeTxPath_le.setText( str( fil ).replace( '\\', '/' ) )
 		
 	def save(self):
 		"""docstring for save"""
 		self.settings.write( 'General', 'basepath', str( self.localPath_le.text().replace( '\\', '/' ) ))
 		self.settings.write( 'General', 'serverpath', str( self.serverPath_le.text().replace( '\\', '/' ) ))
 		self.settings.write( 'General', 'renderpath', str( self.renderPath_le.text().replace( '\\', '/' ) ))
+		self.settings.write( 'General', 'maketxpath', str( self.makeTxPath_le.text().replace( '\\', '/' ) ))
 		self.settings.write( 'General', 'autoload', self.autoLoadManager_chb.isChecked() )
 		self.settings.write( 'General', 'usemayasubfolder', self.useMayaSubFolder_chb.isChecked() )
 		self.settings.write( 'General', 'changeinternalpaths', self.changeInternalPaths_chb.isChecked() )
+		self.settings.write( 'General', 'automaketx', self.makeTx_chb.isChecked() )
 		self.settings.write( 'General', 'skin', str( self.skin_cmb.currentText() ))
 		QtGui.QDialog.accept(self)
 		

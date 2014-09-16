@@ -59,6 +59,7 @@ class InstallerUI(base, fom):
 		res14  = self.setupMaya( '2014' )
 		res15  = self.setupMaya( '2015' )
 		resNuk = self.setupNuke()
+		print 'installing client', res14, res15, resNuk
 		if res14 or res15 or resNuk: 
 			#ADD REGISTER
 			rg.set_reg( 'HKCU', r'Software\Pipel', 'key', '1561532593' )
@@ -66,13 +67,12 @@ class InstallerUI(base, fom):
 			path = self.serverPath + ';'
 			pyPath = ''
 			try:
-				pyPath = pr.queryValue('HKLM', r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'PYTHONPATH')
+				pyPath = rg.queryValue('HKLM', r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'PYTHONPATH')
 			except:
 				pass
-			if self.serverPath in pyPath:
+			if not self.serverPath in pyPath:
 				#ALLREADY INSTALLED
-				return
-			rg.set_reg( 'HKLM', r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'PYTHONPATH', path + pyPath )
+				rg.set_reg( 'HKLM', r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'PYTHONPATH', path + pyPath )
 			self.procStart.emit( 'Installed' )
 			
 	
@@ -80,6 +80,7 @@ class InstallerUI(base, fom):
 		"""create userSetup.mel or if exists check if there is pipel installed if not add lines to it"""
 		userDir      = os.path.expanduser( '~' )
 		mayaPath = userDir + '\\Documents\\maya\\' + version + '-x64\\scripts'
+		print mayaPath
 		if os.path.exists( mayaPath ): #is maya installed
 			setupFile = mayaPath + '\\userSetup.mel'
 			if os.path.exists( setupFile ):#SETUP FILE EXISTS.. WE NEED TO CHECK IF PIPEL IS INSTALLED
@@ -87,7 +88,7 @@ class InstallerUI(base, fom):
 					data = fil.read()
 					if 'install.pipelMenu' in data:
 						#PIPEL is installed
-						return
+						return True
 					data += '\npython( "import install.pipelMenu;print \'Pipel Loaded\'" );'
 					fil.write( data )
 			else:
@@ -104,15 +105,15 @@ class InstallerUI(base, fom):
 		if os.path.exists( nukePath ): #is nuke installed 
 			menuFile = nukePath + '\\menu.py'
 			if os.path.exists( menuFile ):#SETUP FILE EXISTS.. WE NEED TO CHECK IF PIPEL IS INSTALLED
-				with open( setupFile, 'r+' ) as fil:
+				with open( menuFile, 'r+' ) as fil:
 					data = fil.read()
 					if 'install.pipelNukeMenu' in data:
 						#PIPEL is installed
-						return
+						return True
 					data += 'import install.pipelNukeMenu'
 					fil.write( data )
 			else:
-				with open( setupFile, 'w' ) as fil:
+				with open( menuFile, 'w' ) as fil:
 					data = 'import install.pipelNukeMenu'
 					fil.write( data )
 			return True
