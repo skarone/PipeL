@@ -134,8 +134,9 @@ class CacheFile(fl.File):
 			tmpAl = self.imp()
 		for o in tmpAl.outputs:
 			origObj = mn.Node( o[1].node.name.replace( 'TMP:', '' ) )
-			origAttr = mn.NodeAttribute( origObj, o[1].name )
-			o[0] >> origAttr
+			if origObj.exists:
+				origAttr = mn.NodeAttribute( origObj, o[1].name )
+				o[0] >> origAttr
 		alNode.delete()
 		tmpAl.name = alNode.name
 		nam.remove()
