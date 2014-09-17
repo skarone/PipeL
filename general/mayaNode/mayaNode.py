@@ -267,6 +267,10 @@ class Nodes(list):
 		for n in self.nodes:
 			n.parent = newParent
 
+	def delete(self):
+		"""delete all nodes"""
+		mc.delete( self.names )
+
 ##################################################
 # NODE CLASS
 
@@ -865,10 +869,10 @@ class Namespace(object):
 		if not self.exists:
 			raise NamespaceNotFound( self.name )
 		with self.set():
-			nods = mc.namespaceInfo( lod = True )
+			nods = mc.namespaceInfo( lod = True, fn = True )
 			if nods:
-				return [ Node( n ) for n in nods ]
-		return None
+				return Nodes( nods )
+		return []
 
 	@property
 	def firstParent(self):
@@ -904,7 +908,7 @@ class Namespace(object):
 		"""remove namespace if exists"""
 		if not self.exists:
 			raise NamespaceNotFound( self.name )
-		mc.namespace( rm = self.name )
+		mc.namespace( rm = self.name, dnc = True )
 
 	def set(self):
 		"""set namespace to current"""

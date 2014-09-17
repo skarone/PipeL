@@ -239,6 +239,16 @@
           </widget>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="replaceAlembic_btn">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select AlembicNode in maya, and choose from UI the new alembic Node :)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Replace Cache</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tab_2">

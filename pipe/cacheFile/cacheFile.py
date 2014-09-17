@@ -126,6 +126,19 @@ class CacheFile(fl.File):
 		rf.reloadSelected()
 		"""
 
+	def replace(self, alembicNodeName):
+		"""replace alembic Node with this alembic"""
+		nam = mn.Namespace( 'TMP' )
+		alNode = mn.Node( alembicNodeName )
+		with nam.set():
+			tmpAl = self.imp()
+		for o in tmpAl.outputs:
+			origObj = mn.Node( o[1].node.name.replace( 'TMP:', '' ) )
+			origAttr = mn.NodeAttribute( origObj, o[1].name )
+			o[0] >> origAttr
+		alNode.delete()
+		tmpAl.name = alNode.name
+		nam.remove()
 
 	def importForAsset2(self, asset, customNamespace = None ):
 		"""import cache and assign to asset"""

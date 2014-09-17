@@ -101,14 +101,15 @@ class CacheManagerUI(base,fom):
 
 	def _makeConnections(self):
 		"""create connection in the UI"""
-		self.connect( self.refresh_btn            , QtCore.SIGNAL("clicked()") , self.refresh )
-		self.connect( self.exportSelectedGeo_btn            , QtCore.SIGNAL("clicked()") , self.exportSelectedGeo )
-		self.connect( self.exportAssetCache_btn            , QtCore.SIGNAL("clicked()") , self.exportAssetCache )
-		self.connect( self.loadExternalCache_btn            , QtCore.SIGNAL("clicked()") , self.loadExternalCache )
-		self.connect( self.loadSelectedCache_btn            , QtCore.SIGNAL("clicked()") , self.loadSelectedCache )
-		self.connect( self.referenceCamera_btn            , QtCore.SIGNAL("clicked()") , self.referenceCamera )
-		self.connect( self.exportCamera_btn            , QtCore.SIGNAL("clicked()") , self.exportCamera )
+		self.connect( self.refresh_btn             , QtCore.SIGNAL("clicked()") , self.refresh )
+		self.connect( self.exportSelectedGeo_btn   , QtCore.SIGNAL("clicked()") , self.exportSelectedGeo )
+		self.connect( self.exportAssetCache_btn    , QtCore.SIGNAL("clicked()") , self.exportAssetCache )
+		self.connect( self.loadExternalCache_btn   , QtCore.SIGNAL("clicked()") , self.loadExternalCache )
+		self.connect( self.loadSelectedCache_btn   , QtCore.SIGNAL("clicked()") , self.loadSelectedCache )
+		self.connect( self.referenceCamera_btn     , QtCore.SIGNAL("clicked()") , self.referenceCamera )
+		self.connect( self.exportCamera_btn        , QtCore.SIGNAL("clicked()") , self.exportCamera )
 		self.connect( self.exportSelectedToSet_btn , QtCore.SIGNAL("clicked()") , self.exportSet )
+		self.connect( self.replaceAlembic_btn      , QtCore.SIGNAL("clicked()") , self.replaceAlembic )
 
 		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._fillSequences )
 		QtCore.QObject.connect( self.sequences_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._fillShots )
@@ -210,6 +211,27 @@ class CacheManagerUI(base,fom):
 						n = i.data( 32 )
 					n.reference()
 
+	def replaceAlembic(self):
+		"""replace Alembic File"""
+		SelAl = mn.ls( sl = True )
+		if not SelAl:
+			QtGui.QMessageBox.critical(self, 'Bad Input' , "PLEASE SELECT AN ALEMBIC NODE THAT YOU WANT TO REPLACE", QtGui.QMessageBox.Close)
+			return
+		if not SelAl[0].type == 'AlembicNode':
+			QtGui.QMessageBox.critical(self, 'Bad Input' , "PLEASE SELECT AN ALEMBIC NODE THAT YOU WANT TO REPLACE", QtGui.QMessageBox.Close)
+			return
+		tabNum = self._getCurrentTab()
+		importAsset = self.importShading_chb.isChecked()
+		if tabNum == 0:
+			cacheTab, cacheTabNum = self._getCurrentCacheTab()
+			for v in xrange( cacheTab.count()):
+				i = cacheTab.item(v)
+				if i.checkState() == 2:
+					if uiH.USEPYQT:
+						n = i.data(32).toPyObject()
+					else:
+						n = i.data( 32 )
+					n.replace( SelAl[0].name )
 
 	def _fillUi(self):
 		"""fill ui based on current scene or selected shot"""
