@@ -114,7 +114,7 @@ except:
 	print 'running from outside maya'
 import re
 import sys
-
+"""
 import install.pyregistry.pyregistry as pr
 try:
 	test = pr.queryValue('HKCU', r'Software\Pipel', 'key' )
@@ -124,7 +124,7 @@ try:
 except:
 	print 'Are you stealing PipeL? :( Im Shame of You'
 	quit()
-
+"""
 """
 SETTINGS:
 	Here we can setup some global settings =)
@@ -908,7 +908,7 @@ class Namespace(object):
 		"""remove namespace if exists"""
 		if not self.exists:
 			raise NamespaceNotFound( self.name )
-		mc.namespace( rm = self.name, dnc = True )
+		mc.namespace( rm = self.name )
 
 	def set(self):
 		"""set namespace to current"""
