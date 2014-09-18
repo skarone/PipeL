@@ -139,6 +139,7 @@ class CacheFile(fl.File):
 				o[0] >> origAttr
 		alNode.delete()
 		tmpAl.name = alNode.name
+		#nam.nodes.delete()
 		nam.remove()
 
 	def importForAsset2(self, asset, customNamespace = None ):

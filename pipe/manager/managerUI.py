@@ -328,7 +328,6 @@ class ManagerUI(base,fom):
 		self.fillProjectsCombo()
 		self.fillAssetsTable()
 		self.fillSequenceList()
-		self.fillSetTable()
 
 	def fillProjectsCombo(self):
 		"""fill projects combo with projects in local disc"""

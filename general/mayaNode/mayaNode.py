@@ -869,7 +869,7 @@ class Namespace(object):
 		if not self.exists:
 			raise NamespaceNotFound( self.name )
 		with self.set():
-			nods = mc.namespaceInfo( lod = True, fn = True )
+			nods = mc.namespaceInfo( ':' + self.name, ls = True, an = True )
 			if nods:
 				return Nodes( nods )
 		return []
@@ -908,7 +908,7 @@ class Namespace(object):
 		"""remove namespace if exists"""
 		if not self.exists:
 			raise NamespaceNotFound( self.name )
-		mc.namespace( rm = self.name )
+		mc.namespace( rm = self.name, deleteNamespaceContent = True )
 
 	def set(self):
 		"""set namespace to current"""
