@@ -83,6 +83,13 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
+         <widget class="QCheckBox" name="copyToServer_chb">
+          <property name="text">
+           <string>Copy To Server</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QCheckBox" name="useShotFolder_chb">
           <property name="text">
            <string>Use Shot Folder</string>

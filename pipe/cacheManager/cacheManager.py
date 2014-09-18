@@ -55,6 +55,7 @@ class CacheManagerUI(base,fom):
 		self._makeConnections()
 		self.settings = sti.Settings()
 		gen = self.settings.General
+		self.serverPath = ''
 		if gen:
 			basePath = gen[ "basepath" ]
 			if basePath:
@@ -64,6 +65,7 @@ class CacheManagerUI(base,fom):
 				prj.USE_MAYA_SUBFOLDER = True
 			else:
 				prj.USE_MAYA_SUBFOLDER = False
+			self.serverPath = gen[ "serverpath" ]
 		self._fillUi()
 		self._loadConfig()
 		self.setObjectName( 'cacheManager_WIN' )
@@ -71,7 +73,6 @@ class CacheManagerUI(base,fom):
 			skin = gen[ "skin" ]
 			if skin:
 				uiH.loadSkin( self, skin )
-		
 
 	def _loadConfig(self):
 		"""load config settings"""
@@ -143,6 +144,8 @@ class CacheManagerUI(base,fom):
 		sel = mc.ls( sl = True )
 		cacheFile = cfl.CacheFile( self.fileNameForCache(), sel )
 		cacheFile.export()
+		if self.copyToServer_chb.isChecked():
+			cacheFile.copy( cacheFile.path.replace( prj.BASE_PATH, self.serverPath ) )
 		self._fillCacheList()
 
 	def exportAssetCache(self):
@@ -158,6 +161,9 @@ class CacheManagerUI(base,fom):
 			cacFile = cfl.CacheFile( baseDir + '/' + baseName + '.abc', n )
 			cacFile.exportAsset( a, self.useFinalToExport_chb.isChecked() )
 			exportedAsset.append( baseName )
+			if self.copyToServer_chb.isChecked():
+				cacFile.copy( cacFile.path.replace( prj.BASE_PATH, self.serverPath ) )
+		self._fillCacheList()
 
 	def exportSet(self):
 		"""export selection"""
