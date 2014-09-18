@@ -82,9 +82,6 @@ class ManagerUI(base,fom):
 		self.shots_tw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.shots_tw.customContextMenuRequested.connect(self.showMenu)
 
-		self.sets_tw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-		self.sets_tw.customContextMenuRequested.connect(self.showMenu)
-
 	###################################
 	#LOAD SETTINGS
 	def loadProjectsPath(self):
@@ -206,8 +203,6 @@ class ManagerUI(base,fom):
 		if currentTab == 0:
 			tabwid = self.assets_tw
 		elif currentTab == 1:
-			tabwid = self.sets_tw
-		elif currentTab == 2:
 			tabwid = self.shots_tw
 		return tabwid
 
@@ -217,7 +212,6 @@ class ManagerUI(base,fom):
 		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "activated( const QString& )" ), self.updateUi )
 		QtCore.QObject.connect( self.actionNew_Project, QtCore.SIGNAL( "triggered()" ), self._newProject )
 		QtCore.QObject.connect( self.actionNew_Asset, QtCore.SIGNAL( "triggered()" ), self._newAsset )
-		QtCore.QObject.connect( self.actionNew_Set, QtCore.SIGNAL( "triggered()" ), self._newSet )
 		QtCore.QObject.connect( self.actionNew_Sequence, QtCore.SIGNAL( "triggered()" ), self._newSequence )
 		QtCore.QObject.connect( self.actionNew_Shot, QtCore.SIGNAL( "triggered()" ), self._newShot )
 		QtCore.QObject.connect( self.actionCopy_Selected_From_Server, QtCore.SIGNAL( "triggered()" ), self.copySelectedAssetsFromServer )
@@ -228,8 +222,6 @@ class ManagerUI(base,fom):
 		QtCore.QObject.connect( self.sequences_lw, QtCore.SIGNAL( "itemActivated( QListWidgetItem* )" ), self.fillShotsTable )
 		QtCore.QObject.connect( self.sequences_lw, QtCore.SIGNAL( "itemPressed( QListWidgetItem* )" ), self.fillShotsTable )
 		#TABLE SIGNALS
-		QtCore.QObject.connect( self.sets_tw, QtCore.SIGNAL( "itemClicked (QTableWidgetItem *)" ), self.setStatusInfo )
-		QtCore.QObject.connect( self.sets_tw, QtCore.SIGNAL( "itemDoubleClicked (QTableWidgetItem *)" ), self.openFile )
 		QtCore.QObject.connect( self.assets_tw, QtCore.SIGNAL( "itemDoubleClicked (QTableWidgetItem *)" ), self.openFile )
 		QtCore.QObject.connect( self.assets_tw, QtCore.SIGNAL( "itemClicked (QTableWidgetItem *)" ), self.setStatusInfo )
 		QtCore.QObject.connect( self.shots_tw, QtCore.SIGNAL( "itemDoubleClicked (QTableWidgetItem *)" ), self.openFile )
@@ -260,17 +252,22 @@ class ManagerUI(base,fom):
 
 	def showMenu(self, pos):
 		menu=QtGui.QMenu(self)
-		actionProperties = QtGui.QAction("Properties", menu)
+		propIcon = QtGui.QIcon( PYFILEDIR + '/icons/question.png' )
+		actionProperties = QtGui.QAction(propIcon, "Properties", menu)
 		menu.addAction( actionProperties )
 		self.connect( actionProperties, QtCore.SIGNAL( "triggered()" ), self.properties )
-		actionOpenInExplorer = QtGui.QAction("Open File in explorer", menu)
+		folderIcon = QtGui.QIcon( PYFILEDIR + '/icons/folder.png' )
+		actionOpenInExplorer = QtGui.QAction(folderIcon,"Open File in explorer", menu)
 		menu.addAction( actionOpenInExplorer )
 		self.connect( actionOpenInExplorer, QtCore.SIGNAL( "triggered()" ), self.openFileLocation )
 		menu.addSeparator()
-		actionCopyServer = QtGui.QAction("Copy From Server", menu)
+		downIcon = QtGui.QIcon( PYFILEDIR + '/icons/download.png' )
+		uploIcon = QtGui.QIcon( PYFILEDIR + '/icons/upload.png' )
+		actionCopyServer = QtGui.QAction( downIcon, "Download From Server", menu)
+		actionCopyServer.setIcon( downIcon )
 		menu.addAction(actionCopyServer)
 		self.connect( actionCopyServer, QtCore.SIGNAL( "triggered()" ), self.copyFromServer )
-		actionToServer = QtGui.QAction("Copy To Server", menu)
+		actionToServer = QtGui.QAction( uploIcon, "Upload To Server", menu)
 		menu.addAction(actionToServer)
 		self.connect( actionToServer, QtCore.SIGNAL( "triggered()" ), self.copyToServer )
 		menu.addSeparator()
@@ -325,7 +322,6 @@ class ManagerUI(base,fom):
 		"""update ui"""
 		self.fillAssetsTable()
 		self.fillSequenceList()
-		self.fillSetTable()
 
 	def updateFullUi(self):
 		"""docstring for updateFullUi"""
@@ -581,67 +577,6 @@ class ManagerUI(base,fom):
 						item.setBackground( color[ status[v] ] )
 					self.shots_tw.setItem( i, v + 1, item )
 
-	def fillSetTable(self):
-		"""fill the table of the sets"""
-		proj = prj.Project( str( self.projects_cmb.currentText()) )
-		if not proj.name:
-			return
-		sets = proj.sets
-		self.sets_tw.setRowCount( len( sets ) )
-		color = [QtGui.QColor( "grey" ),
-				QtGui.QColor( "green" ),
-				QtGui.QColor( "red" )]
-		if not sets:
-			return
-		for i,a in enumerate( sets ):
-			item = QtGui.QTableWidgetItem( a.name )
-			item.setCheckState(QtCore.Qt.Unchecked )
-			self.sets_tw.setItem( i, 0, item )
-			item.setData(32, a )
-			files = [
-				a.modelPath,
-				a.finalPath
-				]
-			status = a.status
-			if self.compareServer_chb.isChecked(): #SERVER MODE ON
-				for v,f in enumerate(files):
-					item = QtGui.QTableWidgetItem( f.date )
-					item.setCheckState(QtCore.Qt.Unchecked )
-					item.setData(32, f )
-					filePath = str( f.path )
-					serverFile = fl.File( filePath.replace( prj.BASE_PATH, self.serverPath ) )
-					if status[v] == 0:
-						item.setText( '' )
-					stat = status[v]
-					if serverFile.exists and f.exists:
-						if not serverFile.isZero:
-							if f.isOlderThan( serverFile ):
-								item.setText( f.date + '||' + serverFile.date )
-								stat = -1
-							else:
-								stat = 1
-						elif f.isZero:
-							stat = 0
-						else:
-							stat = 1
-					if uiH.USEPYQT:
-						item.setBackgroundColor( color[ stat ])
-					else:
-						item.setBackground( color[ stat ] )
-					self.sets_tw.setItem( i, v + 1, item )
-			else:
-				for v,f in enumerate(files):
-					item = QtGui.QTableWidgetItem( f.date )
-					item.setCheckState(QtCore.Qt.Unchecked )
-					item.setData(32, f )
-					if status[v] == 0:
-						item.setText( '' )
-					if uiH.USEPYQT:
-						item.setBackgroundColor( color[ status[v] ])
-					else:
-						item.setBackground( color[ status[v] ] )
-					self.sets_tw.setItem( i, v + 1, item )
-
 	#
 	###################################
 	#CREATE
@@ -661,16 +596,6 @@ class ManagerUI(base,fom):
 		res = dia.exec_()
 		if res:
 			self.fillAssetsTable()
-
-	def _newSet(self):
-		"""create a new set"""
-		dia = setUi.SetCreator(self)
-		dia.show()
-		index = self.projects_cmb.currentIndex()
-		dia.projects_cmb.setCurrentIndex(index)
-		res = dia.exec_()
-		if res:
-			self.fillSetTable()
 
 	def _newSequence(self):
 		"""creates a new sequence"""
