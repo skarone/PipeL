@@ -2,6 +2,7 @@ import os
 from PyQt4 import QtGui,QtCore, uic
 import pyregistry as rg
 from xml.etree.ElementTree import parse, SubElement
+import client
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
@@ -35,6 +36,11 @@ class InstallerUI(base, fom):
 		"""return serverPath"""
 		return str( self.server_le.text() )
 
+	@property
+	def serial(self):
+		"""return serial from ui"""
+		return str( self.serial_le.text() )
+
 	@QtCore.pyqtSlot()
 	def serverInstall(self):
 		"""copy PipeL files to serverPath and try to do client Install in this machine"""
@@ -56,13 +62,29 @@ class InstallerUI(base, fom):
 		if not self.serverPath or self.serverPath == 'Please Fill ME!':
 			self.server_le.setText( 'Please Fill ME!' )
 			return
+		if not self.serial or self.serial == 'Please Fill ME!':
+			self.serial_le.setText( 'Please Fill ME!' )
+			return
+		#check with server is serial is OK
+		newData = client.sendClientInfo( self.serial )
+		if not newData:
+			self.serial_le.setText( 'Check Internet Connection!' )
+			return
+		if newData == 'Wrong-Serial':
+			self.serial_le.setText( 'Wrong SERIAL!' )
+			return
+		if newData == 'installations-reached':
+			self.serial_le.setText( 'Number of Installations reached!' )
+			return
+		print newData
+		return
 		res14  = self.setupMaya( '2014' )
 		res15  = self.setupMaya( '2015' )
 		resNuk = self.setupNuke()
 		print 'installing client', res14, res15, resNuk
 		if res14 or res15 or resNuk: 
 			#ADD REGISTER
-			rg.set_reg( 'HKCU', r'Software\Pipel', 'key', '1561532593' )
+			rg.set_reg( 'HKCU', r'Software\Pipel', 'key', newData )
 			#SET PYTHONPATH
 			path = self.serverPath + ';'
 			pyPath = ''

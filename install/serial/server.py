@@ -1,5 +1,6 @@
 import socket
 import sys
+import coder
 
 # Create a TCP/IP socket to listen on
 server = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
@@ -23,12 +24,21 @@ while 1:
 	# Let's receive something
 	data = connection.recv( 4096 )
 	if not data: break
-	print 'Received ', repr( data )
 
 	#send it back nicely formatted
-	data = data.rstrip()
-	connection.send( "%s\n%s\n%s\n" % ( '-'*80, data.center( 80 ), '-'*80))
+	data      = coder.decode('monigota', data )
+	dataSplit = data.split( '/' )
+	mac       = dataSplit[0]
+	usr       = dataSplit[1]
+	serial    = dataSplit[2]
+	print 'Received ', mac,usr,serial
+	#TODO
+	#HERE WE HAVE TO CHECK WITH SQL IF SERIAL IS OK AND THERE ARE INSTALLATIONS AVAIABLES FOR THIS SERIAL
+	finalData = serial + '+' + mac + '+' + usr + 'monigota'
+	finalData = coder.encode( 'gotamoni', finalData )
+	connection.send( finalData )
 	print 'Response sent!'
+
 	
 	# close the connection from our side
 	connection.shutdown( socket.SHUT_RD | socket.SHUT_WR )

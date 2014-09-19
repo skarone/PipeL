@@ -12,8 +12,9 @@ import os
 import subprocess
 import shutil
 import imp
+import pipe.mayaFile.mayaFile as mfl
 
-def batcher(modules = [], functions = [], mayaFiles = [],makeBckp = False,makeLog = False,localRepoPath = 'F:',help = False):
+def batcher(modules = [], functions = [], mayaFiles = [],saveFile = False,makeLog = False,mayaBatchPath = 'C:\\Program Files\\Autodesk\\Maya2014\\bin\\mayabatch.exe', help = False):
 	""" create a Batch file """
 	helpText = 'This script is for run an array of scripts\n'
 	helpText += '(mel or python) in an array of maya files.\n'
@@ -27,9 +28,8 @@ def batcher(modules = [], functions = [], mayaFiles = [],makeBckp = False,makeLo
 	helpText += '\tmodules = [\'t:/lay/ftb_lay_importExportCamaraFromLayout\',\'t:/mel/ftb_mel_cameraSequence.mel\']\n'
 	helpText += '\t,functions = [\'ftb_lay_importExportCamaraFromLayout.fixThisCameraScene()\',\'cameraSequence\']\n'
 	helpText += '\t,mayaFiles = [\'C:/pol/270ride010a_lay_camera_v003.ma\',\'C:/skarone/666ride666a_lay_camera_v666.ma\']\n'
-	helpText += '\t,makeBckp = True  (This will make a back up of the file before edit)\n'
+	helpText += '\t,saveFile = True  (This will make a back up of the file before edit)\n'
 	helpText += '\t,makeLog = True  (This will make a log of the batch per file in the same path))\n'
-	helpText += '\t,localRepoPath = \'F:\' (this is the path of the local repository of fuzion)'
 	if (help):
 		print helpText
 		return False
@@ -90,24 +90,22 @@ def batcher(modules = [], functions = [], mayaFiles = [],makeBckp = False,makeLo
 			print '>>something in this module is wrong',mod
 			return False
 	
+	mayaBatchPath = 'C:\\Program Files\\Autodesk\\Maya2014\\bin\\mayabatch.exe'
 	#LOOP THRU THE FILES
 	for fileName in mayaFiles:
 		finalcmd = cmd
 		#fileName = fileName.replace('\\','/')
-		if not os.path.exists(fileName):
-			print '>>cant find file',fileName
+		fileName = mfl.mayaFile( fileName )
+		if not fileName.exists:
+			print '>>cant find file',fileName.path
 			continue;
-		if (makeBckp):
-			backup = fileName.replace('.ma','_bckp.ma')
-			print '>>backup made at',backup
-			shutil.copy(fileName, backup)
-			renFile = fileName.replace('\\','/')
-			finalcmd +='file -rename \\"'+renFile+'\\";'
+		if (saveFile):
+			fileName.newVersion()
 			finalcmd +='file -save;'
 		finalcmd +='print (\\"done!\\n\\");'
 		
 		batch = ''
-		batch +='C:\\Program Files\\Autodesk\\Maya2013\\bin\\mayabatch.exe -file "'+fileName+'" '
+		batch += mayaBatchPath + ' -file "'+fileName+'" '
 		batch +='-command "'+finalcmd+'" '
 		
 		if(makeLog):
