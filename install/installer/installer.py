@@ -70,7 +70,7 @@ class InstallerUI(base, fom):
 		if not newData:
 			self.serial_le.setText( 'Check Internet Connection!' )
 			return
-		if newData == 'Wrong-Serial':
+		if newData == 'wrong-serial':
 			self.serial_le.setText( 'Wrong SERIAL!' )
 			return
 		if newData == 'installations-reached':
