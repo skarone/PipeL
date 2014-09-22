@@ -1,6 +1,7 @@
 import socket
 import sys
 import coder
+import clientsManager as clm
 
 # Create a TCP/IP socket to listen on
 server = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
@@ -27,15 +28,18 @@ while 1:
 
 	#send it back nicely formatted
 	data      = coder.decode('monigota', data )
+	dbase     = clm.ClientsManager()
 	dataSplit = data.split( '/' )
 	mac       = dataSplit[0]
 	usr       = dataSplit[1]
 	serial    = dataSplit[2]
-	print 'Received ', mac,usr,serial
-	#TODO
-	#HERE WE HAVE TO CHECK WITH SQL IF SERIAL IS OK AND THERE ARE INSTALLATIONS AVAIABLES FOR THIS SERIAL
-	finalData = serial + '+' + mac + '+' + usr + 'monigota'
-	finalData = coder.encode( 'gotamoni', finalData )
+	result    = dbase.clientInstall( serial )
+	if result == True:
+		print 'Received ', mac,usr,serial
+		finalData = serial + '+' + mac + '+' + usr + 'monigota'
+		finalData = coder.encode( 'gotamoni', finalData )
+	else:
+		finalData = result
 	connection.send( finalData )
 	print 'Response sent!'
 

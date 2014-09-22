@@ -68,13 +68,13 @@ class InstallerUI(base, fom):
 		#check with server is serial is OK
 		newData = client.sendClientInfo( self.serial )
 		if not newData:
-			self.serial_le.setText( 'Check Internet Connection!' )
+			self.message_lbl.setText( 'Check Internet Connection!' )
 			return
 		if newData == 'wrong-serial':
-			self.serial_le.setText( 'Wrong SERIAL!' )
+			self.message_lbl.setText( 'Wrong SERIAL!' )
 			return
 		if newData == 'installations-reached':
-			self.serial_le.setText( 'Number of Installations reached!' )
+			self.message_lbl.setText( 'Number of Installations reached!' )
 			return
 		print newData
 		return

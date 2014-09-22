@@ -113,18 +113,31 @@ class RenderManagerUI(base,fom):
 
 	def render(self):
 		"""docstring for render"""
+		curFile = mfl.currentFile()
 		if self.autoSave_chb.isChecked():
-			curFile = mfl.currentFile()
 			curFile.newVersion()
 			curFile.save()
-		dead     = dl.Deadline()
-		group    = str(self.groups_cmb.currentText())
-		pool     = str(self.pools_cmb.currentText())
-		comments = str( self.comments_te.toPlainText())
-		filePrefix= str( self.filePath_le.text())
-		priority = str( self.priority_spb.value() )
-		taskSize = str( self.taskSize_spb.value() )
-		projPath = str( self.projectPath_le.text() )
+		dead       = dl.Deadline()
+		group      = str(self.groups_cmb.currentText())
+		pool       = str(self.pools_cmb.currentText())
+		comments   = str( self.comments_te.toPlainText())
+		filePrefix = str( self.filePath_le.text())
+		priority   = str( self.priority_spb.value() )
+		taskSize   = str( self.taskSize_spb.value() )
+		projPath   = str( self.projectPath_le.text() )
+		if self.useServerPaths_chb.isChecked(): #IF USE PATH FROM SERVER... WE NEED TO CHANGE INTERNAL PATHS SO MATCH SERVER
+			curFile = mfl.mayaFile( curFile.copy( dead.userHomeDirectory + '/' + curFile.fullName ).path )
+			settings = sti.Settings()
+			gen = settings.General
+			if gen:
+				basePath = gen[ "basepath" ]
+				if basePath:
+					if basePath.endswith( '\\' ):
+						basePath = basePath[:-1]
+					basePath = basePath.replace( '\\', '/' )
+				serverPath = gen[ "serverpath" ]
+				curFile.changePathsBrutForce( srchAndRep =  [ basePath, serverPath ] )
+			
 		InitialStatus = "Active"
 		if self.submitSuspended_chb.isChecked():
 			InitialStatus = "Suspended"
@@ -152,7 +165,7 @@ class RenderManagerUI(base,fom):
 							'Comment'         : comments,
 							'InitialStatus'   : InitialStatus,
 							'Whitelist'       : whiteList,
-							'Name'            : name + mfl.currentFile().name + ' - ' + w.layer.name,
+							'Name'            : name + curFile.name + ' - ' + w.layer.name,
 							'OutputFilename0' : filename,
 							'Priority'        : priority,
 							'ChunkSize'       : taskSize
@@ -161,7 +174,7 @@ class RenderManagerUI(base,fom):
 								'ProjectPath'       : projPath,
 								'RenderLayer'       : w.layer.name,
 								'OutputFilePrefix'  : filePrefix,
-							}, mfl.currentFile() )
+							}, curFile )
 			Job.write()
 			dead.runMayaJob( Job )
 

@@ -1,9 +1,10 @@
 import sqlite3 as lite
 import sys
+import os
 
 class ClientsManager(object):
 	"""handle sql database of the clients"""
-	def __init__(self, path):
+	def __init__(self, path = 'D:/test.db'):
 		self._path = path
 
 	def create(self):

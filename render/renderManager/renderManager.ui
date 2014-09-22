@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>474</width>
-    <height>779</height>
+    <width>345</width>
+    <height>586</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,18 +16,21 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_9">
+     <layout class="QHBoxLayout" name="horizontalLayout_10">
       <item>
-       <widget class="QLabel" name="label_9">
+       <widget class="QCheckBox" name="useServerPaths_chb">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This will change all the paths in the file to point to server, but it will leave scene untouch :)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="text">
-         <string>Project Path:</string>
+         <string>Use Paths From Server</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="projectPath_le">
+       <widget class="QCheckBox" name="submitSuspended_chb">
         <property name="text">
-         <string/>
+         <string>Submit suspended</string>
         </property>
        </widget>
       </item>
@@ -81,6 +84,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QCheckBox" name="renderLocal_chb">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use only this machine in deadline to render&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="layoutDirection">
            <enum>Qt::RightToLeft</enum>
           </property>
@@ -106,6 +112,24 @@
          </widget>
         </item>
        </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_9">
+      <item>
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>Project Path:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="projectPath_le">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -160,13 +184,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="submitSuspended_chb">
-        <property name="text">
-         <string>Submit suspended</string>
-        </property>
-       </widget>
       </item>
      </layout>
     </item>
@@ -232,12 +249,9 @@
        </widget>
       </item>
       <item>
-       <widget class="QTextEdit" name="comments_te">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>100</height>
-         </size>
+       <widget class="QLineEdit" name="comments_te">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;write the frame range for the entire scene, ex:120-150,163,200-250&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
@@ -303,8 +317,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>434</width>
-            <height>238</height>
+            <width>305</width>
+            <height>259</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_4">
