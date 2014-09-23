@@ -28,12 +28,6 @@ class MultiAttributeUI(base, fom):
 		else:
 			super(MultiAttributeUI, self).__init__(parent)
 		self.setupUi(self)
-		self.connect(self.select_btn, QtCore.SIGNAL("clicked()"), self.select)
-		self.connect(self.lock_btn, QtCore.SIGNAL("clicked()"), self.lock)
-		self.connect(self.unlock_btn, QtCore.SIGNAL("clicked()"), self.unlock)
-		self.connect(self.apply_btn, QtCore.SIGNAL("clicked()"), self.apply)
-		self.connect(self.remove_btn, QtCore.SIGNAL("clicked()"), self.remove)
-		QtCore.QObject.connect( self.attribute_le, QtCore.SIGNAL( "textChanged (const QString&)" ), self.text_changed )
 		self.fillByTypeCMB()
 		self.attribute_le.setFocus()
 		self.setObjectName( 'multiAttr_WIN' )
@@ -42,9 +36,153 @@ class MultiAttributeUI(base, fom):
 		self.attribute_le.customContextMenuRequested.connect(self.showAttributes)
 		self.completer = TagsCompleter( self.attribute_le )
 		self.completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
-		QtCore.QObject.connect(self.completer, QtCore.SIGNAL('activated(QString)'), self.complete_text) 
 		self.completer.setWidget( self.attribute_le )
+		self._makeConnections()
 
+	def _makeConnections(self):
+		"""docstring for _makeConnections"""
+		QtCore.QObject.connect( self.attribute_le, QtCore.SIGNAL( "textChanged (const QString&)" ), self.text_changed )
+		QtCore.QObject.connect(self.completer, QtCore.SIGNAL('activated(QString)'), self.complete_text) 
+		self.connect(self.select_btn, QtCore.SIGNAL("clicked()"), self.select)
+		self.connect(self.lock_btn, QtCore.SIGNAL("clicked()"), self.lock)
+		self.connect(self.unlock_btn, QtCore.SIGNAL("clicked()"), self.unlock)
+		self.connect(self.apply_btn, QtCore.SIGNAL("clicked()"), self.apply)
+		self.connect(self.remove_btn, QtCore.SIGNAL("clicked()"), self.remove)
+		self.connect(self.connect_btn, QtCore.SIGNAL("clicked()"), self.connectList)
+		self.connect(self.setFrom_btn, QtCore.SIGNAL("clicked()"), self.setFrom)
+		self.connect(self.addFrom_btn, QtCore.SIGNAL("clicked()"), self.addFrom)
+		self.connect(self.removeFrom_btn, QtCore.SIGNAL("clicked()"), self.removeFrom)
+		self.connect(self.removeTo_btn, QtCore.SIGNAL("clicked()"), self.removeTo)
+		self.connect(self.addTo_btn, QtCore.SIGNAL("clicked()"), self.addTo)
+		self.connect(self.setTo_btn, QtCore.SIGNAL("clicked()"), self.setTo)
+		#CONSTRAINS
+		self.connect(self.parent_btn, QtCore.SIGNAL("clicked()"), self.parentList)
+		self.connect(self.point_btn, QtCore.SIGNAL("clicked()"), self.point)
+		self.connect(self.orient_btn, QtCore.SIGNAL("clicked()"), self.orient)
+		self.connect(self.scale_btn, QtCore.SIGNAL("clicked()"), self.scale)
+		QtCore.QObject.connect( self.from_lw, QtCore.SIGNAL( "itemClicked( QListWidgetItem* )" ), self.selectItem )
+		QtCore.QObject.connect( self.to_lw, QtCore.SIGNAL( "itemClicked( QListWidgetItem* )" ), self.selectItem )
+		
+	def _getItemsInLists(self):
+		"""return the items in the lists"""
+		fromItems = []
+		for v in xrange( self.from_lw.count()):
+			i = self.from_lw.item(v)
+			if uiH.USEPYQT:
+				n = i.data(32).toPyObject()
+			else:
+				n = i.data( 32 )
+			fromItems.append( n )
+		toItems = []
+		for v in xrange( self.to_lw.count()):
+			i = self.to_lw.item(v)
+			if uiH.USEPYQT:
+				n = i.data(32).toPyObject()
+			else:
+				n = i.data( 32 )
+			toItems.append( n )
+		return fromItems, toItems
+
+	def connectList(self):
+		"""docstring for connect"""
+		fromItems, toItems = self._getItemsInLists()
+		#if fromItems es only 1 item, then connect thisone to all toItems
+		fromAttribute = str( self.fromAttr_le.text() )
+		toAttribute = str( self.toAttr_le.text() )
+		if len( fromItems ) == 1:
+			for toNode in toItems:
+				fromItems[0].attr( fromAttribute ) >> toNode.attr( toAttribute )
+		else:
+			for fromNode,toNode in zip( fromItems, toItems ):
+				fromNode.attr( fromAttribute ) >> toNode.attr( toAttribute )
+
+	def setFrom(self):
+		"""clear and add items to From list"""
+		self.from_lw.clear()
+		for f in mn.ls( sl = True ):
+			item = QtGui.QListWidgetItem( f.name )
+			item.setData(32, f )
+			self.from_lw.addItem( item )
+
+	def addFrom(self):
+		"""add itmes to From list without cleaning"""
+		for f in mn.ls( sl = True ):
+			item = QtGui.QListWidgetItem( f.name )
+			item.setData(32, f )
+			self.from_lw.addItem( item )
+
+	def removeFrom(self):
+		"""remove selected item from Form list"""
+		for SelectedItem in self.from_lw.selectedItems():
+			self.from_lw.takeItem(self.from_lw.row(SelectedItem))
+
+	def removeTo(self):
+		"""remove selected item from To list"""
+		for SelectedItem in self.to_lw.selectedItems():
+			self.to_lw.takeItem(self.to_lw.row(SelectedItem))
+
+	def addTo(self):
+		"""add itmes to To list without cleaning"""
+		for f in mn.ls( sl = True ):
+			item = QtGui.QListWidgetItem( f.name )
+			item.setData(32, f )
+			self.from_lw.addItem( item )
+
+	def setTo(self):
+		"""clear and add items to To list"""
+		self.to_lw.clear()
+		for f in mn.ls( sl = True ):
+			item = QtGui.QListWidgetItem( f.name )
+			item.setData(32, f )
+			self.to_lw.addItem( item )
+
+	def parentList(self):
+		"""make a parent constraint between lists"""
+		fromItems, toItems = self._getItemsInLists()
+		if len( fromItems ) == 1:
+			for toNode in toItems:
+				mc.parentConstraint( fromItems[0].name, toNode.name, mo = True )
+		else:
+			for fromNode,toNode in zip( fromItems, toItems ):
+				mc.parentConstraint( fromNode.name, toNode.name, mo = True )
+
+	def point(self):
+		"""make a point constraint between lists"""
+		fromItems, toItems = self._getItemsInLists()
+		if len( fromItems ) == 1:
+			for toNode in toItems:
+				mc.pointConstraint( fromItems[0].name, toNode.name, mo = True )
+		else:
+			for fromNode,toNode in zip( fromItems, toItems ):
+				mc.pointConstraint( fromNode.name, toNode.name, mo = True )
+
+	def orient(self):
+		"""make a orient constraint between lists"""
+		fromItems, toItems = self._getItemsInLists()
+		if len( fromItems ) == 1:
+			for toNode in toItems:
+				mc.orientConstraint( fromItems[0].name, toNode.name, mo = True )
+		else:
+			for fromNode,toNode in zip( fromItems, toItems ):
+				mc.orientConstraint( fromNode.name, toNode.name, mo = True )
+
+	def scale(self):
+		"""make a scale constraint between lists"""
+		fromItems, toItems = self._getItemsInLists()
+		if len( fromItems ) == 1:
+			for toNode in toItems:
+				mc.scaleConstraint( fromItems[0].name, toNode.name, mo = True )
+		else:
+			for fromNode,toNode in zip( fromItems, toItems ):
+				mc.scaleConstraint( fromNode.name, toNode.name, mo = True )
+
+	def selectItem(self, item):
+		"""select node when node is selected in list"""
+		if uiH.USEPYQT:
+			n = item.data(32).toPyObject()
+		else:
+			n = item.data( 32 )
+		n()
  
 	def text_changed(self, text):
 		all_text = unicode(text)
