@@ -162,7 +162,9 @@ class CacheManagerUI(base,fom):
 			cacFile.exportAsset( a, self.useFinalToExport_chb.isChecked() )
 			exportedAsset.append( baseName )
 			if self.copyToServer_chb.isChecked():
-				cacFile.copy( cacFile.path.replace( prj.BASE_PATH, self.serverPath ) )
+				serverFile = cfl.CacheFile( cacFile.path.replace( prj.BASE_PATH, self.serverPath ) )
+				serverFile.newVersion()
+				cacFile.copy( serverFile.path )
 		self._fillCacheList()
 
 	def exportSet(self):
@@ -172,6 +174,11 @@ class CacheManagerUI(base,fom):
 			maFile = mfl.mayaFile( str( pat ) )
 			maFile.newVersion()
 			mc.file( str( pat ), preserveReferences=True, type='mayaAscii', exportSelected =True, prompt=True, force=True )
+			if self.copyToServer_chb.isChecked():
+				serverFile = mfl.mayaFile( maFile.path.replace( prj.BASE_PATH, self.serverPath ) )
+				serverFile.newVersion()
+				maFile.copy( serverFile.path )
+
 
 	def _getCurrentTab(self):
 		"""return the visible table in the ui"""
