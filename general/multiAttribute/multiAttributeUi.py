@@ -37,12 +37,22 @@ class MultiAttributeUI(base, fom):
 		self.completer = TagsCompleter( self.attribute_le )
 		self.completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
 		self.completer.setWidget( self.attribute_le )
+		self.fromCompleter = TagsCompleter( self.fromAttr_le )
+		self.fromCompleter.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+		self.fromCompleter.setWidget( self.fromAttr_le )
+		self.toCompleter = TagsCompleter( self.toAttr_le )
+		self.toCompleter.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+		self.toCompleter.setWidget( self.toAttr_le )
 		self._makeConnections()
 
 	def _makeConnections(self):
 		"""docstring for _makeConnections"""
 		QtCore.QObject.connect( self.attribute_le, QtCore.SIGNAL( "textChanged (const QString&)" ), self.text_changed )
 		QtCore.QObject.connect(self.completer, QtCore.SIGNAL('activated(QString)'), self.complete_text) 
+		QtCore.QObject.connect( self.fromAttr_le, QtCore.SIGNAL( "textChanged (const QString&)" ), self.from_text_changed )
+		QtCore.QObject.connect( self.toAttr_le, QtCore.SIGNAL( "textChanged (const QString&)" ), self.to_text_changed )
+		QtCore.QObject.connect(self.fromCompleter, QtCore.SIGNAL('activated(QString)'), self.from_complete_text) 
+		QtCore.QObject.connect(self.toCompleter, QtCore.SIGNAL('activated(QString)'), self.to_complete_text) 
 		self.connect(self.select_btn, QtCore.SIGNAL("clicked()"), self.select)
 		self.connect(self.lock_btn, QtCore.SIGNAL("clicked()"), self.lock)
 		self.connect(self.unlock_btn, QtCore.SIGNAL("clicked()"), self.unlock)
@@ -81,6 +91,9 @@ class MultiAttributeUI(base, fom):
 			else:
 				n = i.data( 32 )
 			toItems.append( n )
+		if len(fromItems) == 1 or not len(fromItems) == len(toItems):
+			QtGui.QMessageBox.critical(self, 'Bad Input' , "IN THE FIRST LIST YOU MUST HAVE ONE NODE OR THE SAME AMOUNTS\n OF NODE THAT YOU HAVE IN THE SECOND ONE", QtGui.QMessageBox.Close)
+			
 		return fromItems, toItems
 
 	def connectList(self):
@@ -184,6 +197,60 @@ class MultiAttributeUI(base, fom):
 			n = item.data( 32 )
 		n()
  
+	def from_text_changed(self, text):
+		all_text = unicode(text)
+		text = all_text[:self.fromAttr_le.cursorPosition()]
+		prefix = text.split(',')[-1].strip()
+		text_tags = []
+		for t in all_text.split(','):
+			t1 = unicode(t).strip()
+			if t1 != '':
+				text_tags.append(t)
+		text_tags = list(set(text_tags))
+		i = self.from_lw.item(0)
+		if i:
+			if uiH.USEPYQT:
+				n = i.data(32).toPyObject()
+			else:
+				n = i.data( 32 )
+			attrs = [a.name for a in n.listAttr( s = True ) ]
+			self.fromCompleter.update( attrs, text_tags, prefix )
+  
+	def from_complete_text(self, text):
+		cursor_pos = self.fromAttr_le.cursorPosition()
+		before_text = unicode(self.fromAttr_le.text())[:cursor_pos]
+		after_text = unicode(self.fromAttr_le.text())[cursor_pos:]
+		self.fromAttr_le.setText('%s' % (text))
+		print text
+		self.fromAttr_le.setCursorPosition(cursor_pos + len(text) + 1)
+
+
+	def to_text_changed(self, text):
+		all_text = unicode(text)
+		text = all_text[:self.toAttr_le.cursorPosition()]
+		prefix = text.split(',')[-1].strip()
+		text_tags = []
+		for t in all_text.split(','):
+			t1 = unicode(t).strip()
+			if t1 != '':
+				text_tags.append(t)
+		text_tags = list(set(text_tags))
+		i = self.to_lw.item(0)
+		if i:
+			if uiH.USEPYQT:
+				n = i.data(32).toPyObject()
+			else:
+				n = i.data( 32 )
+			attrs = [a.name for a in n.listAttr( s = True ) ]
+			self.toCompleter.update( attrs, text_tags, prefix )
+  
+	def to_complete_text(self, text):
+		cursor_pos = self.toAttr_le.cursorPosition()
+		before_text = unicode(self.toAttr_le.text())[:cursor_pos]
+		after_text = unicode(self.toAttr_le.text())[cursor_pos:]
+		self.toAttr_le.setText('%s' % ( text))
+		self.toAttr_le.setCursorPosition(cursor_pos + len(text) + 1)
+
 	def text_changed(self, text):
 		all_text = unicode(text)
 		text = all_text[:self.attribute_le.cursorPosition()]
@@ -262,10 +329,10 @@ class MultiAttributeUI(base, fom):
 		"""return the attributes of the line edit"""
 		attrs = str( self.attribute_le.text() )
 		finalAttrs = []
-		for a in attrs.split( ', ' ):
-			if a == '':
+		for a in attrs.split( ',' ):
+			if a.strip() == '':
 				continue
-			finalAttrs.append( a )
+			finalAttrs.append( a.strip() )
 		return finalAttrs
 
 	def lock(self):
