@@ -49,9 +49,13 @@ class textureFile(fl.File):
 	@property
 	def hasUdim(self):
 		"""check if the path has udim, so we can treat the texture has a group of textures"""
-		return '<udim>' in self.path
-		
+		return '<udim>' in self.path.lower()
 
+	@property
+	def udimPaths(self):
+		"""return the textures that correspond to the udim path"""
+		return [ textureFile( self.dirPath + a ) for a in os.listdir( self.dirPath ) if self.name + '.' in a ]
+		
 	@property
 	def hasTx(self):
 		"""return if there is a tx version"""
@@ -66,6 +70,44 @@ class textureFile(fl.File):
 			return True
 		return textureFile( self.path.replace( self.extension, '.png' ) ).exists
 
+	@property
+	def name(self):
+		"""return the name of the texture"""
+		nam = super( textureFile, self ).name
+		if self.hasUdim:
+			return nam[:nam.rindex( '.' )]
+		return nam
+
+	@property
+	def exists(self):
+		"""override exists to support udim"""
+		if self.hasUdim:
+			return len( self.udimPaths ) != 0
+		return super( textureFile, self ).exists
+
+	def copy(self, newPath):
+		"""override copy to support udim"""
+		if self.hasUdim:
+			for a in self.udimPaths:
+				a.copy( newPath )
+		else:
+			super( textureFile, self ).copy( newPath )
+
+	def delete(self):
+		"""override delete to support udim"""
+		if self.hasUdim:
+			for a in self.udimPaths:
+				a.delete()
+		else:
+			super( textureFile, self ).delete()
+
+	def move(self, newPath):
+		"""override move to support udim"""
+		if self.hasUdim:
+			for a in self.udimPaths:
+				a.move(newPath)
+		else:
+			super( textureFile, self ).move( newPath )
 
 	@property
 	def hasLow(self):
@@ -162,7 +204,6 @@ class textureFile(fl.File):
 		else:
 			return textureFile( self.path.replace( self.extension, '.png' ) )
 
-
 	@property
 	def width(self):
 		"""return the width of the texture"""
@@ -179,6 +220,14 @@ class textureFile(fl.File):
 			return False
 		if self.isTx:
 			return False
+		if self.hasUdim:
+			for a in self.udimPaths:
+				a._makeTx()
+		else:
+			self._makeTx()
+
+	def _makeTx(self):
+		"""docstring for _makeTx"""
 		if self.hasTx:
 			if not self.toTx().isOlderThan( self ) and not force:
 				return False
