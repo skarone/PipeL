@@ -184,6 +184,24 @@ class Shot(object):
 		"""docstring for hasSkin"""
 		return os.path.getsize( self.skinFixPath.path ) != 0
 	
+	def renderedLayersPath(self, basePath):
+		path = basePath + '/' + self.project.name + '/' + self.sequence.name + '/' + self.name + '/'
+		return path
+
+	def renderedLayers(self, basePath):
+		"""return the rendered layers for this shot, based on render path"""
+		path = self.renderedLayersPath( basePath )
+		return [ a for a in os.listdir( path ) if os.path.isdir( path + a ) ]
+
+	def renderedLayerVersions(self, basePath, layerName ):
+		"""return the versions in the render layer"""
+		path = self.renderedLayersPath( basePath ) + '/' + layerName
+		return sorted([ a for a in os.listdir( path ) if os.path.isdir( path + a ) ])
+
+	def renderedLayerVersionPath(self, basePath, layerName, versionName ):
+		"""return the path for the rendered layer for specific version"""
+		path = self.renderedLayersPath( basePath ) + layerName + '/' + versionName + '/'
+		return path
 
 	@property
 	def animCachesPath(self):

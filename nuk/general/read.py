@@ -4,32 +4,19 @@ import os
 import pipe.settings.settings as sti
 reload( sti )
 import pipe.project.project as prj
-
-def getFileSeq( dirPath ):
-	'''Return file sequence with same name as the parent directory. Very loose example!!'''
-	dirName = os.path.basename( dirPath )
-	# COLLECT ALL FILES IN THE DIRECTORY THAT HVE THE SAME NAME AS THE DIRECTORY
-	files = sorted(glob( os.path.join( dirPath, '%s.*.*' % dirName ) ))
-	# GRAB THE RIGHT MOST DIGIT IN THE FIRST FRAME'S FILE NAME
-	firstString = re.findall( r'\d+', files[0] )[-1]
-	# GET THE PADDING FROM THE AMOUNT OF DIGITS
-	padding = len( firstString )
-	# CREATE PADDING STRING FRO SEQUENCE NOTATION
-	paddingString = '%04s' % padding
-	# CONVERT TO INTEGER
-	first = int( firstString )
-	# GET LAST FRAME
-	last = int( re.findall( r'\d+', files[-1] )[-1] )
-	# GET EXTENSION
-	ext = os.path.splitext( files[0] )[-1]
-	# BUILD SEQUENCE NOTATION
-	fileName = '%s.%%%sd%s' % ( dirName, str(padding).zfill(2), ext )
-	# RETURN FULL PATH AS SEQUENCE NOTATION
-	return os.path.join( dirPath, fileName ),[ first, last ]
+import pipe.sequence.sequence as sq
+import pipe.shot.shot as sh
+import pipe.sequenceFile.sequenceFile as sqFil
+import nuke
 
 #print getFileSeq( 'R:/Pony_Halloween_Fantasmas/Terror/s004_T04/v0011/Fondo_Beauty' )
 
 def createVersionKnobs():
+	'''
+	Add as callback to add user knobs in Read nodes.
+	In menu.py or init.py:
+	   nuke.addOnUserCreate( nuk.general.read.createVersionKnobs, nodeClass='Read' )        
+	'''
 	# CREATE USER KNOBS
 	node        = nuke.thisNode()
 	tabKnob     = nuke.Tab_Knob( 'PipeL', 'PipeL' )
@@ -46,46 +33,87 @@ def createVersionKnobs():
 	for k in ( tabKnob, projKnob, seqKnob, shotKnob, layerKnob, updateKnob, versionKnob, loadKnob ):
 		node.addKnob( k )
 	# UPDATE THE VERSION KNOB SO IT SHOWS WHAT'S ON DISK / IN THE DATABASE
-	updateVersionKnob()
+	fillProjects()
 
-def loadFile():
-	node    = nuke.thisNode()
-	projSel = node[ 'projectSel' ].value()
-	seqSel  = node[ 'seqSel' ].value()
-	shotSel = node[ 'shotSel' ].value()
-	laySel  = node[ 'layerSel' ].value()
-	verSel  = node[ '_version' ].value()
-	#HERE WE NEED TO CREATE PATH SO WE CAN READ FILE
-	pathDir = getPathDir()
-	getFileSeq( pathDir )
-	first, last = range.split('-')
-	node['file'].setValue( path )
-	node['first'].setValue( int(first) )
-	node['last'].setValue( int(last) )
-
-def updateVersionKnob():
-	"""update list of version of the render in the node"""
-	node = nuke.thisNode()
-	knob = nuke.thisKnob()
-
-	# RUN ONLY IF THE TYPE KNOB CHANGES OR IF THE NODE PANEL IS OPENED.
+def fillProjects():
+	"""docstring for fillProjects"""
 	settings = sti.Settings()
-	gen = self.settings.General
+	gen = settings.General
 	if gen:
 		basePath = gen[ "basepath" ]
 		if basePath:
 			if basePath.endswith( '\\' ):
 				basePath = basePath[:-1]
 			prj.BASE_PATH = basePath.replace( '\\', '/' )
+		renderPath = gen[ "renderpath" ]
+	node = nuke.thisNode()
+	root = nuke.root()
+	node[ 'projectSel' ].setValues( prj.projects( prj.BASE_PATH ) )
+	node[ 'seqSel' ].setValues( [s.name for s in prj.Project( root[ 'pipPorject' ].value() ).sequences] )
+	node[ 'shotSel' ].setValues( [ s.name for s in sq.Sequence( root[ 'pipSequence' ].value(), prj.Project( root[ 'pipPorject' ].value() )).shots ]  )
+	node[ 'layerSel' ].setValues( sh.Shot( root[ 'pipShot' ].value(),sq.Sequence( root[ 'pipSequence' ].value(), prj.Project( root[ 'pipPorject' ].value() ))).renderedLayers( renderPath ) )
+	node[ '_version' ].setValues( sh.Shot( root[ 'pipShot' ].value(),sq.Sequence( root[ 'pipSequence' ].value(), prj.Project( root[ 'pipPorject' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
+	
+	node[ 'projectSel' ].setValue( root[ 'pipPorject' ].value() )
+	node[ 'seqSel' ].setValue( root[ 'pipSequence' ].value() )
+	node[ 'shotSel' ].setValue( root[ 'pipShot' ].value() )
 
+def loadFile():
+	node    = nuke.thisNode()
+	#HERE WE NEED TO CREATE PATH SO WE CAN READ FILE
+	settings = sti.Settings()
+	gen = settings.General
+	if gen:
+		renderPath = gen[ "renderpath" ]
+	pathDir = getPathDir( renderPath, node )
+	seqNode = sqFil.sequenceFile( pathDir + node[ 'layerSel' ].value() + '.*' )
+	node['file'].setValue( seqNode.seqPath )
+	node['first'].setValue( seqNode.start )
+	node['last'].setValue( seqNode.end )
+
+def updateVersionKnob():
+	'''
+	Add as callback to list versions per type in Read node's user knob
+	In menu.py or init.py:
+	   nuke.addKnobChanged( nuk.general.read.updateVersionKnob, nodeClass='Read' )  
+	'''
+	"""update list of version of the render in the node"""
+	node = nuke.thisNode()
+	knob = nuke.thisKnob()
+
+	# RUN ONLY IF THE TYPE KNOB CHANGES OR IF THE NODE PANEL IS OPENED.
+	settings = sti.Settings()
+	gen = settings.General
+	if gen:
+		basePath = gen[ "basepath" ]
+		if basePath:
+			if basePath.endswith( '\\' ):
+				basePath = basePath[:-1]
+			prj.BASE_PATH = basePath.replace( '\\', '/' )
+		renderPath = gen[ "renderpath" ]
+	
+	root = nuke.root()
 	#UPDATE SEQUENCES BECAUSE PROJECTSEL HAS CHANGE
 	if not knob or knob.name() in [ 'projectSel', 'showPanel' ]:
-		node[ 'seqSel' ].setValues( prj.Project( node[ 'projectSel' ].value() ).sequences )
+		node[ 'seqSel' ].setValues( [s.name for s in prj.Project( node[ 'projectSel' ].value() ).sequences] )
 
 	#UPDATE SHOTS BECAUSE SEQSEL HAS CHANGE
 	if not knob or knob.name() in [ 'seqSel', 'showPanel' ]:
-		node[ 'shotSel' ].setValues( sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() )).shots  )
+		node[ 'shotSel' ].setValues( [ s.name for s in sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() )).shots ]  )
 	
 	#UPDATE SHOTS BECAUSE SEQSEL HAS CHANGE
-	if not knob or knob.name() in [ 'seqSel', 'showPanel' ]:
-		node[ 'layerSel' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).layers )
+	if not knob or knob.name() in [ 'shotSel', 'showPanel' ]:
+		node[ 'layerSel' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayers( renderPath ) )
+
+	#UPDATE SHOTS BECAUSE SEQSEL HAS CHANGE
+	if not knob or knob.name() in [ 'layerSel', 'showPanel' ]:
+		node[ '_version' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
+
+	#NOW IT WOULD BE GREAT TO SET ALL THIS KNOBS BASED ON ENVIROMENT VARIABLES
+
+def getPathDir( renderPath, node ):
+	"""docstring for getPathDir"""
+	curShot = sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() )))
+	path    = curShot.renderedLayerVersionPath( renderPath, node[ 'layerSel' ].value(), layerName, node[ '_version' ].value() )
+	return path
+	
