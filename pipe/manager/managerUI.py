@@ -42,6 +42,12 @@ try:
 	INMAYA = True
 except:
 	pass
+INNUKE = False
+try:
+	import nuke
+	INNUKE = True
+except:
+	pass
 
 #load UI FILE
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
@@ -292,6 +298,15 @@ class ManagerUI(base,fom):
 			actionSaveScene = QtGui.QAction("Save Scene Here!", menu)
 			menu.addAction( actionSaveScene )
 			self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.saveScene )
+		elif INNUKE:
+			#OPEN IN CURRENT MAYA
+			actionOpenInCurrent = QtGui.QAction("Open in This Nuke", menu)
+			menu.addAction( actionOpenInCurrent )
+			self.connect( actionOpenInCurrent, QtCore.SIGNAL( "triggered()" ), self.openFileInCurrentNuke )
+			#SAVE IN THIS SCENE
+			actionSaveScene = QtGui.QAction("Save Scene Here!", menu)
+			menu.addAction( actionSaveScene )
+			self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.saveNukeScene )
 
 		tabwid = self._getCurrentTab()
 		menu.popup(tabwid.viewport().mapToGlobal(pos))
@@ -753,6 +768,41 @@ class ManagerUI(base,fom):
 			asset = item.data(32)
 		props = mfp.MayaFilePropertiesUi(asset,self)
 		props.show()
+
+	def openFileInCurrentNuke(self):
+		"""docstring for openFileInCurrentNuke"""
+		tab = self._getCurrentTab()
+		item = tab.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		root = nuke.root()
+		pipProj = nuke.String_Knob( 'pipPorject', 'Pony_Halloween_Fantasmas' )
+		pipSeq = nuke.String_Knob( 'pipSequence', 'Terror' )
+		pipShot = nuke.String_Knob( 'pipShot', 's001_T01' )
+		root.addKnob( pipProj ) 
+		root.addKnob( pipSeq ) 
+		root.addKnob( pipShot ) 
+		root[ 'pipPorject' ].setValue( str( self.projects_cmb.currentText() ) )
+		root[ 'pipSequence' ].setValue( str( self.sequences_lw.selectedItems()[0].text() ) )
+		row = item.row()
+		root[ 'pipShot' ].setValue( tab.item ( row, 0 ).text() )
+		if asset.isZero:
+			root[ 'name' ].setValue( asset.path )
+		else:
+			asset.open()
+
+	def saveNukeScene(self):
+		"""docstring for saveNukeScene"""
+		tab = self._getCurrentTab()
+		item = tab.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		asset.newVersion()
+		asset.save()
 
 	#
 	###################################

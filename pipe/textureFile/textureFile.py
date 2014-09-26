@@ -44,7 +44,8 @@ IMAGEMAGICPATH = dirname + 'bin/ImageMagick/'
 class textureFile(fl.File):
 	"""docstring for textureFile"""
 	def __init__(self, path):
-		super(textureFile, self).__init__( path )
+		self.as_super = super(textureFile, self)
+		self.as_super.__init__( path )
 	
 	@property
 	def hasUdim(self):

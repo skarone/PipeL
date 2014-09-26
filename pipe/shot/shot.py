@@ -5,6 +5,8 @@ import pipe.mayaFile.mayaFile as mfl
 import pipe.file.file as fl
 import pipe.dependency.dependency as dp
 import pipe.cacheFile.cacheFile as cfl
+import pipe.nukeFile.nukeFile   as nfl
+reload( nfl )
 reload(cfl)
 reload( dp )
 
@@ -93,7 +95,7 @@ class Shot(object):
 	@property
 	def compPath(self):
 		"""return the anim file"""
-		return fl.File( self.path + '/Comp/' + self.name + '_COMP.nk' )
+		return nfl.nukeFile( self.path + '/Comp/' + self.name + '_COMP.nk' )
 
 	@property
 	def hasComp(self):
@@ -196,7 +198,7 @@ class Shot(object):
 	def renderedLayerVersions(self, basePath, layerName ):
 		"""return the versions in the render layer"""
 		path = self.renderedLayersPath( basePath ) + '/' + layerName
-		return sorted([ a for a in os.listdir( path ) if os.path.isdir( path + a ) ])
+		return sorted([ a for a in os.listdir( path ) if os.path.isdir( path + '/' + a ) ])
 
 	def renderedLayerVersionPath(self, basePath, layerName, versionName ):
 		"""return the path for the rendered layer for specific version"""

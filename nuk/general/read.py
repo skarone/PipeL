@@ -27,8 +27,8 @@ def createVersionKnobs():
 	updateKnob  = nuke.PyScript_Knob( 'update', 'update' )
 	versionKnob = nuke.Enumeration_Knob( '_version', 'version', [] ) # DO NOT USE "VERSION" AS THE KNOB NAME AS THE READ NODE ALREADY HAS A "VERSION" KNOB
 	loadKnob    = nuke.PyScript_Knob( 'load', 'load' )
-	updateKnob.setValue( 'assetManager.updateVersionKnob()' )
-	loadKnob.setValue( 'assetManager.loadFile()' )
+	updateKnob.setValue( 'import nuk.general.read as rd; rd.updateVersionKnob()' )
+	loadKnob.setValue( 'import nuk.general.read as rd; rd.loadFile()' )
 	# ADD NEW KNOBS TO NODE
 	for k in ( tabKnob, projKnob, seqKnob, shotKnob, layerKnob, updateKnob, versionKnob, loadKnob ):
 		node.addKnob( k )
@@ -66,7 +66,10 @@ def loadFile():
 	if gen:
 		renderPath = gen[ "renderpath" ]
 	pathDir = getPathDir( renderPath, node )
+	print pathDir
 	seqNode = sqFil.sequenceFile( pathDir + node[ 'layerSel' ].value() + '.*' )
+	print pathDir + node[ 'layerSel' ].value() + '.*'
+	print seqNode.files
 	node['file'].setValue( seqNode.seqPath )
 	node['first'].setValue( seqNode.start )
 	node['last'].setValue( seqNode.end )
@@ -114,6 +117,6 @@ def updateVersionKnob():
 def getPathDir( renderPath, node ):
 	"""docstring for getPathDir"""
 	curShot = sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() )))
-	path    = curShot.renderedLayerVersionPath( renderPath, node[ 'layerSel' ].value(), layerName, node[ '_version' ].value() )
+	path    = curShot.renderedLayerVersionPath( renderPath, node[ 'layerSel' ].value(), node[ '_version' ].value() )
 	return path
 	

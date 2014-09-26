@@ -1,26 +1,33 @@
 import pipe.textureFile.textureFile as tfl
+import pipe.file.file as fl
+import re
+import os
+from glob import glob
 
-class sequenceFile(tfl.textureFile):
+class sequenceFile(fl.File):
 	"""main class to handle sequences of files"""
 	def __init__(self, path):
 		"""init sequence path, base path"""
-		super( sequenceFile ).__init__( path )
+		self.as_super = super(sequenceFile, self)
+		self.as_super.__init__( str( path ).replace( '\\', '/' ) )
 
 	@property
-	def path(self):
+	def seqPath(self):
 		"""return the path of the sequence"""
-		return self.getFileSeq()[0]
+		return '%s.%%%sd%s' % ( self.dirPath + self.name, str(self.padding).zfill(2), self.files[0].extension )
 
 	@property
 	def start(self):
 		"""return start Frame"""
-		firstString = re.findall( r'\d+', self.files[0] )[-1]
+		print self.files
+		fil = self.files[0]
+		firstString = re.findall( r'\d+', fil.path )[-1]
 		return int( firstString )
 
 	@property
 	def end(self):
 		"""return end Frame"""
-		return int( re.findall( r'\d+', self.files[-1] )[-1] )
+		return int( re.findall( r'\d+', self.files[-1].path )[-1] )
 
 	@property
 	def frames(self):
@@ -49,18 +56,16 @@ class sequenceFile(tfl.textureFile):
 	@property
 	def padding(self):
 		"""return the padding of this sequence"""
-		firstString = re.findall( r'\d+', self.files[0] )[-1]
+		firstString = re.findall( r'\d+', self.files[0].path )[-1]
 		# GET THE PADDING FROM THE AMOUNT OF DIGITS
 		return len( firstString )
 
 	@property
 	def files(self):
 		"""return all the files in the sequence"""
-		return [ tfl.textureFile( a ) for a in sorted(glob( os.path.join( self.dirPath, '%s.*.%s' % ( self.name, self.extension ) ) ))]
+		print self.dirPath, '%s.*%s' % ( self.name, self.extension )
+		pa = os.path.join( self.dirPath, '%s.*%s' % ( self.name, self.extension ) )
+		print pa
+		fils = sorted(glob( pa ))
+		return [ tfl.textureFile( a ) for a in fils ]
 
-	@property
-	def seqPath():
-		'''Return file sequence. Very loose example!!'''
-		fileName = '%s.%%%sd%s' % ( self.name, str(self.padding).zfill(2), self.files[0].extension )
-		# RETURN FULL PATH AS SEQUENCE NOTATION
-		return os.path.join( self.dirPath, fileName )
