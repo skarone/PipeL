@@ -22,6 +22,8 @@ import pipe.file.file as fl
 reload( fl )
 import pipe.mayaFile.mayaFilePropertiesUI as mfp
 reload( mfp )
+import pipe.nukeFile.nukeFilePropertiesUI as nkp
+reload( nkp )
 import pipe.mayaFile.mayaFile as mfl
 reload( mfl )
 import pipe.sequence.sequence as sq
@@ -766,9 +768,11 @@ class ManagerUI(base,fom):
 			asset = item.data(32).toPyObject()
 		else:
 			asset = item.data(32)
-		props = mfp.MayaFilePropertiesUi(asset,self)
+		if asset.extension == '.ma':
+			props = mfp.MayaFilePropertiesUi(asset,self)
+		elif asset.extension == '.nk':
+			props = nkp.NukeFilePropertiesUi(asset,self)
 		props.show()
-
 	def openFileInCurrentNuke(self):
 		"""docstring for openFileInCurrentNuke"""
 		tab = self._getCurrentTab()

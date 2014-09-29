@@ -57,6 +57,8 @@ def fillProjects():
 	node[ 'projectSel' ].setValue( root[ 'pipPorject' ].value() )
 	node[ 'seqSel' ].setValue( root[ 'pipSequence' ].value() )
 	node[ 'shotSel' ].setValue( root[ 'pipShot' ].value() )
+	vers = sorted( node[ '_version' ].values() )
+	node[ '_version' ].setValue( vers[-1] )
 
 def loadFile():
 	node    = nuke.thisNode()
@@ -111,6 +113,8 @@ def updateVersionKnob():
 	#UPDATE SHOTS BECAUSE SEQSEL HAS CHANGE
 	if not knob or knob.name() in [ 'layerSel', 'showPanel' ]:
 		node[ '_version' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
+		vers = sorted( node[ '_version' ].values() )
+		node[ '_version' ].setValue( vers[-1] )
 
 	#NOW IT WOULD BE GREAT TO SET ALL THIS KNOBS BASED ON ENVIROMENT VARIABLES
 
