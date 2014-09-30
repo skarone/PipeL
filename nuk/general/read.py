@@ -27,10 +27,11 @@ def createVersionKnobs():
 	updateKnob  = nuke.PyScript_Knob( 'update', 'update' )
 	versionKnob = nuke.Enumeration_Knob( '_version', 'version', [] ) # DO NOT USE "VERSION" AS THE KNOB NAME AS THE READ NODE ALREADY HAS A "VERSION" KNOB
 	loadKnob    = nuke.PyScript_Knob( 'load', 'load' )
+	copyKnob    = nuke.Boolean_Knob( 'copy', 'Copy To Local', 0 )
 	updateKnob.setValue( 'import nuk.general.read as rd; rd.updateVersionKnob()' )
 	loadKnob.setValue( 'import nuk.general.read as rd; rd.loadFile()' )
 	# ADD NEW KNOBS TO NODE
-	for k in ( tabKnob, projKnob, seqKnob, shotKnob, layerKnob, updateKnob, versionKnob, loadKnob ):
+	for k in ( tabKnob, projKnob, seqKnob, shotKnob, layerKnob, updateKnob, versionKnob, loadKnob, copyKnob ):
 		node.addKnob( k )
 	# UPDATE THE VERSION KNOB SO IT SHOWS WHAT'S ON DISK / IN THE DATABASE
 	fillProjects()
@@ -67,11 +68,13 @@ def loadFile():
 	gen = settings.General
 	if gen:
 		renderPath = gen[ "renderpath" ]
+		localNuke  = gen[ "localnukepath" ]
 	pathDir = getPathDir( renderPath, node )
-	print pathDir
 	seqNode = sqFil.sequenceFile( pathDir + node[ 'layerSel' ].value() + '.*' )
-	print pathDir + node[ 'layerSel' ].value() + '.*'
-	print seqNode.files
+	if node[ 'copy' ].value():
+		newPath = pathFromStructure( localNuke, node[ 'projectSel' ].value(), node[ 'seqSel' ].value(), node[ 'shotSel' ].value(), node[ 'layerSel' ].value() )
+		print newPath
+		seqNode = seqNode.copy( newPath + node[ '_version' ].value() + '/' )
 	node['file'].setValue( seqNode.seqPath )
 	node['first'].setValue( seqNode.start )
 	node['last'].setValue( seqNode.end )
@@ -123,4 +126,15 @@ def getPathDir( renderPath, node ):
 	curShot = sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() )))
 	path    = curShot.renderedLayerVersionPath( renderPath, node[ 'layerSel' ].value(), node[ '_version' ].value() )
 	return path
+
+def pathFromStructure( basePath, project, sequence, shot, layer ):
+	"""
+	basePath should be something like this...
+	"D:/Projects/<project>/Sequences/<sequence>/Shots/<shot>/Renders/<layer>"
+	X:/<project>/-Materiales-/3D/<sequence>/<shot>/<layer>
+	"""
+	basePath = basePath.replace( '<project>', project )
+	basePath = basePath.replace( '<sequence>', sequence )
+	basePath = basePath.replace( '<shot>', shot )
+	return basePath.replace( '<layer>', layer ) + '/'
 	

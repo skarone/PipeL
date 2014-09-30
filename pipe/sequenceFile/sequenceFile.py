@@ -63,9 +63,12 @@ class sequenceFile(fl.File):
 	@property
 	def files(self):
 		"""return all the files in the sequence"""
-		print self.dirPath, '%s.*%s' % ( self.name, self.extension )
 		pa = os.path.join( self.dirPath, '%s.*%s' % ( self.name, self.extension ) )
-		print pa
 		fils = sorted(glob( pa ))
 		return [ tfl.textureFile( a ) for a in fils ]
 
+	def copy(self, newPath ):
+		"""copy all the files"""
+		for f in self.files:
+			f.copy( newPath )
+		return sequenceFile( newPath + '/'  + self.basename )

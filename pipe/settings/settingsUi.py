@@ -60,6 +60,9 @@ class Settings(base, fom):
 				else: 
 					state = QtCore.Qt.Unchecked
 				self.useMayaSubFolder_chb.setCheckState( state )
+			if gen.has_key( 'localnukepath' ):
+				localnukepath = gen[ 'localnukepath' ]
+				self.nukeLocalPath_le.setText( localnukepath )
 			if gen.has_key( 'changeinternalpaths' ):
 				changeinternalpaths = gen[ "changeinternalpaths" ]
 				if changeinternalpaths == 'True': 
@@ -103,6 +106,7 @@ class Settings(base, fom):
 		self.settings.write( 'General', 'basepath', str( self.localPath_le.text().replace( '\\', '/' ) ))
 		self.settings.write( 'General', 'serverpath', str( self.serverPath_le.text().replace( '\\', '/' ) ))
 		self.settings.write( 'General', 'renderpath', str( self.renderPath_le.text().replace( '\\', '/' ) ))
+		self.settings.write( 'General', 'localnukepath', str( self.nukeLocalPath_le.text().replace( '\\', '/' ) ))
 		self.settings.write( 'General', 'maketxpath', str( self.makeTxPath_le.text().replace( '\\', '/' ) ))
 		self.settings.write( 'General', 'autoload', self.autoLoadManager_chb.isChecked() )
 		self.settings.write( 'General', 'usemayasubfolder', self.useMayaSubFolder_chb.isChecked() )
