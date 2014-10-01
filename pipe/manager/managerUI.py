@@ -773,6 +773,7 @@ class ManagerUI(base,fom):
 		elif asset.extension == '.nk':
 			props = nkp.NukeFilePropertiesUi(asset,self)
 		props.show()
+
 	def openFileInCurrentNuke(self):
 		"""docstring for openFileInCurrentNuke"""
 		tab = self._getCurrentTab()
@@ -782,12 +783,15 @@ class ManagerUI(base,fom):
 		else:
 			asset = item.data(32)
 		root = nuke.root()
-		pipProj = nuke.String_Knob( 'pipPorject', 'Pony_Halloween_Fantasmas' )
-		pipSeq = nuke.String_Knob( 'pipSequence', 'Terror' )
-		pipShot = nuke.String_Knob( 'pipShot', 's001_T01' )
-		root.addKnob( pipProj ) 
-		root.addKnob( pipSeq ) 
-		root.addKnob( pipShot ) 
+		if not root.knob( 'pipPorject' ):
+			pipProj = nuke.String_Knob( 'pipPorject', 'Project' )
+			root.addKnob( pipProj ) 
+		if not root.knob( 'pipSequence' ):
+			pipSeq = nuke.String_Knob( 'pipSequence', 'Sequence' )
+			root.addKnob( pipSeq ) 
+		if not root.knob( 'pipShot' ):
+			pipShot = nuke.String_Knob( 'pipShot', 'Shot' )
+			root.addKnob( pipShot ) 
 		root[ 'pipPorject' ].setValue( str( self.projects_cmb.currentText() ) )
 		root[ 'pipSequence' ].setValue( str( self.sequences_lw.selectedItems()[0].text() ) )
 		row = item.row()

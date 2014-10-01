@@ -11,6 +11,7 @@ import nuke
 
 #print getFileSeq( 'R:/Pony_Halloween_Fantasmas/Terror/s004_T04/v0011/Fondo_Beauty' )
 
+
 def createVersionKnobs():
 	'''
 	Add as callback to add user knobs in Read nodes.
@@ -19,6 +20,11 @@ def createVersionKnobs():
 	'''
 	# CREATE USER KNOBS
 	node        = nuke.thisNode()
+	addKnobs( node )
+	# UPDATE THE VERSION KNOB SO IT SHOWS WHAT'S ON DISK / IN THE DATABASE
+	fillProjects(node)
+
+def addKnobs( node ):
 	tabKnob     = nuke.Tab_Knob( 'PipeL', 'PipeL' )
 	projKnob    = nuke.Enumeration_Knob( 'projectSel', 'Project', [] )
 	seqKnob     = nuke.Enumeration_Knob( 'seqSel', 'Sequence', [] )
@@ -28,15 +34,13 @@ def createVersionKnobs():
 	versionKnob = nuke.Enumeration_Knob( '_version', 'version', [] ) # DO NOT USE "VERSION" AS THE KNOB NAME AS THE READ NODE ALREADY HAS A "VERSION" KNOB
 	loadKnob    = nuke.PyScript_Knob( 'load', 'load' )
 	copyKnob    = nuke.Boolean_Knob( 'copy', 'Copy To Local', 0 )
-	updateKnob.setValue( 'import nuk.general.read as rd; rd.updateVersionKnob()' )
+	updateKnob.setValue( 'import nuk.general.read as rd; rd.fillVersions()' )
 	loadKnob.setValue( 'import nuk.general.read as rd; rd.loadFile()' )
 	# ADD NEW KNOBS TO NODE
 	for k in ( tabKnob, projKnob, seqKnob, shotKnob, layerKnob, updateKnob, versionKnob, loadKnob, copyKnob ):
 		node.addKnob( k )
-	# UPDATE THE VERSION KNOB SO IT SHOWS WHAT'S ON DISK / IN THE DATABASE
-	fillProjects()
 
-def fillProjects():
+def fillProjects( node ):
 	"""docstring for fillProjects"""
 	settings = sti.Settings()
 	gen = settings.General
@@ -47,17 +51,19 @@ def fillProjects():
 				basePath = basePath[:-1]
 			prj.BASE_PATH = basePath.replace( '\\', '/' )
 		renderPath = gen[ "renderpath" ]
-	node = nuke.thisNode()
 	root = nuke.root()
+	pipPorj = root[ 'pipPorject' ].value()
+	pipSeq  = root[ 'pipSequence' ].value()
+	pipShot = root[ 'pipShot' ].value()
 	node[ 'projectSel' ].setValues( prj.projects( prj.BASE_PATH ) )
-	node[ 'seqSel' ].setValues( [s.name for s in prj.Project( root[ 'pipPorject' ].value() ).sequences] )
-	node[ 'shotSel' ].setValues( [ s.name for s in sq.Sequence( root[ 'pipSequence' ].value(), prj.Project( root[ 'pipPorject' ].value() )).shots ]  )
-	node[ 'layerSel' ].setValues( sh.Shot( root[ 'pipShot' ].value(),sq.Sequence( root[ 'pipSequence' ].value(), prj.Project( root[ 'pipPorject' ].value() ))).renderedLayers( renderPath ) )
-	node[ '_version' ].setValues( sh.Shot( root[ 'pipShot' ].value(),sq.Sequence( root[ 'pipSequence' ].value(), prj.Project( root[ 'pipPorject' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
+	node[ 'projectSel' ].setValue( pipPorj )
+	node[ 'seqSel' ].setValues( [s.name for s in prj.Project( pipPorj ).sequences] )
+	node[ 'seqSel' ].setValue( pipSeq )
+	node[ 'shotSel' ].setValues( [ s.name for s in sq.Sequence( pipSeq, prj.Project( pipPorj )).shots ]  )
+	node[ 'shotSel' ].setValue( pipShot )
+	node[ 'layerSel' ].setValues( sh.Shot( pipShot, sq.Sequence( pipSeq, prj.Project( pipPorj ))).renderedLayers( renderPath ) )
+	node[ '_version' ].setValues( sh.Shot( pipShot, sq.Sequence( pipSeq, prj.Project( pipPorj ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
 	
-	node[ 'projectSel' ].setValue( root[ 'pipPorject' ].value() )
-	node[ 'seqSel' ].setValue( root[ 'pipSequence' ].value() )
-	node[ 'shotSel' ].setValue( root[ 'pipShot' ].value() )
 	vers = sorted( node[ '_version' ].values() )
 	node[ '_version' ].setValue( vers[-1] )
 
@@ -73,11 +79,11 @@ def loadFile():
 	seqNode = sqFil.sequenceFile( pathDir + node[ 'layerSel' ].value() + '.*' )
 	if node[ 'copy' ].value():
 		newPath = pathFromStructure( localNuke, node[ 'projectSel' ].value(), node[ 'seqSel' ].value(), node[ 'shotSel' ].value(), node[ 'layerSel' ].value() )
-		print newPath
 		seqNode = seqNode.copy( newPath + node[ '_version' ].value() + '/' )
 	node['file'].setValue( seqNode.seqPath )
 	node['first'].setValue( seqNode.start )
 	node['last'].setValue( seqNode.end )
+	checkVersion( node, renderPath )
 
 def updateVersionKnob():
 	'''
@@ -99,7 +105,6 @@ def updateVersionKnob():
 				basePath = basePath[:-1]
 			prj.BASE_PATH = basePath.replace( '\\', '/' )
 		renderPath = gen[ "renderpath" ]
-	
 	root = nuke.root()
 	#UPDATE SEQUENCES BECAUSE PROJECTSEL HAS CHANGE
 	if not knob or knob.name() in [ 'projectSel', 'showPanel' ]:
@@ -116,10 +121,51 @@ def updateVersionKnob():
 	#UPDATE SHOTS BECAUSE SEQSEL HAS CHANGE
 	if not knob or knob.name() in [ 'layerSel', 'showPanel' ]:
 		node[ '_version' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
-		vers = sorted( node[ '_version' ].values() )
-		node[ '_version' ].setValue( vers[-1] )
+		#vers = sorted( node[ '_version' ].values() )
+		#node[ '_version' ].setValue( vers[-1] )
 
-	#NOW IT WOULD BE GREAT TO SET ALL THIS KNOBS BASED ON ENVIROMENT VARIABLES
+def fillVersions():
+	"""docstring for fillVersions"""
+	settings = sti.Settings()
+	gen = settings.General
+	node = nuke.thisNode()
+	knob = nuke.thisKnob()
+	if gen:
+		basePath = gen[ "basepath" ]
+		if basePath:
+			if basePath.endswith( '\\' ):
+				basePath = basePath[:-1]
+			prj.BASE_PATH = basePath.replace( '\\', '/' )
+		renderPath = gen[ "renderpath" ]
+	node[ '_version' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
+
+def checkVersions( ):
+	"""docstring for fname"""
+	settings = sti.Settings()
+	gen = settings.General
+	if gen:
+		basePath = gen[ "basepath" ]
+		if basePath:
+			if basePath.endswith( '\\' ):
+				basePath = basePath[:-1]
+			prj.BASE_PATH = basePath.replace( '\\', '/' )
+		renderPath = gen[ "renderpath" ]
+	for node in nuke.allNodes():
+		if node.Class()=='Read':
+			checkVersion( node, renderPath )
+
+def checkVersion( node, renderPath ):
+	"""docstring for checkVersion"""
+	currentVersion = node[ '_version' ].value()
+	node[ '_version' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
+	node[ '_version' ].setValue( currentVersion )
+	vers = sorted( node[ '_version' ].values() )
+	if not vers[-1] ==  currentVersion:
+		hexColour = int('%02x%02x%02x%02x' % (255,255,0,1),16)
+		node['tile_color'].setValue( hexColour )
+	else:
+		node['tile_color'].setValue( 0 )
+
 
 def getPathDir( renderPath, node ):
 	"""docstring for getPathDir"""
@@ -137,4 +183,5 @@ def pathFromStructure( basePath, project, sequence, shot, layer ):
 	basePath = basePath.replace( '<sequence>', sequence )
 	basePath = basePath.replace( '<shot>', shot )
 	return basePath.replace( '<layer>', layer ) + '/'
+
 	

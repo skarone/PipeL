@@ -90,9 +90,10 @@ class textureFile(fl.File):
 		"""override copy to support udim"""
 		if self.hasUdim:
 			for a in self.udimPaths:
-				a.copy( newPath )
+				fi = a.copy( newPath )
+			return fi
 		else:
-			super( textureFile, self ).copy( newPath )
+			return textureFile( super( textureFile, self ).copy( newPath ).path )
 
 	def delete(self):
 		"""override delete to support udim"""

@@ -19,7 +19,6 @@ class sequenceFile(fl.File):
 	@property
 	def start(self):
 		"""return start Frame"""
-		print self.files
 		fil = self.files[0]
 		firstString = re.findall( r'\d+', fil.path )[-1]
 		return int( firstString )
