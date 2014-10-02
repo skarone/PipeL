@@ -51,21 +51,24 @@ def fillProjects( node ):
 				basePath = basePath[:-1]
 			prj.BASE_PATH = basePath.replace( '\\', '/' )
 		renderPath = gen[ "renderpath" ]
+		node[ 'projectSel' ].setValues( prj.projects( prj.BASE_PATH ) )
 	root = nuke.root()
-	pipPorj = root[ 'pipPorject' ].value()
-	pipSeq  = root[ 'pipSequence' ].value()
-	pipShot = root[ 'pipShot' ].value()
-	node[ 'projectSel' ].setValues( prj.projects( prj.BASE_PATH ) )
-	node[ 'projectSel' ].setValue( pipPorj )
-	node[ 'seqSel' ].setValues( [s.name for s in prj.Project( pipPorj ).sequences] )
-	node[ 'seqSel' ].setValue( pipSeq )
-	node[ 'shotSel' ].setValues( [ s.name for s in sq.Sequence( pipSeq, prj.Project( pipPorj )).shots ]  )
-	node[ 'shotSel' ].setValue( pipShot )
-	node[ 'layerSel' ].setValues( sh.Shot( pipShot, sq.Sequence( pipSeq, prj.Project( pipPorj ))).renderedLayers( renderPath ) )
-	node[ '_version' ].setValues( sh.Shot( pipShot, sq.Sequence( pipSeq, prj.Project( pipPorj ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
-	
-	vers = sorted( node[ '_version' ].values() )
-	node[ '_version' ].setValue( vers[-1] )
+	if root.knob('pipPorject'):
+		pipPorj = root[ 'pipPorject' ].value()
+		pipSeq  = root[ 'pipSequence' ].value()
+		pipShot = root[ 'pipShot' ].value()
+		node[ 'projectSel' ].setValue( pipPorj )
+		node[ 'seqSel' ].setValues( [s.name for s in prj.Project( pipPorj ).sequences] )
+		node[ 'seqSel' ].setValue( pipSeq )
+		node[ 'shotSel' ].setValues( [ s.name for s in sq.Sequence( pipSeq, prj.Project( pipPorj )).shots ]  )
+		node[ 'shotSel' ].setValue( pipShot )
+		node[ 'layerSel' ].setValues( sh.Shot( pipShot, sq.Sequence( pipSeq, prj.Project( pipPorj ))).renderedLayers( renderPath ) )
+		node[ '_version' ].setValues( sh.Shot( pipShot, sq.Sequence( pipSeq, prj.Project( pipPorj ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
+		vers = sorted( node[ '_version' ].values() )
+		node[ '_version' ].setValue( vers[-1] )
+	else:
+		f = nuke.getClipname("Select clip")
+		node['file'].fromUserText(f)
 
 def loadFile():
 	node    = nuke.thisNode()
@@ -105,7 +108,6 @@ def updateVersionKnob():
 				basePath = basePath[:-1]
 			prj.BASE_PATH = basePath.replace( '\\', '/' )
 		renderPath = gen[ "renderpath" ]
-	root = nuke.root()
 	#UPDATE SEQUENCES BECAUSE PROJECTSEL HAS CHANGE
 	if not knob or knob.name() in [ 'projectSel', 'showPanel' ]:
 		node[ 'seqSel' ].setValues( [s.name for s in prj.Project( node[ 'projectSel' ].value() ).sequences] )
@@ -157,14 +159,15 @@ def checkVersions( ):
 def checkVersion( node, renderPath ):
 	"""docstring for checkVersion"""
 	currentVersion = node[ '_version' ].value()
-	node[ '_version' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
-	node[ '_version' ].setValue( currentVersion )
-	vers = sorted( node[ '_version' ].values() )
-	if not vers[-1] ==  currentVersion:
-		hexColour = int('%02x%02x%02x%02x' % (255,255,0,1),16)
-		node['tile_color'].setValue( hexColour )
-	else:
-		node['tile_color'].setValue( 0 )
+	if not node[ 'seqSel' ].value() == 0:
+		node[ '_version' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
+		node[ '_version' ].setValue( currentVersion )
+		vers = sorted( node[ '_version' ].values() )
+		if not vers[-1] ==  currentVersion:
+			hexColour = int('%02x%02x%02x%02x' % (255,255,0,1),16)
+			node['tile_color'].setValue( hexColour )
+		else:
+			node['tile_color'].setValue( 0 )
 
 
 def getPathDir( renderPath, node ):

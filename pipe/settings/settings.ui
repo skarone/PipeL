@@ -89,7 +89,7 @@
      <item>
       <widget class="QLineEdit" name="nukeLocalPath_le">
        <property name="text">
-        <string>X:/&lt;project&gt;/-Materiales-/3D/&lt;sequence&gt;/&lt;shot&gt;/&lt;layer&gt;</string>
+        <string>E:/&lt;project&gt;/-Materiales-/3D/&lt;sequence&gt;/&lt;shot&gt;/&lt;layer&gt;</string>
        </property>
       </widget>
      </item>

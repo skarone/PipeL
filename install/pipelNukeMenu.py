@@ -33,6 +33,12 @@ nuke.addKnobChanged( nuk.general.read.updateVersionKnob, nodeClass='Read' )
 
 nuke.addOnScriptLoad( nuk.general.read.checkVersions )
 nuke.addOnScriptSave( nuk.general.read.checkVersions )
+"""
+import nuk.general.read
+import nuke
+nuke.removeOnScriptLoad(nuk.general.read.checkVersions)
+nuke.removeOnScriptSave(nuk.general.read.checkVersions)
+"""
 
 def mergeColor():
 	n = nuke.thisNode()
