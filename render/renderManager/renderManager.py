@@ -78,12 +78,13 @@ class RenderManagerUI(base,fom):
 		self._project = ''
 		if assOrShot:
 			if assOrShot.type == 'asset':
-				versionNumber = self._getVersionNumber( renderPath + assOrShot.project.name + '/Asset/' + assOrShot.name )
-				pat = renderPath + assOrShot.project.name + '/Asset/' + assOrShot.name + '/v' + str(versionNumber).zfill( 4 ) + '/' + '<RenderLayer>' + '/<RenderLayer>'
+				#versionNumber = self._getVersionNumber( renderPath + assOrShot.project.name + '/Asset/' + assOrShot.name )
+				pat = renderPath + assOrShot.project.name + '/Asset/' + assOrShot.name + '/<RenderLayer>/' + '<RenderLayerVersion>' + '/<RenderLayer>'
 			elif assOrShot.type == 'shot':
-				versionNumber = self._getVersionNumber( renderPath + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name )
-				pat = renderPath + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name + '/v' + str(versionNumber).zfill( 4 ) + '/' + '<RenderLayer>' + '/<RenderLayer>'
-				renderGlobals.a.imageFilePrefix.v = str( pat )
+				#R:\Pony_Halloween_Fantasmas\Terror\s013_T13\Chicos_Beauty
+				#versionNumber = self._getVersionNumber( renderPath + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name )
+				pat = renderPath + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name + '/<RenderLayer>/' + '<RenderLayerVersion>' + '/<RenderLayer>'
+				#renderGlobals.a.imageFilePrefix.v = str( pat )
 			self._project = assOrShot.project.name
 			self.filePath_le.setText( str( pat ))
 		self.frameRange_le.setText( str( int( renderGlobals.a.startFrame.v ) ) + "-" + str( int(  renderGlobals.a.endFrame.v ) ) )
@@ -120,7 +121,7 @@ class RenderManagerUI(base,fom):
 		dead       = dl.Deadline()
 		group      = str(self.groups_cmb.currentText())
 		pool       = str(self.pools_cmb.currentText())
-		comments   = str( self.comments_te.toPlainText())
+		comments   = str( self.comments_te.text())
 		filePrefix = str( self.filePath_le.text())
 		priority   = str( self.priority_spb.value() )
 		taskSize   = str( self.taskSize_spb.value() )
@@ -144,7 +145,7 @@ class RenderManagerUI(base,fom):
 		whiteList = ''
 		deRenGlob = mn.Node( 'defaultRenderGlobals' )
 		pad = deRenGlob.a.extensionPadding.v
-		deRenGlob.a.imageFilePrefix.v = str(self.filePath_le.text())
+		#deRenGlob.a.imageFilePrefix.v = str(self.filePath_le.text())
 		if self.renderLocal_chb.isChecked():
 			whiteList = socket.gethostname()
 			print 'rendering in local', whiteList
@@ -155,6 +156,12 @@ class RenderManagerUI(base,fom):
 			if w.overFrameRange_chb.isChecked():
 				frames =  str( w.frameRange_le.text() )
 			filename = mc.renderSettings( lyr = w.layer.name, gin = ('?'*pad) )[0]
+			filePrefix = filePrefix.replace( '<RenderLayer>', w.layer.name )
+			#get version number
+			if '<RenderLayerVersion>' in filePrefix:
+				versionNumber = self._getVersionNumber( filePrefix.split( '<RenderLayerVersion>' )[0] )
+				filePrefix = filePrefix.replace( '<RenderLayerVersion>', 'v' + str(versionNumber).zfill( 4 ) )
+			filename = filePrefix + '.' + ('?'*pad) + os.path.splitext( filename )[1]
 			name = ''
 			if self._project:
 				name = self._project + ' - '

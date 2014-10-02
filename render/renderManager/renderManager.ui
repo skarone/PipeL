@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>345</width>
-    <height>586</height>
+    <width>561</width>
+    <height>784</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,12 +23,15 @@
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This will change all the paths in the file to point to server, but it will leave scene untouched :)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
-         <string>Use Paths From Server</string>
+         <string>Make Paths To Server</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QCheckBox" name="submitSuspended_chb">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;send scene to deadline but keep it suspended&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="text">
          <string>Submit suspended</string>
         </property>
@@ -36,6 +39,12 @@
       </item>
       <item>
        <widget class="QCheckBox" name="autoSave_chb">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Save current scene before render&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
         <property name="text">
          <string>AutoSave</string>
         </property>
@@ -136,6 +145,20 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>FrameRange:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="frameRange_le">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;write the frame range for the entire scene, ex:120-150,163,200-250&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="label_3">
         <property name="text">
          <string>Priority:</string>
@@ -173,37 +196,6 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_6">
-      <item>
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>FrameRange:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="frameRange_le">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;write the frame range for the entire scene, ex:120-150,163,200-250&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="allOverridesOff_btn">
         <property name="text">
          <string>Turn All Overrides Off</string>
@@ -224,7 +216,7 @@
       <item>
        <widget class="QLineEdit" name="filePath_le">
         <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;write the frame range for the entire scene, ex:120-150,163,200-250&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;use special key words to handle final path of render&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
@@ -251,7 +243,7 @@
       <item>
        <widget class="QLineEdit" name="comments_te">
         <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;write the frame range for the entire scene, ex:120-150,163,200-250&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Write small comments here, and will appear in deadline monitor&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
@@ -317,8 +309,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>305</width>
-            <height>259</height>
+            <width>521</width>
+            <height>485</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_4">
