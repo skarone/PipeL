@@ -935,6 +935,12 @@ class ManagerUI(base,fom):
 		textures = asset.textures
 		for r in refs:
 			textures.extend( r.textures )
+		finalTextures = []
+		for t in textures:
+			if t.hasUdim:
+				finalTextures.extend( t.udimPaths )
+			else:
+				finalTextures.append( t )
 		caches = asset.caches
 		result.extend( refs )
 		result.extend( textures )
