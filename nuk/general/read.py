@@ -158,17 +158,17 @@ def checkVersions( ):
 
 def checkVersion( node, renderPath ):
 	"""docstring for checkVersion"""
-	currentVersion = node[ '_version' ].value()
-	if not node[ 'seqSel' ].value() == 0:
-		node[ '_version' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
-		node[ '_version' ].setValue( currentVersion )
-		vers = sorted( node[ '_version' ].values() )
-		if not vers[-1] ==  currentVersion:
-			hexColour = int('%02x%02x%02x%02x' % (255,255,0,1),16)
-			node['tile_color'].setValue( hexColour )
-		else:
-			node['tile_color'].setValue( 0 )
-
+	if node.knob('_version'):
+		if not node[ '_version' ].value() == '0':
+			currentVersion = node[ '_version' ].value()
+			node[ '_version' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
+			node[ '_version' ].setValue( currentVersion )
+			vers = sorted( node[ '_version' ].values() )
+			if not vers[-1] ==  currentVersion:
+				hexColour = int('%02x%02x%02x%02x' % (255,255,0,1),16)
+				node['tile_color'].setValue( hexColour )
+			else:
+				node['tile_color'].setValue( 0 )
 
 def getPathDir( renderPath, node ):
 	"""docstring for getPathDir"""
