@@ -238,6 +238,7 @@ class Shot(object):
 		"""create folder structure"""
 		struc = [
 				'/' + self.name + '.breakdown',
+				'/Assets',
 				#ANIM
 				'/Anim',
 				'/Anim/Versions',
