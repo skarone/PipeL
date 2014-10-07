@@ -51,8 +51,8 @@ class CacheFile(fl.File):
 		cmd = '-f ' + self.path + ' -uv -ro '
 		if self.nodes:
 			if asset:
-				sel = mn.ls( self.nodes[0].name[:self.nodes[0].name.rindex(':')] + ':*', dag = True, ni = True, typ = 'mesh' )
-			sel.select()
+				self._nodes = mn.ls( self.nodes[0].name[:self.nodes[0].name.rindex(':')] + ':*', dag = True, ni = True, typ = 'mesh' )
+			self._nodes.select()
 			cmd += '-sl '
 		if not fr:
 			#get frame range from timeslider

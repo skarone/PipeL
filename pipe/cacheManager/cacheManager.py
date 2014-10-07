@@ -141,7 +141,7 @@ class CacheManagerUI(base,fom):
 
 	def exportSelectedGeo(self):
 		"""docstring for exp"""
-		sel = mc.ls( sl = True )
+		sel = mn.ls( sl = True )
 		cacheFile = cfl.CacheFile( self.fileNameForCache(), sel )
 		cacheFile.export()
 		if self.copyToServer_chb.isChecked():
@@ -213,7 +213,10 @@ class CacheManagerUI(base,fom):
 						n = i.data(32).toPyObject()
 					else:
 						n = i.data( 32 )
-					n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), n.name, not importAsset )
+					if '_' in n.name:
+						n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), n.name, not importAsset )
+					else:
+						n.imp()
 		elif tabNum == 1:
 			for v in xrange(self.files_lw.count()):
 				i = self.files_lw.item(v)
@@ -325,6 +328,7 @@ class CacheManagerUI(base,fom):
 				pathDir = self._selectedShot.simCachesPath 
 		else:
 			pathDir = QtGui.QFileDialog.getSaveFileName(self, 'Save Cache', self._selectedShot.animCachesPath, selectedFilter='*.abc')
+			pathDir = pathDir[0]
 		return str( pathDir )
 
 def main():
