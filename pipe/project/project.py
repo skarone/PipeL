@@ -76,11 +76,7 @@ class Project(object):
 	@property
 	def path(self):
 		"""return the path of the Project"""
-<<<<<<< HEAD
-		base = BASE_PATH
-=======
 		base = self._basePath
->>>>>>> withSkinFix
 		if base.endswith( '/' ):
 			base = base[:-1]
 		if USE_MAYA_SUBFOLDER:

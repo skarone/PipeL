@@ -979,8 +979,6 @@ class ManagerUI(base,fom):
 				localFile = fl.File( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
 				asset.copy( str( localFile.path ))
 
-<<<<<<< HEAD
-=======
 	def makeTxForTexture(self, texture, serverPath, localPath  ):
 		newTextFile = tfl.textureFile( texture.path.replace( serverPath, localPath ) )
 		newTextFile.makeTx()
@@ -988,7 +986,6 @@ class ManagerUI(base,fom):
 	###################################
 	#
 
->>>>>>> withSkinFix
 def main():
 	global PyForm
 	PyForm=ManagerUI()

@@ -186,8 +186,6 @@ class Shot(object):
 		"""docstring for hasSkin"""
 		return os.path.getsize( self.skinFixPath.path ) != 0
 	
-<<<<<<< HEAD
-=======
 	def renderedLayersPath(self, basePath):
 		path = basePath + '/' + self.project.name + '/' + self.sequence.name + '/' + self.name + '/'
 		return path
@@ -206,7 +204,6 @@ class Shot(object):
 		"""return the path for the rendered layer for specific version"""
 		path = self.renderedLayersPath( basePath ) + layerName + '/' + versionName + '/'
 		return path
->>>>>>> withSkinFix
 
 	@property
 	def animCachesPath(self):
