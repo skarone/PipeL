@@ -26,6 +26,7 @@ class File(object):
 	def __init__(self, path):
 		"""init file node with full path"""
 		self._path =  path
+		self._data = None
 
 	def __repr__(self):
 		"""return the path"""
@@ -117,6 +118,16 @@ class File(object):
 			print 'this file allready exists in', path
 			return False
 	
+	"""
+	def copy(self, newPath):
+		newPath = newPath.replace( '//', '/' )
+		if not os.path.exists(  os.path.dirname( newPath ) ):
+			os.makedirs( os.path.dirname( newPath ) )
+		trhC.ProgressDialog( self.path.replace( '//', '/' ), newPath )
+		return File( newPath )
+
+	"""
+
 	def copy(self, newPath):
 		"""copy file to new path,
 		   newPath could be a directory path or a complete path and it will rename the file"""
@@ -152,7 +163,9 @@ class File(object):
 
 	def isOlderThan(self, fileToCompare):
 		"""compare to File objects to see if the current one is older than"""
-		return os.path.getmtime( fileToCompare.path ) - os.path.getmtime( self.path ) > File.threshold
+		fToCtime = round( os.path.getmtime(fileToCompare.path) )
+		origFTime   = round( os.path.getmtime(self.path) )
+		return fToCtime > origFTime
 
 	def isBiggerThan(self, fileToCompare):
 		"""compare File object size with another File object"""
@@ -166,9 +179,13 @@ class File(object):
 	@property
 	def data(self):
 		"""return the data if the file"""
-		with open( self.path ) as f:
-			file_str = f.read()
-		return file_str
+		if not self._data:
+			with open( self.path ) as f:
+				self._data = f.read()
+		return self._data
+
+	def __eq__(self, other):
+		return self.path == other.path
 
 	@property
 	def lines(self):

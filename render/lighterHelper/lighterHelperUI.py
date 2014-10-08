@@ -18,6 +18,7 @@ import mtoa.core as cor
 from functools import partial
 import pipe.mayaFile.mayaFile as mfl
 reload( mfl )
+import general.undo.undo as undo
 
 #load UI FILE
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
@@ -163,53 +164,52 @@ class LighterHelperUI(base,fom):
 
 	def updateLighterUI(self):
 		"""update Ui based on render layer"""
-		mc.undoInfo( swf = False )
-		arnoldSettings = mn.Node( 'defaultArnoldRenderOptions' )
-		spinBoxes = [ 
-				self.AASamples_sb,              
-				self.GIDiffuseSamples_sb,       
-				self.GIGlossySamples_sb,        
-				self.GIRefractionSamples_sb,    
-				self.GITotalDepth_sb,           
-				self.GIDiffuseDepth_sb,         
-				self.GIGlossyDepth_sb,          
-				self.GIReflectionDepth_sb,      
-				self.GIRefractionDepth_sb,      
-				self.autoTransparencyDepth_sb  
-				]
-		for s in spinBoxes:
-			s.setValue( arnoldSettings.attr( str( s.objectName() ).replace( '_sb', '' ) ).v )
+		with undo.Undo():
+			arnoldSettings = mn.Node( 'defaultArnoldRenderOptions' )
+			spinBoxes = [ 
+					self.AASamples_sb,              
+					self.GIDiffuseSamples_sb,       
+					self.GIGlossySamples_sb,        
+					self.GIRefractionSamples_sb,    
+					self.GITotalDepth_sb,           
+					self.GIDiffuseDepth_sb,         
+					self.GIGlossyDepth_sb,          
+					self.GIReflectionDepth_sb,      
+					self.GIRefractionDepth_sb,      
+					self.autoTransparencyDepth_sb  
+					]
+			for s in spinBoxes:
+				s.setValue( arnoldSettings.attr( str( s.objectName() ).replace( '_sb', '' ) ).v )
 
-		chBoxes = [
-				self.ignoreTextures_chb,    
-				self.ignoreAtmosphere_chb,  
-				self.ignoreShadows_chb,     
-				self.ignoreDisplacement_chb,
-				self.ignoreSmoothing_chb,   
-				self.ignoreSss_chb,         
-				self.ignoreDof_chb,         
-				self.ignoreShaders_chb,     
-				self.ignoreLights_chb,      
-				self.ignoreSubdivision_chb,
-				self.ignoreBump_chb,        
-				self.ignoreMotionBlur_chb,  
-				#self.ignoreMis_chb,         
-				]
-		for c in chBoxes:
-			c.setChecked( arnoldSettings.attr( str( c.objectName() ).replace( '_chb', '' ) ).v )
+			chBoxes = [
+					self.ignoreTextures_chb,    
+					self.ignoreAtmosphere_chb,  
+					self.ignoreShadows_chb,     
+					self.ignoreDisplacement_chb,
+					self.ignoreSmoothing_chb,   
+					self.ignoreSss_chb,         
+					self.ignoreDof_chb,         
+					self.ignoreShaders_chb,     
+					self.ignoreLights_chb,      
+					self.ignoreSubdivision_chb,
+					self.ignoreBump_chb,        
+					self.ignoreMotionBlur_chb,  
+					#self.ignoreMis_chb,         
+					]
+			for c in chBoxes:
+				c.setChecked( arnoldSettings.attr( str( c.objectName() ).replace( '_chb', '' ) ).v )
 
-		for v in range( self.aovs_lw.count() ):
-			i = self.aovs_lw.item( v )
-			if uiH.USEPYQT:
-				aovNode = i.data(32).toPyObject()
-			else:
-				aovNode = i.data(32)
-			if aovNode.a.enabled.v:
-				i.setCheckState(QtCore.Qt.Checked)
-			else:
-				i.setCheckState(QtCore.Qt.Unchecked)
+			for v in range( self.aovs_lw.count() ):
+				i = self.aovs_lw.item( v )
+				if uiH.USEPYQT:
+					aovNode = i.data(32).toPyObject()
+				else:
+					aovNode = i.data(32)
+				if aovNode.a.enabled.v:
+					i.setCheckState(QtCore.Qt.Checked)
+				else:
+					i.setCheckState(QtCore.Qt.Unchecked)
 
-		mc.undoInfo( swf = True )
 
 	##########################
 	#OBJECTS
@@ -310,11 +310,21 @@ class LighterHelperUI(base,fom):
 		hairSel = []
 		if sels:
 			for s in sels:
-				hai = mn.listRelatives( s.name, type = ['hairSystem', 'shaveHair' ], ad = True )
+				hai = mn.listRelatives( s.name, type = 'hairSystem', ad = True )
 				if hai:
 					hairSel.extend( hai )
+				try:
+					hai = mn.listRelatives( s.name, type = 'shaveHair', ad = True )
+					if hai:
+						hairSel.extend( hai )
+				except:
+					pass
 		else:
-			hairSel = mn.ls( typ = ['hairSystem','shaveHair'] )
+			hairSel = mn.ls( typ = 'hairSystem' )
+			try:
+				hairSel.extend( mn.ls( typ = 'shaveHair' ) )
+			except:
+				pass
 		if not hairSel:
 			return
 		for h in hairSel:
@@ -347,25 +357,24 @@ class LighterHelperUI(base,fom):
 		sels = mn.ls( sl = True )
 		shaderNode = mn.Node( 'ZDEPTH_MAT' )
 		if not shaderNode.exists:
-			mc.undoInfo( ock = True )
-			shaderNode = mn.createNode( 'surfaceShader'  , n = 'ZDEPTH_MAT' )
-			rangeNode  = mn.createNode( 'setRange'       , n = 'range_ZDEPTH_RNG' )
-			multyNode  = mn.createNode( 'multiplyDivide' , n = 'multy_ZDEPTH_MUL' )
-			rampNode   = mn.createNode( 'ramp'           , n = 'ramp_ZDEPTH_RMP' )
-			sampleNode = mn.createNode( 'samplerInfo'    , n = 'ramp_ZDEPTH_RMP' )
-			#make connections
-			sampleNode.a.pointCameraZ   >> multyNode.a.input1X
-			multyNode.a.output          >> rangeNode.a.value
-			multyNode.a.input2X.v = -1
-			rangeNode.a.outValueX       >> rampNode.a.uCoord
-			rangeNode.a.outValueX       >> rampNode.a.vCoord
-			rangeNode.a.oldMaxX.v = 100
-			rampNode.a.outColor         >> shaderNode.a.outColor
-			rampNode.attr( 'colorEntryList[0].position' ).v = 0
-			rampNode.attr( 'colorEntryList[0].color' ).v = [0,0,0]
-			rampNode.attr( 'colorEntryList[1].position' ).v = 1
-			rampNode.attr( 'colorEntryList[1].color' ).v = [1,1,1]
-			mc.undoInfo( cck = True )
+			with undo.Undo():
+				shaderNode = mn.createNode( 'surfaceShader'  , n = 'ZDEPTH_MAT' )
+				rangeNode  = mn.createNode( 'setRange'       , n = 'range_ZDEPTH_RNG' )
+				multyNode  = mn.createNode( 'multiplyDivide' , n = 'multy_ZDEPTH_MUL' )
+				rampNode   = mn.createNode( 'ramp'           , n = 'ramp_ZDEPTH_RMP' )
+				sampleNode = mn.createNode( 'samplerInfo'    , n = 'ramp_ZDEPTH_RMP' )
+				#make connections
+				sampleNode.a.pointCameraZ   >> multyNode.a.input1X
+				multyNode.a.output          >> rangeNode.a.value
+				multyNode.a.input2X.v = -1
+				rangeNode.a.outValueX       >> rampNode.a.uCoord
+				rangeNode.a.outValueX       >> rampNode.a.vCoord
+				rangeNode.a.oldMaxX.v = 100
+				rampNode.a.outColor         >> shaderNode.a.outColor
+				rampNode.attr( 'colorEntryList[0].position' ).v = 0
+				rampNode.attr( 'colorEntryList[0].color' ).v = [0,0,0]
+				rampNode.attr( 'colorEntryList[1].position' ).v = 1
+				rampNode.attr( 'colorEntryList[1].color' ).v = [1,1,1]
 		self.applyShaderToSel( shaderNode, sels )
 
 	def removeShaderOverride(self):
@@ -375,18 +384,17 @@ class LighterHelperUI(base,fom):
 		if not sel:
 			rlay.removeOverridedShader()
 		else:
-			mc.undoInfo( ock = True )
-			for s in sel:
-				childs = s.allchildren
-				if childs:
-					for c in childs:
-						shap = c.shape
-						if shap:
-							mc.editRenderLayerAdjustment( shap.name + '.instObjGroups', remove = True )
-				shap = s.shape
-				if shap:
-					mc.editRenderLayerAdjustment( shap.name + '.instObjGroups', remove = True )
-			mc.undoInfo( cck = True )
+			with undo.Undo():
+				for s in sel:
+					childs = s.allchildren
+					if childs:
+						for c in childs:
+							shap = c.shape
+							if shap:
+								mc.editRenderLayerAdjustment( shap.name + '.instObjGroups', remove = True )
+					shap = s.shape
+					if shap:
+						mc.editRenderLayerAdjustment( shap.name + '.instObjGroups', remove = True )
 
 	###########################
 	#RENDER STATS OVERRIDE
@@ -401,31 +409,30 @@ class LighterHelperUI(base,fom):
 		valsDict = {}
 		for w in items:
 			valsDict[str( w.widget().text() )] = w.widget().isChecked()
-		mc.undoInfo( ock = True )
-		for s in sel:
-			childs = s.allchildren
-			sha = s.shape
-			if childs:
-				for c in childs:
-					shap = c.shape
-					if shap:
-						for v in valsDict.keys():
-							value = valsDict[ v ]
-							try:
-								if not value == shap.attr( v ).v:
-									shap.attr( v ).overrided = True
-									shap.attr( v ).v = valsDict[ v ]
-							except:
-								continue
-			for v in valsDict.keys():
-				try:
-					value = valsDict[ v ]
-					if not value == sha.attr( v ).v:
-						sha.attr( v ).overrided = True
-						sha.attr( v ).v = valsDict[ v ]
-				except:
-					continue
-		mc.undoInfo( cck = True )
+		with undo.Undo():
+			for s in sel:
+				childs = s.allchildren
+				sha = s.shape
+				if childs:
+					for c in childs:
+						shap = c.shape
+						if shap:
+							for v in valsDict.keys():
+								value = valsDict[ v ]
+								try:
+									if not value == shap.attr( v ).v:
+										shap.attr( v ).overrided = True
+										shap.attr( v ).v = valsDict[ v ]
+								except:
+									continue
+				for v in valsDict.keys():
+					try:
+						value = valsDict[ v ]
+						if not value == sha.attr( v ).v:
+							sha.attr( v ).overrided = True
+							sha.attr( v ).v = valsDict[ v ]
+					except:
+						continue
 
 	###########################
 	#LIGHTING

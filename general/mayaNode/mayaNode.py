@@ -114,7 +114,17 @@ except:
 	print 'running from outside maya'
 import re
 import sys
-
+"""
+import install.pyregistry.pyregistry as pr
+try:
+	test = pr.queryValue('HKCU', r'Software\Pipel', 'key' )
+	if test != '1561532593':
+		print 'Are you stealing PipeL? :( Im Shame of You'
+		quit()
+except:
+	print 'Are you stealing PipeL? :( Im Shame of You'
+	quit()
+"""
 """
 SETTINGS:
 	Here we can setup some global settings =)
@@ -256,6 +266,10 @@ class Nodes(list):
 		"""parent all nodes to transform"""
 		for n in self.nodes:
 			n.parent = newParent
+
+	def delete(self):
+		"""delete all nodes"""
+		mc.delete( self.names )
 
 ##################################################
 # NODE CLASS
@@ -465,6 +479,24 @@ class Node(object):
 			return sha[0]
 		return None
 
+	@property
+	def outputs(self):
+		"""return all the outputs connections from node"""
+		cons = [ NodeAttribute( Node( a.split('.')[0] ), a.split('.')[1] ) for a in mc.listConnections( self.name, sh = True, s = False, scn = True, p = True, c = True )]
+		return [cons[n:n+2] for n in range(0, len(cons), 2)]
+
+	@property
+	def shader(self):
+		"""return the shading engine from node"""
+		if self.shape:
+			nodes = mc.listConnections(self.shape,type='shadingEngine')
+			if nodes:
+				return Node( nodes[0] )
+		else:
+			nodes = mc.listConnections(self.name,type='shadingEngine')
+			if nodes:
+				return Node( nodes[0] )
+		return None
 
 ##################################################
 # ATTRIBUTES CLASS
@@ -849,10 +881,10 @@ class Namespace(object):
 		if not self.exists:
 			raise NamespaceNotFound( self.name )
 		with self.set():
-			nods = mc.namespaceInfo( lod = True )
+			nods = mc.namespaceInfo( ':' + self.name, ls = True, an = True )
 			if nods:
-				return [ Node( n ) for n in nods ]
-		return None
+				return Nodes( nods )
+		return []
 
 	@property
 	def firstParent(self):
@@ -888,7 +920,7 @@ class Namespace(object):
 		"""remove namespace if exists"""
 		if not self.exists:
 			raise NamespaceNotFound( self.name )
-		mc.namespace( rm = self.name )
+		mc.namespace( rm = self.name, deleteNamespaceContent = True )
 
 	def set(self):
 		"""set namespace to current"""

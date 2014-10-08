@@ -59,7 +59,10 @@ class ManagerUI(base,fom):
 		self.fillTextures()
 
 	def selectNode(self, item):
-		texture = item.data(32).toPyObject()
+		if uiH.USEPYQT:
+			texture = item.data(32).toPyObject()
+		else:
+			texture = item.data(32)
 		texture()
 
 	def getSelected(self):
@@ -72,13 +75,19 @@ class ManagerUI(base,fom):
 			for c in range( tab.columnCount() ):
 				item = tab.item( r, c )
 				if item.checkState() == 2:
-					textures.append( item.data(32).toPyObject())
+					if uiH.USEPYQT:
+						textures.append( item.data(32).toPyObject())
+					else:
+						textures.append( item.data(32))
 		if not textures:
 			for r in range( tab.rowCount() ):
 				if tab.isRowHidden( r ):
 					continue
 				item = tab.item( r, 0 )
-				textures.append( item.data(32).toPyObject() )
+				if uiH.USEPYQT:
+					textures.append( item.data(32).toPyObject() )
+				else:
+					textures.append( item.data(32) )
 		return textures
 
 	def toTx(self):
@@ -135,12 +144,22 @@ class ManagerUI(base,fom):
 			item.setData(32, t )
 			self.textures_tw.setItem( i, 0, item )
 			#SIZE
-			item = QtGui.QTableWidgetItem( "%0.2f MB" %f.size )
+			if not f.exists:
+				item = QtGui.QTableWidgetItem( "0 MB" )
+			else:
+				item = QtGui.QTableWidgetItem( "%0.2f MB" %f.size )
 			self.textures_tw.setItem( i, 1, item )
 			#HASTX
 			item = QtGui.QTableWidgetItem( '' )
-			if f.hasTx:
-				colVal = 0
+
+			if f.exists:
+				if f.hasTx:
+					if f.toTx().isOlderThan(f):
+						colVal = 1
+					else:
+						colVal = 0
+				else:
+					colVal = 1
 			else:
 				colVal = 1
 			if uiH.USEPYQT:
@@ -167,7 +186,7 @@ class ManagerUI(base,fom):
 			match = False
 			for j in range( self.textures_tw.columnCount() ):
 				item = self.textures_tw.item( i, j )
-				if item.text().contains(fil):
+				if fil in str( item.text() ):
 					match = True
 					break
 			self.textures_tw.setRowHidden( i, not match )

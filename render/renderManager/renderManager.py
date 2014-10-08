@@ -12,6 +12,8 @@ reload( dl )
 import pipe.mayaFile.mayaFile as mfl
 import pipe.project.project as prj
 import general.mayaNode.mayaNode as mn
+import pipe.settings.settings as sti
+reload( sti )
 
 import socket
 
@@ -22,6 +24,9 @@ fom, base = uiH.loadUiType( uifile )
 
 uiLayfile = PYFILEDIR + '/renderLayer.ui'
 fomLay, baseLay = uiH.loadUiType( uiLayfile )
+
+import pipe.mayaFile.mayaFile as mfl
+reload(mfl)
 
 import maya.cmds as mc
 frameUnits = { 
@@ -47,7 +52,6 @@ class RenderManagerUI(base,fom):
 		self._fillUi()
 		uiH.loadSkin( self, 'QTDarkGreen' )
 		
-
 	def _makeConnections(self):
 		"""create connection for ui"""
 		self.connect( self.render_btn, QtCore.SIGNAL("clicked()") , self.render )
@@ -59,19 +63,28 @@ class RenderManagerUI(base,fom):
 		"""fill ui"""
 		dead = dl.Deadline()
 		self.groups_cmb.addItems( dead.groups ) 
+		settings = sti.Settings()
+		gen = settings.General
+		renderPath = 'R:/'
+		if gen:
+			renderPath = gen[ "renderpath" ]
+			if not renderPath.endswith( '/' ):
+				renderPath += '/'
 		self.pools_cmb.addItems( dead.pools ) 
 		renderGlobals = mn.Node( 'defaultRenderGlobals' )
 		self.filePath_le.setText( str( renderGlobals.a.imageFilePrefix.v ))
 		assOrShot = prj.shotOrAssetFromFile( mfl.currentFile() )
+		self.projectPath_le.setText( mc.workspace( q = True, fullName = True ) )
 		self._project = ''
 		if assOrShot:
 			if assOrShot.type == 'asset':
-				versionNumber = self._getVersionNumber( 'R:/' + assOrShot.project.name + '/Asset/' + assOrShot.name )
-				pat = 'R:/' + assOrShot.project.name + '/Asset/' + assOrShot.name + '/v' + str(versionNumber).zfill( 4 ) + '/' + '<RenderLayer>' + '/<RenderLayer>'
+				#versionNumber = self._getVersionNumber( renderPath + assOrShot.project.name + '/Asset/' + assOrShot.name )
+				pat = renderPath + assOrShot.project.name + '/Asset/' + assOrShot.name + '/<RenderLayer>/' + '<RenderLayerVersion>' + '/<RenderLayer>'
 			elif assOrShot.type == 'shot':
-				versionNumber = self._getVersionNumber( 'R:/' + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name )
-				pat = 'R:/' + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name + '/v' + str(versionNumber).zfill( 4 ) + '/' + '<RenderLayer>' + '/<RenderLayer>'
-				renderGlobals.a.imageFilePrefix.v = str( pat )
+				#R:\Pony_Halloween_Fantasmas\Terror\s013_T13\Chicos_Beauty
+				#versionNumber = self._getVersionNumber( renderPath + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name )
+				pat = renderPath + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name + '/<RenderLayer>/' + '<RenderLayerVersion>' + '/<RenderLayer>'
+				#renderGlobals.a.imageFilePrefix.v = str( pat )
 			self._project = assOrShot.project.name
 			self.filePath_le.setText( str( pat ))
 		self.frameRange_le.setText( str( int( renderGlobals.a.startFrame.v ) ) + "-" + str( int(  renderGlobals.a.endFrame.v ) ) )
@@ -101,20 +114,38 @@ class RenderManagerUI(base,fom):
 
 	def render(self):
 		"""docstring for render"""
-		dead     = dl.Deadline()
-		group    = str(self.groups_cmb.currentText())
-		pool     = str(self.pools_cmb.currentText())
-		comments = str( self.comments_te.toPlainText())
-		filePrefix= str( self.filePath_le.text())
-		priority = str( self.priority_spb.value() )
-		taskSize = str( self.taskSize_spb.value() )
+		curFile = mfl.currentFile()
+		if self.autoSave_chb.isChecked():
+			curFile.newVersion()
+			curFile.save()
+		dead       = dl.Deadline()
+		group      = str(self.groups_cmb.currentText())
+		pool       = str(self.pools_cmb.currentText())
+		comments   = str( self.comments_te.text())
+		filePrefix = str( self.filePath_le.text())
+		priority   = str( self.priority_spb.value() )
+		taskSize   = str( self.taskSize_spb.value() )
+		projPath   = str( self.projectPath_le.text() )
+		if self.useServerPaths_chb.isChecked(): #IF USE PATH FROM SERVER... WE NEED TO CHANGE INTERNAL PATHS SO MATCH SERVER
+			curFile = mfl.mayaFile( curFile.copy( dead.userHomeDirectory + '/' + curFile.fullName ).path )
+			settings = sti.Settings()
+			gen = settings.General
+			if gen:
+				basePath = gen[ "basepath" ]
+				if basePath:
+					if basePath.endswith( '\\' ):
+						basePath = basePath[:-1]
+					basePath = basePath.replace( '\\', '/' )
+				serverPath = gen[ "serverpath" ]
+				curFile.changePathsBrutForce( srchAndRep =  [ basePath, serverPath ] )
+			
 		InitialStatus = "Active"
 		if self.submitSuspended_chb.isChecked():
 			InitialStatus = "Suspended"
 		whiteList = ''
 		deRenGlob = mn.Node( 'defaultRenderGlobals' )
 		pad = deRenGlob.a.extensionPadding.v
-		deRenGlob.a.imageFilePrefix.v = str(self.filePath_le.text())
+		#deRenGlob.a.imageFilePrefix.v = str(self.filePath_le.text())
 		if self.renderLocal_chb.isChecked():
 			whiteList = socket.gethostname()
 			print 'rendering in local', whiteList
@@ -125,25 +156,32 @@ class RenderManagerUI(base,fom):
 			if w.overFrameRange_chb.isChecked():
 				frames =  str( w.frameRange_le.text() )
 			filename = mc.renderSettings( lyr = w.layer.name, gin = ('?'*pad) )[0]
+			filePrefix = filePrefix.replace( '<RenderLayer>', w.layer.name )
+			#get version number
+			if '<RenderLayerVersion>' in filePrefix:
+				versionNumber = self._getVersionNumber( filePrefix.split( '<RenderLayerVersion>' )[0] )
+				filePrefix = filePrefix.replace( '<RenderLayerVersion>', 'v' + str(versionNumber).zfill( 4 ) )
+			filename = filePrefix + '.' + ('?'*pad) + os.path.splitext( filename )[1]
 			name = ''
 			if self._project:
 				name = self._project + ' - '
 			Job = dl.Job( w.layer.name,
-						{	'Group'     : group,
-							'Pool'     : pool,
-							'Frames'   : frames,
-							'Comment'  : comments,
-							'InitialStatus' : InitialStatus,
-							'Whitelist'     : whiteList,
-							'Name'      : name + mfl.currentFile().name + ' - ' + w.layer.name,
+						{	'Group'           : group,
+							'Pool'            : pool,
+							'Frames'          : frames,
+							'Comment'         : comments,
+							'InitialStatus'   : InitialStatus,
+							'Whitelist'       : whiteList,
+							'Name'            : name + curFile.name + ' - ' + w.layer.name,
 							'OutputFilename0' : filename,
-							'Priority': priority,
-							'ChunkSize':taskSize
-							},{'CommandLineOptions':  '-rl ' + w.layer.name,
-								'UsingRenderLayers': 1,
-								'RenderLayer': w.layer.name,
-								'OutputFilePrefix': filePrefix,
-							}, mfl.currentFile() )
+							'Priority'        : priority,
+							'ChunkSize'       : taskSize
+							},{'CommandLineOptions' : '-rl ' + w.layer.name,
+								'UsingRenderLayers' : 1,
+								'ProjectPath'       : projPath,
+								'RenderLayer'       : w.layer.name,
+								'OutputFilePrefix'  : filePrefix,
+							}, curFile )
 			Job.write()
 			dead.runMayaJob( Job )
 
@@ -152,7 +190,6 @@ class RenderManagerUI(base,fom):
 		if not os.path.exists( path ):
 			return 1
 		return len( [a for a in os.listdir( path ) if os.path.isdir( path + '/' + a ) ] ) + 1
-
 
 	def _getLayersWidgets(self):
 		"""return the layerswidgets items"""

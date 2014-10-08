@@ -83,6 +83,13 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
+         <widget class="QCheckBox" name="copyToServer_chb">
+          <property name="text">
+           <string>Copy To Server</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QCheckBox" name="useShotFolder_chb">
           <property name="text">
            <string>Use Shot Folder</string>
@@ -237,6 +244,16 @@
             </item>
            </layout>
           </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="replaceAlembic_btn">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select AlembicNode in maya, and choose from UI the new alembic Node :)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>Replace Cache</string>
+          </property>
          </widget>
         </item>
        </layout>

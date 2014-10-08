@@ -13,7 +13,11 @@ class Manager(object):
 		"""
 		return the textures in the scene
 		"""
-		return mn.ls( typ = ['file', 'aiImage'] )
+		fils = mn.ls( typ = 'file' )
+		aiImage = mn.ls( typ = 'aiImage' )
+		if aiImage:
+			fils.extend( aiImage )
+		return fils
 
 	def toTx(self, textures, autoCreate = True):
 		"""

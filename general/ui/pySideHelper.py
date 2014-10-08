@@ -69,6 +69,9 @@ def getMayaWindow():
 
 def loadSkin( obj, skinName ):
 	"""docstring for loadSkin"""
+	if skinName == 'None':
+		obj.setStyleSheet('')
+		return
 	sshFile=PYFILEDIR  + "/skins/" + skinName + ".stylesheet"
 	with open(sshFile,"r") as fh:
 		obj.setStyleSheet(fh.read())

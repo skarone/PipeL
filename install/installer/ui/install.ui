@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>484</width>
-    <height>534</height>
+    <width>423</width>
+    <height>616</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -74,7 +74,7 @@ color: rgb(225, 225, 225);
           </property>
           <property name="icon">
            <iconset>
-            <normaloff>images/close.png</normaloff>images/close.png</iconset>
+            <normaloff>../images/close.png</normaloff>../images/close.png</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -217,6 +217,124 @@ padding: 4px;</string>
      </layout>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <spacer name="horizontalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QFrame" name="frame_2">
+        <property name="minimumSize">
+         <size>
+          <width>287</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>287</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border-style: outset;
+     border-width: 2px;
+     border-radius: 10px;
+     border-color: grey;</string>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <widget class="QLabel" name="label_6">
+           <property name="styleSheet">
+            <string notr="true">border:none;</string>
+           </property>
+           <property name="text">
+            <string>Serial:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="serial_le">
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(255, 255, 255);
+border:none;
+font: 75 10pt &quot;Open Sans&quot;;
+color:black;
+padding: 4px;</string>
+           </property>
+           <property name="frame">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_7">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <item>
+       <spacer name="horizontalSpacer_8">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="message_lbl">
+        <property name="styleSheet">
+         <string notr="true">color: rgb(255, 76, 6);</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_9">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="spacing">
        <number>15</number>
@@ -277,7 +395,7 @@ border:none;
           </property>
           <property name="icon">
            <iconset>
-            <normaloff>images/arrow.png</normaloff>images/arrow.png</iconset>
+            <normaloff>../images/arrow.png</normaloff>../images/arrow.png</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -355,7 +473,7 @@ border:none;
           </property>
           <property name="icon">
            <iconset>
-            <normaloff>images/arrow.png</normaloff>images/arrow.png</iconset>
+            <normaloff>../images/arrow.png</normaloff>../images/arrow.png</iconset>
           </property>
           <property name="iconSize">
            <size>

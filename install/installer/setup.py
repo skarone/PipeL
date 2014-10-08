@@ -1,39 +1,20 @@
-import os
-from PyQt4 import QtGui,QtCore, uic
-import FaderWidget.FaderWidget as fd
-import installer as ins
-import thanks as insth
+from distutils.core import setup
+import py2exe, sys, os
 
-class _ToolsDock(QtGui.QWidget):
-	"""Former Miscellaneous, contains all the widgets in the bottom area."""
-	def __init__(self, parent=None):
-		super(_ToolsDock, self).__init__(parent)
-		vbox = QtGui.QVBoxLayout(self)
-		vbox.setContentsMargins(0, 0, 0, 0)
-		vbox.setSpacing(0)
-		self.stack = fd.StackedWidget()
-		vbox.addWidget( self.stack )
-		self.installer = ins.InstallerUI()
-		self.installerHelper = insth.ThanksUI()
-		self.stack.addWidget( self.installer )
-		self.stack.addWidget( self.installerHelper )
-		self.installer.procStart.connect( self.inputconnection )
-		self.installerHelper.procStart.connect( self.inputconnection )
-		self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+sys.argv.append('py2exe')
 
-	def inputconnection(self, action):
-		"""docstring for inputconnection"""
-		if action == 'Installed':
-			index_of = self.stack.indexOf(self.installerHelper)
-			self.stack.setCurrentIndex( index_of )
-		elif action == 'Close':
-			self.close()
+DATA=[('imageformats',['C:\\Python27/Lib/site-packages/PyQt4/plugins/imageformats/qjpeg4.dll',
+    'C:\\Python27/Lib/site-packages/PyQt4/plugins/imageformats/qgif4.dll',
+    'C:\\Python27/Lib/site-packages/PyQt4/plugins/imageformats/qico4.dll',
+    'C:\\Python27/Lib/site-packages/PyQt4/plugins/imageformats/qmng4.dll',
+    'C:\\Python27/Lib/site-packages/PyQt4/plugins/imageformats/qsvg4.dll',
+    'C:\\Python27/Lib/site-packages/PyQt4/plugins/imageformats/qtiff4.dll'
+    ])]
 
-if __name__=="__main__":
-	import sys
-	a = QtGui.QApplication(sys.argv)
-	global PyForm
-	PyForm=_ToolsDock()
-	PyForm.show()
-	sys.exit(a.exec_())
-		
+setup(
+    options = {'py2exe': { 'compressed': True,"includes":["sip"]}},
+    console = [{'script': "install.py"}],
+    zipfile = None,
+    data_files = DATA,
+)
+

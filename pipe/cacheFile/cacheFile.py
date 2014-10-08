@@ -1,6 +1,5 @@
 try:
 	import maya.cmds as mc
-	mc.loadPlugin( 'AbcImport' )
 except:
 	pass
 import general.mayaNode.mayaNode as mn
@@ -52,8 +51,8 @@ class CacheFile(fl.File):
 		cmd = '-f ' + self.path + ' -uv -ro '
 		if self.nodes:
 			if asset:
-				sel = mn.ls( self.nodes[0].name[:self.nodes[0].name.rindex(':')] + ':*', dag = True, ni = True, typ = 'mesh' )
-			sel.select()
+				self._nodes = mn.ls( self.nodes[0].name[:self.nodes[0].name.rindex(':')] + ':*', dag = True, ni = True, typ = 'mesh' )
+			self._nodes.select()
 			cmd += '-sl '
 		if not fr:
 			#get frame range from timeslider
@@ -127,6 +126,21 @@ class CacheFile(fl.File):
 		rf.reloadSelected()
 		"""
 
+	def replace(self, alembicNodeName):
+		"""replace alembic Node with this alembic"""
+		nam = mn.Namespace( 'TMP' )
+		alNode = mn.Node( alembicNodeName )
+		with nam.set():
+			tmpAl = self.imp()
+		for o in tmpAl.outputs:
+			origObj = mn.Node( o[1].node.name.replace( 'TMP:', '' ) )
+			if origObj.exists:
+				origAttr = mn.NodeAttribute( origObj, o[1].name )
+				o[0] >> origAttr
+		alNode.delete()
+		tmpAl.name = alNode.name
+		#nam.nodes.delete()
+		nam.remove()
 
 	def importForAsset2(self, asset, customNamespace = None ):
 		"""import cache and assign to asset"""

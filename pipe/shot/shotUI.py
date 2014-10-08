@@ -8,6 +8,8 @@ import pipe.project.project   as prj
 import pipe.sequence.sequence as seq
 import pipe.shot.shot as sh
 reload( prj )
+import pipe.settings.settings as sti
+reload( sti )
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
@@ -16,19 +18,20 @@ fom, base = uiH.loadUiType( uifile )
 
 class ShotCreator(base, fom):
 	"""docstring for ProjectCreator"""
-	def __init__(self, currentProj, currentSeq ):
+	def __init__(self, currentProj, currentSeq, parent = None ):
 		if uiH.USEPYQT:
-			super(base, self).__init__()
+			super(base, self).__init__(parent)
 		else:
-			super(ShotCreator, self).__init__()
+			super(ShotCreator, self).__init__(parent)
 		self.setupUi(self)
 		self._curProj = currentProj
 		self._curSeq  = currentSeq
 		self.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), self.createShot)
+		self.settings = sti.Settings()
+		self.loadProjectsPath()
 		self.fillProjectsCMB()
 		self.fillSequencesCMB()
 		self.shot_le.setFocus()
-		uiH.loadSkin( self, 'QTDarkGreen' )
 
 	@property
 	def curProj(self):
@@ -40,10 +43,20 @@ class ShotCreator(base, fom):
 		"""docstring for curSeq"""
 		return self._curSeq
 
+	def loadProjectsPath(self):
+		"""docstring for loadProjectsPath"""
+		gen = self.settings.General
+		if gen:
+			basePath = gen[ "basepath" ]
+			if basePath:
+				if basePath.endswith( '\\' ):
+					basePath = basePath[:-1]
+				prj.BASE_PATH = basePath.replace( '\\', '/' )
+
 	def fillProjectsCMB(self):
 		"""fill combo box with projects"""
 		self.projects_cmb.clear()
-		self.projects_cmb.addItems( prj.projects() )
+		self.projects_cmb.addItems( prj.projects( prj.BASE_PATH ) )
 	
 	def fillSequencesCMB(self):
 		"""fill combo box with sequences"""
@@ -58,7 +71,7 @@ class ShotCreator(base, fom):
 		projName =  str( self.projects_cmb.currentText() )
 		seqName =  str( self.sequences_cmb.currentText() )
 		assetName = self.shot_le.text()
-		se = seq.Sequence( seqName, prj.Project( projName ) )
+		se = seq.Sequence( seqName, prj.Project( projName, prj.BASE_PATH ) )
 		newAsset = sh.Shot( 's' + str(len( se.shots ) + 1 ).zfill( 3 ) + '_' +  str( assetName ),  se )
 		if not newAsset.exists:
 			newAsset.create()

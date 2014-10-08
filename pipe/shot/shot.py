@@ -5,6 +5,8 @@ import pipe.mayaFile.mayaFile as mfl
 import pipe.file.file as fl
 import pipe.dependency.dependency as dp
 import pipe.cacheFile.cacheFile as cfl
+import pipe.nukeFile.nukeFile   as nfl
+reload( nfl )
 reload(cfl)
 reload( dp )
 
@@ -93,7 +95,7 @@ class Shot(object):
 	@property
 	def compPath(self):
 		"""return the anim file"""
-		return fl.File( self.path + '/Comp/' + self.name + '_COMP.nk' )
+		return nfl.nukeFile( self.path + '/Comp/' + self.name + '_COMP.nk' )
 
 	@property
 	def hasComp(self):
@@ -134,9 +136,10 @@ class Shot(object):
 	def status(self):
 		"""return an array with the status of the files in the shot,
 		return:
-			-1 : not updated
-			0  : 0k file or not exists
-			1  : updated"""
+			0  : 0k file
+			1  : updated
+			2  : not Updated
+			3  : not exists"""
 		depFiles = [ 
 				[dp.Node( self.layPath      ),[]],
 				[dp.Node( self.animPath     ),[ 0 ]],
@@ -152,7 +155,7 @@ class Shot(object):
 		for i,f in enumerate( depFiles ):
 			value = 1
 			if not f[0].name.exists:
-				value = 0
+				value = 3
 			elif f[0].name.isZero:
 				value = 0
 			else:
@@ -163,7 +166,7 @@ class Shot(object):
 						continue
 					isOlder = f[0].name.isOlderThan( deps.name )
 					if isOlder:
-						value = -1
+						value = 2
 						break
 			result.append( value )
 		return result
@@ -183,6 +186,27 @@ class Shot(object):
 		"""docstring for hasSkin"""
 		return os.path.getsize( self.skinFixPath.path ) != 0
 	
+<<<<<<< HEAD
+=======
+	def renderedLayersPath(self, basePath):
+		path = basePath + '/' + self.project.name + '/' + self.sequence.name + '/' + self.name + '/'
+		return path
+
+	def renderedLayers(self, basePath):
+		"""return the rendered layers for this shot, based on render path"""
+		path = self.renderedLayersPath( basePath )
+		return [ a for a in os.listdir( path ) if os.path.isdir( path + a ) ]
+
+	def renderedLayerVersions(self, basePath, layerName ):
+		"""return the versions in the render layer"""
+		path = self.renderedLayersPath( basePath ) + '/' + layerName
+		return sorted([ a for a in os.listdir( path ) if os.path.isdir( path + '/' + a ) ])
+
+	def renderedLayerVersionPath(self, basePath, layerName, versionName ):
+		"""return the path for the rendered layer for specific version"""
+		path = self.renderedLayersPath( basePath ) + layerName + '/' + versionName + '/'
+		return path
+>>>>>>> withSkinFix
 
 	@property
 	def animCachesPath(self):
@@ -217,6 +241,7 @@ class Shot(object):
 		"""create folder structure"""
 		struc = [
 				'/' + self.name + '.breakdown',
+				'/Assets',
 				#ANIM
 				'/Anim',
 				'/Anim/Versions',

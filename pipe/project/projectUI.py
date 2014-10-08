@@ -6,6 +6,8 @@ from Qt import QtGui,QtCore
 
 import pipe.project.project   as prj
 reload( prj )
+import pipe.settings.settings as sti
+reload( sti )
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
@@ -14,19 +16,30 @@ fom, base = uiH.loadUiType( uifile )
 
 class ProjectCreator(base, fom):
 	"""docstring for ProjectCreator"""
-	def __init__(self):
+	def __init__(self, parent = None):
 		if uiH.USEPYQT:
-			super(base, self).__init__()
+			super(base, self).__init__(parent)
 		else:
-			super(ProjectCreator, self).__init__()
+			super(ProjectCreator, self).__init__(parent)
 		self.setupUi(self)
 		self.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), self.createProject)
-		uiH.loadSkin( self, 'QTDarkGreen' )
+		self.settings = sti.Settings()
+		self.loadProjectsPath()
+
+	def loadProjectsPath(self):
+		"""docstring for loadProjectsPath"""
+		gen = self.settings.General
+		if gen:
+			basePath = gen[ "basepath" ]
+			if basePath:
+				if basePath.endswith( '\\' ):
+					basePath = basePath[:-1]
+				prj.BASE_PATH = basePath.replace( '\\', '/' )
 	
 	def createProject(self):
 		"""create New Project Based on new project name"""
 		projName = self.project_le.text()
-		newProject = prj.Project( str( projName ) )
+		newProject = prj.Project( str( projName ), prj.BASE_PATH )
 		if not newProject.exists:
 			newProject.create()
 			print 'New Project Created : ', newProject.name

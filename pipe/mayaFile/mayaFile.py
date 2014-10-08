@@ -53,24 +53,90 @@ class mayaFile(fl.File):
 		mc.file( s = True, type='mayaAscii' )
 	
 	@property
+	def caches(self):
+		"""return the caches in the scene"""
+		references = [r for r in self.files if '.abc' in r]
+		finalRefs = []
+		for r in references:
+			r = fl.File( r )
+			if r in finalRefs:
+				continue
+			finalRefs.append( r )
+		return finalRefs
+
+	@property
+	def references(self):
+		"""return references that has the file"""
+		references = [r for r in self.files if '.ma' in r]
+		finalRefs = []
+		for r in references:
+			r = mayaFile( r )
+			if r in finalRefs:
+				continue
+			finalRefs.append( r )
+		return finalRefs
+
+	@property
+	def files(self):
+		"""return all the internal files in the mayaFile"""
+		pat = re.compile( '"(?P<Path>\S+\/\S+\.[a-zA-Z]+)"' )
+		search = pat.search
+		matches = (search(line) for line in file(self.path, "rb") )
+		references = [match.group('Path') for match in matches if match]
+		return references
+
+	@property
+	def time(self):
+		"""return time setted in the file"""
+		t =  re.search( '(:?currentUnit -l )(?P<Linear>.+)(:? -a )(?P<Angle>.+)(:? -t )(?P<Time>.+);', self.data )
+		if t:
+			lin = str( t.group('Linear') )
+			angle = str( t.group('Angle') )
+			tim = str( t.group('Time') )
+		m =  re.search( '(:?.+playbackOptions -min )(?P<Min>.+)(:? -max )(?P<Max>.+)(:? -ast )(?P<Ast>.+)(:? -aet )(?P<Aet>.+) ";', self.data )
+		if m:
+			amin = int( m.group('Min') )
+			amax = int( m.group('Max') )
+			aast = int( m.group('Ast') )
+			aaet = int( m.group('Aet') )
+			return {'min':amin,'max':amax,'ast':aast,'aet':aaet, 'lin':lin,'angle':angle,'tim':tim}
+		return {'lin':lin,'angle':angle,'tim':tim}
+
+	@property
 	def textures(self):
 		"""return the textures on the maya File"""
 		textures = []
-		for l in self.lines:
-			match =  re.search( '(:?.+".ftn" -type "string" ")(?P<Path>.+)"', l )
-			if match:
-				textures.append( tfl.textureFile( match.group("Path") ) )
-		match =  re.findall( '(:?.+"fileTextureName".+[\n]?[\t]*" -type \\\\"string\\\\" \\\\")(?P<Path>.+)\\\\""', self.data )
-		for m in match:
-			textures.append( tfl.textureFile( m[-1] ) )
+		pat = re.compile( '(:?".ftn" -type "string" ")(?P<Path>.+)"' )
+		search = pat.search
+		matches = (search(line) for line in file(self.path, "rb"))
+		refs = [match.group('Path') for match in matches if match]
+		for r in refs:
+			r = tfl.textureFile( r )
+			if r in textures:
+				continue
+			textures.append( r )
+		pat = re.compile( '(:?"fileTextureName".+[\n]?[\t]*" -type \\\\"string\\\\" \\\\")(?P<Path>.+)\\\\""' )
+		search = pat.search
+		matches = (search(line) for line in file(self.path, "rb"))
+		refs = [match.group('Path') for match in matches if match]
+		for r in refs:
+			r = tfl.textureFile( r )
+			if r in textures:
+				continue
+			textures.append( r )
 		return textures
+
+	def changePathsBrutForce(self, srchAndRep = []):
+		"""change all Paths in file but with brut force, instead of search textures or caches, just search paths to replace"""
+		file_str = self.data.replace( srchAndRep[0].replace( '\\', '/' ), srchAndRep[1].replace( '\\', '/' ) )
+		self.write( file_str )
 		
 	def changePaths(self,newDir = '', srchAndRep = []):
 		"""change textures, references, and caches to new path"""
 		#TEXTURES
 		file_str = re.sub( '(?:.+".ftn" -type "string" ")(?P<Path>.+)(?:")', partial( self._changeTexture, newDir, '', '', srchAndRep ), self.data )
 		#REFERENCES
-		file_str = re.sub( '(:?file -r[d]*[i]*\s*[12]* .+[\n]?[\t]* ")(?P<Path>.+)";', partial( self._changeReferences, newDir, srchAndRep ), file_str )
+		file_str = re.sub( '(:?file -r[d]*[i]*\s*[12]* .+[\n]?[\t]* (-shd )?")(?P<Path>.+)";', partial( self._changeReferences, newDir, srchAndRep ), file_str )
 		#CACHES
 		file_str = re.sub( '(:?.+".fn" .+[\n]?[\t]* ")(?P<Path>.+abc)";', partial( self._changeCache, newDir, srchAndRep ), file_str )
 		self.write( file_str )
@@ -97,7 +163,7 @@ class mayaFile(fl.File):
 
 	def changeReferences(self,newDir = '', srchAndRep = []):
 		"""change References Paths"""
-		file_str = re.sub( '(:?file -r[d]*[i]*\s*[12]* .+[\n]?[\t]* ")(?P<Path>.+)";', partial( self._changeReferences, newDir, srchAndRep ), self.data )
+		file_str = re.sub( '(?:file -r[d]*[i]*\s*[12]* .+[\n]?[\t]* (?:-shd )?")(?P<Path>.+)";', partial( self._changeReferences, newDir, srchAndRep ), self.data )
 		# do stuff with file_str
 		self.write( file_str )
 
@@ -111,14 +177,28 @@ class mayaFile(fl.File):
 			newPath = newPath.replace( srchAndRep[0], srchAndRep[1] )
 		return matchobj.group( 0 ).replace( path, newPath )
 
-	@property
-	def references(self):
-		"""return the references in the scene"""
-		references = []
-		match =  re.findall( '(:?file -rdi [12] .+[\n]?[\t]* ")(?P<Path>.+)";', self.data )
-		for m in match:
-			references.append( mayaFile( m[-1] ) )
-		return references
+	def allReferences(self):
+		"""return all references in a recursive way
+		import pipe.mayaFile.mayaFile as mfl
+		fi = mfl.mayaFile( r'D:\Projects\Pony_Halloween_Fantasmas\Maya\Sequences\Terror\Shots\s007_T07\Lit\s007_T07_LIT.ma' )
+		print fi.allReferences()"""
+		allreferences = []
+		for f in self.references:
+			if f in allreferences:
+				continue
+			allreferences.append( f )
+			for a in f.allReferences():
+				if a in allreferences:
+					continue
+				allreferences.append(a )
+		return allreferences
+	
+	def allTextures(self):
+		"""return all the textures from file and references"""
+		textures = self.textures
+		for r in self.allReferences():
+			textures.extend( r.textures )
+		return textures
 
 	def changeCaches(self,newDir = '', srchAndRep = []):
 		"""change References Paths"""
@@ -136,15 +216,13 @@ class mayaFile(fl.File):
 			newPath = newPath.replace( srchAndRep[0], srchAndRep[1] )
 		return matchobj.group( 0 ).replace( path, newPath )
 
-	def copyAll( self, newPath ):
+	def copyAll( self, newPath, changePaths = True ):
 		"""custom copy"""
+		newPathFile = mayaFile( newPath )
+		newPathFile.newVersion()
 		super( mayaFile, self ).copy( newPath )
 		print 'copiando ', self.path, newPath
 		#COPY TEXTURES AND FILES
-		self.copyDependences( mayaFile( newPath ) )
-
-	def copyDependences( self, newPathFile ):
-		"""copy all the dependences of the newPathFile... it will read from newFile instead of original"""
 		lon = 0
 		base = 0
 		s = difflib.SequenceMatcher( None, self.path, newPathFile.path )
@@ -155,6 +233,12 @@ class mayaFile(fl.File):
 				finalbase = block[1]
 		BasePath = self.path[:base]
 		finalBasePath = newPathFile.path[:finalbase]
+		self.copyDependences( newPathFile, BasePath, finalBasePath )
+		if changePaths:
+			newPathFile.changePathsBrutForce( srchAndRep = [BasePath, finalBasePath] )
+
+	def copyDependences( self, newPathFile, BasePath, finalBasePath ):
+		"""copy all the dependences of the newPathFile... it will read from newFile instead of original"""
 		self.copyTextures( newPathFile, BasePath, finalBasePath )
 		self.copyCaches( newPathFile, BasePath, finalBasePath )
 		self.copyReferences( newPathFile, BasePath, finalBasePath )
@@ -162,48 +246,41 @@ class mayaFile(fl.File):
 	def copyTextures( self, newPathFile, BasePath, finalBasePath ):
 		"""docstring for copyTextures"""
 		for t in newPathFile.textures:
-			origTexture = tfl.textureFile( t.path.replace( finalBasePath, BasePath ) )
-			if not origTexture.exists:
+			origTexture = tfl.textureFile( t.path.replace( BasePath, finalBasePath ) )
+			if not t.exists:
 				continue
-			if t.exists:
-				if not t.isOlderThan( origTexture ):
+			if origTexture.exists:
+				if not origTexture.isOlderThan( t ):
 					continue
-			print 'copiando ', origTexture.path, t.path
-			origTexture.copy( t.path )
+			print 'copiando ', t.path, origTexture.path
+			t.copy( origTexture.path )
+			#AUTO CREATE TX TODO!
+			origTexture.makeTx( True )
 
 	def copyReferences(self, newPathFile, BasePath, finalBasePath ):
 		"""copy references from file, recursive"""
 		for r in newPathFile.references:
-			origRef = mayaFile( r.path.replace( finalBasePath, BasePath ) )
-			if not origRef.exists:
+			origRef = mayaFile( r.path.replace( BasePath, finalBasePath ) )
+			if not r.exists:
 				continue
-			if r.exists:
-				if not r.isOlderThan( origRef ):
+			if origRef.exists:
+				if not origRef.isOlderThan( r ):
 					continue
-			print 'copiando ', origRef.path, r.path
-			origRef.copyAll( r.path )
-
-	@property
-	def caches(self):
-		"""return the caches in the scene"""
-		caches = []
-		match =  re.findall( '(:?.+".fn" .+[\n]?[\t]* ")(?P<Path>.+abc)";', self.data )
-		for m in match:
-			caches.append( fl.File( m[-1] ) )
-		print caches
-		return caches
+			print 'copiando ', r.path, origRef.path
+			r.copyAll( origRef.path )
 
 	def copyCaches(self, newPathFile, BasePath, finalBasePath ):
 		"""copy all the caches in the file"""
 		for r in newPathFile.caches:
-			origRef = mayaFile( r.path.replace( finalBasePath, BasePath ) )
-			if not origRef.exists:
+			origRef = mayaFile( r.path.replace( BasePath, finalBasePath ) )
+			if not r.exists:
 				continue
-			if r.exists:
-				if not r.isOlderThan( origRef ):
+			if origRef.exists:
+				if not origRef.isOlderThan( r ):
 					continue
-			print 'copiando ', origRef.path, r.path
-			origRef.copy( r.path )
+			print 'copiando ', r.path, origRef.path
+			origRef.newVersion()
+			r.copy( origRef.path )
 
 	def setRes(self, newRes, path ):
 		tex = tfl.textureFile( path )
@@ -230,24 +307,6 @@ class mayaFile(fl.File):
 			namespa = self.name
 		nodes = mc.file( self.path, r = True, type = "mayaAscii", gl = True, loadReferenceDepth = "all",rnn = True, shd = ["renderLayersByName", "shadingNetworks"] , mergeNamespacesOnClash = False, namespace = namespa, options = "v=0;" )
 		return mn.Nodes(nodes)
-
-	@property
-	def time(self):
-		"""return time setted in the file"""
-		t =  re.search( '(:?currentUnit -l )(?P<Linear>.+)(:? -a )(?P<Angle>.+)(:? -t )(?P<Time>.+);', self.data )
-		if t:
-			lin = str( t.group('Linear') )
-			angle = str( t.group('Angle') )
-			tim = str( t.group('Time') )
-		m =  re.search( '(:?.+playbackOptions -min )(?P<Min>.+)(:? -max )(?P<Max>.+)(:? -ast )(?P<Ast>.+)(:? -aet )(?P<Aet>.+) ";', self.data )
-		if m:
-			amin = int( m.group('Min') )
-			amax = int( m.group('Max') )
-			aast = int( m.group('Ast') )
-			aaet = int( m.group('Aet') )
-			return {'min':amin,'max':amax,'ast':aast,'aet':aaet, 'lin':lin,'angle':angle,'tim':tim}
-		return {'lin':lin,'angle':angle,'tim':tim}
-		
 
 	def open(self):
 		"""open file in current maya"""

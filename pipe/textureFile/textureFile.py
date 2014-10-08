@@ -6,6 +6,8 @@ try:
 except:
 	print 'outside maya'
 import os
+import pipe.settings.settings as sti
+reload( sti )
 
 
 #TODO... hasUdim Property
@@ -26,15 +28,7 @@ for n in mn.ls( typ = ['file', 'aiImage' ] ):
         toTx = f.toTx()
         n.attr( attr ).v = toTx.path
 
-"""
-
-MAKETXPATH     = 'C:/solidangle/mtoadeploy/2013/bin/maketx.exe'
-dirname, filename = os.path.split(os.path.abspath(__file__))
-dirname = dirname.split( 'pipe' )[0]
-IMAGEMAGICPATH = dirname + 'bin/ImageMagick/'
-
 #import pipe.project.project as prj
-"""
 def projectToTx( proj = 'DogMendoncaAndPizzaBoy' ):
 	proj = prj.Project( proj )
 	for a in proj.assets:
@@ -42,17 +36,27 @@ def projectToTx( proj = 'DogMendoncaAndPizzaBoy' ):
 			t.makeTx()
 """
 
+dirname, filename = os.path.split(os.path.abspath(__file__))
+dirname = dirname.split( 'pipe' )[0]
+IMAGEMAGICPATH = dirname + 'bin/ImageMagick/'
+
+
 class textureFile(fl.File):
 	"""docstring for textureFile"""
 	def __init__(self, path):
-		super(textureFile, self).__init__( path )
+		self.as_super = super(textureFile, self)
+		self.as_super.__init__( path )
 	
 	@property
 	def hasUdim(self):
 		"""check if the path has udim, so we can treat the texture has a group of textures"""
-		return '<udim>' in self.path
-		
+		return '<udim>' in self.path.lower()
 
+	@property
+	def udimPaths(self):
+		"""return the textures that correspond to the udim path"""
+		return [ textureFile( self.dirPath + a ) for a in os.listdir( self.dirPath ) if self.name + '.' in a ]
+		
 	@property
 	def hasTx(self):
 		"""return if there is a tx version"""
@@ -67,6 +71,45 @@ class textureFile(fl.File):
 			return True
 		return textureFile( self.path.replace( self.extension, '.png' ) ).exists
 
+	@property
+	def name(self):
+		"""return the name of the texture"""
+		nam = super( textureFile, self ).name
+		if self.hasUdim:
+			return nam[:nam.rindex( '.' )]
+		return nam
+
+	@property
+	def exists(self):
+		"""override exists to support udim"""
+		if self.hasUdim:
+			return len( self.udimPaths ) != 0
+		return super( textureFile, self ).exists
+
+	def copy(self, newPath):
+		"""override copy to support udim"""
+		if self.hasUdim:
+			for a in self.udimPaths:
+				fi = a.copy( newPath )
+			return fi
+		else:
+			return textureFile( super( textureFile, self ).copy( newPath ).path )
+
+	def delete(self):
+		"""override delete to support udim"""
+		if self.hasUdim:
+			for a in self.udimPaths:
+				a.delete()
+		else:
+			super( textureFile, self ).delete()
+
+	def move(self, newPath):
+		"""override move to support udim"""
+		if self.hasUdim:
+			for a in self.udimPaths:
+				a.move(newPath)
+		else:
+			super( textureFile, self ).move( newPath )
 
 	@property
 	def hasLow(self):
@@ -163,7 +206,6 @@ class textureFile(fl.File):
 		else:
 			return textureFile( self.path.replace( self.extension, '.png' ) )
 
-
 	@property
 	def width(self):
 		"""return the width of the texture"""
@@ -176,12 +218,30 @@ class textureFile(fl.File):
 
 	def makeTx(self, force = False ):
 		"""make Tx version of the texture"""
+		if not self.exists:
+			return False
 		if self.isTx:
 			return False
-		if force or not self.hasTx:
-			print 'Converting >> ' + self.path + ' to TX!'
-			finalCMD =  MAKETXPATH + ' "' + self.path + '"'
-			os.popen( finalCMD ) 
+		if self.hasUdim:
+			for a in self.udimPaths:
+				a._makeTx()
+		else:
+			self._makeTx()
+
+	def _makeTx(self):
+		"""docstring for _makeTx"""
+		if self.hasTx:
+			if not self.toTx().isOlderThan( self ) and not force:
+				return False
+		print 'Converting >> ' + self.path + ' to TX!'
+		MAKETXPATH     = 'C:/solidangle/mtoadeploy/2014/bin/maketx.exe'
+		settings = sti.Settings()
+		gen = settings.General
+		maketxpath = gen[ "maketxpath" ]
+		if maketxpath:
+			MAKETXPATH = maketxpath
+		finalCMD =  MAKETXPATH + ' "' + self.path + '"'
+		os.popen( finalCMD ) 
 
 	def makeMid(self, force = False):
 		"""make Mid version of texture"""

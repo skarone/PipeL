@@ -78,7 +78,10 @@ class MayaFilePropertiesUi(base, fom):
 				colVal = 0
 			else:
 				colVal = 1
-			item.setBackgroundColor( color[ colVal ])
+			if uiH.USEPYQT:
+				item.setBackgroundColor(  color[ colVal ])
+			else:
+				item.setBackground(  color[ colVal ] )
 			self.textures_tw.setItem( i, 2, item )
 			#PATH
 			item = QtGui.QTableWidgetItem( t.path )
@@ -86,7 +89,10 @@ class MayaFilePropertiesUi(base, fom):
 				colVal = 0
 			else:
 				colVal = 1
-			item.setBackgroundColor( color[ colVal ])
+			if uiH.USEPYQT:
+				item.setBackgroundColor(  color[ colVal ])
+			else:
+				item.setBackground(  color[ colVal ] )
 			self.textures_tw.setItem( i, 3, item )
 
 	def fillReferencesTable(self):
@@ -106,7 +112,10 @@ class MayaFilePropertiesUi(base, fom):
 				colVal = 0
 			else:
 				colVal = 1
-			item.setBackgroundColor( color[ colVal ])
+			if uiH.USEPYQT:
+				item.setBackgroundColor(  color[ colVal ])
+			else:
+				item.setBackground(  color[ colVal ] )
 			self.assets_tw.setItem( i, 1, item )
 
 	def fillCachesTable(self):
@@ -129,7 +138,10 @@ class MayaFilePropertiesUi(base, fom):
 				colVal = 0
 			else:
 				colVal = 1
-			item.setBackgroundColor( color[ colVal ])
+			if uiH.USEPYQT:
+				item.setBackgroundColor(  color[ colVal ])
+			else:
+				item.setBackground(  color[ colVal ] )
 			self.caches_tw.setItem( i, 2, item )
 
 class Window(QtGui.QMainWindow):

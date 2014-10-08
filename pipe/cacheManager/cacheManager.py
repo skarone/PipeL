@@ -15,6 +15,15 @@ INMAYA = False
 import pipe.mayaFile.mayaFile as mfl
 import pipe.cacheFile.cacheFile as cfl
 reload( cfl )
+import pipe.settings.settings as sti
+reload( sti )
+
+try:
+	import maya.cmds as mc
+	mc.loadPlugin( 'AbcImport' )
+except:
+	pass
+
 try:
 	import general.mayaNode.mayaNode as mn
 	import maya.cmds as mc
@@ -44,16 +53,26 @@ class CacheManagerUI(base,fom):
 			super(base, self).__init__()
 		self.setupUi(self)
 		self._makeConnections()
-		Config = ConfigParser.ConfigParser()
-		Config.read( settingsFile )
-		if Config.has_section( "GeneralSettings" ):
-			basePath = Config.get("GeneralSettings", "basepath")
+		self.settings = sti.Settings()
+		gen = self.settings.General
+		self.serverPath = ''
+		if gen:
+			basePath = gen[ "basepath" ]
 			if basePath:
 				prj.BASE_PATH = basePath.replace( '\\', '/' )
+			useMayaSubFolder = gen[ "usemayasubfolder" ]
+			if useMayaSubFolder == 'True':
+				prj.USE_MAYA_SUBFOLDER = True
+			else:
+				prj.USE_MAYA_SUBFOLDER = False
+			self.serverPath = gen[ "serverpath" ]
 		self._fillUi()
 		self._loadConfig()
 		self.setObjectName( 'cacheManager_WIN' )
-		uiH.loadSkin( self, 'QTDarkGreen' )
+		if gen:
+			skin = gen[ "skin" ]
+			if skin:
+				uiH.loadSkin( self, skin )
 
 	def _loadConfig(self):
 		"""load config settings"""
@@ -72,24 +91,26 @@ class CacheManagerUI(base,fom):
 				return
 		if not os.path.exists( settingsFile ):
 			return
-		Config = ConfigParser.ConfigParser()
-		Config.read( settingsFile )
-		lastProject = Config.get("BaseSettings", "lastproject")
-		if lastProject:
-			index = self.projects_cmb.findText( lastProject )
-			if not index == -1:
-				self.projects_cmb.setCurrentIndex(index)
+		his = self.settings.History
+		if his:
+			if 'lastproject' in his:
+				lastProject = his[ "lastproject" ]
+				if lastProject:
+					index = self.projects_cmb.findText( lastProject )
+					if not index == -1:
+						self.projects_cmb.setCurrentIndex(index)
 
 	def _makeConnections(self):
 		"""create connection in the UI"""
-		self.connect( self.refresh_btn            , QtCore.SIGNAL("clicked()") , self.refresh )
-		self.connect( self.exportSelectedGeo_btn            , QtCore.SIGNAL("clicked()") , self.exportSelectedGeo )
-		self.connect( self.exportAssetCache_btn            , QtCore.SIGNAL("clicked()") , self.exportAssetCache )
-		self.connect( self.loadExternalCache_btn            , QtCore.SIGNAL("clicked()") , self.loadExternalCache )
-		self.connect( self.loadSelectedCache_btn            , QtCore.SIGNAL("clicked()") , self.loadSelectedCache )
-		self.connect( self.referenceCamera_btn            , QtCore.SIGNAL("clicked()") , self.referenceCamera )
-		self.connect( self.exportCamera_btn            , QtCore.SIGNAL("clicked()") , self.exportCamera )
+		self.connect( self.refresh_btn             , QtCore.SIGNAL("clicked()") , self.refresh )
+		self.connect( self.exportSelectedGeo_btn   , QtCore.SIGNAL("clicked()") , self.exportSelectedGeo )
+		self.connect( self.exportAssetCache_btn    , QtCore.SIGNAL("clicked()") , self.exportAssetCache )
+		self.connect( self.loadExternalCache_btn   , QtCore.SIGNAL("clicked()") , self.loadExternalCache )
+		self.connect( self.loadSelectedCache_btn   , QtCore.SIGNAL("clicked()") , self.loadSelectedCache )
+		self.connect( self.referenceCamera_btn     , QtCore.SIGNAL("clicked()") , self.referenceCamera )
+		self.connect( self.exportCamera_btn        , QtCore.SIGNAL("clicked()") , self.exportCamera )
 		self.connect( self.exportSelectedToSet_btn , QtCore.SIGNAL("clicked()") , self.exportSet )
+		self.connect( self.replaceAlembic_btn      , QtCore.SIGNAL("clicked()") , self.replaceAlembic )
 
 		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._fillSequences )
 		QtCore.QObject.connect( self.sequences_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._fillShots )
@@ -120,9 +141,11 @@ class CacheManagerUI(base,fom):
 
 	def exportSelectedGeo(self):
 		"""docstring for exp"""
-		sel = mc.ls( sl = True )
+		sel = mn.ls( sl = True )
 		cacheFile = cfl.CacheFile( self.fileNameForCache(), sel )
 		cacheFile.export()
+		if self.copyToServer_chb.isChecked():
+			cacheFile.copy( cacheFile.path.replace( prj.BASE_PATH, self.serverPath ) )
 		self._fillCacheList()
 
 	def exportAssetCache(self):
@@ -138,6 +161,11 @@ class CacheManagerUI(base,fom):
 			cacFile = cfl.CacheFile( baseDir + '/' + baseName + '.abc', n )
 			cacFile.exportAsset( a, self.useFinalToExport_chb.isChecked() )
 			exportedAsset.append( baseName )
+			if self.copyToServer_chb.isChecked():
+				serverFile = cfl.CacheFile( cacFile.path.replace( prj.BASE_PATH, self.serverPath ) )
+				serverFile.newVersion()
+				cacFile.copy( serverFile.path )
+		self._fillCacheList()
 
 	def exportSet(self):
 		"""export selection"""
@@ -146,6 +174,11 @@ class CacheManagerUI(base,fom):
 			maFile = mfl.mayaFile( str( pat ) )
 			maFile.newVersion()
 			mc.file( str( pat ), preserveReferences=True, type='mayaAscii', exportSelected =True, prompt=True, force=True )
+			if self.copyToServer_chb.isChecked():
+				serverFile = mfl.mayaFile( maFile.path.replace( prj.BASE_PATH, self.serverPath ) )
+				serverFile.newVersion()
+				maFile.copy( serverFile.path )
+
 
 	def _getCurrentTab(self):
 		"""return the visible table in the ui"""
@@ -180,7 +213,10 @@ class CacheManagerUI(base,fom):
 						n = i.data(32).toPyObject()
 					else:
 						n = i.data( 32 )
-					n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), n.name, not importAsset )
+					if '_' in n.name:
+						n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), n.name, not importAsset )
+					else:
+						n.imp()
 		elif tabNum == 1:
 			for v in xrange(self.files_lw.count()):
 				i = self.files_lw.item(v)
@@ -191,6 +227,27 @@ class CacheManagerUI(base,fom):
 						n = i.data( 32 )
 					n.reference()
 
+	def replaceAlembic(self):
+		"""replace Alembic File"""
+		SelAl = mn.ls( sl = True )
+		if not SelAl:
+			QtGui.QMessageBox.critical(self, 'Bad Input' , "PLEASE SELECT AN ALEMBIC NODE THAT YOU WANT TO REPLACE", QtGui.QMessageBox.Close)
+			return
+		if not SelAl[0].type == 'AlembicNode':
+			QtGui.QMessageBox.critical(self, 'Bad Input' , "PLEASE SELECT AN ALEMBIC NODE THAT YOU WANT TO REPLACE", QtGui.QMessageBox.Close)
+			return
+		tabNum = self._getCurrentTab()
+		importAsset = self.importShading_chb.isChecked()
+		if tabNum == 0:
+			cacheTab, cacheTabNum = self._getCurrentCacheTab()
+			for v in xrange( cacheTab.count()):
+				i = cacheTab.item(v)
+				if i.checkState() == 2:
+					if uiH.USEPYQT:
+						n = i.data(32).toPyObject()
+					else:
+						n = i.data( 32 )
+					n.replace( SelAl[0].name )
 
 	def _fillUi(self):
 		"""fill ui based on current scene or selected shot"""
@@ -271,6 +328,7 @@ class CacheManagerUI(base,fom):
 				pathDir = self._selectedShot.simCachesPath 
 		else:
 			pathDir = QtGui.QFileDialog.getSaveFileName(self, 'Save Cache', self._selectedShot.animCachesPath, selectedFilter='*.abc')
+			pathDir = pathDir[0]
 		return str( pathDir )
 
 def main():
