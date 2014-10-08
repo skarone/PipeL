@@ -23,7 +23,9 @@ def createSoftsOnFace( mesh, vertexToRemove = [] ):
 	grp = mn.Node( 'base_head_rig_grp' )
 	softs = createSoftOnFaceCurves( mesh, grp, vertexToRemove )
 	softs.extend( createSoftOnFacePoints( mesh, grp, vertexToRemove ) )
-	faceSoftsGrp = mn.Node( mc.group( n = 'face_SFM_grp', em = True ) )
+	faceSoftsGrp = mn.Node( 'face_SFM_grp' )
+	if not faceSoftsGrp.exists:
+		faceSoftsGrp = mn.Node( mc.group( n = 'face_SFM_grp', em = True ) )
 	for s in softs:
 		s.parent = faceSoftsGrp
 	#removeEyeLidsFromSofts( vertex, softs )
@@ -57,11 +59,17 @@ def createSoftOnFacePoints( mesh, grp, vertexToRemove = [] ):
 def softModsToStickys( mesh, skin = '', finalMesh = '' ):
 	"""convert all the soft mods of the face to stickys"""
 	grp = mn.Node( 'face_SFM_grp' )
-	sticksGrp = mn.Node( mc.group( n = 'faceRig_grp', em = True ) )
-	jointsGrp = mn.Node( mc.group( n = 'faceRig_joints_grp', em = True ) )
-	rivetsGrp = mn.Node( mc.group( n = 'faceRig_rivets_grp', em = True ) )
-	rivetsGrp.parent = sticksGrp
-	jointsGrp.parent = sticksGrp
+	sticksGrp = mn.Node( 'faceRig_grp' )
+	if not sticksGrp.exists:
+		sticksGrp = mn.Node( mc.group( n = 'faceRig_grp', em = True ) )
+	jointsGrp = mn.Node( 'faceRig_joints_grp' )
+	if not jointsGrp.exists:
+		jointsGrp = mn.Node( mc.group( n = 'faceRig_joints_grp', em = True ) )
+		jointsGrp.parent = sticksGrp
+	rivetsGrp = mn.Node( 'faceRig_rivets_grp' )
+	if not rivetsGrp.exists:
+		rivetsGrp = mn.Node( mc.group( n = 'faceRig_rivets_grp', em = True ) )
+		rivetsGrp.parent = sticksGrp
 	if skin == '': #THERE IS NO SKIN... CREATE ONE WITH A BASE JOINT
 		mc.select(d=True)
 		jnt = mn.Node( mc.joint(p=(0,0,0), n = 'faceBase_jnt') )
