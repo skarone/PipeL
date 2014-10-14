@@ -88,17 +88,20 @@ class CacheFile(fl.File):
 		abcNode = mn.Node( eval( "mc.AbcImport(" + cmd + ")" ) )
 		return abcNode
 
-	def importForAsset(self, asset, customNamespace = None, referenceAsset = True ):
+	def importForAsset(self, asset, customNamespace = None, referenceAsset = True, assetInShotFolder = False, shot = None ):
 		"""import cache and assign to asset"""
 		#reference render asset
 		#connect cache to objects
 		if referenceAsset:
-			nodes = asset.shadingPath.reference( customNamespace )
+			if assetInShotFolder:
+				assetNewPath = asset.shadingPath.copy( shot.assetsPath )
+				nodes = assetNewPath.reference( customNamespace )
+			else:
+				nodes = asset.shadingPath.reference( customNamespace )
 			mshs = mn.ls( nodes, typ = 'mesh', ni = True, l = True )
 		else:
 			nodes = asset.shadingPath.imp( customNamespace )
 			if nodes:
-				print nodes
 				mshs = mn.ls( nodes, typ = 'mesh', ni = True, l = True )
 			else:
 				mshs = mn.ls( customNamespace + ':*', typ = 'mesh', ni = True, l = True )

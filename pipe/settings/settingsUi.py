@@ -110,6 +110,7 @@ class Settings(base, fom):
 		self.settings.write( 'General', 'maketxpath', str( self.makeTxPath_le.text().replace( '\\', '/' ) ))
 		self.settings.write( 'General', 'autoload', self.autoLoadManager_chb.isChecked() )
 		self.settings.write( 'General', 'usemayasubfolder', self.useMayaSubFolder_chb.isChecked() )
+		self.settings.write( 'General', 'useassetspershot', self.useAssetsPerShot_chb.isChecked() )
 		self.settings.write( 'General', 'changeinternalpaths', self.changeInternalPaths_chb.isChecked() )
 		self.settings.write( 'General', 'automaketx', self.makeTx_chb.isChecked() )
 		self.settings.write( 'General', 'skin', str( self.skin_cmb.currentText() ))

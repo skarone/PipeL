@@ -34,8 +34,6 @@ Nodes:
 		node.istype( 'type' ) # check if the node is a specific type
 
 	TODO:
-		node.inputs      # get incomming connections to node
-		node.outputs     # get outcomming connections to node
 		node.isinstance
 		node.isreference
 

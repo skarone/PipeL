@@ -753,6 +753,15 @@ class ManagerUI(base,fom):
 			asset = item.data(32).toPyObject()
 		else:
 			asset = item.data(32)
+		#TODO HERE WE NEED TO DETECT IF WE ARE IN A SHOT
+		"""
+		assetPerShot = gen[ "useassetspershot" ]
+		if assetPerShot:
+			shotSel = sh.Shot( tab.item ( row, 0 ).text(), sq.Sequence(self.sequences_lw.selectedItems()[0].text(), prj.Project( self.projects_cmb.currentText() ) ) )
+			newFil = asset.copy( shotSel.assetPath )
+			newFil.reference()
+		else:
+		"""
 		asset.reference()
 
 	def referenceSelected(self):

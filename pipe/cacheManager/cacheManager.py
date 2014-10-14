@@ -205,6 +205,8 @@ class CacheManagerUI(base,fom):
 		tabNum = self._getCurrentTab()
 		importAsset = self.importShading_chb.isChecked()
 		if tabNum == 0:
+			assetPerShot = gen[ "useassetspershot" ]
+			shotSel = self._selectedShot
 			cacheTab, cacheTabNum = self._getCurrentCacheTab()
 			for v in xrange( cacheTab.count()):
 				i = cacheTab.item(v)
@@ -214,7 +216,7 @@ class CacheManagerUI(base,fom):
 					else:
 						n = i.data( 32 )
 					if '_' in n.name:
-						n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), n.name, not importAsset )
+						n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), n.name, not importAsset, assetPerShot, shotSel )
 					else:
 						n.imp()
 		elif tabNum == 1:

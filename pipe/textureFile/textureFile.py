@@ -228,7 +228,7 @@ class textureFile(fl.File):
 		else:
 			self._makeTx()
 
-	def _makeTx(self):
+	def _makeTx(self, force = False):
 		"""docstring for _makeTx"""
 		if self.hasTx:
 			if not self.toTx().isOlderThan( self ) and not force:
