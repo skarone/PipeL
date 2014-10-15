@@ -122,7 +122,6 @@ class RenderManagerUI(base,fom):
 		group      = str(self.groups_cmb.currentText())
 		pool       = str(self.pools_cmb.currentText())
 		comments   = str( self.comments_te.text())
-		filePrefix = str( self.filePath_le.text())
 		priority   = str( self.priority_spb.value() )
 		taskSize   = str( self.taskSize_spb.value() )
 		projPath   = str( self.projectPath_le.text() )
@@ -150,6 +149,7 @@ class RenderManagerUI(base,fom):
 			whiteList = socket.gethostname()
 			print 'rendering in local', whiteList
 		for w in self._getLayersWidgets():
+			filePrefix = str( self.filePath_le.text())
 			frames   = str(self.frameRange_le.text())
 			if not w.renderMe_chb.isChecked():
 				continue
@@ -162,6 +162,7 @@ class RenderManagerUI(base,fom):
 				versionNumber = self._getVersionNumber( filePrefix.split( '<RenderLayerVersion>' )[0] )
 				filePrefix = filePrefix.replace( '<RenderLayerVersion>', 'v' + str(versionNumber).zfill( 4 ) )
 			filename = filePrefix + '.' + ('?'*pad) + os.path.splitext( filename )[1]
+			print 'RENDERING', filename, w.layer.name
 			name = ''
 			if self._project:
 				name = self._project + ' - '

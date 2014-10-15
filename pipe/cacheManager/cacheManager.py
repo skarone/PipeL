@@ -205,7 +205,10 @@ class CacheManagerUI(base,fom):
 		tabNum = self._getCurrentTab()
 		importAsset = self.importShading_chb.isChecked()
 		if tabNum == 0:
+			gen = self.settings.General
 			assetPerShot = gen[ "useassetspershot" ]
+			if assetPerShot == 'True': assetPerShot = True
+			else: assetPerShot = False
 			shotSel = self._selectedShot
 			cacheTab, cacheTabNum = self._getCurrentCacheTab()
 			for v in xrange( cacheTab.count()):

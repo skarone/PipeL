@@ -30,6 +30,8 @@ import pipe.sequence.sequence as sq
 reload( sq )
 import pipe.sequence.sequenceUI as sqUI
 reload( sqUI )
+import pipe.shot.shot as sh
+reload( sh )
 import pipe.shot.shotUI as shUI
 reload( shUI )
 import pipe.settings.settings as sti
@@ -703,7 +705,11 @@ class ManagerUI(base,fom):
 		else:
 			asset = item.data(32)
 		self.addFileToHistory( asset )
-		asset.open()
+		if asset.isZero:
+			mc.file( new = True, force = True )
+			asset.save()
+		else:
+			asset.open()
 
 	def saveScene(self):
 		"""save scene here"""
@@ -754,15 +760,15 @@ class ManagerUI(base,fom):
 		else:
 			asset = item.data(32)
 		#TODO HERE WE NEED TO DETECT IF WE ARE IN A SHOT
-		"""
+		gen = self.settings.General
 		assetPerShot = gen[ "useassetspershot" ]
-		if assetPerShot:
-			shotSel = sh.Shot( tab.item ( row, 0 ).text(), sq.Sequence(self.sequences_lw.selectedItems()[0].text(), prj.Project( self.projects_cmb.currentText() ) ) )
-			newFil = asset.copy( shotSel.assetPath )
+		if assetPerShot == 'True':
+			shotSel = prj.shotOrAssetFromFile( mfl.currentFile() )
+			#assetspath + assetname + department + file
+			newFil = asset.copy( shotSel.assetsPath + asset.path.split( 'Assets/' )[-1] )
 			newFil.reference()
 		else:
-		"""
-		asset.reference()
+			asset.reference()
 
 	def referenceSelected(self):
 		"""reference selected items"""

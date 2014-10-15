@@ -94,7 +94,7 @@ class CacheFile(fl.File):
 		#connect cache to objects
 		if referenceAsset:
 			if assetInShotFolder:
-				assetNewPath = asset.shadingPath.copy( shot.assetsPath )
+				assetNewPath = asset.shadingPath.copy( shot.assetsPath + asset.shadingPath.path.split( 'Assets/' )[-1] )
 				nodes = assetNewPath.reference( customNamespace )
 			else:
 				nodes = asset.shadingPath.reference( customNamespace )

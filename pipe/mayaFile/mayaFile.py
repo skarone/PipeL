@@ -311,3 +311,8 @@ class mayaFile(fl.File):
 	def open(self):
 		"""open file in current maya"""
 		mc.file( self.path, f = True, options = "v=0;", typ = "mayaAscii", o = True )
+
+	def copy(self, newPath):
+		"""custom copy"""
+		fil = super(mayaFile, self).copy( newPath )
+		return mayaFile( fil.path )
