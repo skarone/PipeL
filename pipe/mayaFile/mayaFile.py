@@ -126,6 +126,34 @@ class mayaFile(fl.File):
 			textures.append( r )
 		return textures
 
+	@property
+	def xgenFiles(self):
+		"""return xgen files inside maya file"""
+		pat = re.compile( '(:?"fileTextureName".+[\n]?[\t]*" -type \\\\"string\\\\" \\\\")(?P<Path>.+)\\\\""' )
+		search = pat.search
+		matches = (search(line) for line in file(self.path, "rb"))
+		refs = [match.group('Path') for match in matches if match]
+		for r in refs:
+			r = tfl.textureFile( r )
+			if r in textures:
+				continue
+			textures.append( r )
+
+	def changeXgens(self, newDir = '', srchAndRep = []):
+		"""docstring for changeXgens"""
+		file_str = re.sub( '(?:.+".xfn" -type "string" ")(?P<Path>.+)(?:")', partial( self._changeXgen, newDir, srchAndRep ), self.data )
+		self.write( file_str )
+
+	def _changeXgen(self, newDir = '', srchAndRep = []):
+		"""docstring for _changeXgen"""
+		path = matchobj.group( "Path" )
+		newPath = path
+		if not newDir == '':
+			newPath = newDir + fl.File( newPath ).basename
+		if srchAndRep:
+			newPath = newPath.replace( srchAndRep[0], srchAndRep[1] )
+		return matchobj.group( 0 ).replace( path, newPath )
+
 	def changePathsBrutForce(self, srchAndRep = []):
 		"""change all Paths in file but with brut force, instead of search textures or caches, just search paths to replace"""
 		file_str = self.data.replace( srchAndRep[0].replace( '\\', '/' ), srchAndRep[1].replace( '\\', '/' ) )

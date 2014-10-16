@@ -137,7 +137,9 @@ class RenderManagerUI(base,fom):
 					basePath = basePath.replace( '\\', '/' )
 				serverPath = gen[ "serverpath" ]
 				curFile.changePathsBrutForce( srchAndRep =  [ basePath, serverPath ] )
-			
+
+		#fix for xgen =)
+		curFile.changeXgens( newDir = curFile.dirPath )
 		InitialStatus = "Active"
 		if self.submitSuspended_chb.isChecked():
 			InitialStatus = "Suspended"
