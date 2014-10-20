@@ -38,6 +38,7 @@ class ManagerUI(base,fom):
 		self.connect(self.moveToFolder_btn, QtCore.SIGNAL("clicked()"), self.moveToFolder)
 		self.connect(self.replacePath_btn, QtCore.SIGNAL("clicked()"), self.replacePath)
 		self.connect(self.toTx_btn, QtCore.SIGNAL("clicked()"), self.toTx)
+		self.connect(self.createVersions_btn, QtCore.SIGNAL("clicked()"), self.createVersions)
 		self.connect(self.toPng_btn, QtCore.SIGNAL("clicked()"), self.toPng)
 		self.connect(self.refresh_btn, QtCore.SIGNAL("clicked()"), self.fillTextures)
 		self.connect(self.renameTexture_btn, QtCore.SIGNAL("clicked()"), self.renameTextures)
@@ -102,6 +103,12 @@ class ManagerUI(base,fom):
 		"""docstring for createTx"""
 		textures = self.getSelected()
 		self.manager.createTx( textures )
+		self.fillTextures()
+
+	def createVersions(self):
+		"""docstring for createVersions"""
+		textures = self.getSelected()
+		self.manager.createVersions( textures )
 		self.fillTextures()
 
 	def toPng(self):

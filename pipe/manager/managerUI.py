@@ -404,8 +404,8 @@ class ManagerUI(base,fom):
 			files = [
 				a.modelPath,
 				a.shadingPath,
-				a.rigPath,
 				a.hairPath,
+				a.rigPath,
 				a.finalPath
 				]
 			if self.compareServer_chb.isChecked(): #SERVER MODE ON

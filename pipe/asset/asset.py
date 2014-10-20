@@ -232,9 +232,9 @@ class Asset(object):
 		depFiles = [ 
 				[dp.Node( self.modelPath   ),[]],
 				[dp.Node( self.shadingPath ),[ 0 ]],
-				[dp.Node( self.rigPath     ),[ 1, 3 ]],
 				[dp.Node( self.hairPath    ),[ 0 ]],
-				[dp.Node( self.finalPath   ),[ 2, 3 ]]
+				[dp.Node( self.rigPath     ),[ 1, 2 ]],
+				[dp.Node( self.finalPath   ),[ 1, 2, 3 ]]
 				]
 		res = dp.dep_resolvedArray( depFiles )
 		result = []
@@ -280,3 +280,17 @@ class Asset(object):
 	def assignedUserInArea(self, area):
 		"""return the assigned used for this asset in the specific area"""
 		pass
+
+	def areaPath(self, areaNumber):
+		"""docstring for areaPath"""
+		if areaNumber == 0:
+			return self.modelPath
+		elif areaNumber == 1:
+			return self.shadingPath
+		elif areaNumber == 2:
+			return self.hairPath
+		elif areaNumber == 3:
+			return self.rigPath
+		elif areaNumber == 4:
+			return self.finalPath
+

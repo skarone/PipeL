@@ -60,6 +60,13 @@ class Settings(base, fom):
 				else: 
 					state = QtCore.Qt.Unchecked
 				self.useMayaSubFolder_chb.setCheckState( state )
+			if gen.has_key( 'useassetspershot' ):
+				usemayasubfolder = gen[ "useassetspershot" ]
+				if usemayasubfolder == 'True': 
+					state = QtCore.Qt.Checked 
+				else: 
+					state = QtCore.Qt.Unchecked
+				self.useAssetsPerShot_chb.setCheckState( state )
 			if gen.has_key( 'localnukepath' ):
 				localnukepath = gen[ 'localnukepath' ]
 				self.nukeLocalPath_le.setText( localnukepath )

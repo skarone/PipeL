@@ -179,7 +179,6 @@ class CacheManagerUI(base,fom):
 				serverFile.newVersion()
 				maFile.copy( serverFile.path )
 
-
 	def _getCurrentTab(self):
 		"""return the visible table in the ui"""
 		currentTab = self.tabWidget.currentIndex()
@@ -219,7 +218,8 @@ class CacheManagerUI(base,fom):
 					else:
 						n = i.data( 32 )
 					if '_' in n.name:
-						n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), n.name, not importAsset, assetPerShot, shotSel )
+						print 'ROW',self.area_lw.currentRow()
+						n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), self.area_lw.currentRow() , n.name, not importAsset, assetPerShot, shotSel )
 					else:
 						n.imp()
 		elif tabNum == 1:

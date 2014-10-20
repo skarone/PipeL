@@ -113,3 +113,13 @@ class Manager(object):
 		if f.hasTx():
 			txVer = f.toTx()
 			txVer.rename( newName + txVer.extension )
+
+	def createVersions(self, textures):
+		"""docstring for createVersions"""
+		for n in textures:
+			if n.type == 'aiImage':
+				attr = "filename"
+			else:
+				attr = "ftn"
+			f = tfl.textureFile( n.attr( attr ).v )
+			f.createVersions()
