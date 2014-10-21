@@ -784,9 +784,9 @@ class ManagerUI(base,fom):
 		else:
 			asset = item.data(32)
 		if asset.extension == '.ma':
-			props = mfp.MayaFilePropertiesUi(asset,self)
+			props = mfp.MayaFilePropertiesUi(asset,self, False )
 		elif asset.extension == '.nk':
-			props = nkp.NukeFilePropertiesUi(asset,self)
+			props = nkp.NukeFilePropertiesUi(asset,self, False)
 		props.show()
 
 	def openFileInCurrentNuke(self):

@@ -181,6 +181,8 @@ def ls( strToSearch = None, **args ):
 	nodes = eval( "mc.ls(" + cmd + ")" )
 	if nodes:
 		return Nodes( nodes )
+	else:
+		return []
 
 def listRelatives( strToSearch = None, **args ):
 	"""Node version of list relatives maya command
