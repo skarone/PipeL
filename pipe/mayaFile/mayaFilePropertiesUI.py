@@ -13,7 +13,10 @@ import shading.textureManager.textureManager as tm
 reload(tm)
 import pipe.textureFile.textureFile as tfl
 reload(tfl)
-import maya.cmds as mc
+try:
+	import maya.cmds as mc
+except:
+	pass
 import pipe.settings.settings as sti
 reload( sti )
 import pipe.asset.asset as ass
@@ -44,13 +47,10 @@ class MayaFilePropertiesUi(base, fom):
 		self.inMaya = inMaya
 		self.setupUi(self)
 		self._file = fil
-		self.filepath_la.setText( str(fil.path) )
-		self.setWindowTitle( str( fil.basename + ' Properties' ) )
-		if not fil.exists:
-			return
-		if fil.isZero:
-			return
-		self.filedate_la.setText( str(fil.date))
+		if fil.exists:
+			self.filepath_la.setText( str(fil.path) )
+			self.setWindowTitle( str( fil.basename + ' Properties' ) )
+			self.filedate_la.setText( str(fil.date))
 		self.manager = tm.Manager()
 		if inMaya:
 			pass
@@ -62,9 +62,7 @@ class MayaFilePropertiesUi(base, fom):
 			self.time_endbase_la.setText( str(tim['aet']) )
 		self.updateUi()
 		QtCore.QObject.connect( self.searchPath_le, QtCore.SIGNAL( "textEdited (const QString&)" ), self.search )
-
 		QtCore.QObject.connect( self.textures_tw, QtCore.SIGNAL( "itemClicked (QTableWidgetItem *)" ), self.selectNode )
-		
 		self.connect(self.moveToFolder_btn, QtCore.SIGNAL("clicked()"), self.moveToFolder)
 		self.connect(self.replacePath_btn, QtCore.SIGNAL("clicked()"), self.replacePath)
 		self.connect(self.toTx_btn, QtCore.SIGNAL("clicked()"), self.toTx)
@@ -245,8 +243,9 @@ class MayaFilePropertiesUi(base, fom):
 			#HASTX
 			item = QtGui.QTableWidgetItem( '' )
 			if f.hasTx:
-				if f.toTx().isOlderThan(f):
-					colVal = 1
+				if f.exists and f.exists:
+					if f.toTx().isOlderThan(f):
+						colVal = 1
 				else:
 					colVal = 0
 			else:
@@ -320,19 +319,19 @@ class MayaFilePropertiesUi(base, fom):
 			tabwid = self.caches_tw
 		return tabwid, currentTab
 
-
 	def search(self, fil):
 		"""search asset based on line edit string"""
 		#fil = self.search_asset_le.text()
-		tab, index = self._getCurrentTab()
-		for i in range( tab.rowCount() ):
-			match = False
-			for j in range( tab.columnCount() ):
-				item = tab.item( i, j )
-				if fil in str( item.text() ):
-					match = True
-					break
-			tab.setRowHidden( i, not match )
+		tabs = [ self.textures_tw, self.assets_tw, self.caches_tw ]
+		for tab in tabs:
+			for i in range( tab.rowCount() ):
+				match = False
+				for j in range( tab.columnCount() ):
+					item = tab.item( i, j )
+					if fil in str( item.text() ):
+						match = True
+						break
+				tab.setRowHidden( i, not match )
 
 	@property
 	def fil(self):

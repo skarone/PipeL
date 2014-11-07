@@ -46,8 +46,7 @@ class Manager(object):
 			f = tfl.textureFile( n.attr( attr ).v )
 			if not f.exists:
 				continue
-			if not f.hasTx:
-				f.makeTx( True )
+			f.makeTx( True )
 
 	def allToTx(self):
 		"""

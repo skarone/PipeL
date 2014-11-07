@@ -171,9 +171,10 @@ class CacheManagerUI(base,fom):
 		"""export selection"""
 		pat = QtGui.QFileDialog.getSaveFileName(self, 'Save Set', self._selectedShot.setsPath, selectedFilter='*.ma')
 		if pat:
-			maFile = mfl.mayaFile( str( pat ) )
+			print 'patSSS',pat
+			maFile = mfl.mayaFile( str( pat[0] ) )
 			maFile.newVersion()
-			mc.file( str( pat ), preserveReferences=True, type='mayaAscii', exportSelected =True, prompt=True, force=True )
+			mc.file( str( maFile.path ), preserveReferences=True, type='mayaAscii', exportSelected =True, prompt=True, force=True )
 			if self.copyToServer_chb.isChecked():
 				serverFile = mfl.mayaFile( maFile.path.replace( prj.BASE_PATH, self.serverPath ) )
 				serverFile.newVersion()

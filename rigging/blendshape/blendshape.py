@@ -1,5 +1,9 @@
 import general.mayaNode.mayaNode as mn
-import maya.cmds as mc
+try:
+	import maya.cmds as mc
+	import maya.OpenMaya as api
+except:
+	pass
 
 def copyVertexFromLeftToRight():
 	"""move vertices from right blendshape to match left one"""
@@ -42,5 +46,105 @@ def extractBlendsTargets( blendNode, mesh, prefix = "" ):
 		mesh.duplicate( geoName )
 		at.v = 0
 
-	
+def createMirror( meshes, baseMesh, axis = 'x', searchAndReplace = [ 'L_', 'R_' ], vertexList = [] ):
+	"""create mirror of meshes """
+	base = BlendShapeMesh( baseMesh, baseMesh )
+	base.createReflectionTable( axis, vertexList )
+	for m in mn.Nodes( meshes ):
+		newNode = m.duplicate( m.name.replace( searchAndReplace[0], searchAndReplace[1] ) )
+		blend = BlendShapeMesh( newNode.name, baseMesh, base.reflectionVertexTable )
+		blend.mirror( axis. vertexList )
 
+def createReflect( meshes, baseMesh, axis = 'x', searchAndReplace = [ 'L_', 'R_' ], vertexList = [] ):
+	"""create mirror of meshes """
+	base = BlendShapeMesh( baseMesh, baseMesh )
+	base.createReflectionTable( axis, vertexList )
+	for m in mn.Nodes( meshes ):
+		newNode = m.duplicate( m.name.replace( searchAndReplace[0], searchAndReplace[1] ) )
+		blend = BlendShapeMesh( newNode.name, baseMesh, base.reflectionVertexTable )
+		blend.reflect( axis, vertexList )
+
+class BlendShapeMesh( mn.Node ):
+	"""docstring for BlendShapeMesh"""
+	AXIS = {'x':0, 'y':1, 'z':2}
+	def __init__(self, name, baseMesh, reflectionTable = {} ):
+		super(BlendShapeMesh, self).__init__(name)
+		self._baseMesh = mn.Node( baseMesh )
+		self._reflectionTable = reflectionTable
+
+	@property
+	def baseMesh(self):
+		"""return original mesh"""
+		return self._baseMesh
+
+	@property
+	def reflectionVertexTable(self):
+		"""docstring for reflectionVertexTable"""
+		return self._reflectionTable
+
+	def createReflectionTable(self, axis = 'x', vertexList = []):
+		"""create the table that relates vertex from one side to the other"""
+		#createVertexList from one side
+		xVerts = []
+		tolerance = 0.0001
+		if not vertexList:
+			vertexList = mn.ls( self.baseMesh.name + '.vtx[*]', fl = True )
+		else:
+			vertexList = mn.Nodes( [ self.baseMesh.name + '.' + a.split( '.' )[-1] for a in vertexList ] )
+		for a in vertexList:
+			vPos = mc.xform( a, q = True, os = True, t = True )
+			if vPos[self.AXIS[axis]] + tolerance >= 0 or vPos[self.AXIS[axis]] - tolerance >= 0:
+				xVerts.append( int( a.name[a.name.index('[')+1: a.name.index( ']' )]) )
+		clos = mn.createNode( 'closestPointOnMesh' )
+		self.baseMesh.a.worldMesh >> clos.a.inMesh
+		for v in xVerts:
+			vPos = mc.xform( self.baseMesh.name + '.vtx[' + str( v ) + ']', q = True, os = True, t = True )
+			vPos[self.AXIS[axis]] *= -1
+			clos.a.inPosition.v = [vPos[0],vPos[1],vPos[2] ]
+			self._reflectionTable[v] = clos.a.closestVertexIndex.v
+		clos.delete()
+
+	def mirror(self, axis = 'x', vertexList = [] ):
+		"""mirror blendshape only on vertexList, if non.. mirror all"""
+		if not self.reflectionVertexTable:
+			self.createReflectionTable( axis, vertexList )
+		for s in self.reflectionVertexTable.keys():
+			vPos1 = mc.xform( self.name + '.vtx[' + str( s ) + ']', q = True, os = True, t = True )
+			vPos1[self.AXIS[axis]] *= -1
+			if s == self.reflectionVertexTable[ s ]: #middle vertex, only move once
+				vPos1[self.AXIS[axis]] = (( vPos1[self.AXIS[axis]] * -1) + vPos1[self.AXIS[axis]]) / 2
+			mc.xform( self.name + '.vtx[' + str(  self.reflectionVertexTable[ s ] ) + ']', os = True, t = vPos1 )
+
+	def reflect(self, axis = 'x', vertexList = [] ):
+		"""reflect blendshape only on vertexList, if non.. reflect all"""
+		if not self.reflectionVertexTable:
+			self.createReflectionTable( axis, vertexList )
+		for s in self.reflectionVertexTable.keys():
+			vPos1 = mc.xform( self.name + '.vtx[' + str( s ) + ']', q = True, os = True, t = True )
+			vPos1[self.AXIS[axis]] *= -1
+			vPos2 = mc.xform( self.name + '.vtx[' + str( self.reflectionVertexTable[ s ] ) + ']', q = True, os = True, t = True )
+			mc.xform( self.name + '.vtx[' + str( self.reflectionVertexTable[ s ] ) + ']', os = True, t = vPos1 )
+			if s == self.reflectionVertexTable[ s ]: #middle vertex, only move once
+				continue
+			vPos2[self.AXIS[axis]] *= -1
+			mc.xform( self.name + '.vtx[' + str( s ) + ']', os = True, t = vPos2 )
+
+	def asBase(self, vertexList = None):
+		"""set vertex of blendshape as baseMesh"""
+		if not vertexList:
+			vertexList = mn.ls( self.name + '.vtx[*]', fl = True )
+		for a in vertexList:
+			vPos = mc.xform( a.name.replace( self.name, self.baseMesh.name ), q = True, os = True, t = True )
+			mc.xform( a.name, os = True, t = vPos )
+
+
+class BlendShapeNode( mn.Node ):
+	"""docstring for BlendShapeNode"""
+	def __init__(self, name):
+		super(BlendShapeNode, self).__init__( name )
+		
+
+	@property
+	def blends(self):
+		"""return all the blendshapes that this blendshape node has"""
+		pass

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>317</width>
-    <height>631</height>
+    <width>464</width>
+    <height>772</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -192,6 +192,27 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adjust Soft Mods, settings... FallOff Mode and FallOff Radius, &lt;/p&gt;&lt;p&gt;and then click &amp;quot;Create Face Rig&amp;quot; &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Skin:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="skin_le"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="fillSkin_btn">
+        <property name="text">
+         <string>&lt;&lt;&lt;</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QPushButton" name="create_btn">
