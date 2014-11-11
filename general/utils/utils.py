@@ -136,3 +136,21 @@ def reAssignMaterial():
 			if h.type == 'shadingEngine':
 				n()
 				mc.hyperShade( assign = h.a.surfaceShader.input )
+
+#PANELS
+def isolate( node ):
+	"""isolate node"""
+	node = mn.Node( node )
+	currPanel = mc.getPanel( withFocus = True );
+	panelType = mc.getPanel( to = currPanel )
+	if panelType == 'modelPanel':
+		node()
+		mc.isolateSelect( state = 1, currPanel )
+
+def desIsolate():
+	"""desisolate"""
+	currPanel = mc.getPanel( withFocus = True );
+	panelType = mc.getPanel( to = currPanel )
+	if panelType == 'modelPanel':
+		node()
+		mc.isolateSelect( state = 0, currPanel )

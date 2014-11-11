@@ -142,9 +142,75 @@ class BlendShapeNode( mn.Node ):
 	"""docstring for BlendShapeNode"""
 	def __init__(self, name):
 		super(BlendShapeNode, self).__init__( name )
+
+	def create(self, meshes, baseMesh ):
+		"""create blendshape and add meshes as targets"""
+		self.__init__( mc.blendShape( meshes, baseMesh, n = self.name )[0] )
 		
+	@property
+	def meshes(self):
+		"""return all the blendshapes that this blendshape node has"""
+		blends = ads.listAttr( st = 'weight', m = True )
+		result = []
+		for a in blends:
+			result.append( BlendShapeMesh( a.name ) )
+		return result
 
 	@property
-	def blends(self):
-		"""return all the blendshapes that this blendshape node has"""
-		pass
+	def meshesCount(self):
+		"""return the number of targets that the blendshape has"""
+		return len(self.meshes)
+
+	def getMeshIndex(self, mesh):
+		"""docstring for getMeshIndex"""
+		res = [m.name for m in self.meshes ]
+		return res.index( mesh )
+
+	@property
+	def isMeshTarget(self, mesh):
+		"""docstring for isMeshTarget"""
+		return mesh in [m.name for m in self.meshes ]
+
+	@property
+	def baseMesh(self):
+		"""docstring for baseMesh"""
+		return mn.Node( mc.ls( mc.listHistory(self.name, future=True), typ = 'mesh' )[0] )
+
+	def addMesh(self, mesh):
+		"""add Mesh to blendshape node"""
+		if self.isMeshTarget( mesh ):
+			print 'This mesh is allready a target for this blendshape', mesh, self.name
+			return
+		mc.blendShape( self.name, edit=True, t=(self.baseMesh.name, len(self.meshes), mesh, 1.0) )
+
+	def addInBetween(self, mesh, inBetweenMesh, percent ):
+		"""add mesh for inbetween"""
+		mc.blendShape( self.name, edit=True, t=(self.baseMesh.name, self.getMeshIndex( mesh ), inBetweenMesh, percent) )
+
+	def removeMesh(self, mesh):
+		"""remove mesh from target mesh"""
+		mc.blendShape( self.name, edit=True, rm = True, t=(self.baseMesh.name, self.getMeshIndex( mesh ), mesh, 1.0) )
+
+	def makeCorrectiveBlend(self, mesh1, mesh2 ):
+		"""create a corrective blendshape"""
+		corrective = self.baseMesh.duplicate( mesh1 + mesh2 + '_corrective' )
+		corrective.a.corrective.add( at = 'bool' )
+		self.a.envelope.v = 0
+		dummy = self.baseMesh.duplicate( mesh1 + mesh2 + '_dummy' )
+		dummy.a.dummy.add( at = 'bool' )
+		self.a.envelope.v = 1
+		blend = BlendShapeNode( mesh1 + mesh2 + '_blend' )
+		blend.create( [mesh1, mesh2, corrective], dummy )
+		dummy.attr( mesh1 ).v = -1
+		dummy.attr( mesh2 ).v = -1
+		dummy.attr( corrective.name ).v = 1
+		self.addMesh( dummy.name )
+		#connect mesh1 and mesh 2 to controls dummy weight
+		mul = mn.createNode( 'multiplyDivide' )
+		mul.name = mesh1 + mesh2 + '_MUL'
+		self.attr( mesh1 ) >> mul.a.input1X
+		self.attr( mesh2 ) >> mul.a.input2X
+		mul.a.outputX >> self.attr( dummy.name )
+		
+
+
