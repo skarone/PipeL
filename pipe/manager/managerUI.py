@@ -519,6 +519,7 @@ class ManagerUI(base,fom):
 				finalShots.append( a )
 			shots.extend( finalShots )
 		self.shots_tw.setRowCount( len( shots ) )
+		shots = sorted(shots, key=lambda s: s.name[s.name.index('_')+1:])
 		for i,s in enumerate( shots ):
 			item = QtGui.QTableWidgetItem( s.name )
 			item.setCheckState(QtCore.Qt.Unchecked )

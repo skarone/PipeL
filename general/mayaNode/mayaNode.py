@@ -497,15 +497,14 @@ class Node(object):
 			if nodes:
 				return Node( nodes[0] )
 		return None
-"""
+
 	def isolate(self):
 		currPanel = mc.getPanel( withFocus = True )
 		panelType = mc.getPanel( to = currPanel )
 		if panelType == 'modelPanel':
 			self()
-			mc.isolateSelect( state = 1, currPanel )
+			mc.isolateSelect( currPanel, state = 1 )
 
-"""
 ##################################################
 # ATTRIBUTES CLASS
 

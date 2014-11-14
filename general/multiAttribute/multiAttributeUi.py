@@ -91,7 +91,7 @@ class MultiAttributeUI(base, fom):
 			else:
 				n = i.data( 32 )
 			toItems.append( n )
-		if len(fromItems) == 1 or not len(fromItems) == len(toItems):
+		if not len(fromItems) == 1 or not len(fromItems) == len(toItems):
 			QtGui.QMessageBox.critical(self, 'Bad Input' , "IN THE FIRST LIST YOU MUST HAVE ONE NODE OR THE SAME AMOUNTS\n OF NODE THAT YOU HAVE IN THE SECOND ONE", QtGui.QMessageBox.Close)
 			
 		return fromItems, toItems

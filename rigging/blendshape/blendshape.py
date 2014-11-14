@@ -150,10 +150,11 @@ class BlendShapeNode( mn.Node ):
 	@property
 	def meshes(self):
 		"""return all the blendshapes that this blendshape node has"""
-		blends = ads.listAttr( st = 'weight', m = True )
+		blends = self.listAttr( st = 'weight', m = True )
 		result = []
-		for a in blends:
-			result.append( BlendShapeMesh( a.name ) )
+		if blends:
+			for a in blends:
+				result.append( BlendShapeMesh( a.name, self.baseMesh ) )
 		return result
 
 	@property
@@ -164,11 +165,11 @@ class BlendShapeNode( mn.Node ):
 	def getMeshIndex(self, mesh):
 		"""docstring for getMeshIndex"""
 		res = [m.name for m in self.meshes ]
+		print res
 		return res.index( mesh )
 
-	@property
 	def isMeshTarget(self, mesh):
-		"""docstring for isMeshTarget"""
+		"""check if mesh is allready a target for the blendshape"""
 		return mesh in [m.name for m in self.meshes ]
 
 	@property
@@ -193,6 +194,8 @@ class BlendShapeNode( mn.Node ):
 
 	def makeCorrectiveBlend(self, mesh1, mesh2 ):
 		"""create a corrective blendshape"""
+		self.attr( mesh1 ).v = 1
+		self.attr( mesh2 ).v = 1
 		corrective = self.baseMesh.duplicate( mesh1 + mesh2 + '_corrective' )
 		corrective.a.corrective.add( at = 'bool' )
 		self.a.envelope.v = 0
@@ -201,9 +204,9 @@ class BlendShapeNode( mn.Node ):
 		self.a.envelope.v = 1
 		blend = BlendShapeNode( mesh1 + mesh2 + '_blend' )
 		blend.create( [mesh1, mesh2, corrective], dummy )
-		dummy.attr( mesh1 ).v = -1
-		dummy.attr( mesh2 ).v = -1
-		dummy.attr( corrective.name ).v = 1
+		blend.attr( mesh1 ).v = -1
+		blend.attr( mesh2 ).v = -1
+		blend.attr( corrective.name ).v = 1
 		self.addMesh( dummy.name )
 		#connect mesh1 and mesh 2 to controls dummy weight
 		mul = mn.createNode( 'multiplyDivide' )
@@ -211,6 +214,15 @@ class BlendShapeNode( mn.Node ):
 		self.attr( mesh1 ) >> mul.a.input1X
 		self.attr( mesh2 ) >> mul.a.input2X
 		mul.a.outputX >> self.attr( dummy.name )
+		self.attr( mesh1 ).v = 0
+		self.attr( mesh2 ).v = 0
+		return dummy, corrective
 		
-
-
+	def extractTargets(self):
+		"""re generate targets """
+		for m in self.meshes:
+			blNode.attr( m.name ).v = 0
+		for m in self.meshes:
+			blNode.attr( m.name ).v = 1
+			blNode.baseMesh.duplicate( m.name )
+			blNode.attr( m.name ).v = 0

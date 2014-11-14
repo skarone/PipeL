@@ -4,6 +4,7 @@ Author: Ignacio Urruty
 Description: general utilities for the pipe
 '''
 import general.mayaNode.mayaNode as mn
+import maya.mel as mm
 import maya.cmds as mc
 import pipe.mayaFile.mayaFile as mfl
 import pipe.file.file as fl
@@ -140,17 +141,19 @@ def reAssignMaterial():
 #PANELS
 def isolate( node ):
 	"""isolate node"""
-	node = mn.Node( node )
+	nod = mn.Node( node )
+	nod()
 	currPanel = mc.getPanel( withFocus = True );
 	panelType = mc.getPanel( to = currPanel )
 	if panelType == 'modelPanel':
-		node()
-		mc.isolateSelect( state = 1, currPanel )
+		mc.isolateSelect( currPanel, state = 1 )
+		mm.eval( 'enableIsolateSelect %s 1;'%currPanel )
 
 def desIsolate():
 	"""desisolate"""
 	currPanel = mc.getPanel( withFocus = True );
 	panelType = mc.getPanel( to = currPanel )
 	if panelType == 'modelPanel':
-		node()
-		mc.isolateSelect( state = 0, currPanel )
+		mc.isolateSelect( currPanel, state = 0 )
+		mm.eval( 'enableIsolateSelect %s 0;'%currPanel )
+		

@@ -72,7 +72,13 @@ class ShotCreator(base, fom):
 		seqName =  str( self.sequences_cmb.currentText() )
 		assetName = self.shot_le.text()
 		se = seq.Sequence( seqName, prj.Project( projName, prj.BASE_PATH ) )
-		newAsset = sh.Shot( 's' + str(len( se.shots ) + 1 ).zfill( 3 ) + '_' +  str( assetName ),  se )
+		#get last s number
+		shots = se.shots
+		lastShotNumber = 0
+		if len(shots):
+			lastShot = shots[-1].name
+			lastShotNumber = int( lastShot.split( '_' )[0][1:] )
+		newAsset = sh.Shot( 's' + str(lastShotNumber + 1 ).zfill( 3 ) + '_' +  str( assetName ),  se )
 		if not newAsset.exists:
 			newAsset.create()
 			print 'New Shot Created : ', newAsset.name, ' for ',  projName
