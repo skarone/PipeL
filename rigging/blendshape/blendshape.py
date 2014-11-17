@@ -70,6 +70,7 @@ class BlendShapeMesh( mn.Node ):
 	def __init__(self, name, baseMesh, reflectionTable = {} ):
 		super(BlendShapeMesh, self).__init__(name)
 		self._baseMesh = mn.Node( baseMesh )
+		print reflectionTable
 		self._reflectionTable = reflectionTable
 
 	@property
@@ -87,6 +88,7 @@ class BlendShapeMesh( mn.Node ):
 		#createVertexList from one side
 		xVerts = []
 		tolerance = 0.0001
+		self._reflectionTable = {}
 		if not vertexList:
 			vertexList = mn.ls( self.baseMesh.name + '.vtx[*]', fl = True )
 		else:
@@ -131,11 +133,13 @@ class BlendShapeMesh( mn.Node ):
 
 	def asBase(self, vertexList = None):
 		"""set vertex of blendshape as baseMesh"""
-		if not vertexList:
-			vertexList = mn.ls( self.name + '.vtx[*]', fl = True )
+		if vertexList:
+			vertexList = [ self.name + '.' + a.split( '.' )[-1] for a in vertexList ]
+		else:
+			vertexList = mc.ls( self.name + '.vtx[*]', fl = True )
 		for a in vertexList:
-			vPos = mc.xform( a.name.replace( self.name, self.baseMesh.name ), q = True, os = True, t = True )
-			mc.xform( a.name, os = True, t = vPos )
+			vPos = mc.xform( a.replace( self.name, self.baseMesh.name ), q = True, os = True, t = True )
+			mc.xform( a, os = True, t = vPos )
 
 
 class BlendShapeNode( mn.Node ):

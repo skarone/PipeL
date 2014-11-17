@@ -213,40 +213,93 @@ class BlendShapeUI(base,fom):
 	#MIRROR
 	def addMeshToList(self):
 		"""add Mesh to meshes to mirror/reflect"""
-		pass
+		for n in mn.ls( sl = True ):
+			item = QtGui.QListWidgetItem( n.name )
+			item.setData(32, n )
+			self.meshes_lw.addItem( item )
 
 	def insMesh(self):
 		"""clean list and add selected meshes"""
-		pass
+		self.meshes_lw.clear()
+		self.addMeshToList()
 
 	def remMesh(self):
 		"""remove selected meshes from list Mirror"""
-		pass
+		for s in self.meshes_lw.selectedItems():
+			self.meshes_lw.removeItemWidget( s )
 
 	def addVert(self):
 		"""add selected vertecies from list vert"""
-		pass
+		for n in mn.ls( sl = True, fl = True ):
+			item = QtGui.QListWidgetItem( n.name )
+			self.vertex_lw.addItem( item )
 
 	def insVert(self):
 		"""clean list vert and add selected verticies"""
-		pass
+		self.vertex_lw.clear()
+		self.addVert()
 
 	def remVert(self):
 		"""remove selected verteces from list"""
-		pass
+		for s in self.vertex_lw.selectedItems():
+			self.vertex_lw.removeItemWidget( s )
+
+	def getSearchAndReplace(self):
+		"""return search and replace strings"""
+		return [str( self.search_le.text() ), str( self.replace_le.text() )]
+
+	def getSelectedAxis(self):
+		"""return the selected axis in the ui"""
+		qvbl = self.groupBox.layout()
+		for r in [ self.xAxis_rb, self.yAxis_rb, self.zAxis_rb]:
+			if r.isChecked():
+				return str( r.text() )
+
+	def getVertexList(self):
+		"""return the vertex list """
+		verts = []
+		for v in range( self.vertex_lw.count() ):
+			verts.append( str( self.vertex_lw.item(v).text() ))
+		return verts
 
 	def reflect(self):
 		"""reflect selected meshes with the vertecies in the list, if no verticies reflect all"""
-		pass
+		base = bls.BlendShapeMesh( str( self.baseMesh ), str( self.baseMesh ) )
+		axis = self.getSelectedAxis()
+		vtexList = self.getVertexList()
+		reflectionTable = {}
+		base.createReflectionTable( axis, vtexList )
+		reflectionTable = base.reflectionVertexTable
+		print reflectionTable 
+		srcAndRep = self.getSearchAndReplace()
+		for s in range( self.meshes_lw.count() ):
+			node = str( self.meshes_lw.item(s ).text())
+			newNode = mn.Node( node ).duplicate( node.replace( srcAndRep[0], srcAndRep[1] ) )
+			bl = bls.BlendShapeMesh( newNode.name, str( self.baseMesh ),reflectionTable )
+			print vtexList
+			bl.reflect( axis, vtexList )
 
 	def mirror(self):
 		"""mirror selected meshes with the vertecies in the list, if no verticies mirror all"""
-		pass
+		base = bls.BlendShapeMesh( str( self.baseMesh ), str( self.baseMesh ) )
+		axis = self.getSelectedAxis()
+		vtexList = self.getVertexList()
+		reflectionTable = {}
+		base.createReflectionTable( axis, vtexList )
+		reflectionTable = base.reflectionVertexTable
+		srcAndRep = self.getSearchAndReplace()
+		for s in range( self.meshes_lw.count() ):
+			node = str( self.meshes_lw.item(s ).text())
+			newNode = mn.Node( node ).duplicate( node.replace( srcAndRep[0], srcAndRep[1] ) )
+			bl = bls.BlendShapeMesh( newNode.name, str( self.baseMesh ), reflectionTable )
+			bl.mirror( axis, vtexList )
 
 	def asBase(self):
 		"""set verteces asBase mesh for meshes in list with the vertecies in the list, if no verticies in list, set all asBasemesh all"""
-		pass
-
+		vtexList = self.getVertexList()
+		for s in range( self.meshes_lw.count() ):
+			bl = bls.BlendShapeMesh( str( self.meshes_lw.item(s ).text()), str( self.baseMesh )  )
+			bl.asBase( vtexList )
 
 def main():
 	"""use this to create project in maya"""
