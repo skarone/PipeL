@@ -36,23 +36,33 @@ import pipe.sequence.sequence as seq
 reload( seq )
 import pipe.shot.shot as sh
 reload( sh )
+import pipe.settings.settings as sti
+reload( sti )
 
 BASE_PATH = 'P:/'
 USE_MAYA_SUBFOLDER = True
 
 def shotOrAssetFromFile(mayaFile):
 	"""return from maya File if there is an asset, a shot or what"""
-	split = mayaFile.path.split( '/' )
+	setti = sti.Settings()
+	gen = setti.General
+	if gen:
+		basePath = gen[ "basepath" ]
+		if basePath:
+			BASE_PATH = basePath.replace( '\\', '/' )
+	split = mayaFile.path.replace( BASE_PATH, '' ).split( '/' )
+	print split
 	if 'Assets' in mayaFile.path:
 		#P:\Sprite_Gallo\Maya\Assets\Gallo\Gallo_Final.ma
-		area = split[-1].split( '.' )[0][ split[-1].rindex( '_' ):]
-		index = [ass.AREAS.index(i) for i in ass.AREAS if i in area]
-		return ass.Asset( split[4], Project(split[1]), index[0] )
+		area = split[-1].split( '.' )[0][ split[-1].rindex( '_' )+1:]
+		index = [ass.AREAS.index(i) for i in ass.AREAS if i.lower() in area.lower()]
+		print index, 'index', area, 'area'
+		return ass.Asset( split[3], Project(split[0], BASE_PATH), index[0] )
 	elif 'Shots' in mayaFile.path:
 		#P:\Sprite_Gallo\Maya\Sequences\Entrevista\Shots\s001_T01\Anim\s001_T01_ANIM.ma
-		area = split[7]
+		area = split[6]
 		index = [sh.AREAS.index(i) for i in sh.AREAS if i in area]
-		return sh.Shot( split[6], seq.Sequence( split[4], Project( split[1] ) ), index[0] )
+		return sh.Shot( split[5], seq.Sequence( split[3], Project( split[0],BASE_PATH ) ), index[0] )
 	else:
 		return None
 

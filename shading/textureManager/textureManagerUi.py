@@ -9,8 +9,10 @@ import shading.textureManager.textureManager as tm
 reload(tm)
 import pipe.textureFile.textureFile as tfl
 reload(tfl)
-import maya.OpenMayaUI as mui
 import maya.cmds as mc
+import pipe.settings.settings as sti
+reload( sti )
+
 
 #load UI FILE
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
@@ -30,7 +32,13 @@ class ManagerUI(base,fom):
 		self.manager = tm.Manager()
 		self.fillTextures()
 		self.setObjectName( 'textureManager_WIN' )
-		uiH.loadSkin( self, 'QTDarkGreen' )
+		self.settings = sti.Settings()
+		gen = self.settings.General
+		
+		if gen:
+			skin = gen[ "skin" ]
+			if skin:
+				uiH.loadSkin( self, skin )
 
 	def _makeConnections(self):
 		QtCore.QObject.connect( self.searchPath_le, QtCore.SIGNAL( "textEdited (const QString&)" ), self.searchTexture )
@@ -38,6 +46,7 @@ class ManagerUI(base,fom):
 		self.connect(self.moveToFolder_btn, QtCore.SIGNAL("clicked()"), self.moveToFolder)
 		self.connect(self.replacePath_btn, QtCore.SIGNAL("clicked()"), self.replacePath)
 		self.connect(self.toTx_btn, QtCore.SIGNAL("clicked()"), self.toTx)
+		self.connect(self.createVersions_btn, QtCore.SIGNAL("clicked()"), self.createVersions)
 		self.connect(self.toPng_btn, QtCore.SIGNAL("clicked()"), self.toPng)
 		self.connect(self.refresh_btn, QtCore.SIGNAL("clicked()"), self.fillTextures)
 		self.connect(self.renameTexture_btn, QtCore.SIGNAL("clicked()"), self.renameTextures)
@@ -102,6 +111,12 @@ class ManagerUI(base,fom):
 		"""docstring for createTx"""
 		textures = self.getSelected()
 		self.manager.createTx( textures )
+		self.fillTextures()
+
+	def createVersions(self):
+		"""docstring for createVersions"""
+		textures = self.getSelected()
+		self.manager.createVersions( textures )
 		self.fillTextures()
 
 	def toPng(self):

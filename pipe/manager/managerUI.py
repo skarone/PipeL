@@ -30,6 +30,8 @@ import pipe.sequence.sequence as sq
 reload( sq )
 import pipe.sequence.sequenceUI as sqUI
 reload( sqUI )
+import pipe.shot.shot as sh
+reload( sh )
 import pipe.shot.shotUI as shUI
 reload( shUI )
 import pipe.settings.settings as sti
@@ -402,8 +404,8 @@ class ManagerUI(base,fom):
 			files = [
 				a.modelPath,
 				a.shadingPath,
-				a.rigPath,
 				a.hairPath,
+				a.rigPath,
 				a.finalPath
 				]
 			if self.compareServer_chb.isChecked(): #SERVER MODE ON
@@ -517,6 +519,7 @@ class ManagerUI(base,fom):
 				finalShots.append( a )
 			shots.extend( finalShots )
 		self.shots_tw.setRowCount( len( shots ) )
+		shots = sorted(shots, key=lambda s: s.name[s.name.index('_')+1:])
 		for i,s in enumerate( shots ):
 			item = QtGui.QTableWidgetItem( s.name )
 			item.setCheckState(QtCore.Qt.Unchecked )
@@ -703,7 +706,11 @@ class ManagerUI(base,fom):
 		else:
 			asset = item.data(32)
 		self.addFileToHistory( asset )
-		asset.open()
+		if asset.isZero:
+			mc.file( new = True, force = True )
+			asset.save()
+		else:
+			asset.open()
 
 	def saveScene(self):
 		"""save scene here"""
@@ -753,7 +760,16 @@ class ManagerUI(base,fom):
 			asset = item.data(32).toPyObject()
 		else:
 			asset = item.data(32)
-		asset.reference()
+		#TODO HERE WE NEED TO DETECT IF WE ARE IN A SHOT
+		gen = self.settings.General
+		assetPerShot = gen[ "useassetspershot" ]
+		if assetPerShot == 'True':
+			shotSel = prj.shotOrAssetFromFile( mfl.currentFile() )
+			#assetspath + assetname + department + file
+			newFil = asset.copy( shotSel.assetsPath + asset.path.split( 'Assets/' )[-1] )
+			newFil.reference()
+		else:
+			asset.reference()
 
 	def referenceSelected(self):
 		"""reference selected items"""
@@ -769,9 +785,9 @@ class ManagerUI(base,fom):
 		else:
 			asset = item.data(32)
 		if asset.extension == '.ma':
-			props = mfp.MayaFilePropertiesUi(asset,self)
+			props = mfp.MayaFilePropertiesUi(asset,self, False )
 		elif asset.extension == '.nk':
-			props = nkp.NukeFilePropertiesUi(asset,self)
+			props = nkp.NukeFilePropertiesUi(asset,self, False)
 		props.show()
 
 	def openFileInCurrentNuke(self):

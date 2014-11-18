@@ -60,7 +60,10 @@ def getMayaWindow():
 	Get the main Maya window as a QtGui.QMainWindow instance
 	@return: QtGui.QMainWindow instance of the top level Maya windows
 	"""
-	ptr = mui.MQtUtil.mainWindow()
+	try:
+		ptr = mui.MQtUtil.mainWindow()
+	except:
+		return
 	if USEPYQT:
 		return sip.wrapinstance( long( ptr ), QtCore.QObject )
 	else:

@@ -1,7 +1,9 @@
 import maya.OpenMaya as OpenMaya
 import pymel.core as pm
 
-geo = pm.PyNode('Pulpo_Grafica')
+
+geo = pm.PyNode('eyeLidLowUp_L1') #Geometry that you want to copy
+#select vertices that you want to move.. to geo position
 for loc in pm.ls( sl = True, fl = True ):
 	#loc = pm.PyNode('Pulpo_Body.vtx[166]')
 	#loc = pm.PyNode('locator1')
@@ -14,6 +16,7 @@ for loc in pm.ls( sl = True, fl = True ):
 		selectionList.add(geo.name())
 		nodeDagPath = OpenMaya.MDagPath()
 		selectionList.getDagPath(0, nodeDagPath)
+		print geo.name()
 	except:
 		raise RuntimeError('OpenMaya.MDagPath() failed on %s' % geo.name())
 
@@ -39,4 +42,3 @@ for loc in pm.ls( sl = True, fl = True ):
 			minLength = thisLength
 			closestVert = v
 	loc.setPosition( closestVert.getPosition(space='world') )
-	#pm.select(closestVert)

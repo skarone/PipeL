@@ -324,6 +324,16 @@ class Shot(object):
 		return []
 
 	@property
+	def assetsPath(self):
+		"""return assets paths"""
+		return self.path + '/Assets/'
+
+	@property
+	def assets(self):
+		"""return all the assets in the shot"""
+		return [ a for a in os.listdir( self.assetsPath ) if os.path.isdir( self.assetsPath + a )]
+
+	@property
 	def breakdownPath(self):
 		"""return the path of the breakdown"""
 		return self.path + '/' + self.name + '.breakdown'

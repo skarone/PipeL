@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>391</width>
-    <height>662</height>
+    <width>470</width>
+    <height>595</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Pool Manager</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_4">
+   <layout class="QVBoxLayout" name="verticalLayout_8">
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
@@ -189,6 +189,9 @@
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
            <widget class="QCheckBox" name="useFinalToExport_chb">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Import FINAL to Export</string>
             </property>
@@ -200,7 +203,7 @@
              <bool>true</bool>
             </property>
             <property name="text">
-             <string>Import Shading instead of reference it</string>
+             <string>Import instead of reference it</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -210,41 +213,97 @@
          </layout>
         </item>
         <item>
-         <widget class="QTabWidget" name="caches_tw">
-          <property name="currentIndex">
-           <number>0</number>
-          </property>
-          <widget class="QWidget" name="tab_3">
-           <attribute name="title">
-            <string>Anim</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout">
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <widget class="QTabWidget" name="caches_tw">
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <widget class="QWidget" name="tab_3">
+             <attribute name="title">
+              <string>Anim</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout">
+              <item>
+               <widget class="QListWidget" name="animCaches_lw"/>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="tab_4">
+             <attribute name="title">
+              <string>SkinFix</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+              <item>
+               <widget class="QListWidget" name="skinFixCaches_lw"/>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="tab_5">
+             <attribute name="title">
+              <string>Sim</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_7">
+              <item>
+               <widget class="QListWidget" name="simCaches_lw"/>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
-             <widget class="QListWidget" name="animCaches_lw"/>
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Area to Ref/Imp:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QListWidget" name="area_lw">
+              <property name="maximumSize">
+               <size>
+                <width>150</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="currentRow">
+               <number>1</number>
+              </property>
+              <item>
+               <property name="text">
+                <string>Model</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Shading</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Hrs</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Rig</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Final</string>
+               </property>
+              </item>
+             </widget>
             </item>
            </layout>
-          </widget>
-          <widget class="QWidget" name="tab_4">
-           <attribute name="title">
-            <string>SkinFix</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_6">
-            <item>
-             <widget class="QListWidget" name="skinFixCaches_lw"/>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="tab_5">
-           <attribute name="title">
-            <string>Sim</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_7">
-            <item>
-             <widget class="QListWidget" name="simCaches_lw"/>
-            </item>
-           </layout>
-          </widget>
-         </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QPushButton" name="replaceAlembic_btn">

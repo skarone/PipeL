@@ -176,6 +176,14 @@ class File(object):
 		"""return if the file is a zero kbytes file"""
 		return os.path.getsize( self.path ) == 0
 
+	def replaceData(self, searchAndReplace = [] ):
+		"""replace data in the file, by search and replace,
+		searchAndReplace = [['string1','newString1'],['string2','newstring2']]"""
+		filStr = self.data
+		for s in searchAndReplace:
+			filStr = filStr.replace( s[0], s[1] )
+		self.write( filStr )
+
 	@property
 	def data(self):
 		"""return the data if the file"""

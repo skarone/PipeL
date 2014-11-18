@@ -34,8 +34,6 @@ Nodes:
 		node.istype( 'type' ) # check if the node is a specific type
 
 	TODO:
-		node.inputs      # get incomming connections to node
-		node.outputs     # get outcomming connections to node
 		node.isinstance
 		node.isreference
 
@@ -183,6 +181,8 @@ def ls( strToSearch = None, **args ):
 	nodes = eval( "mc.ls(" + cmd + ")" )
 	if nodes:
 		return Nodes( nodes )
+	else:
+		return []
 
 def listRelatives( strToSearch = None, **args ):
 	"""Node version of list relatives maya command
@@ -497,6 +497,13 @@ class Node(object):
 			if nodes:
 				return Node( nodes[0] )
 		return None
+
+	def isolate(self):
+		currPanel = mc.getPanel( withFocus = True )
+		panelType = mc.getPanel( to = currPanel )
+		if panelType == 'modelPanel':
+			self()
+			mc.isolateSelect( currPanel, state = 1 )
 
 ##################################################
 # ATTRIBUTES CLASS

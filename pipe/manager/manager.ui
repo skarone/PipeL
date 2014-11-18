@@ -286,7 +286,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="assetsTab">
        <attribute name="title">
@@ -348,12 +348,12 @@
           </column>
           <column>
            <property name="text">
-            <string>Rig</string>
+            <string>Hrs</string>
            </property>
           </column>
           <column>
            <property name="text">
-            <string>Hrs</string>
+            <string>Rig</string>
            </property>
           </column>
           <column>

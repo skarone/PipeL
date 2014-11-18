@@ -171,14 +171,14 @@ class CacheManagerUI(base,fom):
 		"""export selection"""
 		pat = QtGui.QFileDialog.getSaveFileName(self, 'Save Set', self._selectedShot.setsPath, selectedFilter='*.ma')
 		if pat:
-			maFile = mfl.mayaFile( str( pat ) )
+			print 'patSSS',pat
+			maFile = mfl.mayaFile( str( pat[0] ) )
 			maFile.newVersion()
-			mc.file( str( pat ), preserveReferences=True, type='mayaAscii', exportSelected =True, prompt=True, force=True )
+			mc.file( str( maFile.path ), preserveReferences=True, type='mayaAscii', exportSelected =True, prompt=True, force=True )
 			if self.copyToServer_chb.isChecked():
 				serverFile = mfl.mayaFile( maFile.path.replace( prj.BASE_PATH, self.serverPath ) )
 				serverFile.newVersion()
 				maFile.copy( serverFile.path )
-
 
 	def _getCurrentTab(self):
 		"""return the visible table in the ui"""
@@ -205,6 +205,11 @@ class CacheManagerUI(base,fom):
 		tabNum = self._getCurrentTab()
 		importAsset = self.importShading_chb.isChecked()
 		if tabNum == 0:
+			gen = self.settings.General
+			assetPerShot = gen[ "useassetspershot" ]
+			if assetPerShot == 'True': assetPerShot = True
+			else: assetPerShot = False
+			shotSel = self._selectedShot
 			cacheTab, cacheTabNum = self._getCurrentCacheTab()
 			for v in xrange( cacheTab.count()):
 				i = cacheTab.item(v)
@@ -214,7 +219,8 @@ class CacheManagerUI(base,fom):
 					else:
 						n = i.data( 32 )
 					if '_' in n.name:
-						n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), n.name, not importAsset )
+						print 'ROW',self.area_lw.currentRow()
+						n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), self.area_lw.currentRow() , n.name, not importAsset, assetPerShot, shotSel )
 					else:
 						n.imp()
 					n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), n.name, not importAsset )

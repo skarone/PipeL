@@ -45,6 +45,7 @@ class CacheFile(fl.File):
 		return self._nodes
 
 	def export(self, fr = None, asset = None ):
+	def export(self, fr = None, asset = None, useDefaultName = False ):
 		"""export cache for selected file"""
 		if self.exists:
 			super(CacheFile, self).newVersion()
@@ -53,18 +54,23 @@ class CacheFile(fl.File):
 			if asset:
 				sel = mn.ls( self.nodes[0].name[:self.nodes[0].name.rindex(':')] + ':*', dag = True, ni = True, typ = 'mesh' )
 			sel.select()
+				self._nodes = sorted( mc.ls( self.nodes[0].name[:self.nodes[0].name.rindex(':')] + ':*', dag = True, ni = True, typ = ['mesh','nurbsCurve'] ) )
+				self._nodes = mn.Nodes( self._nodes )
+			self._nodes.select()
 			cmd += '-sl '
 		if not fr:
 			#get frame range from timeslider
 			start = mc.playbackOptions(q = True, min = True )
 			end   = mc.playbackOptions(q = True, max = True )
 			cmd += '-fr ' + str( start ) + ' ' + str( end )
+		if useDefaultName:
+			cmd += ' -sn '
 		print cmd
 		mc.refresh( su = True )
 		mc.AbcExport( j = cmd )
 		mc.refresh( su = False )
 
-	def exportAsset(self, asset, importFinal = False):
+	def exportAsset(self, asset, importFinal = False, useDefaultName = False ):
 		"""export all the geometry for the selected asset"""
 		#get asset..
 		#import asset for render
@@ -73,7 +79,7 @@ class CacheFile(fl.File):
 			#create blendshape between rig and render assets
 			createBlendshape()
 		#export cache
-		self.export( fr = None, asset = asset )
+		self.export( fr = None, asset = asset, useDefaultName = False )
 
 	def imp( self, **args ):
 		"""import cache to scene"""
@@ -88,20 +94,26 @@ class CacheFile(fl.File):
 		abcNode = mn.Node( eval( "mc.AbcImport(" + cmd + ")" ) )
 		return abcNode
 
-	def importForAsset(self, asset, customNamespace = None, referenceAsset = True ):
+	def importForAsset(self, asset, area = 1,customNamespace = None, referenceAsset = True, assetInShotFolder = False, shot = None, useDefaultName = False ):
 		"""import cache and assign to asset"""
 		#reference render asset
 		#connect cache to objects
 		if referenceAsset:
-			nodes = asset.shadingPath.reference( customNamespace )
+			if assetInShotFolder:
+				assetNewPath = asset.areaPath( area ).copy( shot.assetsPath + asset.areaPath( area ).path.split( 'Assets/' )[-1] )
+				nodes = assetNewPath.reference( customNamespace, useDefaultName )
+			else:
+				nodes = asset.areaPath( area ).reference( customNamespace, useDefaultName )
 			mshs = mn.ls( nodes, typ = 'mesh', ni = True, l = True )
 		else:
-			nodes = asset.shadingPath.imp( customNamespace )
-			if nodes:
-				print nodes
-				mshs = mn.ls( nodes, typ = 'mesh', ni = True, l = True )
+			if useDefaultName:
+				nodes = asset.areaPath( area ).imp( None )
 			else:
-				mshs = mn.ls( customNamespace + ':*', typ = 'mesh', ni = True, l = True )
+				nodes = asset.areaPath( area ).imp( customNamespace )
+			if nodes:
+				mshs = mn.ls( nodes, typ = ['mesh','nurbsCurve'], ni = True, l = True )
+			else:
+				mshs = mn.ls( customNamespace + ':*', typ = ['mesh','nurbsCurve'], ni = True, l = True )
 			#filter meshes
 		mshs.select()
 		abcNode = self.imp( mode = 'import', connect = "/", createIfNotFound = True )

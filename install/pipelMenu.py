@@ -32,6 +32,7 @@ mc.setParent('..', menu = True )
 
 #TOOLS
 mc.menuItem( l = 'General', sm = True, to = True )
+mc.menuItem( l = 'File Manager', c = "import pipe.mayaFile.mayaFilePropertiesUI as mflProp;reload(mflProp);mflProp.main()" )
 mc.menuItem( l = 'Save', c = "import pipe.mayaFile.mayaFile as mfl;reload(mfl);curFile = mfl.currentFile();curFile.newVersion();curFile.save()" )
 mc.menuItem( l = 'Curve Scatter', c = "import general.curveScatter.curveScatterUi as crvScatterUi;reload( crvScatterUi );crvScatterUi.main()" )
 mc.menuItem( l = 'Multi-Attribute', c = "import general.multiAttribute.multiAttributeUi as maUI; reload( maUI ); maUI.main()" )
@@ -92,6 +93,7 @@ mc.menuItem( l = 'Reload Selected', c = "import general.reference.reference as r
 mc.menuItem( l = 'Unload Selected', c = "import general.reference.reference as rf;reload(rf);rf.unloadSelected()" )
 mc.menuItem( l = 'Remove Selected', c = "import general.reference.reference as rf;reload(rf);rf.removeSelected()" )
 mc.menuItem( l = 'Duplicate Selected', c = "import general.reference.reference as rf;reload(rf);rf.dupReferenceForSelectedObjects()" )
+mc.menuItem( l = 'Make Selected For Shot', c = "import pipe.utils.utils as pipUtils;reload( pipUtils );pipUtils.makeAssetForShot()" )
 mc.setParent('..', menu = True )
 
 #RELOAD

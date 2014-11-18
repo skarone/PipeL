@@ -15,6 +15,7 @@ fom, base = uiH.loadUiType( uifile )
 
 import rigging.face.face as fc
 reload( fc )
+import rigging.utils.utils as utl
 
 class faceRigUi(base, fom):
 	"""docstring for ProjectCreator"""
@@ -31,6 +32,7 @@ class faceRigUi(base, fom):
 		self.connect(self.fillMeshToDeform_btn, QtCore.SIGNAL("clicked()"), self.fillMeshToDeform)
 		self.connect(self.fillVertecesToIgnore_btn, QtCore.SIGNAL("clicked()"), self.fillVertecesToIgnore)
 		self.connect(self.fillMeshToSkin_btn, QtCore.SIGNAL("clicked()"), self.fillMeshToSkin)
+		self.connect(self.fillSkin_btn, QtCore.SIGNAL("clicked()"), self.fillSkin)
 		self.connect(self.createSofts_btn, QtCore.SIGNAL("clicked()"), self.createSofts)
 		uiH.loadSkin( self, 'QTDarkGreen' )
 
@@ -47,6 +49,12 @@ class faceRigUi(base, fom):
 	def fillMeshToSkin(self):
 		"""docstring for fname"""
 		self.meshToSkin_le.setText( mn.ls( sl = True, dag = True, s = True )[0].name )
+
+	def fillSkin(self):
+		"""docstring for fillSkin"""
+		skin = utl.getSkinFromGeo( mn.ls( sl = True, dag = True, s = True )[0].name )
+		print skin
+		self.skin_le.setText( skin[0] )
 
 	def importRig(self):
 		"""import rig to scene"""
@@ -68,7 +76,8 @@ class faceRigUi(base, fom):
 		"""create face rig based on selection"""
 		meshWithRivets = str( self.meshToDeform_le.text() )
 		skinMesh = str( self.meshToSkin_le.text() )
-		fc.softModsToStickys( meshWithRivets, '', skinMesh )
+		skin = str( self.skin_le.text() )
+		fc.softModsToStickys( meshWithRivets, skin, skinMesh )
 
 
 def main():

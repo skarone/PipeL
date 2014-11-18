@@ -26,7 +26,7 @@ def customRead():
 	n['PipeL'].setFlag( 0 )
 	return n
 
-nuke.menu( 'Nodes' ).addCommand( 'Image/Read', customRead, 'r' )
+nuke.menu( 'Nodes' ).addCommand( 'Image/ReadPipel', customRead, 'Shift+r' )
 
 nuke.addOnUserCreate( nuk.general.read.createVersionKnobs, nodeClass='Read' )
 nuke.addKnobChanged( nuk.general.read.updateVersionKnob, nodeClass='Read' )

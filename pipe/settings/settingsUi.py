@@ -60,6 +60,13 @@ class Settings(base, fom):
 				else: 
 					state = QtCore.Qt.Unchecked
 				self.useMayaSubFolder_chb.setCheckState( state )
+			if gen.has_key( 'useassetspershot' ):
+				usemayasubfolder = gen[ "useassetspershot" ]
+				if usemayasubfolder == 'True': 
+					state = QtCore.Qt.Checked 
+				else: 
+					state = QtCore.Qt.Unchecked
+				self.useAssetsPerShot_chb.setCheckState( state )
 			if gen.has_key( 'localnukepath' ):
 				localnukepath = gen[ 'localnukepath' ]
 				self.nukeLocalPath_le.setText( localnukepath )
@@ -110,6 +117,7 @@ class Settings(base, fom):
 		self.settings.write( 'General', 'maketxpath', str( self.makeTxPath_le.text().replace( '\\', '/' ) ))
 		self.settings.write( 'General', 'autoload', self.autoLoadManager_chb.isChecked() )
 		self.settings.write( 'General', 'usemayasubfolder', self.useMayaSubFolder_chb.isChecked() )
+		self.settings.write( 'General', 'useassetspershot', self.useAssetsPerShot_chb.isChecked() )
 		self.settings.write( 'General', 'changeinternalpaths', self.changeInternalPaths_chb.isChecked() )
 		self.settings.write( 'General', 'automaketx', self.makeTx_chb.isChecked() )
 		self.settings.write( 'General', 'skin', str( self.skin_cmb.currentText() ))
