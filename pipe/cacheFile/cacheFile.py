@@ -44,7 +44,6 @@ class CacheFile(fl.File):
 		"""return the nodes for the cache"""
 		return self._nodes
 
-	def export(self, fr = None, asset = None ):
 	def export(self, fr = None, asset = None, useDefaultName = False ):
 		"""export cache for selected file"""
 		if self.exists:
