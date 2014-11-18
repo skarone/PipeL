@@ -97,6 +97,11 @@ class BlendShapeUI(base,fom):
 		"""return selected targets from list"""
 		return [ bls.BlendShapeMesh(s.text(), self.baseMesh ) for s in self.targets_lw.selectedItems()]
 
+	def targetsOff(self):
+		"""docstring for targetsOff"""
+		for s in range( self.targets_lw.count() ):
+			mn.Node( self.targets_lw.item( s).text() ).a.v.v = 0
+
 	def setBaseMesh(self):
 		"""set base mesh based on selection"""
 		sel = mc.ls( sl = True )
@@ -174,13 +179,14 @@ class BlendShapeUI(base,fom):
 
 	def editMesh(self):
 		"""show selected mesh to edit"""
+		self.targetsOff()
 		self.selTargets[0].a.v.v = 1
 		utl.isolate( self.selTargets[0].name )
 
 	def doneEdit(self):
 		"""docstring for doneEdit"""
 		utl.desIsolate()
-		self.selTargets[0].a.v.v = 0
+		self.targetsOff()
 
 	def deleteMesh(self):
 		"""delete selected meshes from blendshape"""

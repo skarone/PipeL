@@ -88,6 +88,7 @@ mc.menuItem( l = 'Reload Selected', c = "import general.reference.reference as r
 mc.menuItem( l = 'Unload Selected', c = "import general.reference.reference as rf;reload(rf);rf.unloadSelected()" )
 mc.menuItem( l = 'Remove Selected', c = "import general.reference.reference as rf;reload(rf);rf.removeSelected()" )
 mc.menuItem( l = 'Duplicate Selected', c = "import general.reference.reference as rf;reload(rf);rf.dupReferenceForSelectedObjects()" )
+mc.menuItem( l = 'Make Selected For Shot', c = "import pipe.utils.utils as pipUtils;reload( pipUtils );pipUtils.makeAssetForShot()" )
 mc.setParent('..', menu = True )
 
 #RELOAD

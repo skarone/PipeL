@@ -127,3 +127,6 @@ def dupReferenceForSelectedObjects():
 				mm.eval( e.replace( baseOldName, baseNewName, 1 ) )
 			except:
 				continue
+
+
+

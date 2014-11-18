@@ -29,6 +29,7 @@ import pipe.mayaFile.mayaFile as mfl
 reload( mfl )
 import general.mayaNode.mayaNode as mn
 reload( mn )
+import re
 
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
@@ -361,7 +362,7 @@ class MayaFilePropertiesUi(base, fom):
 			self.assets_tw.setItem( i, 1, item )
 			needs = 'No'
 			if 'Shot' in t.path:
-				origFile = mfl.mayaFile( result = re.sub(r'Sequences[^)]*Assets', 'Assets', t.path) )
+				origFile = mfl.mayaFile( re.sub(r'Sequences[^)]*Assets', 'Assets', t.path) )
 				if t.isOlderThan( origFile ):
 					needs = 'Yes'
 			item = QtGui.QTableWidgetItem( needs )

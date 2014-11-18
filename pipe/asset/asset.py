@@ -13,6 +13,7 @@ import pipe.textureFile.textureFile as tfl
 reload( tfl )
 import pipe.dependency.dependency as dp
 reload( dp )
+
 try:
 	import general.mayaNode.mayaNode as mn
 except:
@@ -45,6 +46,7 @@ def getAssetFromNode(s, project):
 	if not index:
 		index.append(0)
 	return Asset( assetName[ :assetName.rindex( '_' )], project, index[0] ) 
+
 
 class Asset(object):
 	"""asset production object in the system, files and folders"""
