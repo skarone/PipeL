@@ -21,11 +21,11 @@ fom, base = uiH.loadUiType( uifile )
 
 class LoadReadsUi(base,fom):
 	"""manager ui class"""
-	def __init__(self):
+	def __init__(self, parent=None):
 		if uiH.USEPYQT:
-			super(base, self).__init__()
+			super(base, self).__init__(parent)
 		else:
-			super(LoadReadsUi, self).__init__()
+			super(LoadReadsUi, self).__init__(parent)
 		self.setupUi(self)
 		self.settings = sti.Settings()
 		self.gen = self.settings.General
@@ -145,7 +145,7 @@ class LoadReadsUi(base,fom):
 
 def main():
 	global PyForm
-	PyForm=LoadReadsUi()
+	PyForm=LoadReadsUi(parent=QtGui.QApplication.activeWindow())
 	PyForm.show()
 		
 if __name__=="__main__":

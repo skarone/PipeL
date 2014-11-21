@@ -28,6 +28,7 @@ mc.menuItem( l = 'Project', sm = True, to = True )
 mc.menuItem( l = 'Manager', c = "import pipe.manager.managerUI as manUI; reload( manUI ); manUI.main()" )
 mc.menuItem( l = 'Cache Manager', c = "import pipe.cacheManager.cacheManager as chM;reload( chM );chM.main()" )
 mc.menuItem( l = 'Asset Exporter', c = "import modeling.exporter.exporterUI as exUI; reload(exUI); exUI.main()" )
+mc.menuItem( l = 'To Do List', c = "import general.toDoList.toDoList as todoUi; reload(todoUi); todoUi.main()" )
 mc.setParent('..', menu = True )
 
 #TOOLS

@@ -6,6 +6,9 @@ from Qt import QtGui,QtCore
 
 import maya.cmds as mc
 import general.mayaNode.mayaNode as mn
+import pipe.settings.settings as sti
+reload( sti )
+
 
 
 """
@@ -31,7 +34,6 @@ class MultiAttributeUI(base, fom):
 		self.fillByTypeCMB()
 		self.attribute_le.setFocus()
 		self.setObjectName( 'multiAttr_WIN' )
-		uiH.loadSkin( self, 'QTDarkGreen' )
 		self.attribute_le.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.attribute_le.customContextMenuRequested.connect(self.showAttributes)
 		self.completer = TagsCompleter( self.attribute_le )
@@ -44,6 +46,12 @@ class MultiAttributeUI(base, fom):
 		self.toCompleter.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
 		self.toCompleter.setWidget( self.toAttr_le )
 		self._makeConnections()
+		self.settings = sti.Settings()
+		gen = self.settings.General
+		if gen:
+			skin = gen[ "skin" ]
+			if skin:
+				uiH.loadSkin( self, skin )
 
 	def _makeConnections(self):
 		"""docstring for _makeConnections"""
