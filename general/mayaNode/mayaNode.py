@@ -243,7 +243,7 @@ class Nodes(list):
 		try:
 			return [ n for n in self ]
 		except:
-			return None
+			return []
 
 	@property
 	def names(self):
@@ -251,7 +251,7 @@ class Nodes(list):
 		try:
 			return [ n.name for n in self ]
 		except:
-			return None
+			return []
 
 	@property
 	def a(self):
@@ -298,21 +298,25 @@ class Node(object):
 
 	@name.setter
 	def name(self, newName ):
-		"""rename object"""
+		"""rename object
+		:param newName: new Name of node
+		:type newName: str"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		self._name = mc.rename( self.name, newName )
 
 	@property
 	def fullname(self):
-		""":returns: the FullName of the node, if not exists return False"""
+		""":returns: the FullName of the node, if not exists return False
+		:rtype: str"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		return mc.ls( '*' + self._name, l = True )[0]
 
 	@property
 	def parent(self):
-		""":returns: the parent of the node"""
+		""":returns: the parent of the node
+		:rtype: Node"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		p = mc.listRelatives( self._name, p = True )
@@ -324,7 +328,8 @@ class Node(object):
 	@parent.setter
 	def parent(self, newParent):
 		"""set a new parent for node, supports string and Node, if newParent = None, set to world
-		:param newParent: mayaNode to set for parent for this node"""
+		:param newParent: mayaNode to set for parent for this node
+		:type newParent: str or Node"""
 		if not self.exists:
 			raise NodeNotFound( self.name )
 		if not newParent:
@@ -338,7 +343,8 @@ class Node(object):
 
 	@property
 	def allparents(self):
-		""":returns: all parents of the node... recursive"""
+		""":returns: all parents of the node... recursive
+		:rtype: Nodes or None"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		p = self.parent
@@ -354,7 +360,8 @@ class Node(object):
 
 	@property
 	def children(self):
-		""":returns: children of the node"""
+		""":returns: children of the node
+		:rtype: Node[] or []"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		c = mc.listRelatives( self._name, c = True, f = True )
@@ -365,7 +372,8 @@ class Node(object):
 
 	@property
 	def allchildren(self):
-		""":returns: all the children in recursive"""
+		""":returns: all the children in recursive
+		:rtype: Node[] or []"""
 		child = self.children
 		for c in child:
 			child.extend( c.allchildren )
@@ -373,32 +381,37 @@ class Node(object):
 
 	@property
 	def exists(self):
-		""":returns: True or False, check if the node really exists"""
+		""":returns: True or False, check if the node really exists
+		:rtype: bool"""
 		return mc.objExists( self._name )
 
 	@property
 	def type(self):
-		""":return: Node Type"""
+		""":return: Node Type
+		:rtype: str"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		return mc.objectType( self.name )
 
 	def istype(self, typ ):
-		""":returns: True of False, if the node is a specific type"""
+		""":returns: True of False, if the node is a specific type
+		:rtype: bool"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		return mc.objectType( self.name, isType = typ )
 
 	@property
 	def a(self):
-		""":returns: attribute object to work with =)"""
+		""":returns: attribute object to work with =)
+		:rtype: NodeAttribute"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		return NodeAttributeCollection( self )
 
 	@property
 	def namespace(self):
-		""":returns: namespace of node"""
+		""":returns: namespace of node
+		:rtype: Namespace"""
 		return Namespace.fromNode( self )
 
 	@namespace.setter
@@ -418,19 +431,24 @@ class Node(object):
 			self.name = oldName.replace( self.namespace.name[1:], newNamespace.name[1:] )
 
 	def attr(self, attribute):
-		""":returns: attribute object to work with =)"""
+		""":param attribute: attribute name
+		:type attribute: str
+		:returns: attribute object to work with =)
+		:rtype: NodeAttribute"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
 		return NodeAttribute(self, attribute)
 
 	@property
 	def worldPosition(self):
-		""":return: 3 float, the world position if it is a transform node"""
+		""":return: the world position if it is a transform node
+		:rtype: float[3]"""
 		return mc.xform( self.name, q = True, ws = True, rp = True )
 
 	@property
 	def locked(self):
-		""":returns: True or False, lock state of the Node"""
+		""":returns: True or False, lock state of the Node
+		:rtype: bool"""
 		if not self.exists:
 			raise NodeNotFound( self.name )
 		return mc.lockNode( self.name, q = True, l = True )[0]
@@ -443,7 +461,8 @@ class Node(object):
 		mc.lockNode( self.name, l = state )
 
 	def duplicate(self, newName = None):
-		""":returns: new duplicated node"""
+		""":returns: new duplicated node
+		:rtype: Node"""
 		if not self.exists:
 			raise NodeNotFound( self.name )
 		if newName:
@@ -459,7 +478,8 @@ class Node(object):
 		mc.delete( self.name )
 
 	def listAttr(self, **args):
-		""":returns: list the attributes of the node"""
+		""":returns: list the attributes of the node
+		:rtype: NodeAttribute[]"""
 		cmd = ''
 		for a in args.keys():
 			val = args[a]
@@ -473,7 +493,8 @@ class Node(object):
 
 	@property
 	def shape(self):
-		""":returns: the shape of the node if there is one"""
+		""":returns: the shape of the node if there is one
+		:rtype: Node"""
 		sha = listRelatives( self.name, s = True, ni = True, f = True )
 		if sha:
 			return sha[0]
@@ -481,13 +502,15 @@ class Node(object):
 
 	@property
 	def outputs(self):
-		"""return all the outputs connections from node"""
+		""":returns: all the outputs connections from node
+		:rtype: NodeAttribute"""
 		cons = [ NodeAttribute( Node( a.split('.')[0] ), a.split('.')[1] ) for a in mc.listConnections( self.name, sh = True, s = False, scn = True, p = True, c = True )]
 		return [cons[n:n+2] for n in range(0, len(cons), 2)]
 
 	@property
 	def shader(self):
-		"""return the shading engine from node"""
+		""":returns: the shading engine from node
+		:rtype: Node"""
 		if self.shape:
 			nodes = mc.listConnections(self.shape,type='shadingEngine')
 			if nodes:
@@ -499,6 +522,7 @@ class Node(object):
 		return None
 
 	def isolate(self):
+		"""isolate node in viewport"""
 		currPanel = mc.getPanel( withFocus = True )
 		panelType = mc.getPanel( to = currPanel )
 		if panelType == 'modelPanel':
@@ -520,7 +544,8 @@ class NodesAttributes(list):
 
 	@property
 	def nodes(self):
-		"""return the nodes in the attributes array"""
+		""":returns: the nodes in the attributes array
+		:rtype: Nodes"""
 		try:
 			return Nodes( [ a.node for a in self ] )
 		except:
@@ -528,7 +553,8 @@ class NodesAttributes(list):
 
 	@property
 	def values(self):
-		"""return the values of the nodes"""
+		""":returns: the values of the nodes
+		:rtype: [multi]"""
 		try:
 			return [ a.v for a in self ]
 		except:
@@ -551,22 +577,25 @@ class NodeAttribute(object):
 
 	@property
 	def fullname(self):
-		"""full name of the attribute with the node --> node.attribute string"""
+		""":returns: full name of the attribute with the node --> node.attribute string
+		:rtype: str"""
 		return self._node.name + "." + self._attribute
 
 	@property
 	def name(self):
-		"""name of the attribute"""
+		""":returns: name of the attribute
+		:rtype: str"""
 		return self._attribute
 
 	@property
 	def node(self):
-		"""return node of the current attribute"""
+		""":returns: node of the current attribute
+		:rtype: Node"""
 		return self._node
 
 	@property
 	def v(self):
-		"""attribute value"""
+		""":returns: attribute value"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self.name )
 		return mc.getAttr( self.fullname )
@@ -574,7 +603,8 @@ class NodeAttribute(object):
 	@v.setter
 	def v(self, value):
 		"""Set the attribute value.. 
-		Handle different types"""
+		Handle different types
+		:param value: new value to set"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		ty = self.type
@@ -604,7 +634,8 @@ class NodeAttribute(object):
 
 	@property
 	def children(self):
-		"""Return children attributes"""
+		""":returns: children attributes
+		:rtype: NodeAttribute[]"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		tmpAttr = re.sub( '\[\d+\]$', '' , self._attribute )
@@ -616,14 +647,16 @@ class NodeAttribute(object):
 
 	@property
 	def type(self):
-		"""return Attribute Type"""
+		""":returns: Attribute Type
+		:rtype: str"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		return mc.getAttr(self.fullname, type=True)
 
 	@property
 	def exists(self):
-		"""attribute exists? """
+		""":returns: attribute exists? 
+		:rtype: bool"""
 		tmpAttr = re.sub( '\[\d+\]$', '' , self._attribute )
 		tmpAttr = tmpAttr[tmpAttr.rfind( '.' )+1:]
 		if self._node.exists:
@@ -633,7 +666,8 @@ class NodeAttribute(object):
 
 	@property
 	def locked(self):
-		"""lock attribute"""
+		""":returns: if attribute is locked
+		:rtype: bool"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		return mc.getAttr( self.fullname, l = True )
@@ -647,55 +681,62 @@ class NodeAttribute(object):
 
 	@property
 	def size(self):
-		"""retur the size of the attribute,
-		usefull for array attributes"""
+		""":returns: the size of the attribute,
+		usefull for array attributes
+		:rtype: int"""
 		return mc.getAttr( self.fullname, size = True )
 
 	@property
 	def max(self):
-		"""return max value if it has, else None"""
+		""":returns: max value if it has, else None
+		:rtype: float"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		return mc.addAttr( self.fullname, q = True, max = True )
 
 	@max.setter
 	def max(self, value):
-		"""set new max value for attribute"""
+		"""set new max value for attribute
+		:param value: new value to be max"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		mc.addAttr( self.fullname, e = True, max = value )
 
 	@property
 	def min(self):
-		"""return min value if it has, else None"""
+		""":returns: min value if it has, else None
+		:rtype: float"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		return mc.addAttr( self.fullname, q = True, min = True )
 
 	@min.setter
 	def min(self, value):
-		"""set new min value for attribute"""
+		"""set new min value for attribute
+		:param value: new value to be min"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		mc.addAttr( self.fullname, e = True, min = value )
 
 	@property
 	def default(self):
-		"""return default value if it has, else None"""
+		""":returns: default value if it has, else None"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		return mc.attributeQuery( self._attribute, n = self._node.name, ld = True )[0]
 
 	@default.setter
 	def default(self, value):
-		"""set new default value for attribute"""
+		"""set new default value for attribute
+		:param value: value to be default"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		mc.addAttr( self.fullname, e = True, dv = value )
 
 	@property
 	def input(self):
-		"""get input connection if there is one, None if not"""
+		"""get input connection if there is one, None if not
+		:returns: NodeAttribute[]"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		con = mc.listConnections( self.fullname, p = True, d = False, skipConversionNodes = True )
@@ -706,7 +747,8 @@ class NodeAttribute(object):
 
 	@property
 	def output(self):
-		"""get output connections if there is one, None if not, this return an array"""
+		"""get output connections if there is one, None if not, this return an array
+		:returns: NodesAttributes"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		con = mc.listConnections( self.fullname, p = True, s = True, skipConversionNodes = True )
@@ -718,7 +760,8 @@ class NodeAttribute(object):
 
 	@property
 	def overrided(self):
-		"""return if the attribute has override"""
+		""":returns: if the attribute has override
+		:rtype: bool"""
 		lay = mc.editRenderLayerGlobals( query=True, currentRenderLayer=True )
 		if not 'defaultRenderLayer' == lay:
 			if any( a.node.name == lay for a in c.a.v.output ):
@@ -727,7 +770,9 @@ class NodeAttribute(object):
 
 	@overrided.setter
 	def overrided(self, value):
-		"""set an override for attribute"""
+		"""set an override for attribute
+		:param value: set overrded attribute or not
+		:type value: bool"""
 		lay = mc.editRenderLayerGlobals( query=True, currentRenderLayer=True )
 		if not 'defaultRenderLayer' == lay:
 			if value:
@@ -782,7 +827,8 @@ class NodeAttribute(object):
 		return self.isConnected( other )
 
 	def isConnected(self, other, inOrder = True ):
-		"""check if the attributes are connected"""
+		""":param other: other AttributeNode
+		:returns: if the attributes are connected"""
 		if not self.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		if not other.exists:
@@ -811,7 +857,9 @@ class NodeAttribute(object):
 		eval( "mc.addAttr( '"+ self._node.name + "', longName = '" + self._attribute + "'," + cmd + ")" )
 
 	def alias(self, newName):
-		"""alias the current attribute with a new name"""
+		"""alias the current attribute with a new name
+		:param newName: alias name for the attribute
+		:type newName: str"""
 		mc.aliasAttr( newName, self.fullname )
 
 
@@ -852,7 +900,7 @@ class Namespace(object):
 
 	@property
 	def name(self):
-		"""return the namespace in string"""
+		""":returns: the namespace in string"""
 		return self._namespace
 	
 	def create(self):
@@ -868,12 +916,14 @@ class Namespace(object):
 
 	@property
 	def exists(self):
-		"""check if current namespace exists"""
+		""":returns: if current namespace exists
+		:rtype: bool"""
 		return mc.namespace( ex = self._namespace )
 
 	@property
 	def children(self):
-		"""return the children of the namespace if exists"""
+		""":returns: the children of the namespace if exists
+		:rtype: Namespace[]"""
 		if not self.exists:
 			raise NamespaceNotFound( self.name )
 		with self.set():
@@ -884,7 +934,8 @@ class Namespace(object):
 
 	@property
 	def nodes(self):
-		"""return the nodes that have the namespace"""
+		""":returns: the nodes that have the namespace
+		:rtype: Nodes"""
 		if not self.exists:
 			raise NamespaceNotFound( self.name )
 		with self.set():
@@ -895,7 +946,8 @@ class Namespace(object):
 
 	@property
 	def firstParent(self):
-		"""return the first namespace of current namespace"""
+		""":returns: the first namespace of current namespace
+		:rtype: Namespace"""
 		nspace = self.parent
 		if not self.parent.name == ':':
 			nspace = nspace.firstParent
@@ -905,7 +957,8 @@ class Namespace(object):
 
 	@property
 	def parent(self):
-		"""return the parent of the current namespace"""
+		""":returns: the parent of the current namespace
+		:rtype: Namespace"""
 		if not self.exists:
 			raise NamespaceNotFound( self.name )
 		p = self.name.rindex(':')
@@ -916,7 +969,8 @@ class Namespace(object):
 
 	@property
 	def empty(self):
-		"""return if the namespace is empty"""
+		""":returns: if the namespace is empty
+		:rtype: bool"""
 		nods = self.nodes
 		if nods:
 			return True
@@ -939,7 +993,8 @@ class Namespace(object):
 		return nsTempSet
 
 	def move(self, other):
-		"""move current nodes in namespace to other, also support if other is a string"""
+		"""move current nodes in namespace to other, also support if other is a string
+		:param other: new Namespace to use"""
 		if not self.exists:
 			raise NamespaceNotFound( self.name )
 		if isinstance( other, str ):
@@ -957,14 +1012,16 @@ class Namespace(object):
 		self.move( other )
 
 	def rename(self, newName):
-		"""rename current namespace, it will rename all childs namespaces"""
+		"""rename current namespace, it will rename all childs namespaces
+		:param newName: new name of namespace"""
 		if not self.exists:
 			raise NamespaceNotFound( self.name )
 		mc.namespace( ren = newName, f = True )
 
 	@staticmethod
 	def fromNode(node):
-		"""return namespace from Node"""
+		""":returns: namespace from Node
+		:rtype: Namespace"""
 		p = node.name.rfind( ':' )
 			
 		if p == -1:
