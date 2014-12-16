@@ -68,10 +68,11 @@ mc.setParent('..', menu = True )
 
 #RIGGING
 mc.menuItem( l = 'Rigging', sm = True, to = True )
+mc.menuItem( l = 'BlendShapes Tool', c = "import rigging.blendshape.blendshapesUi as bld;reload( bld );bld.main()" )
 mc.menuItem( l = 'Curved-Base Tool', c = "import rigging.curveBased.curveBasedUi as crvBaseUI;reload( crvBaseUI );crvBaseUI.main()" )
 mc.menuItem( l = 'Wrap To Joints', c = "import rigging.utils.wrapToJoints.nmpWrapToJoints as wrpToJ;wrpToJ.nmpWrapToJoints()" )
 mc.menuItem( l = 'Copy Soft Weights To Joint', c = "import rigging.utils.SoftModCluster.SoftModCluster as sfm;reload(sfm);sfm.copyWeightsToJointFromSelection();" )
-mc.menuItem( l = 'Create Controls For Selection', c = "import rigging.utils.createControls.createControls as ctls;reload( ctls );ctls.createControlsForSelection();" )
+mc.menuItem( l = 'Create Controls For Selection', c = "import rigging.utils.createControls.createControlsUi as ctlsUi;reload( ctlsUi );ctlsUi.main();" )
 mc.menuItem( l = 'TF Smooth Skin', c = "import rigging.utils.tf_smoothSkinWeight as tf_smoothSkinWeight;tf_smoothSkinWeight.paint()" )
 mc.menuItem( l = 'BBoxCurve For Selection', c = "import modeling.bBoxToCurve.bBoxToCurve as bbox;reload( bbox );bbox.BBoxToSel();" )
 mc.menuItem( l = 'Rivet On Mesh', c = "import rigging.stickyControl.stickyControl as stk;reload( stk );stk.createRivetOnMesh( name = 'boton' );" )
@@ -83,6 +84,7 @@ mc.setParent('..', menu = True )
 
 #LIGHTING
 mc.menuItem( l = 'Lighting/Render', sm = True, to = True )
+mc.menuItem( l = 'Light Rig', c = "import render.lightRig.lightRig as ltRig;reload( ltRig );ltRig.loadUnloadLightRig()" )
 mc.menuItem( l = 'Lighter Helper', c = "import render.lighterHelper.lighterHelperUI as litHelpUI; reload( litHelpUI ); litHelpUI.main()" )
 mc.menuItem( l = 'Render Manager', c = "import render.renderManager.renderManager as rm;reload(rm);rm.main()" )
 mc.menuItem( l = 'Mask AOV Create', c = 'import maya.mel as mm;mm.eval( \'source "'+PYFILEDIR.replace( '\\', '/' ).replace( 'install','render/mask' ) +'/AOVsArnoldMasker_1.0v.mel";\')' )

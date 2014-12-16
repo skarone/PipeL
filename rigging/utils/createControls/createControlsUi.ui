@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>241</width>
+    <height>140</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Control For Selection!</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Control Shape:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="shape_cmb">
+        <item>
+         <property name="text">
+          <string>circleX</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>circleY</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>circleZ</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>arrow</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>cross</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>square</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>cube</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>orient</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>sphere</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>plus</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QCheckBox" name="last_chb">
+        <property name="text">
+         <string>Last Also</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="recursive_chb">
+        <property name="text">
+         <string>Recursive</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="constraint_chb">
+        <property name="text">
+         <string>Constraint</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QPushButton" name="create_btn">
+      <property name="text">
+       <string>Create</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

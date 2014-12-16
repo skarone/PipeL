@@ -9,11 +9,11 @@ reload( ctls )
 ctls.createControlsForSelection()
 """
 
-def createControlsForSelection( shape = 'circleX' ):
+def createControlsForSelection( shape = 'circleX',childsAlso = True, par = None, lastAlso = False, constraint = True ):
 	#CREATE A CONTROL FOR THE SELECTED OBJECTS, WITH OFFSET GROUP AND CONSTRAINT
 	#ALSO FOR THEIR CHILDRENS EXCEPT LAST
 	for s in mn.ls( sl = True ):
-		grp = createControl( s, shape )
+		grp = createControl( s, shape, childsAlso, par, lastAlso, constraint )
 
             
 def createControl( s, shape = 'circleX', childsAlso = True, par = None, lastAlso = False, constraint = True ):

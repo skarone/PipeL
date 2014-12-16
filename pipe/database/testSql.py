@@ -21,7 +21,7 @@ class ProjectDataBase(object):
 			cur = con.cursor()    
 			cur.execute("CREATE TABLE Assets( Id INTEGER PRIMARY KEY, Name TEXT, Type TEXT, Area TEXT,Sequence TEXT, UserId INTEGER, Priority INTEGER, Status INTEGER, TimeStart TEXT, TimeEnd TEXT );")
 			cur.execute("CREATE TABLE Users( Id INTEGER PRIMARY KEY, Name TEXT UNIQUE, Permisions INTEGER );")
-			cur.execute("CREATE TABLE Notes( Id INTEGER PRIMARY KEY, Note TEXT, UserId INTEGER, AssetId INTEGER, Date TEXT );")
+			cur.execute("CREATE TABLE Notes( Id INTEGER PRIMARY KEY, Note TEXT, UserId INTEGER, AssetId INTEGER, Date TEXT, Version INTEGER );")
 
 	def addAsset(self, name, typ, area, seq, user, priority, status, timeStart, timeEnd ):
 		"""add asset to database"""
@@ -61,33 +61,37 @@ class ProjectDataBase(object):
 			con.commit()
 			return cur.fetchall()
 			
-	def setAssetTime(self, assetName, timeStart, timeEnd):
+	def setAssetTime(self, assetName, area, timeStart, timeEnd):
 		"""docstring for setAssetTime"""
+		assetId = self.getAssetIdFromName(assetName, area)
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
-			cur.execute("UPDATE Assets SET TimeStart = %s, TimeEnd = %s WHERE Name = %s"%(timeStart,timeEnd,assetName)) 
+			cur.execute("UPDATE Assets SET TimeStart = %s, TimeEnd = %s WHERE Id = %i"%(timeStart,timeEnd,assetId)) 
 
-	def setAssetUser(self, assetName, userName):
-		"""docstring for setAssetUser"""
+	def setAssetUser(self, assetName, area, userName):
+		"""assing user to asset"""
+		assetId = self.getAssetIdFromName(assetName, area)
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
-			cur.execute("UPDATE Assets SET User = %s WHERE Name = %s"%(userName, assetName)) 
+			cur.execute("UPDATE Assets SET User = %s WHERE Id = %i"%(userName, assetId)) 
 
-	def setAssetStatus(self, assetName, status):
-		"""docstring for setAssetStatys"""
+	def setAssetStatus(self, assetName, area, status):
+		"""set asset status"""
+		assetId = self.getAssetIdFromName(assetName, area)
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
-			cur.execute("UPDATE Assets SET Status = %i WHERE Name = %s"%(status, assetName)) 
+			cur.execute("UPDATE Assets SET Status = %i WHERE Name = %i"%(status, assetId)) 
 
-	def setAssetPriority(self, assetName, priority):
-		"""docstring for setAssetPriority"""
+	def setAssetPriority(self, assetName, area, priority):
+		"""set asset priority"""
+		assetId = self.getAssetIdFromName(assetName, area)
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
-			cur.execute("UPDATE Assets SET Priority = %i WHERE Name = %s"%(priority, assetName)) 
+			cur.execute("UPDATE Assets SET Priority = %i WHERE Id = %i"%(priority, assetId)) 
 
 	def getAssetIdFromName(self, assetName, area):
 		"""return user id from user name"""
@@ -140,7 +144,7 @@ class ProjectDataBase(object):
 			con.commit()
 			return cur.fetchone()[0]
 
-	def addNote(self, note, user, asset, area):
+	def addNote(self, note, user, asset, area, version ):
 		"""add note to database"""
 		userId = self.getUserIdFromName( user )
 		assetId = self.getAssetIdFromName( asset, area )
@@ -148,11 +152,15 @@ class ProjectDataBase(object):
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
-			cur.execute("INSERT INTO Notes(Note, UserId, AssetId, Date) VALUES(?,?,?,?)",(note,userId,assetId,date))
+			cur.execute("INSERT INTO Notes(Note, UserId, AssetId, Date, Version) VALUES(?,?,?,?,?)",(note,userId,assetId,date,version))
 
 	def removeNote(self, asset, area, date ):
 		"""remove note from database"""
-		pass
+		assetId = self.getAssetIdFromName( asset, area )
+		con = lite.connect(self.dataBaseFile)
+		with con:
+			cur = con.cursor()
+			cur.execute("DELETE FROM Notes WHERE AssetId=:name AND Date=:area", {"name": assetId, "area": date}) 
 
 	def getNotesForAsset(self, assetName, area ):
 		"""return all the notes for asset"""
@@ -161,7 +169,7 @@ class ProjectDataBase(object):
 		with con:
 			con.row_factory = lite.Row
 			cur = con.cursor()
-			cur.execute("SELECT Note, Users.Name as userName, Assets.Name as assetName, Date FROM Notes INNER JOIN Users ON Notes.UserId = Users.Id INNER JOIN Assets ON Notes.AssetId = Assets.Id WHERE Notes.UserId=:name", {"name": assetId})        
+			cur.execute("SELECT Note, Users.Name as userName, Assets.Name as assetName, Date, Version FROM Notes INNER JOIN Users ON Notes.UserId = Users.Id INNER JOIN Assets ON Notes.AssetId = Assets.Id WHERE Notes.UserId=:name", {"name": assetId})        
 			con.commit()
 			return cur.fetchall()
 
