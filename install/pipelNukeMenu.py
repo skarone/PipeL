@@ -5,6 +5,7 @@ import nuk.general.read
 menubar = nuke.menu( "Nuke" )
 m = menubar.addMenu( 'PipeL' )
 m.addCommand( 'Project Manager', 'import pipe.manager.managerUI as manUI; reload( manUI ); manUI.main();' )
+m.addCommand( 'Collect Files', 'import nuk.collect.collectFiles as colFils; reload( colFils ); colFils.collectFiles();' )
 m.addCommand( 'To Do List', 'import general.toDoList.toDoList as todoUi; reload(todoUi); todoUi.main();' )
 m.addCommand( 'Load All Layers', 'import nuk.general.readAllLayers.readAllLayers as readUI; reload( readUI ); readUI.main();' )
 m.addCommand( 'Turn ON|OFF Heavy Nodes', 'import nuk.utils.utils as ut;reload(ut);ut.turnHeavyNodesOnOff();' )
