@@ -88,6 +88,7 @@ class CacheFile(fl.File):
 			else:
 				cmd += a + '=' + str( args[a] ) + ','
 		finalCmd = "mc.AbcImport(" + cmd + ")"
+		print finalCmd
 		abcNode = mn.Node( eval( "mc.AbcImport(" + cmd + ")" ) )
 		return abcNode
 
@@ -115,6 +116,7 @@ class CacheFile(fl.File):
 		mshs.select()
 		abcNode = self.imp( mode = 'import', connect = "/", createIfNotFound = True )
 		"""
+		mn.Nodes( mn.ls( mn.ls(sl = True)[0].namespace.name[1:] + ':*', typ = ['mesh'] )).select()
 		#reconnect via polyTransfer so we can use the original uvs from shape
 		attrs = abcNode.listAttr( c = True, m = True, ro = True, hd = True )
 		for a in attrs:
@@ -135,20 +137,35 @@ class CacheFile(fl.File):
 		rf.reloadSelected()
 		"""
 
-	def replace(self, alembicNodeName):
+	def replace(self):
+		"""docstring for replace"""
+		mn.Nodes( mn.ls( mn.ls(sl = True)[0].namespace.name[1:] + ':*', typ = ['mesh'] )).select()
+		self.imp( mode = 'import', connect = "/", createIfNotFound = True )
+
+	def replace2(self, alembicNodeName):
 		"""replace alembic Node with this alembic"""
 		nam = mn.Namespace( 'TMP' )
 		alNode = mn.Node( alembicNodeName )
 		with nam.set():
 			tmpAl = self.imp()
 		for o in tmpAl.outputs:
-			origObj = mn.Node( o[1].node.name.replace( 'TMP:', '' ) )
+			origObj = mn.Node( o[1].node.name.replace( 'TMP:', alNode.name.replace( '_AlembicNode', '' ) + ':' ) )
+			print origObj.name, o[1].node.name
 			if origObj.exists:
 				origAttr = mn.NodeAttribute( origObj, o[1].name )
 				o[0] >> origAttr
+				if not origObj.type == 'transform':
+					origObj = origObj.parent
+				try:
+					origObj.parent.a.t.v = [0]*3
+					origObj.parent.a.r.v = [0]*3
+					origObj.parent.a.z.v = [1]*3
+				except:
+					pass
 		alNode.delete()
 		tmpAl.name = alNode.name
-		#nam.nodes.delete()
+		print tmpAl.name
+		nam.nodes.delete()
 		nam.remove()
 
 	def importForAsset2(self, asset, customNamespace = None ):

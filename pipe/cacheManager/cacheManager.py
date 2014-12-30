@@ -236,15 +236,7 @@ class CacheManagerUI(base,fom):
 
 	def replaceAlembic(self):
 		"""replace Alembic File"""
-		SelAl = mn.ls( sl = True )
-		if not SelAl:
-			QtGui.QMessageBox.critical(self, 'Bad Input' , "PLEASE SELECT AN ALEMBIC NODE THAT YOU WANT TO REPLACE", QtGui.QMessageBox.Close)
-			return
-		if not SelAl[0].type == 'AlembicNode':
-			QtGui.QMessageBox.critical(self, 'Bad Input' , "PLEASE SELECT AN ALEMBIC NODE THAT YOU WANT TO REPLACE", QtGui.QMessageBox.Close)
-			return
 		tabNum = self._getCurrentTab()
-		importAsset = self.importShading_chb.isChecked()
 		if tabNum == 0:
 			cacheTab, cacheTabNum = self._getCurrentCacheTab()
 			for v in xrange( cacheTab.count()):
@@ -254,7 +246,7 @@ class CacheManagerUI(base,fom):
 						n = i.data(32).toPyObject()
 					else:
 						n = i.data( 32 )
-					n.replace( SelAl[0].name )
+					n.replace()
 
 	def _fillUi(self):
 		"""fill ui based on current scene or selected shot"""

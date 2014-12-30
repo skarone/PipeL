@@ -616,6 +616,7 @@ class LighterHelperUI(base,fom):
 		mc.setAttr( "defaultRenderGlobals.outFormatControl", 0 )
 		mc.setAttr( "defaultRenderGlobals.putFrameBeforeExt", 1 )
 		mc.setAttr( "defaultRenderGlobals.periodInExt", 1)
+		mc.setAttr( "defaultArnoldDriver.mergeAOVs", 1 )
 		mc.setAttr( "defaultArnoldRenderOptions.use_existing_tiled_textures", 1 )
 		try:
 			for c in mn.ls( typ = 'camera' ):
