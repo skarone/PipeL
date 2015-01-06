@@ -113,18 +113,21 @@ def updateVersionKnob():
 		node[ 'seqSel' ].setValues( [s.name for s in prj.Project( node[ 'projectSel' ].value() ).sequences] )
 
 	#UPDATE SHOTS BECAUSE SEQSEL HAS CHANGE
-	if not knob or knob.name() in [ 'seqSel', 'showPanel' ]:
-		node[ 'shotSel' ].setValues( [ s.name for s in sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() )).shots ]  )
+	if not node[ 'seqSel' ].value() == '0' or not node[ 'seqSel' ].value() == '':
+		if not knob or knob.name() in [ 'seqSel', 'showPanel' ]:
+			node[ 'shotSel' ].setValues( [ s.name for s in sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() )).shots ]  )
 	
 	#UPDATE SHOTS BECAUSE SEQSEL HAS CHANGE
-	if not knob or knob.name() in [ 'shotSel', 'showPanel' ]:
-		node[ 'layerSel' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayers( renderPath ) )
+	if not node[ 'shotSel' ].value() == '0' or not node[ 'shotSel' ].value() == '':
+		if not knob or knob.name() in [ 'shotSel', 'showPanel' ]:
+			node[ 'layerSel' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayers( renderPath ) )
 
 	#UPDATE SHOTS BECAUSE SEQSEL HAS CHANGE
-	if not knob or knob.name() in [ 'layerSel', 'showPanel' ]:
-		node[ '_version' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
-		#vers = sorted( node[ '_version' ].values() )
-		#node[ '_version' ].setValue( vers[-1] )
+	if not node[ 'shotSel' ].value() == '0' or not node[ 'shotSel' ].value() == '':
+		if not knob or knob.name() in [ 'layerSel', 'showPanel' ]:
+			node[ '_version' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
+			#vers = sorted( node[ '_version' ].values() )
+			#node[ '_version' ].setValue( vers[-1] )
 
 def fillVersions():
 	"""docstring for fillVersions"""
@@ -139,7 +142,8 @@ def fillVersions():
 				basePath = basePath[:-1]
 			prj.BASE_PATH = basePath.replace( '\\', '/' )
 		renderPath = gen[ "renderpath" ]
-	node[ '_version' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
+	if not node[ 'seqSel' ].value() == '0':
+		node[ '_version' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
 
 def checkVersions( ):
 	"""docstring for fname"""
@@ -159,16 +163,18 @@ def checkVersions( ):
 def checkVersion( node, renderPath ):
 	"""docstring for checkVersion"""
 	if node.knob('_version'):
-		if not node[ '_version' ].value() == '0':
+		print 'shotSel!', node[ 'shotSel' ].value()
+		if not node[ 'shotSel' ].value() == '0' or not node[ 'shotSel' ].value() == '':
 			currentVersion = node[ '_version' ].value()
 			node[ '_version' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
 			node[ '_version' ].setValue( currentVersion )
 			vers = sorted( node[ '_version' ].values() )
-			if not vers[-1] ==  currentVersion:
-				hexColour = int('%02x%02x%02x%02x' % (255,255,0,1),16)
-				node['tile_color'].setValue( hexColour )
-			else:
-				node['tile_color'].setValue( 0 )
+			if vers:
+				if not vers[-1] ==  currentVersion:
+					hexColour = int('%02x%02x%02x%02x' % (255,255,0,1),16)
+					node['tile_color'].setValue( hexColour )
+				else:
+					node['tile_color'].setValue( 0 )
 
 def getPathDir( renderPath, node ):
 	"""docstring for getPathDir"""

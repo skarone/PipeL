@@ -10,11 +10,12 @@ if(`window -ex "AAM"`) {    deleteUI "AAM";    }
 	
 window -title "AOVsArnoldMasker" -s 0 -w 250 -h 300 "AAM";
 	
-		columnLayout -columnAttach "both" 15 -rowSpacing 10 -columnWidth 265;
+		columnLayout -rowSpacing 10 -adj true;
             
             text " ";
             text "Create AOVs masks from selected Sets";
             text " ";
+			colorSliderGrp -cw 1 25 -label "Color" -rgb 1 1 1 "colMask_sl";
 			button -bgc 1 1 1 -label "CREATE" -w 200 -h 50 -c "create_aov()";
 			
 			text " ";
@@ -32,6 +33,8 @@ global proc create_aov()
     
     string $sel[] = `ls -sl`;
     string $set[];
+
+    float $col[] = `colorSliderGrp -q -rgb "colMask_sl"`;
     
     for($f=0;$f<size($sel);$f++)
     {
@@ -70,7 +73,7 @@ global proc create_aov()
                 setAttr ($name+"_Utility.shadeMode") 2;
                 
                 createNode "aiUserDataColor" -n ($name+"_DataColor");
-                setAttr ($name+"_DataColor.defaultValue") -type double3 1 1 1;
+                setAttr ($name+"_DataColor.defaultValue") -type double3 $col[0] $col[1] $col[2];
                 
                 shadingNode -au "tripleShadingSwitch" -n ($name+"_TripleSwitch");
                 setAttr ($name+"_TripleSwitch.default") -type double3 0 0 0;

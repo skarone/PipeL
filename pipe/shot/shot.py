@@ -200,7 +200,9 @@ class Shot(object):
 	def renderedLayerVersions(self, basePath, layerName ):
 		"""return the versions in the render layer"""
 		path = self.renderedLayersPath( basePath ) + '/' + layerName
-		return sorted([ a for a in os.listdir( path ) if os.path.isdir( path + '/' + a ) ])
+		if os.path.exists( path ):
+			return sorted([ a for a in os.listdir( path ) if os.path.isdir( path + '/' + a ) ])
+		return []
 
 	def renderedLayerVersionPath(self, basePath, layerName, versionName ):
 		"""return the path for the rendered layer for specific version"""
