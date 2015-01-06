@@ -164,7 +164,7 @@ def checkVersion( node, renderPath ):
 	"""docstring for checkVersion"""
 	if node.knob('_version'):
 		print 'shotSel!', node[ 'shotSel' ].value()
-		if not node[ 'shotSel' ].value() == '0' or not node[ 'shotSel' ].value() == '':
+		if not node[ 'shotSel' ].value() == '0' or not node[ 'shotSel' ].value() == '' or not node[ 'shotSel' ].value() == 0:
 			currentVersion = node[ '_version' ].value()
 			node[ '_version' ].setValues( sh.Shot( node[ 'shotSel' ].value(),sq.Sequence( node[ 'seqSel' ].value(), prj.Project( node[ 'projectSel' ].value() ))).renderedLayerVersions( renderPath, node[ 'layerSel' ].value() ) )
 			node[ '_version' ].setValue( currentVersion )
