@@ -22,7 +22,7 @@ mc.group(  mc.ls( '*_joint' ), n = 'joints_grp' )
 mc.group(  mc.ls( '*_rivet' ), n = 'rivets_grp' )
 
 """
-mc.loadPlugin( "C:/Program Files/Autodesk/Maya2013/bin/plug-ins/MayaMuscle.mll" )
+mc.loadPlugin( "MayaMuscle.mll" )
 
 def createControlForSelection( mesh, name = 'controlOnMesh', baseJoint = '' ):
 	"""create a control based on selection...

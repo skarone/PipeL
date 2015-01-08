@@ -44,7 +44,7 @@ class CacheFile(fl.File):
 		"""return the nodes for the cache"""
 		return self._nodes
 
-	def export(self, fr = None, asset = None, useDefaultName = False ):
+	def export(self, fr = None, asset = None, useDefaultName = False, steps = 1 ):
 		"""export cache for selected file"""
 		if self.exists:
 			super(CacheFile, self).newVersion()
@@ -62,12 +62,13 @@ class CacheFile(fl.File):
 			cmd += '-fr ' + str( start ) + ' ' + str( end )
 		if useDefaultName:
 			cmd += ' -sn '
+		cmd += ' -step ' + str( steps ) + ' '
 		print cmd
 		mc.refresh( su = True )
 		mc.AbcExport( j = cmd )
 		mc.refresh( su = False )
 
-	def exportAsset(self, asset, importFinal = False, useDefaultName = False ):
+	def exportAsset(self, asset, importFinal = False, useDefaultName = False, steps = 1 ):
 		"""export all the geometry for the selected asset"""
 		#get asset..
 		#import asset for render
@@ -76,7 +77,7 @@ class CacheFile(fl.File):
 			#create blendshape between rig and render assets
 			createBlendshape()
 		#export cache
-		self.export( fr = None, asset = asset, useDefaultName = False )
+		self.export( fr = None, asset = asset, useDefaultName = False, steps = steps )
 
 	def imp( self, **args ):
 		"""import cache to scene"""

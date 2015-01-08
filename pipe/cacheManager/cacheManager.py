@@ -153,13 +153,14 @@ class CacheManagerUI(base,fom):
 		baseDir =  self.fileNameForCache( True )
 		#TODO add filename and see best way to detect asset
 		exportedAsset = []
+		steps = self.steps_spb.value()
 		for n in mn.ls( sl = True ):
 			baseName = n.name.split( ':' )[0]
 			if baseName in exportedAsset:
 				continue
 			a = ass.getAssetFromNode(n, self._selectedProject)
 			cacFile = cfl.CacheFile( baseDir + '/' + baseName + '.abc', n )
-			cacFile.exportAsset( a, self.useFinalToExport_chb.isChecked() )
+			cacFile.exportAsset( a, self.useFinalToExport_chb.isChecked(), False, steps )
 			exportedAsset.append( baseName )
 			if self.copyToServer_chb.isChecked():
 				serverFile = cfl.CacheFile( cacFile.path.replace( prj.BASE_PATH, self.serverPath ) )

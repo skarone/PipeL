@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>470</width>
-    <height>595</height>
+    <width>407</width>
+    <height>612</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -176,14 +176,48 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="exportAssetCache_btn">
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(0, 170, 0);</string>
-          </property>
-          <property name="text">
-           <string>Export Cache For Selected Asset</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <item>
+           <widget class="QPushButton" name="exportAssetCache_btn">
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(0, 170, 0);</string>
+            </property>
+            <property name="text">
+             <string>Export Cache For Selected Asset</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Steps:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="steps_spb">
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_7">

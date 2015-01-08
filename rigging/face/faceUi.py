@@ -69,8 +69,9 @@ class faceRigUi(base, fom):
 
 	def addAttrToCurve(self):
 		"""docstring for fname"""
-		#TODO
-		pass
+		for s in mn.ls( sl = True ):
+			s.a.controls_count.add( minValue = 1, at = 'short', k = True )
+			s.a.use_tips.add( at = 'bool', k = True )
 
 	def create(self):
 		"""create face rig based on selection"""

@@ -27,5 +27,6 @@ def createFollow( obj, constraintObjects ):
 """
 obj = 'IKArm_R'
 constraintObjects = ['Main', 'FKHead_M', 'Root_M']
-createFollow( obj, constraintObjects )
+import rigging.multiFollow.multiFollow as mfw
+mfw.createFollow( obj, constraintObjects )
 """

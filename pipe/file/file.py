@@ -135,12 +135,16 @@ class File(object):
 		if not os.path.exists( os.path.dirname( newPath ) ):
 			os.makedirs( os.path.dirname( newPath ) )
 		if os.path.isdir( newPath ):
-			finalFile = newPath + '/' + self.fullName
-			shutil.copy2( self.path, finalFile )
+			finalFile = File( newPath + '/' + self.fullName )
+			if finalFile.exists:
+				finalFile.delete()
+			shutil.copy2( self.path, finalFile.path )
 		else:
-			finalFile = newPath
-			shutil.copy2( self.path, newPath )
-		return File( finalFile )
+			finalFile = File( newPath )
+			if finalFile.exists:
+				finalFile.delete()
+			shutil.copy2( self.path, finalFile.path )
+		return finalFile 
 	
 	def rename(self, newName):
 		"""rename filename newName"""
