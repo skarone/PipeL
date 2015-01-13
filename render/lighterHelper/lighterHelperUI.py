@@ -63,6 +63,7 @@ class LighterHelperUI(base,fom):
 		self.connect( self.removeObject_btn         , QtCore.SIGNAL("clicked()") , self.removeObjectToLayer )
 		self.connect( self.removeAllObjects_btn     , QtCore.SIGNAL("clicked()") , self.removeAllObjectsToLayer )
 		#SHADING
+		self.connect( self.mateInArnold_btn         , QtCore.SIGNAL("clicked()") , self.createMateColorShaderUI )
 		self.connect( self.blackNoAlpha_btn         , QtCore.SIGNAL("clicked()") , lambda shader=["BLACK_NO_ALPHA",[0,0,0,0]]: self.createAssignColor(shader) )
 		self.connect( self.color_btn                , QtCore.SIGNAL("clicked()") , self.createColorShaderUI )
 		self.connect( self.aiStandard_btn           , QtCore.SIGNAL("clicked()") , self.createAssignAiStandard )
@@ -230,6 +231,36 @@ class LighterHelperUI(base,fom):
 
 	############################
 	#SHADING
+	def createMateColorShaderUI(self):
+		"""ui to create a custom color, then calls createAssignShader"""
+		mc.layoutDialog( ui = self.assignCustomMateColorUI )
+
+	def assignCustomMateColorUI( self, colorMat = 'RL_SOMECOLOR', col = (1,1,1)):
+		mc.columnLayout()
+		mc.colorSliderGrp( 'customColorColorSlider', rgb = col )
+		mc.checkBox( 'customAlpha_chb', l = 'With Alpha', v = True )
+		mc.rowColumnLayout( nc = 2 )
+		mc.button( l = 'Create', w = 120, c = self.assignNewMateColorUi )
+		mc.button( l = 'Cancel', w = 120, c = self.dismissCustomColorUI )
+
+	def assignNewMateColorUi(self, *args):
+		"""docstring for assignNewMateColorUi"""
+		col = mc.colorSliderGrp( 'customColorColorSlider', q = 1, rgb = 1 )
+		alph = mc.checkBox( 'customAlpha_chb', q = True, v = True )
+		mc.layoutDialog( dismiss="Cancel" )
+		self.assignNewMateColor( col, alph )
+	
+	def assignNewMateColor(self, col = (0,0,0), alph = 1):
+		"""turn On Mate for Arnold and set color! for selected objects"""
+		for n in mn.ls( sl = True ):
+			eng = n.shader
+			if eng:
+				sha = eng.a.surfaceShader.input.node
+				sha.a.aiEnableMatte.overrided = 1
+				sha.a.aiEnableMatte.v = 1
+				sha.a.aiMatteColor.v = [col[0],col[1],col[2]]
+				sha.a.aiMatteColorA.v = alph
+
 	def createColorShaderUI(self):
 		"""ui to create a custom color, then calls createAssignShader"""
 		mc.layoutDialog( ui = self.assignCustomColorUI )

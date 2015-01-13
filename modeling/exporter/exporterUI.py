@@ -70,13 +70,15 @@ class ExporterUI(base, fom):
 	def _projectData(self):
 		"""try to get set name from scene"""
 		fi = mc.file(q =1 ,sn = 1 )
-		if fi == '':
-			self.projectName = ''
-			self.setName = ''
-			return
-		folders = fi.split( '/' )
-		self.projectName = folders[2]
-		self.setName     = folders[4]
+		self.projectName = ''
+		self.setName = ''
+		if not fi == '':
+			folders = fi.split( '/' )
+			try:
+				self.projectName = folders[2]
+				self.setName     = folders[4]
+			except:
+				pass
 
 	def _fillSetName(self):
 		"""edit setName with set information --> WTF!"""
