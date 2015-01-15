@@ -32,11 +32,13 @@ class ProjectDataBase(object):
 			userId = self.getUserIdFromName( user )
 		else:
 			userId = 0
-		con = lite.connect(self.dataBaseFile)
-		with con:
-			cur = con.cursor()
-			cur.execute("INSERT INTO Assets( Name, Area, Sequence, UserId, Priority, Status, TimeStart, TimeEnd ) VALUES(?,?,?,?,?,?,?,?)",(name,area,seq,userId,priority,status,timeStart,timeEnd))
-
+		if self.getAssetIdFromName( name, area, seq ):
+			self.setAssetUser( name, area, user, seq )
+		else:
+			con = lite.connect(self.dataBaseFile)
+			with con:
+				cur = con.cursor()
+				cur.execute("INSERT OR REPLACE INTO Assets( Name, Area, Sequence, UserId, Priority, Status, TimeStart, TimeEnd ) VALUES(?,?,?,?,?,?,?,?)",(name,area,seq,userId,priority,status,timeStart,timeEnd))
 	def remAsset(self, assetName):
 		"""remove asset from database"""
 		con = lite.connect(self.dataBaseFile)
@@ -82,10 +84,11 @@ class ProjectDataBase(object):
 	def setAssetUser(self, assetName, area, userName, seq = ''):
 		"""assing user to asset"""
 		assetId = self.getAssetIdFromName(assetName, area, seq )
+		userId  = self.getUserIdFromName( userName )
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
-			cur.execute("UPDATE Assets SET User = %s WHERE Id = %i"%(userName, assetId)) 
+			cur.execute("UPDATE Assets SET UserId = %i WHERE Id = %i"%(userId, assetId)) 
 
 	def setAssetStatus(self, assetName, area, status, seq = '' ):
 		"""set asset status"""
@@ -110,7 +113,10 @@ class ProjectDataBase(object):
 			cur = con.cursor()
 			cur.execute("SELECT Id FROM Assets WHERE Name=:name AND Area=:area AND Sequence=:seq", {"name": assetName, "area": area, "seq":seq})        
 			con.commit()
-			return cur.fetchone()[0]
+			assetId = cur.fetchone()
+			if assetId:
+				return assetId[0]
+			return None
 
 	def getAsset(self, assetName, area):
 		"""return asset information from assetName and Area"""
