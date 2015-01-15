@@ -7,38 +7,29 @@ Description:
 
 class Note(object):
 	"""base class to handle notes"""
-	def __init__(self, asset, area ):
-		self._asset      = asset
-		self._area       = area
-
-	def add(self, user, noteString ):
-		"""docstring for create"""
-		pass
+	def __init__(self, noteData ):
+		#note, userName, assetName, date
+		self.noteData = noteData
 
 	@property
-	def noteString(self):
+	def note(self):
 		"""return the noteString"""
-		pass
+		return self.noteData[ 'note' ]
 		
 	@property
 	def user(self):
 		"""return the user for the note"""
-		pass
+		return self.noteData[ 'userName' ]
 
 	@property
 	def date(self):
 		"""return the date of the note"""
-		pass
-
-	@property
-	def area(self):
-		"""return the area of the asset"""
-		pass
+		return self.noteData[ 'date' ]
 
 	@property
 	def asset(self):
 		"""return the asset of the note"""
-		pass
+		return self.noteData[ 'assetName' ]
 
 class Notes(object):
 	"""base class to handle group of notes"""
@@ -50,7 +41,6 @@ class Notes(object):
 		"""return all the notes for the asset in the area"""
 		pass
 		
-
 	@property
 	def last(self):
 		"""return the last note of the note for the asset"""
