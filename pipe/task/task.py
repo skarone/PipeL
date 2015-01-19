@@ -12,19 +12,21 @@ class Task(object):
 		return self.taskData['id']
 
 	@property
-	def startDate(self):
+	def timeStart(self):
 		"""return start date"""
-		return self.taskData['startDate']
+		return self.taskData['timeStart']
 
 	@property
-	def endDate(self):
+	def timeEnd(self):
 		"""docstring for endDate"""
-		return self.taskData['endDate']
+		return self.taskData['timeEnd']
 
 	@property
 	def name(self):
 		"""return name of the task, if asset.. return asset + area, if shot returns sequence + shot"""
-		return self.taskData['name']
+		if self.taskData['seq'] == '': #ASSET
+			return self.taskData['name'] + ' ' + self.taskData['area']
+		return self.taskData['seq'] + ' ' + self.taskData['name'] + ' ' + self.taskData['area'] #SHOT
 		
 	@property
 	def user(self):

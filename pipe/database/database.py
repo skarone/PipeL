@@ -33,12 +33,22 @@ class ProjectDataBase(object):
 		else:
 			userId = 0
 		if self.getAssetIdFromName( name, area, seq ):
-			self.setAssetUser( name, area, user, seq )
+			self.updateAsset( name, area, seq, user, priority, status, timeStart, timeEnd )
 		else:
 			con = lite.connect(self.dataBaseFile)
 			with con:
 				cur = con.cursor()
 				cur.execute("INSERT OR REPLACE INTO Assets( Name, Area, Sequence, UserId, Priority, Status, TimeStart, TimeEnd ) VALUES(?,?,?,?,?,?,?,?)",(name,area,seq,userId,priority,status,timeStart,timeEnd))
+
+	def updateAsset(self, name, area, seq, user, priority, status, timeStart, timeEnd ):
+		"""docstring for updateAsset"""
+		assetId = self.getAssetIdFromName(assetName, area, seq )
+		userId  = self.getUserIdFromName( userName )
+		con = lite.connect(self.dataBaseFile)
+		with con:
+			cur = con.cursor()
+			cur.execute("UPDATE Assets SET UserId = %i, Prority = %i, Status = %i, TimeStart = %s, TimeEnd = %s  WHERE Id = %i"%(userId, priority, status, timeStart, timeEnd, assetId)) 
+	
 	def remAsset(self, assetName):
 		"""remove asset from database"""
 		con = lite.connect(self.dataBaseFile)

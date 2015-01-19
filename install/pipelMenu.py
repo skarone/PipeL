@@ -52,6 +52,7 @@ mc.setParent('..', menu = True )
 #ANIMATION
 mc.menuItem( l = 'Animation', sm = True, to = True )
 mc.menuItem( l = 'Playblast', c = "import animation.playblast.playblast as plb; plb.playblastCurrentFile();" )
+mc.menuItem( l = 'Pose Man', c = 'import maya.mel as mm;mm.eval( \'source "'+PYFILEDIR.replace( '\\', '/' ).replace( 'install','animation/poseMan' ) +'/poseMan.mel";poseMan;\')' )
 mc.setParent('..', menu = True )
 
 #HAIR
