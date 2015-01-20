@@ -91,6 +91,8 @@ class ManagerUI(base,fom):
 		
 		self.shots_tw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.shots_tw.customContextMenuRequested.connect(self.showMenu)
+		self.setObjectName( 'ManagerUI' )
+
 
 	###################################
 	#LOAD SETTINGS
@@ -256,7 +258,7 @@ class ManagerUI(base,fom):
 		for i in range( self.shots_tw.rowCount() ):
 			match = False
 			item = self.shots_tw.item( i, 0 )
-			if fil in str( item.text() ):
+			if fil.lower() in str( item.text() ).lower():
 				match = True
 			self.shots_tw.setRowHidden( i, not match )
 
@@ -322,7 +324,7 @@ class ManagerUI(base,fom):
 			match = False
 			for j in range( self.assets_tw.columnCount() ):
 				item = self.assets_tw.item( i, j )
-				if fil in str( item.text() ):
+				if fil.lower() in str( item.text() ).lower():
 					match = True
 					break
 			self.assets_tw.setRowHidden( i, not match )
@@ -334,7 +336,7 @@ class ManagerUI(base,fom):
 	def closeEvent(self, event):
 		self._saveConfig()
 
-	#
+	# 
 	###################################
 	#FILL UI
 	def updateUi(self):
@@ -1003,7 +1005,8 @@ class ManagerUI(base,fom):
 	#
 
 def main():
-	global PyForm
+	if mc.window( 'ManagerUI', q = 1, ex = 1 ):
+		mc.deleteUI( 'ManagerUI' )
 	PyForm=ManagerUI()
 	PyForm.show()
 
