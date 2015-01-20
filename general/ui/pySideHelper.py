@@ -105,4 +105,16 @@ def loadUiType(uiFile):
 		return form_class, base_class
 
 
-
+def toQtObject(mayaName):
+	'''
+	Given the name of a Maya UI element of any type,
+	return the corresponding QWidget or QAction.
+	If the object does not exist, returns None
+	'''
+	ptr = mui.MQtUtil.findControl(mayaName)
+	if ptr is None:
+		ptr = mui.MQtUtil.findLayout(mayaName)
+	if ptr is None:
+		ptr = mui.MQtUtil.findMenuItem(mayaName)
+	if ptr is not None:
+		return shiboken.wrapInstance(long(ptr), QtGui.QMainWindow)
