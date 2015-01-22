@@ -13,8 +13,13 @@ http://code.google.com/p/blur-dev/
 #	\date		04/29/10
 #
 #
+import os
+import general.ui.pySideHelper as uiH
+reload( uiH )
+uiH.set_qt_bindings()
+from Qt import QtGui,QtCore
 
-from PyQt4.QtGui 	import QGroupBox
+from Qt.PyQt4.QtGui 	import QGroupBox
 
 class AccordianItem( QGroupBox ):
 	def __init__( self, accordian, title, widget ):
@@ -307,8 +312,9 @@ class AccordianItem( QGroupBox ):
 #
 #
 
-from PyQt4.QtCore 	import pyqtSignal, pyqtProperty
-from PyQt4.QtGui 	import QScrollArea
+
+from Qt.PyQt4.QtCore 	import pyqtSignal, pyqtProperty
+from Qt.PyQt4.QtGui 	import QScrollArea
 #from accordianitem	import AccordianItem
 
 class AccordianWidget( QScrollArea ):

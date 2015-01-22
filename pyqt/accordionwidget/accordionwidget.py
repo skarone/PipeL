@@ -1,10 +1,16 @@
 # Modification of Blur's Accordion Widget to include a Maya style.  Also got rid of the need for a pixmap 
 # and used QPolygon instead.
 
-from PyQt4.QtCore import Qt, QRect, QMimeData, pyqtSignal, pyqtProperty, QEvent, QPoint
-from PyQt4.QtGui import QDrag, QPixmap, QScrollArea, QGroupBox, QVBoxLayout, QPainter, QPainterPath, QPalette, QPen
-from PyQt4.QtGui import QWidget, QMatrix, QCursor, QApplication, QDialog, QColor, QPolygon, QBrush
-from PyQt4 import QtGui
+import os
+import general.ui.pySideHelper as uiH
+reload( uiH )
+uiH.set_qt_bindings()
+
+from Qt.QtCore import Qt, QRect, QMimeData, QEvent, QPoint
+from Qt.QtGui import QDrag, QPixmap, QScrollArea, QGroupBox, QVBoxLayout, QPainter, QPainterPath, QPalette, QPen
+from Qt.QtGui import QWidget, QMatrix, QCursor, QApplication, QDialog, QColor, QPolygon, QBrush
+from Qt import QtGui
+from Qt import QtCore
 import os.path
 
 class AccordionItem(QGroupBox):
@@ -385,10 +391,10 @@ class AccordionItem(QGroupBox):
 
 
 class AccordionWidget(QScrollArea):
-    itemCollapsed = pyqtSignal(AccordionItem)
-    itemMenuRequested = pyqtSignal(AccordionItem)
-    itemDragFailed = pyqtSignal(AccordionItem)
-    itemsReordered = pyqtSignal()
+    itemCollapsed = QtCore.Signal(AccordionItem)
+    itemMenuRequested = QtCore.Signal(AccordionItem)
+    itemDragFailed = QtCore.Signal(AccordionItem)
+    itemsReordered = QtCore.Signal()
 
     Boxed = 1
     Rounded = 2
@@ -653,7 +659,7 @@ class AccordionWidget(QScrollArea):
         return None
 
 
-    pyBoxedMode = pyqtProperty('bool', isBoxedMode, setBoxedMode)
+    pyBoxedMode = QtCore.Property('bool', isBoxedMode, setBoxedMode)
 
 
 _gUI = None
@@ -681,6 +687,15 @@ class Sample(QtGui.QDialog):
         global _gUI
         _gUI = cls()
         _gUI.show()
+
+def main():
+	"""docstring for main"""
+	import sys
+	win = QtGui.QMainWindow()
+	global win
+	PyForm=Sample()
+	win.setCentralWidget(PyForm)
+	win.show()
 
 
 if __name__=="__main__":

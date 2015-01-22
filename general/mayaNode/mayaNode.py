@@ -1028,6 +1028,15 @@ class Namespace(object):
 			return Namespace( ':' )
 		else:
 			return Namespace( ':'+ node.name[ :p ] )
+	
+	@property
+	def first(self):
+		"""return first namespace from current one"""
+		p = self.name.find( ':', 1 )
+		if p == -1:
+			return Namespace( ':' )
+		else:
+			return Namespace( self.name[ :p ] )
 
 #####################################################
 #ERRORS

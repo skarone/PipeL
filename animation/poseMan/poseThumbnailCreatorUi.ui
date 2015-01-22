@@ -128,6 +128,25 @@
       <item>
        <widget class="QComboBox" name="sections_cmb"/>
       </item>
+      <item>
+       <widget class="QPushButton" name="newSection_btn">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>40</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>New</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
