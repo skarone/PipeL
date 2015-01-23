@@ -67,13 +67,17 @@ class Window(QtGui.QWidget):
 class FlowLayout(QtGui.QLayout):
     def __init__(self, parent=None, margin=0, spacing=-1):
         super(FlowLayout, self).__init__(parent)
-
+        self._margin = margin
         if parent is not None:
             self.setMargin(margin)
 
         self.setSpacing(spacing)
 
         self.itemList = []
+
+    def margin(self):
+        """docstring for margin"""
+        return self._margin
 
     def __del__(self):
         item = self.takeAt(0)

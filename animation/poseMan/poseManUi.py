@@ -3,6 +3,9 @@ import general.ui.pySideHelper as uiH
 reload( uiH )
 uiH.set_qt_bindings()
 from Qt import QtGui,QtCore
+import shiboken
+
+import maya.OpenMayaUI as mui
 
 import maya.cmds as mc
 import pipe.file.file as fl
@@ -16,6 +19,7 @@ import cPickle as pickle
 
 import pyqt.accordionwidget.accordionwidget as cgroup
 import pyqt.flowlayout.flowlayout as flowlayout
+reload( flowlayout )
 
 """
 import animation.poseMan.poseManUi as posUi
@@ -42,16 +46,19 @@ fomSec, baseSec = uiH.loadUiType( uifile )
 class PoseThumbnailCreatorUi(base, fom):
 	poseCreated = QtCore.Signal(bool)
 	sectionCreated = QtCore.Signal(bool)
-	def __init__(self, project, parent  = uiH.getMayaWindow() ):
+	def __init__(self, project, pose = None, parent  = uiH.getMayaWindow() ):
 		if uiH.USEPYQT:
 			super(base, self).__init__(parent)
 		else:
 			super(PoseThumbnailCreatorUi, self).__init__(parent)
 		self.setupUi(self)
 		self.project = project
-		self.executer = mc.modelPanel( mbv = False, camera = 'Capture_Pose' )
+		self.pose = pose
+		print shiboken.getCppPointer(self.viewport_lay)
+		layout = mui.MQtUtil.fullName(long(shiboken.getCppPointer(self.viewport_lay)[0]))
+		self.executer = mc.modelPanel( mbv = False, camera = 'Capture_Pose', p = layout )
 		mc.modelEditor(self.executer, e = True, grid = 0, da = "smoothShaded", allObjects = 0, nurbsSurfaces = 1, polymeshes = 1, subdivSurfaces = 1 )
-		self.viewport_lay.addWidget( uiH.toQtObject( self.executer ) )
+		#self.viewport_lay.addWidget( uiH.toQtObject( self.executer ) )
 		self.setObjectName( 'PoseThumbnailCreatorUi' )
 		self._makeConnections()
 		self.saveCameraPreset = 0 #READ, 1.. WRITE
@@ -60,6 +67,8 @@ class PoseThumbnailCreatorUi(base, fom):
 		skin = gen[ "skin" ]
 		if skin:
 			uiH.loadSkin( self, skin )
+		if pose:
+			self.poseName_le.setText( pose.name )
 		self.fillSections()
 
 	def _makeConnections(self):
@@ -81,6 +90,10 @@ class PoseThumbnailCreatorUi(base, fom):
 		sections = [ a for a in os.listdir( poseManPath ) if os.path.isdir( poseManPath + a )]
 		self.sections_cmb.clear()
 		self.sections_cmb.addItems( sections )
+		if self.pose:
+			index = self.sections_cmb.findText( self.pose.section )
+			if not index == -1:
+				self.sections_cmb.setCurrentIndex(index)
 
 	def newSection(self):
 		"""docstring for newSection"""
@@ -131,6 +144,7 @@ class PoseThumbnailCreatorUi(base, fom):
 
 class PoseThumbnailUi(baseThum, fomThum):
 	poseDeleted = QtCore.Signal(bool)
+	updateThumb = QtCore.Signal(Pose)
 	def __init__(self, pose, parent  = uiH.getMayaWindow() ):
 		if uiH.USEPYQT:
 			super(baseThum, self).__init__(parent)
@@ -146,9 +160,9 @@ class PoseThumbnailUi(baseThum, fomThum):
 		myIcon = QtGui.QIcon( self.pose.poseThumbPath )
 		self.pose_btn.setIcon(myIcon)
 
-	def applyPose(self):
+	def applyPose( self ):
 		"""docstring for self.applyPose"""
-		self.pose.load()
+		self.pose.load( )
 
 	def showMenu(self, pos):
 		"""show menu options for pose"""
@@ -177,7 +191,7 @@ class PoseThumbnailUi(baseThum, fomThum):
 	def deletePoseProperties(self):
 		"""docstring for deletePoseProperties"""
 		self.pose.delete()
-		self.emit.poseDeleted(True)
+		self.poseDeleted.emit(True)
 
 	def sliderPoseProperties(self):
 		"""docstring for sliderPoseProperties"""
@@ -185,13 +199,11 @@ class PoseThumbnailUi(baseThum, fomThum):
 
 	def updatePoseProperties(self):
 		"""docstring for updatePoseProperties"""
-		self.pose.controls.select()
 		self.pose.save()
-		print 'in updatePoseProperties'
 
 	def updateThumbProperties(self):
 		"""docstring for upda"""
-		print 'in updateThumbProperties'
+		self.updateThumb.emit(self.pose)
 
 class PoseManUi(baseBase, fomBase):
 	def __init__(self, parent  = uiH.getMayaWindow() ):
@@ -209,6 +221,7 @@ class PoseManUi(baseBase, fomBase):
 		self.catLayout = cgroup.AccordionWidget(None)
 		self.library_lay.addWidget( self.catLayout )
 		self.fillSections()
+		self.poses = []
 
 	def _makeConnections(self):
 		"""docstring for _makeConnections"""
@@ -221,9 +234,9 @@ class PoseManUi(baseBase, fomBase):
 		"""return selected Project"""
 		return prj.Project( str(self.projects_cmb.currentText()), self.serverPath )
 
-	def newPose(self):
+	def newPose(self, pose = None ):
 		"""docstring for newPose"""
-		poseThumbCreator = PoseThumbnailCreatorUi( self.selectedProject )
+		poseThumbCreator = PoseThumbnailCreatorUi( self.selectedProject, pose )
 		poseThumbCreator.poseCreated.connect( self.fillSections )
 		poseThumbCreator.sectionCreated.connect( self.fillSections )
 		poseThumbCreator.show()
@@ -241,8 +254,10 @@ class PoseManUi(baseBase, fomBase):
 		sel = mn.ls( sl = True )
 		if sel:
 			self.namespace_lbl.setText( sel[0].namespace.name )
+			Pose.NAMESPACE = sel[0].namespace.name
 		else:
 			self.namespace_lbl.setText( ':' )
+			Pose.NAMESPACE = ':'
 	
 	def loadLastProject(self):
 		"""docstring for loadLastProject"""
@@ -284,8 +299,7 @@ class PoseManUi(baseBase, fomBase):
 			self.fillPoses( s, grid )
 			wid = QtGui.QWidget()
 			wid.setLayout( grid )
-			self.catLayout.addItem( s, wid, True )
-			print 'asdasdas'
+			self.catLayout.addItem( s, wid, False )
 
 	def fillPoses(self, section, sectionWidget):
 		"""fill poses for section"""
@@ -294,9 +308,11 @@ class PoseManUi(baseBase, fomBase):
 		for p in poses:
 			poseUi = PoseThumbnailUi( p )
 			poseUi.poseDeleted.connect( self.fillSections )
+			poseUi.updateThumb.connect( lambda pose = p : self.newPose( pose ) )
 			sectionWidget.addWidget( poseUi )
 
 class Pose(object):
+	NAMESPACE = ''
 	"""handle pose information, saving and loading"""
 	def __init__(self, project, section, name):
 		self.project = project
@@ -312,7 +328,7 @@ class Pose(object):
 	def poseThumbPath(self):
 		"""docstring for poseThumbPath"""
 		return self.project.path + '/poseMan/' + self.section + '/' + self.name + '.bmp'
-	
+
 	def save(self):
 		"""save pose file"""
 		objs = mn.ls( sl = True )
@@ -330,14 +346,15 @@ class Pose(object):
 			if not o.exists:
 				continue
 			for a in data[o].keys():
-				if a.exist:
-					a.v = data[o][a]
+				finalA = mn.NodeAttribute( mn.Node( Pose.NAMESPACE + o.name ), a.name  )
+				if finalA.exists:
+					finalA.v = data[o][a]
 
 	@property
 	def controls(self):
 		"""return controls of pose"""
 		data = pickle.load( open( self.posePath, "rb") )
-		return mn.Nodes( [o for o in data.keys() if o.exists] )
+		return mn.Nodes( [Pose.NAMESPACE + o.name for o in data.keys() if mn.Node( Pose.NAMESPACE + o.name ).exists] )
 
 	def delete(self):
 		"""docstring for delete"""

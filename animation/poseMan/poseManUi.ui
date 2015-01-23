@@ -36,14 +36,14 @@
         <item>
          <widget class="QLabel" name="namespace_lbl">
           <property name="text">
-           <string>nameSpace</string>
+           <string/>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="setNameSpace_btn">
           <property name="text">
-           <string>Set</string>
+           <string>Namespace</string>
           </property>
          </widget>
         </item>
