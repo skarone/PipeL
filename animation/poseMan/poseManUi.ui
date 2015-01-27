@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Pose Nach!</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -28,6 +28,13 @@
        <widget class="QPushButton" name="newSection_btn">
         <property name="text">
          <string>New Section</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="deleteSection_btn">
+        <property name="text">
+         <string>Delete Section</string>
         </property>
        </widget>
       </item>

@@ -255,11 +255,16 @@ class LighterHelperUI(base,fom):
 		for n in mn.ls( sl = True ):
 			eng = n.shader
 			if eng:
-				sha = eng.a.surfaceShader.input.node
-				sha.a.aiEnableMatte.overrided = 1
-				sha.a.aiEnableMatte.v = 1
-				sha.a.aiMatteColor.v = [col[0],col[1],col[2]]
-				sha.a.aiMatteColorA.v = alph
+				try:
+					sha = eng.a.surfaceShader.input.node
+					sha.a.aiEnableMatte.overrided = 1
+					sha.a.aiEnableMatte.v = 1
+					sha.a.aiMatteColor.overrided = 1
+					sha.a.aiMatteColor.v = [col[0],col[1],col[2]]
+					sha.a.aiMatteColorA.overrided = 1
+					sha.a.aiMatteColorA.v = alph
+				except:
+					continue
 
 	def createColorShaderUI(self):
 		"""ui to create a custom color, then calls createAssignShader"""

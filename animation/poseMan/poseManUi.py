@@ -10,6 +10,7 @@ import maya.OpenMayaUI as mui
 import maya.cmds as mc
 import pipe.file.file as fl
 import general.mayaNode.mayaNode as mn
+reload( mn )
 
 import pipe.settings.settings as sti
 reload( sti )
@@ -20,6 +21,7 @@ import cPickle as pickle
 import pyqt.accordionwidget.accordionwidget as cgroup
 import pyqt.flowlayout.flowlayout as flowlayout
 reload( flowlayout )
+import shutil
 
 """
 import animation.poseMan.poseManUi as posUi
@@ -42,6 +44,9 @@ fomBase, baseBase = uiH.loadUiType( uifile )
 uifile = PYFILEDIR + '/sectionUi.ui'
 fomSec, baseSec = uiH.loadUiType( uifile )
 
+uifile = PYFILEDIR + '/poseSlider.ui'
+fomSlid, baseSlid = uiH.loadUiType( uifile )
+
 
 class PoseThumbnailCreatorUi(base, fom):
 	poseCreated = QtCore.Signal(bool)
@@ -54,9 +59,15 @@ class PoseThumbnailCreatorUi(base, fom):
 		self.setupUi(self)
 		self.project = project
 		self.pose = pose
-		print shiboken.getCppPointer(self.viewport_lay)
 		layout = mui.MQtUtil.fullName(long(shiboken.getCppPointer(self.viewport_lay)[0]))
-		self.executer = mc.modelPanel( mbv = False, camera = 'Capture_Pose', p = layout )
+		self.cam = mn.Node( 'Capture_Pose' )
+		if not self.cam.exists:
+			self.camShape = mn.createNode( 'camera', ss = True )
+			self.camShape.parent.name = 'Capture_Pose'
+			mc.viewSet( self.cam.name, p = True )
+			self.cam.shape.a.focalLength.v = 100
+			self.cam.a.v.v = 0
+		self.executer = mc.modelPanel( mbv = False, camera = self.cam.name, p = layout )
 		mc.modelEditor(self.executer, e = True, grid = 0, da = "smoothShaded", allObjects = 0, nurbsSurfaces = 1, polymeshes = 1, subdivSurfaces = 1 )
 		#self.viewport_lay.addWidget( uiH.toQtObject( self.executer ) )
 		self.setObjectName( 'PoseThumbnailCreatorUi' )
@@ -97,7 +108,6 @@ class PoseThumbnailCreatorUi(base, fom):
 
 	def newSection(self):
 		"""docstring for newSection"""
-		print 'in newSection'
 		self.fillSections()
 		self.sectionCreated.emit( True )
 
@@ -115,9 +125,21 @@ class PoseThumbnailCreatorUi(base, fom):
 	def cameraPreset(self, presetNumber ):
 		"""set or save camera preset on corresponding number"""
 		if self.saveCameraPreset:# save camera preset for current button
-			pass
+			if not os.path.exists(self.cameraPosePath):
+				os.makedirs( self.cameraPosePath )
+			data = {}
+			data[self.cam.a.t] = self.cam.a.t.v
+			data[self.cam.a.r] = self.cam.a.r.v
+			pickle.dump( data, open( self.cameraPosePath + 'camera' + str( presetNumber ) + '.pose' , "wb" ) )
 		else: #read camera preset for current button
-			pass
+			data = pickle.load( open( self.cameraPosePath + 'camera' + str( presetNumber ) + '.pose', "rb") )
+			for d in data.keys():
+				d.v = data[d][0]
+	
+	@property
+	def cameraPosePath(self):
+		"""camerasPosePath"""
+		return self.project.path + '/poseMan/' 
 
 	@property
 	def poseName(self):
@@ -141,10 +163,37 @@ class PoseThumbnailCreatorUi(base, fom):
 		mc.setAttr( "defaultRenderGlobals.imageFormat", 20 )
 		currentTime = mc.currentTime( q = True )
 		mc.playblast( v = False, p = 100, frame = currentTime, w = 160, h = 160, orn = 0, cf = pose.poseThumbPath ,fmt = "image" )
+		
+	def closeEvent(self, evnt):
+		if self.cam.exists:
+			self.cam.delete()
+		mc.deleteUI( self.executer, control=True )
+
+class PoseSliderUi(baseSlid, fomSlid):
+	def __init__(self, pose, parent  = uiH.getMayaWindow() ):
+		if uiH.USEPYQT:
+			super(baseSlid, self).__init__(parent)
+		else:
+			super(PoseSliderUi, self).__init__(parent)
+		self.setupUi(self)
+		self.poseTargetData = pose.controlsDataFromFile
+		pose.controls.select()
+		basePose = Pose( pose.project, pose.section, pose.name + 'base' )
+		self.poseName_lbl.setText( pose.section + ' ' + pose.name )
+		self.basePoseData = basePose.controlsData
+		self.connect( self.poseSlider_sld, QtCore.SIGNAL("valueChanged(int)") , self.mixPose )
+
+	def mixPose(self, val):
+		"""mix values of slider"""
+		for o in self.basePoseData.keys():
+			for a in self.basePoseData[o].keys():
+				mixedValue = (self.poseTargetData[o][a]*float( val )/100.0) + (self.basePoseData[o][a]*(1-float( val )/100.0));
+				finalA = mn.NodeAttribute( mn.Node( Pose.NAMESPACE + o.name ), a.name  )
+				finalA.v = mixedValue
 
 class PoseThumbnailUi(baseThum, fomThum):
 	poseDeleted = QtCore.Signal(bool)
-	updateThumb = QtCore.Signal(Pose)
+	updateThumb = QtCore.Signal(object)
 	def __init__(self, pose, parent  = uiH.getMayaWindow() ):
 		if uiH.USEPYQT:
 			super(baseThum, self).__init__(parent)
@@ -195,7 +244,8 @@ class PoseThumbnailUi(baseThum, fomThum):
 
 	def sliderPoseProperties(self):
 		"""docstring for sliderPoseProperties"""
-		print 'in sliderPoseProperties'
+		slid = PoseSliderUi( self.pose )
+		slid.show()
 
 	def updatePoseProperties(self):
 		"""docstring for updatePoseProperties"""
@@ -217,9 +267,9 @@ class PoseManUi(baseBase, fomBase):
 		self.loadSettings()
 		self.fillProjects()
 		self.loadLastProject()
-		self._makeConnections()
 		self.catLayout = cgroup.AccordionWidget(None)
 		self.library_lay.addWidget( self.catLayout )
+		self._makeConnections()
 		self.fillSections()
 		self.poses = []
 
@@ -227,7 +277,23 @@ class PoseManUi(baseBase, fomBase):
 		"""docstring for _makeConnections"""
 		self.connect( self.newPose_btn, QtCore.SIGNAL("clicked()") , self.newPose )
 		self.connect( self.newSection_btn, QtCore.SIGNAL("clicked()") , self.newSection )
+		self.connect( self.deleteSection_btn, QtCore.SIGNAL("clicked()") , self.deleteSection )
 		self.connect( self.setNameSpace_btn, QtCore.SIGNAL("clicked()") , self.setNameSpace )
+		self.catLayout.itemMenuRequested.connect( self.showSectionMenu )
+
+	def showSectionMenu(self, item):
+		"""display menu on selected item"""
+		menu=QtGui.QMenu(self)
+		selectControlsProperties = QtGui.QAction( "Delete Section", menu)
+		self.connect( selectControlsProperties, QtCore.SIGNAL( "triggered()" ), lambda pose = item : self.deleteSection( pose ) )
+		menu.addAction( selectControlsProperties )
+		menu.popup(self.mapToGlobal(self.mapFromGlobal(QtGui.QCursor.pos())) )
+
+	def deleteSection(self, item):
+		"""docstring for deleteSection"""
+		sectionName = self.selectedProject.path + '/poseMan/' + item.title()
+		shutil.rmtree( sectionName )
+		self.fillSections()
 
 	@property
 	def selectedProject(self):
@@ -318,6 +384,12 @@ class Pose(object):
 		self.project = project
 		self.section = section
 		self.name    = name
+	
+	def __str__(self):
+		return str(self.__dict__)
+
+	def __cmp__(self, other): 
+		return self.__dict__ == other.__dict__
 
 	@property
 	def posePath(self):
@@ -329,19 +401,30 @@ class Pose(object):
 		"""docstring for poseThumbPath"""
 		return self.project.path + '/poseMan/' + self.section + '/' + self.name + '.bmp'
 
-	def save(self):
-		"""save pose file"""
+	@property
+	def controlsData(self):
+		"""returns controls data from current pose"""
 		objs = mn.ls( sl = True )
 		data = {}
 		for o in objs:
 			data[ o ] = {}
 			for a in o.listAttr( k = True ):
 				data[ o ][ a ] = a.v
-		pickle.dump( data, open( self.posePath, "wb" ) )
+		return data
+
+	def save(self):
+		"""save pose file"""
+		pickle.dump( self.controlsData, open( self.posePath, "wb" ) )
+
+	@property
+	def controlsDataFromFile(self):
+		"""docstring for controlsDataFromFile"""
+		data = pickle.load( open( self.posePath, "rb") )
+		return data
 
 	def load(self):
 		"""docstring for load"""
-		data = pickle.load( open( self.posePath, "rb") )
+		data = self.controlsDataFromFile
 		for o in data.keys():
 			if not o.exists:
 				continue

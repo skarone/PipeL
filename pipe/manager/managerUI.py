@@ -1005,8 +1005,9 @@ class ManagerUI(base,fom):
 	#
 
 def main():
-	if mc.window( 'ManagerUI', q = 1, ex = 1 ):
-		mc.deleteUI( 'ManagerUI' )
+	if INMAYA:
+		if mc.window( 'ManagerUI', q = 1, ex = 1 ):
+			mc.deleteUI( 'ManagerUI' )
 	PyForm=ManagerUI()
 	PyForm.show()
 

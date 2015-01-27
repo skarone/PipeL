@@ -279,6 +279,15 @@ class Node(object):
 	def __init__(self, name ):
 		self._name = name
 
+	def __hash__(self):
+		return hash(str(self.name))
+
+	def __eq__(self, other): 
+		return str( self.name ) == str( other.name )
+
+	def __cmp__(self, other): 
+		return str( self.name ) == str( other.name )
+
 	def __str__(self):
 		return self._name
 
@@ -568,12 +577,22 @@ class NodeAttribute(object):
 	def __init__(self, node, attribute):
 		self._node = node
 		self._attribute = attribute
+		self.uid = hash(node.name + attribute)
+
+	def __hash__(self):
+		return hash(str(self._node.name) + str (self._attribute))
 
 	def __str__(self):
 		return self.fullname
 
 	def __repr__(self):
 		return self.fullname
+
+	def __eq__(self, other): 
+		return self.uid == other.uid
+
+	def __cmp__(self, other): 
+		return self.uid == other.uid
 
 	@property
 	def fullname(self):

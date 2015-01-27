@@ -671,9 +671,14 @@ class Sample(QtGui.QDialog):
         self.accWidget = AccordionWidget(self)
         self.accWidget.addItem("A", self.buildFrame())
         self.accWidget.addItem("B", self.buildFrame())
+        self.accWidget.itemMenuRequested.connect( self.showSectionMenu )
         self.accWidget.setRolloutStyle(self.accWidget.Maya)
         self.accWidget.setSpacing(0)# More like Maya but I like some padding.
         self.layout().addWidget(self.accWidget)
+
+    def showSectionMenu(self, item):
+        print item.title()
+        print 'mierda!'
 
     def buildFrame(self):
         someFrame = QtGui.QFrame(self)
@@ -691,8 +696,8 @@ class Sample(QtGui.QDialog):
 def main():
 	"""docstring for main"""
 	import sys
-	win = QtGui.QMainWindow()
 	global win
+	win = QtGui.QMainWindow()
 	PyForm=Sample()
 	win.setCentralWidget(PyForm)
 	win.show()
