@@ -277,7 +277,6 @@ class PoseManUi(baseBase, fomBase):
 		"""docstring for _makeConnections"""
 		self.connect( self.newPose_btn, QtCore.SIGNAL("clicked()") , self.newPose )
 		self.connect( self.newSection_btn, QtCore.SIGNAL("clicked()") , self.newSection )
-		self.connect( self.deleteSection_btn, QtCore.SIGNAL("clicked()") , self.deleteSection )
 		self.connect( self.setNameSpace_btn, QtCore.SIGNAL("clicked()") , self.setNameSpace )
 		self.catLayout.itemMenuRequested.connect( self.showSectionMenu )
 
