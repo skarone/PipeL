@@ -32,13 +32,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="deleteSection_btn">
-        <property name="text">
-         <string>Delete Section</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
          <widget class="QLabel" name="namespace_lbl">
