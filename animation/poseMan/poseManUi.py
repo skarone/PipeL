@@ -464,7 +464,7 @@ class NewSection(baseSec, fomSec):
 			QtGui.QDialog.accept(self)
 		
 
-def main( project, section, pose ):
+def main( ):
 	"""use this to create project in maya"""
 	if mc.window( 'PoseManUi', q = 1, ex = 1 ):
 		mc.deleteUI( 'PoseManUi' )
