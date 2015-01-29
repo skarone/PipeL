@@ -12,6 +12,7 @@ reload( rlExp )
 import maya.cmds as mc
 import maya.mel as mm
 import general.mayaNode.mayaNode as mn
+reload( mn )
 import render.aov.aov as aov
 reload( aov )
 import mtoa.core as cor
@@ -497,16 +498,25 @@ class LighterHelperUI(base,fom):
 		if not sel:
 			self.isolateLight_btn.setStyleSheet('QPushButton {background-color: rgb(0, 170, 255)}')
 			return
-		self.isolatedLights = [l for l in mn.ls( typ=['light','aiAreaLight','aiSkyDomeLight','aiVolumeScattering'], l=1 ) if l.parent.a.v ] #only visibile lights
-		for l in self.isolatedLights:
-			l.a.v.v = 0
+		lits = mn.ls( typ=['light','aiAreaLight','aiSkyDomeLight','aiVolumeScattering'], l=1 )
+		self.isolatedLights = []
+		for l in lits:
+			try:
+				if l.parent.a.v:
+					self.isolatedLights.append( l.parent )
+					l.parent.a.v.v = 0
+			except:
+				continue
 		for l in sel:
-			l.a.v.v = 1
+			l.parent.a.v.v = 1
 
 	def desisolateLight(self):
 		"""desisolate all lights from past isolate"""
 		for l in self.isolatedLights:
-			l.a.v.v = 1
+			try:
+				l.a.v.v = 1
+			except:
+				continue
 
 	def createLight(self, light):
 		"""create light on camera position if we can know what camera use"""

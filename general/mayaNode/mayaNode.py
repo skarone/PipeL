@@ -328,7 +328,7 @@ class Node(object):
 		:rtype: Node"""
 		if not self.exists:
 			raise NodeNotFound( self._name )
-		p = mc.listRelatives( self._name, p = True )
+		p = mc.listRelatives( self._name, p = True, f = True)
 		if p:
 			return Node( p[0] )
 		else:
