@@ -159,7 +159,7 @@ class CacheManagerUI(base,fom):
 			if baseName in exportedAsset:
 				continue
 			a = ass.getAssetFromNode(n, self._selectedProject)
-			cacFile = cfl.CacheFile( baseDir + '/' + baseName + '.abc', n )
+			cacFile = cfl.CacheFile( baseDir + '/' + baseName + '.abc', [n] )
 			cacFile.exportAsset( a, self.useFinalToExport_chb.isChecked(), False, steps )
 			exportedAsset.append( baseName )
 			if self.copyToServer_chb.isChecked():
@@ -224,7 +224,6 @@ class CacheManagerUI(base,fom):
 						n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), self.area_lw.currentRow() , n.name, not importAsset, assetPerShot, shotSel )
 					else:
 						n.imp()
-					n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), n.name, not importAsset )
 		elif tabNum == 1:
 			for v in xrange(self.files_lw.count()):
 				i = self.files_lw.item(v)
@@ -328,6 +327,7 @@ class CacheManagerUI(base,fom):
 				pathDir = self._selectedShot.simCachesPath 
 		else:
 			pathDir = QtGui.QFileDialog.getSaveFileName(self, 'Save Cache', self._selectedShot.animCachesPath, selectedFilter='*.abc')
+			pathDir = pathDir[0]
 		return str( pathDir )
 
 def main():

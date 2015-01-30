@@ -35,7 +35,10 @@ class CacheFile(fl.File):
 	def __init__( self, path, nodes = None ):
 		super(CacheFile, self).__init__( path )
 		if nodes:
-			self._nodes = mn.ls( nodes, s = True, dag = True, ni = True )
+			self._nodes =[]
+			for n in nodes:
+				self._nodes.extend(mn.ls( n, s = True, dag = True, ni = True ) )
+			self._nodes = mn.Nodes( self._nodes )
 		else:
 			self._nodes = None
 	
@@ -48,7 +51,7 @@ class CacheFile(fl.File):
 		"""export cache for selected file"""
 		if self.exists:
 			super(CacheFile, self).newVersion()
-		cmd = '-f ' + self.path + ' -uv -ro '
+		cmd = '-f ' + self.path + ' -uv -ro -wv '
 		if self.nodes:
 			if asset:
 				self._nodes = sorted( mc.ls( self.nodes[0].name[:self.nodes[0].name.rindex(':')] + ':*', dag = True, ni = True, typ = ['mesh','nurbsCurve'] ) )
