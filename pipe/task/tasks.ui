@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1088</width>
-    <height>776</height>
+    <width>1103</width>
+    <height>802</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,9 +20,30 @@
    <enum>QTabWidget::Rounded</enum>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_3">
+   <layout class="QHBoxLayout" name="horizontalLayout_6">
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>User:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="users_cmb"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
       <item>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="0" column="0">
@@ -37,7 +58,7 @@ font-weight: bold;</string>
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="newTask_btn">
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -138,35 +159,40 @@ font-weight: bold;</string>
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QComboBox" name="comboBox">
+         <widget class="QComboBox" name="taskStatus_cmb">
           <item>
            <property name="text">
-            <string>Waiting</string>
+            <string>Waiting to Start</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Review</string>
+            <string>Ready to Start</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Pending</string>
+            <string>In Progress</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>In-Progress</string>
+            <string>Omit</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Approved</string>
+            <string>Paused</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Ready</string>
+            <string>Pending Review</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Final</string>
            </property>
           </item>
          </widget>
@@ -270,7 +296,11 @@ font-weight: bold;</string>
           </layout>
          </item>
          <item>
-          <widget class="QListWidget" name="note_lw"/>
+          <widget class="QListWidget" name="note_lw">
+           <property name="selectionMode">
+            <enum>QAbstractItemView::NoSelection</enum>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

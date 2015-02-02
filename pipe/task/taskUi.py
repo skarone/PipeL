@@ -21,7 +21,7 @@ uiNotefile = PYFILEDIR + '/NoteWidget.ui'
 fomNote, baseNote = uiH.loadUiType( uiNotefile )
 
 class TasksUi(base, fom):
-	def __init__(self,projectName, userName, parent  = uiH.getMayaWindow() ):
+	def __init__(self,projectName, parent  = uiH.getMayaWindow() ):
 		if uiH.USEPYQT:
 			super(base, self).__init__(parent)
 		else:
@@ -29,21 +29,42 @@ class TasksUi(base, fom):
 		self.setupUi(self)
 		self.setObjectName( 'TasksUi' )
 		self.project = projectName
-		self.userName = userName
-		if userName == "":
-			return
+		self.userName = None
+		self.fillUsers()
 		self.fillTasks()
 		self._makeConnections()
+		self.currentTask = None
+
+	def fillUsers(self):
+		"""docstring for fillUsers"""
+		self.users_cmb.clear()
+		self.users_cmb.addItems( db.ProjectDataBase( self.project ).getUsers() )
 
 	def _makeConnections(self):
 		"""docstring for _makeConnections"""
 		QtCore.QObject.connect( self.task_lw, QtCore.SIGNAL( "itemClicked( QListWidgetItem* )" ), self.updateTaskDataUi )
+		QtCore.QObject.connect( self.users_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self.fillTasks )
+		self.connect( self.addNote_btn             , QtCore.SIGNAL("clicked()") , self.addNote )
+
+	@property
+	def currentUser(self):
+		"""docstring for currentUser"""
+		return str ( self.users_cmb.currentText() )
+
+	def addNote(self):
+		"""add note to currentTask"""
+		if not self.currentTask:
+			return
+		self.currentTask.addNote( db.ProjectDataBase( self.project ), str( self.note_te.toPlainText()), self.currentUser, self.currentTask.name, self.currentTask.area, self.currentTask.seq)
+		self.updateNotes()
 
 	def fillTasks(self):
 		"""fill tasks for project and user"""
 		self.task_lw.clear()
 		dataBase = db.ProjectDataBase( self.project )
-		for a in dataBase.getAssetsForUser( self.userName ):
+		if not self.currentUser:
+			return
+		for a in dataBase.getAssetsForUser( self.currentUser ):
 			itemN = QtGui.QListWidgetItem()
 			itemN.setData(32, a )
 			itemN.setSizeHint(QtCore.QSize(200,70));
@@ -56,12 +77,18 @@ class TasksUi(base, fom):
 			taskItem = item.data(32).toPyObject()
 		else:
 			taskItem = item.data(32)
-		self.note_lw.clear()
+		self.currentTask = taskItem
 		self.priority_val_lbl.setText( str( taskItem.priority ) )
 		self.startDate_lbl.setText( taskItem.timeStart )
 		self.endDate_lbl.setText( taskItem.timeEnd )
-		self.taskName_lbl.setText( taskItem.name )
-		for n in taskItem.notes:
+		self.taskName_lbl.setText( taskItem.fullname )
+		self.updateNotes()
+		
+	def updateNotes(self):
+		if not self.currentTask:
+			return
+		self.note_lw.clear()
+		for n in self.currentTask.notes(db.ProjectDataBase( self.project )):
 			itemN = QtGui.QListWidgetItem()
 			itemN.setData(32, n )
 			itemN.setSizeHint(QtCore.QSize(200,70))
@@ -75,9 +102,13 @@ class TaskUi(baseTask, fomTask):
 		else:
 			super(TaskUi, self).__init__()
 		self.setupUi(self)
-		self.taskName_lbl.setText( task.name )
+		self.taskName_lbl.setText( task.fullname )
 		self.startDate_lbl.setText( task.timeStart )
 		self.endDate_lbl.setText( task.timeEnd )
+		iconsNames = [ 'waitingStart', 'ready', 'inProgress', 'omit', 'paused', 'pendingReview', 'final' ]
+		statusIcon = QtGui.QPixmap( PYFILEDIR + '/icons/' + iconsNames[ task.status ] + '.png' )
+		self.status_lbl.setPixmap(statusIcon);
+
 
 class NoteUi(baseNote, fomNote):
 	def __init__(self, note ):
@@ -88,10 +119,11 @@ class NoteUi(baseNote, fomNote):
 		self.setupUi(self)
 		self.userName_lbl.setText( note.user )
 		self.note_lbl.setText( note.note )
+		self.noteDate_lbl.setText( note.date )
 
-def main(projectName, userName):
+def main(projectName):
 	"""use this to create project in maya"""
 	if mc.window( 'TasksUi', q = 1, ex = 1 ):
 		mc.deleteUI( 'TasksUi' )
-	PyForm=TasksUi(projectName, userName)
+	PyForm=TasksUi(projectName)
 	PyForm.show()

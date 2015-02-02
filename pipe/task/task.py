@@ -1,10 +1,8 @@
 class Task(object):
 	"""manage task UI"""
-	def __init__(self, taskData, notes):
+	def __init__(self, taskData ):
 		#(1, u'Brocoli', u'Shading', u'', 1, 50, 0, u'Now', u'Tomorrow')
 		self.taskData = taskData
-		print self.taskData
-		self._notes = notes
 
 	@property
 	def id(self):
@@ -22,11 +20,26 @@ class Task(object):
 		return self.taskData['timeEnd']
 
 	@property
-	def name(self):
+	def fullname(self):
 		"""return name of the task, if asset.. return asset + area, if shot returns sequence + shot"""
 		if self.taskData['seq'] == '': #ASSET
 			return self.taskData['name'] + ' ' + self.taskData['area']
 		return self.taskData['seq'] + ' ' + self.taskData['name'] + ' ' + self.taskData['area'] #SHOT
+
+	@property
+	def name(self):
+		"""docstring for name"""
+		return self.taskData[ 'name' ]
+
+	@property
+	def seq(self):
+		"""docstring for seq"""
+		return self.taskData[ 'seq' ]
+
+	@property
+	def area(self):
+		"""docstring for area"""
+		return self.taskData[ 'area' ]
 		
 	@property
 	def user(self):
@@ -43,7 +56,10 @@ class Task(object):
 		"""return status of task"""
 		return self.taskData['status']
 
-	@property
-	def notes(self):
+	def notes(self, dataBase):
 		"""return notes for task"""
-		return self._notes
+		return dataBase.getNotesForAsset( self.taskData['name'], self.taskData['area'], self.taskData['seq'] )
+
+	def addNote(self, dataBase, note, user, asset, area, seq = ''):
+		"""docstring for addNote"""
+		dataBase.addNote( note, user, asset, area, seq )

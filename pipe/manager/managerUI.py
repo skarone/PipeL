@@ -284,22 +284,26 @@ class ManagerUI(base,fom):
 		self.connect( actionToServer, QtCore.SIGNAL( "triggered()" ), self.copyToServer )
 		menu.addSeparator()
 		if INMAYA:
-			#COPY TIME SETTINGS
-			actionCopyTime = QtGui.QAction("Copy Time Settings", menu)
-			menu.addAction( actionCopyTime )
-			self.connect( actionCopyTime, QtCore.SIGNAL( "triggered()" ), self.copyTimeSettings )
-			#REFERENCE
-			actionReference = QtGui.QAction("Reference", menu)
-			menu.addAction( actionReference )
-			self.connect( actionReference, QtCore.SIGNAL( "triggered()" ), self.reference )
-			#IMPORT
-			actionImport = QtGui.QAction("Import", menu)
-			menu.addAction( actionImport )
-			self.connect( actionImport, QtCore.SIGNAL( "triggered()" ), self.importFile )
 			#OPEN IN CURRENT MAYA
 			actionOpenInCurrent = QtGui.QAction("Open in This Maya", menu)
 			menu.addAction( actionOpenInCurrent )
 			self.connect( actionOpenInCurrent, QtCore.SIGNAL( "triggered()" ), self.openFileInCurrentMaya )
+			menu.addSeparator()
+			#IMPORT
+			actionImport = QtGui.QAction("Import", menu)
+			menu.addAction( actionImport )
+			self.connect( actionImport, QtCore.SIGNAL( "triggered()" ), self.importFile )
+			menu.addSeparator()
+			#COPY TIME SETTINGS
+			actionCopyTime = QtGui.QAction("Copy Time Settings", menu)
+			menu.addAction( actionCopyTime )
+			self.connect( actionCopyTime, QtCore.SIGNAL( "triggered()" ), self.copyTimeSettings )
+			menu.addSeparator()
+			#REFERENCE
+			actionReference = QtGui.QAction("Reference", menu)
+			menu.addAction( actionReference )
+			self.connect( actionReference, QtCore.SIGNAL( "triggered()" ), self.reference )
+			menu.addSeparator()
 			#SAVE IN THIS SCENE
 			actionSaveScene = QtGui.QAction("Save Scene Here!", menu)
 			menu.addAction( actionSaveScene )

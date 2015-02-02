@@ -78,9 +78,7 @@ class ProjectDataBase(object):
 			con.commit()
 			tasks = []
 			for t in cur.fetchall():
-				notes = self.getNotesForAsset( t['name'], t['area'], t['seq'] )
-				print notes
-				tasks.append( task.Task( t, notes ) )
+				tasks.append( task.Task( t ) )
 			return tasks
 			
 	def setAssetTime(self, assetName, area, timeStart, timeEnd, seq = ''):
@@ -159,7 +157,11 @@ class ProjectDataBase(object):
 			cur = con.cursor()
 			cur.execute("SELECT Name FROM Users")        
 			con.commit()
-			return cur.fetchall()
+			res = cur.fetchall()
+			final = []
+			for r in res:
+				final.append( r[0] )
+			return final
 
 	def getUserIdFromName(self, userName):
 		"""return user id from user name"""

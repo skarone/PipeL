@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>307</width>
-    <height>85</height>
+    <width>346</width>
+    <height>160</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,15 +18,39 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QLabel" name="taskName_lbl">
-        <property name="styleSheet">
-         <string notr="true">font: 75 20pt &quot;Corbel&quot;;
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="taskName_lbl">
+          <property name="styleSheet">
+           <string notr="true">font: 75 20pt &quot;Corbel&quot;;
 font-weight: bold;</string>
-        </property>
-        <property name="text">
-         <string>TASK NAME</string>
-        </property>
-       </widget>
+          </property>
+          <property name="text">
+           <string>TASK NAME</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="status_lbl">
+          <property name="text">
+           <string>StatusIcon</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -52,6 +76,9 @@ font-weight: bold;</string>
      </layout>
     </item>
    </layout>
+   <zorder>taskName_lbl</zorder>
+   <zorder>taskName_lbl</zorder>
+   <zorder>status_lbl</zorder>
   </widget>
  </widget>
  <resources/>
