@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>542</width>
+    <width>633</width>
     <height>468</height>
    </rect>
   </property>
@@ -46,6 +46,13 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="newUser_btn">
+        <property name="text">
+         <string>New User</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -129,6 +136,13 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QPushButton" name="newAsset_btn">
+        <property name="text">
+         <string>New Asset</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
@@ -143,7 +157,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="area_cmb">
+         <widget class="QComboBox" name="areas_cmb">
           <property name="minimumSize">
            <size>
             <width>200</width>
@@ -166,6 +180,33 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Priority:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="priority_spb">
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="value">
+         <number>50</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>Status:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="status_cmb"/>
       </item>
      </layout>
     </item>

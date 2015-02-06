@@ -5,6 +5,8 @@ import pipe.task.task as task
 reload( task )
 import pipe.note.note as note
 reload( note )
+import pipe.settings.settings as sti
+reload( sti )
 
 class ProjectDataBase(object):
 	"""class to handle the database of the proyect"""
@@ -14,8 +16,8 @@ class ProjectDataBase(object):
 	@property
 	def dataBaseFile(self):
 		"""data base dataBaseFile"""
-		return 'D:/' + self.project + '.db'
-		#return sti.Settings().General[ "basepath" ] + self.project + '.db'
+		#return 'D:/' + self.project + '.db'
+		return sti.Settings().General[ "serverpath" ] + self.project + '/' + self.project + '.db'
 
 	def create(self):
 		"""create bases for database"""
@@ -197,7 +199,7 @@ class ProjectDataBase(object):
 		with con:
 			con.row_factory = lite.Row
 			cur = con.cursor()
-			cur.execute("SELECT Note as note, Users.Name as userName, Assets.Name as assetName, Date as date FROM Notes INNER JOIN Users ON Notes.UserId = Users.Id INNER JOIN Assets ON Notes.AssetId = Assets.Id WHERE Notes.AssetId=:name", {"name": assetId})        
+			cur.execute("SELECT Note as note, Users.Name as userName, Assets.Name as assetName, Date as date FROM Notes INNER JOIN Users ON Notes.UserId = Users.Id INNER JOIN Assets ON Notes.AssetId = Assets.Id WHERE Notes.AssetId=:name ORDER BY Notes.Id DESC" , {"name": assetId})        
 			con.commit()
 			notes = cur.fetchall()
 			print notes

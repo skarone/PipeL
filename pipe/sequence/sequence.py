@@ -18,6 +18,14 @@ class Sequence(object):
 		self._name = name
 		self._project = project
 
+	def __str__(self):
+		"""docstring for __str__"""
+		return self.name
+
+	def __repr__(self):
+		"""docstring for __rpr__"""
+		return self.name
+
 	@property
 	def name(self):
 		"""return name of the sequence"""

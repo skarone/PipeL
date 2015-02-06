@@ -134,6 +134,27 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="toLow_btn">
+        <property name="text">
+         <string>To LOW</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="toMid_btn">
+        <property name="text">
+         <string>To MID</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="toHigh_btn">
+        <property name="text">
+         <string>To HIGH</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="toTx_btn">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Change path to tx version, if there is no tx version automatically create one&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>

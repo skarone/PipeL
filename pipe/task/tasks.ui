@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1103</width>
-    <height>802</height>
+    <height>642</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -159,43 +159,7 @@ font-weight: bold;</string>
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QComboBox" name="taskStatus_cmb">
-          <item>
-           <property name="text">
-            <string>Waiting to Start</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Ready to Start</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>In Progress</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Omit</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Paused</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Pending Review</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Final</string>
-           </property>
-          </item>
-         </widget>
+         <widget class="QComboBox" name="taskStatus_cmb"/>
         </item>
         <item row="0" column="1">
          <widget class="QLabel" name="priority_val_lbl">

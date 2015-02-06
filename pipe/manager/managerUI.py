@@ -93,7 +93,6 @@ class ManagerUI(base,fom):
 		self.shots_tw.customContextMenuRequested.connect(self.showMenu)
 		self.setObjectName( 'ManagerUI' )
 
-
 	###################################
 	#LOAD SETTINGS
 	def loadProjectsPath(self):
@@ -263,6 +262,7 @@ class ManagerUI(base,fom):
 			self.shots_tw.setRowHidden( i, not match )
 
 	def showMenu(self, pos):
+		tabwid = self._getCurrentTab()
 		menu=QtGui.QMenu(self)
 		propIcon = QtGui.QIcon( PYFILEDIR + '/icons/question.png' )
 		actionProperties = QtGui.QAction(propIcon, "Properties", menu)
@@ -272,7 +272,16 @@ class ManagerUI(base,fom):
 		actionOpenInExplorer = QtGui.QAction(folderIcon,"Open File in explorer", menu)
 		menu.addAction( actionOpenInExplorer )
 		self.connect( actionOpenInExplorer, QtCore.SIGNAL( "triggered()" ), self.openFileLocation )
+		#COPY PATH
+		actionSaveScene = QtGui.QAction("Copy File Path", menu)
+		menu.addAction( actionSaveScene )
+		self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.copyFilePath )
+		#OPEN RENDER PATH
+		actionSaveScene = QtGui.QAction(folderIcon,"Open Render Folder", menu)
+		menu.addAction( actionSaveScene )
+		self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.openRenderFolder )
 		menu.addSeparator()
+		#DOWNLOAD UPLOAD
 		downIcon = QtGui.QIcon( PYFILEDIR + '/icons/download.png' )
 		uploIcon = QtGui.QIcon( PYFILEDIR + '/icons/upload.png' )
 		actionCopyServer = QtGui.QAction( downIcon, "Download From Server", menu)
@@ -285,40 +294,46 @@ class ManagerUI(base,fom):
 		menu.addSeparator()
 		if INMAYA:
 			#OPEN IN CURRENT MAYA
-			actionOpenInCurrent = QtGui.QAction("Open in This Maya", menu)
+			mayaIcon = QtGui.QIcon( PYFILEDIR + '/icons/maya.png' )
+			actionOpenInCurrent = QtGui.QAction(mayaIcon,"Open in This Maya", menu)
 			menu.addAction( actionOpenInCurrent )
 			self.connect( actionOpenInCurrent, QtCore.SIGNAL( "triggered()" ), self.openFileInCurrentMaya )
 			menu.addSeparator()
 			#IMPORT
-			actionImport = QtGui.QAction("Import", menu)
+			impIcon = QtGui.QIcon( PYFILEDIR + '/icons/import.png' )
+			actionImport = QtGui.QAction(impIcon,"Import", menu)
 			menu.addAction( actionImport )
 			self.connect( actionImport, QtCore.SIGNAL( "triggered()" ), self.importFile )
 			menu.addSeparator()
 			#COPY TIME SETTINGS
-			actionCopyTime = QtGui.QAction("Copy Time Settings", menu)
+			timeIcon = QtGui.QIcon( PYFILEDIR + '/icons/time.png' )
+			actionCopyTime = QtGui.QAction(timeIcon,"Copy Time Settings", menu)
 			menu.addAction( actionCopyTime )
 			self.connect( actionCopyTime, QtCore.SIGNAL( "triggered()" ), self.copyTimeSettings )
 			menu.addSeparator()
 			#REFERENCE
-			actionReference = QtGui.QAction("Reference", menu)
+			refIcon = QtGui.QIcon( PYFILEDIR + '/icons/reference.png' )
+			actionReference = QtGui.QAction(refIcon,"Reference", menu)
 			menu.addAction( actionReference )
 			self.connect( actionReference, QtCore.SIGNAL( "triggered()" ), self.reference )
 			menu.addSeparator()
 			#SAVE IN THIS SCENE
-			actionSaveScene = QtGui.QAction("Save Scene Here!", menu)
+			savIcon = QtGui.QIcon( PYFILEDIR + '/icons/save.png' )
+			actionSaveScene = QtGui.QAction(savIcon,"Save Scene Here!", menu)
 			menu.addAction( actionSaveScene )
 			self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.saveScene )
 		elif INNUKE:
 			#OPEN IN CURRENT MAYA
-			actionOpenInCurrent = QtGui.QAction("Open in This Nuke", menu)
+			nukIcon = QtGui.QIcon( PYFILEDIR + '/icons/nuke.png' )
+			actionOpenInCurrent = QtGui.QAction(nukIcon,"Open in This Nuke", menu)
 			menu.addAction( actionOpenInCurrent )
 			self.connect( actionOpenInCurrent, QtCore.SIGNAL( "triggered()" ), self.openFileInCurrentNuke )
 			#SAVE IN THIS SCENE
-			actionSaveScene = QtGui.QAction("Save Scene Here!", menu)
+			savIcon = QtGui.QIcon( PYFILEDIR + '/icons/save.png' )
+			actionSaveScene = QtGui.QAction(savIcon,"Save Scene Here!", menu)
 			menu.addAction( actionSaveScene )
 			self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.saveNukeScene )
 
-		tabwid = self._getCurrentTab()
 		menu.popup(tabwid.viewport().mapToGlobal(pos))
 
 	def searchAsset(self, fil):
@@ -680,6 +695,18 @@ class ManagerUI(base,fom):
 	#
 	###################################
 	#
+	def copyFilePath(self):
+		"""docstring for copyFilePath"""
+		tab = self._getCurrentTab()
+		item = tab.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		command = 'echo ' + asset.path + '| clip'
+		os.popen(command)
+
+
 	def openFile(self,item):
 		"""open selected Asset"""
 		#item = self.assets_tw.currentItem()
@@ -700,7 +727,6 @@ class ManagerUI(base,fom):
 			asset = item.data(32).toPyObject()
 		else:
 			asset = item.data(32)
-		self.addFileToHistory( asset )
 		subprocess.Popen(r'explorer /select,"'+ asset.path.replace( '/','\\' ) +'"')
 
 	def openFileInCurrentMaya(self):
@@ -732,6 +758,26 @@ class ManagerUI(base,fom):
 			print asset.name
 			asset.newVersion()
 			asset.save()
+	
+	def openRenderFolder(self):
+		"""docstring for openRenderFolder"""
+		tab = self._getCurrentTab()
+		item = tab.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		assOrShot = prj.shotOrAssetFromFile( asset )
+		if assOrShot:
+			if assOrShot.type == 'asset':
+				#versionNumber = self._getVersionNumber( renderPath + assOrShot.project.name + '/Asset/' + assOrShot.name )
+				pat = self.settings.General[ 'renderpath' ] + assOrShot.project.name + '/Asset/' + assOrShot.name + '/'
+			elif assOrShot.type == 'shot':
+				#R:\Pony_Halloween_Fantasmas\Terror\s013_T13\Chicos_Beauty
+				#versionNumber = self._getVersionNumber( renderPath + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name )
+				pat =  self.settings.General[ 'renderpath' ] + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name + '/'
+			subprocess.Popen(r'explorer "'+ pat.replace( '/','\\' ) +'"')
+
 
 	def importFile(self):
 		"""import file to current Maya"""

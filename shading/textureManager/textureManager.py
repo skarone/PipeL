@@ -122,3 +122,39 @@ class Manager(object):
 				attr = "ftn"
 			f = tfl.textureFile( n.attr( attr ).v )
 			f.createVersions()
+
+	def toLow(self, textures):
+		"""docstring for toLow"""
+		for n in textures:
+			if n.type == 'aiImage':
+				attr = "filename"
+			else:
+				attr = "ftn"
+			f = tfl.textureFile( n.attr( attr ).v )
+			if f.hasLow:
+				toPng = f.toLow()
+				n.attr( attr ).v = toPng.path
+
+	def toHigh(self, textures):
+		"""docstring for toHigh"""
+		for n in textures:
+			if n.type == 'aiImage':
+				attr = "filename"
+			else:
+				attr = "ftn"
+			f = tfl.textureFile( n.attr( attr ).v )
+			if f.hasHigh:
+				toPng = f.toHigh()
+				n.attr( attr ).v = toPng.path
+
+	def toMid(self, textures):
+		"""docstring for toMid"""
+		for n in textures:
+			if n.type == 'aiImage':
+				attr = "filename"
+			else:
+				attr = "ftn"
+			f = tfl.textureFile( n.attr( attr ).v )
+			if f.hasMid:
+				toPng = f.toMid()
+				n.attr( attr ).v = toPng.path

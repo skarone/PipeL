@@ -150,6 +150,9 @@ class RenderManagerUI(base,fom):
 		if self.renderLocal_chb.isChecked():
 			whiteList = socket.gethostname()
 			print 'rendering in local', whiteList
+		plugin = 'MayaBatch'
+		if mc.getAttr( "defaultRenderGlobals.ren" ) == 'mentalRay':
+			plugin = 'MayaCmd'
 		for w in self._getLayersWidgets():
 			filePrefix = str( self.filePath_le.text())
 			frames   = str(self.frameRange_le.text())
@@ -169,7 +172,8 @@ class RenderManagerUI(base,fom):
 			if self._project:
 				name = self._project + ' - '
 			Job = dl.Job( w.layer.name,
-						{	'Group'           : group,
+					{		'Plugin'          : plugin,
+							'Group'           : group,
 							'Pool'            : pool,
 							'Frames'          : frames,
 							'Comment'         : comments,
@@ -179,7 +183,7 @@ class RenderManagerUI(base,fom):
 							'OutputFilename0' : filename,
 							'Priority'        : priority,
 							'ChunkSize'       : taskSize
-							},{'CommandLineOptions' : '-rl ' + w.layer.name,
+							},{'CommandLineOptions' : '-rl ' + w.layer.name + ' -mr:art ',
 								'UsingRenderLayers' : 1,
 								'ProjectPath'       : projPath,
 								'RenderLayer'       : w.layer.name,

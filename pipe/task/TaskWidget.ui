@@ -22,8 +22,7 @@
         <item>
          <widget class="QLabel" name="taskName_lbl">
           <property name="styleSheet">
-           <string notr="true">font: 75 20pt &quot;Corbel&quot;;
-font-weight: bold;</string>
+           <string notr="true">font-weight: bold;</string>
           </property>
           <property name="text">
            <string>TASK NAME</string>
@@ -55,16 +54,16 @@ font-weight: bold;</string>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QLabel" name="startDate_lbl">
+         <widget class="QLabel" name="date_lbl">
           <property name="text">
-           <string>Start Date</string>
+           <string>Date</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="endDate_lbl">
+         <widget class="QLabel" name="priority_lbl">
           <property name="text">
-           <string>End Date</string>
+           <string>Priority</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -76,9 +75,6 @@ font-weight: bold;</string>
      </layout>
     </item>
    </layout>
-   <zorder>taskName_lbl</zorder>
-   <zorder>taskName_lbl</zorder>
-   <zorder>status_lbl</zorder>
   </widget>
  </widget>
  <resources/>

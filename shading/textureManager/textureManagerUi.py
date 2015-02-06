@@ -44,6 +44,9 @@ class ManagerUI(base,fom):
 		QtCore.QObject.connect( self.searchPath_le, QtCore.SIGNAL( "textEdited (const QString&)" ), self.searchTexture )
 		QtCore.QObject.connect( self.textures_tw, QtCore.SIGNAL( "itemClicked (QTableWidgetItem *)" ), self.selectNode )
 		self.connect(self.moveToFolder_btn, QtCore.SIGNAL("clicked()"), self.moveToFolder)
+		self.connect(self.toHigh_btn, QtCore.SIGNAL("clicked()"), self.toHigh)
+		self.connect(self.toLow_btn, QtCore.SIGNAL("clicked()"), self.toLow)
+		self.connect(self.toMid_btn, QtCore.SIGNAL("clicked()"), self.toMid)
 		self.connect(self.replacePath_btn, QtCore.SIGNAL("clicked()"), self.replacePath)
 		self.connect(self.toTx_btn, QtCore.SIGNAL("clicked()"), self.toTx)
 		self.connect(self.createVersions_btn, QtCore.SIGNAL("clicked()"), self.createVersions)
@@ -51,6 +54,21 @@ class ManagerUI(base,fom):
 		self.connect(self.refresh_btn, QtCore.SIGNAL("clicked()"), self.fillTextures)
 		self.connect(self.renameTexture_btn, QtCore.SIGNAL("clicked()"), self.renameTextures)
 		self.connect(self.createTx_btn, QtCore.SIGNAL("clicked()"), self.createTx)
+
+	def toHigh(self):
+		"""docstring for toHigh"""
+		textures = self.getSelected()
+		self.manager.toHigh( textures )
+
+	def toMid(self):
+		"""docstring for toMid"""
+		textures = self.getSelected()
+		self.manager.toMid( textures )
+
+	def toLow(self):
+		"""docstring for toLow"""
+		textures = self.getSelected()
+		self.manager.toLow( textures )
 
 	def moveToFolder(self):
 		"""

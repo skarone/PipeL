@@ -77,11 +77,14 @@ class RenderLayer(mn.Node):
 					if plg.children:
 						count = 0
 						for p in plg.children:
-							if 'Angle' in p.type:
-								tweaks[ p ] = valAttr.v[0][ count ]/0.0174532925 #deg to rad
-							else:
-								tweaks[ p ] = valAttr.v[0][ count ]
-							count += 1
+							try:
+								if 'Angle' in p.type:
+									tweaks[ p ] = valAttr.v[0][ count ]/0.0174532925 #deg to rad
+								else:
+									tweaks[ p ] = valAttr.v[0][ count ]
+								count += 1
+							except:
+								continue
 					else:
 						if 'Angle' in plg.type:
 							tweaks[ plg ] = valAttr.v/0.0174532925 #deg to rad

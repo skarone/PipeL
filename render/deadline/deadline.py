@@ -28,7 +28,7 @@ class Job(object):
 	def __init__(self, name, infoDict, pluginDict, mayaFile):
 		self._mayaFile = mayaFile
 		self._infoDict = {
-				'Plugin'                             : 'MayaBatch',
+				'Plugin'                             : 'MayaCmd',
 				'ForceReloadPlugin'                  : 'false',
 				'Frames'                             : '101-240',
 				'ChunkSize'                          : '5',
