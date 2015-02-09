@@ -44,7 +44,7 @@ class Task(object):
 	@property
 	def user(self):
 		"""assigned user"""
-		return self.taskData['user']
+		return self.taskData['userName']
 
 	@property
 	def priority(self):

@@ -3,6 +3,8 @@ import general.ui.pySideHelper as uiH
 reload( uiH )
 uiH.set_qt_bindings()
 from Qt import QtGui,QtCore
+import pipe.task.newTask as newTsk
+reload( newTsk )
 
 import maya.cmds as mc
 
@@ -11,11 +13,8 @@ reload( db )
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
-uifile = PYFILEDIR + '/tasks.ui'
+uifile = PYFILEDIR + '/TasksUi.ui'
 fom, base = uiH.loadUiType( uifile )
-
-uiTaskfile = PYFILEDIR + '/TaskWidget.ui'
-fomTask, baseTask = uiH.loadUiType( uiTaskfile )
 
 uiNotefile = PYFILEDIR + '/NoteWidget.ui'
 fomNote, baseNote = uiH.loadUiType( uiNotefile )
@@ -32,7 +31,6 @@ class TasksUi(base, fom):
 		self.userName = None
 		self.fillUsers()
 		self.fillTasks()
-		self.fillStatus()
 		self._makeConnections()
 		self.currentTask = None
 
@@ -50,10 +48,15 @@ class TasksUi(base, fom):
 
 	def _makeConnections(self):
 		"""docstring for _makeConnections"""
-		QtCore.QObject.connect( self.task_lw, QtCore.SIGNAL( "itemClicked( QListWidgetItem* )" ), self.updateTaskDataUi )
 		QtCore.QObject.connect( self.users_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self.fillTasks )
-		QtCore.QObject.connect( self.taskStatus_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self.changeTaskStatus )
+		QtCore.QObject.connect( self.tasks_tw, QtCore.SIGNAL( "itemClicked (QTableWidgetItem *)" ), self.updateTaskDataUi )
 		self.connect( self.addNote_btn             , QtCore.SIGNAL("clicked()") , self.addNote )
+		self.connect( self.newTask_btn             , QtCore.SIGNAL("clicked()") , self.newTask )
+		self.connect( self.refresh_btn             , QtCore.SIGNAL("clicked()") , self.fillTasks )
+
+	def newTask(self):
+		"""docstring for newTask"""
+		newTsk.main( self.project )
 
 	@property
 	def currentUser(self):
@@ -70,32 +73,44 @@ class TasksUi(base, fom):
 
 	def fillTasks(self):
 		"""fill tasks for project and user"""
-		self.task_lw.clear()
+		self.tasks_tw.clearContents()
 		dataBase = db.ProjectDataBase( self.project )
 		if not self.currentUser:
 			return
-		for a in dataBase.getAssetsForUser( self.currentUser ):
-			itemN = QtGui.QListWidgetItem()
-			itemN.setData(32, a )
-			itemN.setSizeHint(QtCore.QSize(200,70));
-			self.task_lw.addItem( itemN )
-			self.task_lw.setItemWidget(itemN, TaskUi( a ) )
+		data = dataBase.getAssetsForUser( self.currentUser )
+		self.tasks_tw.setRowCount( len( data ) )
+		for i,a in enumerate(data):
+			#NAME
+			item = QtGui.QTableWidgetItem( a.fullname )
+			item.setData(32, a )
+			self.tasks_tw.setItem( i, 0, item )
+			#USER
+			item = QtGui.QTableWidgetItem( a.user )
+			item.setData(32, a )
+			self.tasks_tw.setItem( i, 1, item )
+			#PRIORITY
+			item = QtGui.QTableWidgetItem( a.priority )
+			item.setData(32, a )
+			self.tasks_tw.setItem( i, 2, item )
+			#Status
+			item = QtGui.QTableWidgetItem( a.status )
+			item.setData(32, a )
+			self.tasks_tw.setItem( i, 3, item )
+			#Start DATE
+			item = QtGui.QTableWidgetItem( a.timeStart )
+			item.setData(32, a )
+			self.tasks_tw.setItem( i, 4, item )
+			#End DATE
+			item = QtGui.QTableWidgetItem( a.timeEnd )
+			item.setData(32, a )
+			self.tasks_tw.setItem( i, 5, item )
 
-	def updateTaskDataUi(self):
-		item = self.task_lw.selectedItems()[0]
+	def updateTaskDataUi(self, item):
 		if uiH.USEPYQT:
 			taskItem = item.data(32).toPyObject()
 		else:
 			taskItem = item.data(32)
 		self.currentTask = taskItem
-		self.priority_val_lbl.setText( str( taskItem.priority ) )
-		self.startDate_lbl.setText( taskItem.timeStart )
-		self.endDate_lbl.setText( taskItem.timeEnd )
-		self.taskName_lbl.setText( taskItem.fullname )
-		its = [ 'Waiting to Start', 'Ready to Start', 'In Progress', 'Omit', 'Paused', 'Pending Review', 'Final' ]
-		index = self.taskStatus_cmb.findText( its[ taskItem.status ] )
-		if not index == -1:
-			self.taskStatus_cmb.setCurrentIndex(index)
 		self.updateNotes()
 		
 	def updateNotes(self):
@@ -111,22 +126,6 @@ class TasksUi(base, fom):
 
 	def changeTaskStatus(self):
 		"""docstring for fname"""
-
-
-class TaskUi(baseTask, fomTask):
-	def __init__(self, task ):
-		if uiH.USEPYQT:
-			super(baseTask, self).__init__()
-		else:
-			super(TaskUi, self).__init__()
-		self.setupUi(self)
-		self.taskName_lbl.setText( task.fullname )
-		self.date_lbl.setText( task.timeStart + ' - ' + task.timeEnd )
-		self.priority_lbl.setText( str( task.priority ) )
-		iconsNames = [ 'waitingStart', 'ready', 'inProgress', 'omit', 'paused', 'pendingReview', 'final' ]
-		statusIcon = QtGui.QPixmap( PYFILEDIR + '/icons/' + iconsNames[ task.status ] + '.png' )
-		self.status_lbl.setPixmap(statusIcon);
-
 
 class NoteUi(baseNote, fomNote):
 	def __init__(self, note ):

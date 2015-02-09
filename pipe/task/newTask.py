@@ -4,6 +4,8 @@ reload( uiH )
 uiH.set_qt_bindings()
 from Qt import QtGui,QtCore
 
+import maya.cmds as mc
+
 import pipe.database.database as db
 reload( db )
 import pipe.settings.settings as sti
