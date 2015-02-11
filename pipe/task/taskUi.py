@@ -37,14 +37,14 @@ class TasksUi(base, fom):
 	def fillUsers(self):
 		"""docstring for fillUsers"""
 		self.users_cmb.clear()
-		self.users_cmb.addItems( db.ProjectDataBase( self.project ).getUsers() )
+		self.users_cmb.addItems( ['All'] + db.ProjectDataBase( self.project ).getUsers() )
 
-	def fillStatus(self):
+	def fillStatus(self, widget):
 		"""docstring for fillStatus"""
 		its = { 'waitingStart':'Waiting to Start', 'ready':'Ready to Start', 'inProgress':'In Progress', 'omit':'Omit', 'paused':'Paused', 'pendingReview':'Pending Review', 'final':'Final' }
 		for i in sorted( its.keys() ):
 			icon = QtGui.QIcon( PYFILEDIR + '/icons/' + i + '.png' )
-			self.taskStatus_cmb.addItem( icon, its[i] )
+			widget.addItem( icon, its[i] )
 
 	def _makeConnections(self):
 		"""docstring for _makeConnections"""
@@ -77,33 +77,92 @@ class TasksUi(base, fom):
 		dataBase = db.ProjectDataBase( self.project )
 		if not self.currentUser:
 			return
-		data = dataBase.getAssetsForUser( self.currentUser )
+		if self.currentUser == 'All':
+			data = []
+			for u in db.ProjectDataBase( self.project ).getUsers():
+				data.extend(dataBase.getAssetsForUser( u ))
+		else:
+			data = dataBase.getAssetsForUser( self.currentUser )
 		self.tasks_tw.setRowCount( len( data ) )
+		self.mapper = QtCore.QSignalMapper(self)
 		for i,a in enumerate(data):
 			#NAME
+			tmpA = a
 			item = QtGui.QTableWidgetItem( a.fullname )
 			item.setData(32, a )
 			self.tasks_tw.setItem( i, 0, item )
 			#USER
+			cmbStatus = QtGui.QComboBox()
+			cmbStatus.addItems( db.ProjectDataBase( self.project ).getUsers() )
+			index = cmbStatus.findText( a.user )
+			if not index == -1:
+				cmbStatus.setCurrentIndex(index)
 			item = QtGui.QTableWidgetItem( a.user )
-			item.setData(32, a )
 			self.tasks_tw.setItem( i, 1, item )
+			self.tasks_tw.setCellWidget(i,1, cmbStatus);
+			self.connect( cmbStatus, QtCore.SIGNAL("currentIndexChanged( const int& )" ), self.mapper, QtCore.SLOT("map()") )
+			self.mapper.setMapping(cmbStatus, i)
 			#PRIORITY
-			item = QtGui.QTableWidgetItem( a.priority )
-			item.setData(32, a )
+			spin = QtGui.QSpinBox()
+			spin.setValue( a.priority )
+			spin.setRange( 0, 100 )
+			item = QtGui.QTableWidgetItem( str( a.priority ) )
 			self.tasks_tw.setItem( i, 2, item )
+			self.tasks_tw.setCellWidget(i,2, spin);
+			self.connect( spin, QtCore.SIGNAL("valueChanged( const int& )" ), self.mapper, QtCore.SLOT("map()") )
+			self.mapper.setMapping(spin, i)
 			#Status
-			item = QtGui.QTableWidgetItem( a.status )
-			item.setData(32, a )
+			item = QtGui.QTableWidgetItem( str( a.status ) )
+			cmbStatus = QtGui.QComboBox()
+			self.fillStatus( cmbStatus )
+			its = [ 'Waiting to Start', 'Ready to Start', 'In Progress', 'Omit', 'Paused', 'Pending Review', 'Final' ]
+			index = cmbStatus.findText( its[ a.status ] )
+			if not index == -1:
+				cmbStatus.setCurrentIndex(index)
 			self.tasks_tw.setItem( i, 3, item )
+			self.tasks_tw.setCellWidget(i,3, cmbStatus);
+			self.connect( cmbStatus, QtCore.SIGNAL("currentIndexChanged( const int& )" ), self.mapper, QtCore.SLOT("map()") )
+			self.mapper.setMapping(cmbStatus, i)
 			#Start DATE
+			dsplit =  a.timeStart.split( '-' )
+			if '-' in a.timeStart:
+				date = QtGui.QDateEdit( QtCore.QDate( int(dsplit[2]),int(dsplit[1]),int(dsplit[0]) ))
+			else:
+				date = QtGui.QDateEdit()
+			date.setCalendarPopup(True)
 			item = QtGui.QTableWidgetItem( a.timeStart )
-			item.setData(32, a )
 			self.tasks_tw.setItem( i, 4, item )
+			self.tasks_tw.setCellWidget(i,4, date);
+			self.connect( date, QtCore.SIGNAL("dateChanged( const QDate& )" ), self.mapper, QtCore.SLOT("map()") )
+			self.mapper.setMapping(date, i)
 			#End DATE
+			dsplit =  a.timeEnd.split( '-' )
+			if '-' in a.timeEnd:
+				date = QtGui.QDateEdit( QtCore.QDate( int(dsplit[2]),int(dsplit[1]),int(dsplit[0]) ))
+			else:
+				date = QtGui.QDateEdit()
+			date.setCalendarPopup(True)
 			item = QtGui.QTableWidgetItem( a.timeEnd )
-			item.setData(32, a )
 			self.tasks_tw.setItem( i, 5, item )
+			self.tasks_tw.setCellWidget(i,5, date);
+			self.connect( date, QtCore.SIGNAL("dateChanged( const QDate& )" ), self.mapper, QtCore.SLOT("map()") )
+			self.mapper.setMapping(date, i)
+		self.mapper.mapped.connect(self.updateTask)
+
+	def updateTask(self, row):
+		"""docstring for updateTask"""
+		tas = self._getTaskByRowIndex( row )
+		print tas.user, tas.timeStart, tas.timeEnd
+		print 'in updateTask'
+
+	def _getTaskByRowIndex(self, row):
+		"""docstring for _getTaskByRowIndex"""
+		item = self.tasks_tw.item( row, 0 )
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		return asset
 
 	def updateTaskDataUi(self, item):
 		if uiH.USEPYQT:

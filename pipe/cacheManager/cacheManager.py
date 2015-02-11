@@ -293,7 +293,7 @@ class CacheManagerUI(base,fom):
 		self.skinFixCaches_lw.clear()
 		self.simCaches_lw.clear()
 		for s in caches.keys():
-			for f in caches[s]:
+			for f in sorted( caches[s], key=lambda x: x.name, reverse=False):
 				item = QtGui.QListWidgetItem( f.name + ' - ' + s )
 				#item.setFlags(QtCore.Qt.ItemIsEnabled)
 				item.setCheckState(QtCore.Qt.Unchecked )

@@ -178,7 +178,7 @@ class ProjectDataBase(object):
 		"""add note to database"""
 		userId = self.getUserIdFromName( user )
 		assetId = self.getAssetIdFromName( asset, area, seq )
-		date = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+		date = strftime("%d-%m-%Y %H:%M:%S", gmtime())
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
