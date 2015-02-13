@@ -65,17 +65,17 @@ fom, base = uiH.loadUiType( uifile )
 
 class ManagerUI(base,fom):
 	"""manager ui class"""
-	def __init__(self):
+	def __init__(self, parent = uiH.getMayaWindow() ):
 		if INMAYA:
 			if uiH.USEPYQT:
-				super(base, self).__init__(uiH.getMayaWindow())
+				super(base, self).__init__(parent)
 			else:
-				super(ManagerUI, self).__init__(uiH.getMayaWindow())
+				super(ManagerUI, self).__init__(parent)
 		else:
 			if uiH.USEPYQT:
-				super(base, self).__init__()
+				super(base, self).__init__(parent)
 			else:
-				super(ManagerUI, self).__init__()
+				super(ManagerUI, self).__init__(parent)
 		self.setupUi(self)
 		self.serverPath = ''
 		self.settings = sti.Settings()
@@ -1083,7 +1083,7 @@ def main():
 	if INMAYA:
 		if mc.window( 'ManagerUI', q = 1, ex = 1 ):
 			mc.deleteUI( 'ManagerUI' )
-	PyForm=ManagerUI()
+	PyForm=ManagerUI(parent=QtGui.QApplication.activeWindow())
 	PyForm.show()
 
 if __name__=="__main__":

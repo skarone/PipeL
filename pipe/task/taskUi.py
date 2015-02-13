@@ -9,8 +9,12 @@ reload( newTsk )
 import pipe.project.project as prj
 import pipe.settings.settings as sti
 reload( sti )
-
-import maya.cmds as mc
+INMAYA = True
+try:
+	import maya.cmds as mc
+except:
+	INMAYA = False
+	pass
 
 import pipe.database.database as db
 reload( db )
@@ -25,10 +29,16 @@ fomNote, baseNote = uiH.loadUiType( uiNotefile )
 
 class TasksUi(base, fom):
 	def __init__(self,projectName, parent  = uiH.getMayaWindow() ):
-		if uiH.USEPYQT:
-			super(base, self).__init__(parent)
+		if INMAYA:
+			if uiH.USEPYQT:
+				super(base, self).__init__(parent)
+			else:
+				super(TasksUi, self).__init__(parent)
 		else:
-			super(TasksUi, self).__init__(parent)
+			if uiH.USEPYQT:
+				super(base, self).__init__()
+			else:
+				super(TasksUi, self).__init__()
 		self.setupUi(self)
 		self.setObjectName( 'TasksUi' )
 		self.project = projectName
@@ -258,8 +268,9 @@ class NoteUi(baseNote, fomNote):
 		
 def main(projectName):
 	"""use this to create project in maya"""
-	if mc.window( 'TasksUi', q = 1, ex = 1 ):
-		mc.deleteUI( 'TasksUi' )
+	if INMAYA:
+		if mc.window( 'TasksUi', q = 1, ex = 1 ):
+			mc.deleteUI( 'TasksUi' )
 	PyForm=TasksUi(projectName)
 	PyForm.show()
 

@@ -4,7 +4,7 @@ reload( fl )
 try:
 	import maya.cmds as mc
 except:
-	print 'outside maya'
+	pass
 import os
 import pipe.settings.settings as sti
 reload( sti )

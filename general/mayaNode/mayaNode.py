@@ -109,7 +109,7 @@ Namespace:
 try:
 	import maya.cmds as mc
 except:
-	print 'running from outside maya'
+	pass
 import re
 import sys
 """

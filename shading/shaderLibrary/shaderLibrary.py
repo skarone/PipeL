@@ -16,7 +16,7 @@ try:
 	import maya.cmds as mc
 	import maya.mel as mm
 except:
-	print 'runing from outside maya'
+	pass
 import json
 import datetime
 import os

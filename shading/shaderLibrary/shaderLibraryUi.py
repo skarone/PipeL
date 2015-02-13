@@ -7,7 +7,7 @@ try:
 	import maya.cmds as cmds
 	import maya.mel as mm
 except:
-	print 'running from outside maya'
+	pass
 import os
 import json
 

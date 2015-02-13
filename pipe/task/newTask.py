@@ -4,7 +4,12 @@ reload( uiH )
 uiH.set_qt_bindings()
 from Qt import QtGui,QtCore
 
-import maya.cmds as mc
+INMAYA = True
+try:
+	import maya.cmds as mc
+except:
+	INMAYA = False
+	pass
 
 import pipe.database.database as db
 reload( db )
@@ -29,10 +34,16 @@ fomUser, baseUser = uiH.loadUiType( uiUserfile )
 
 class NewTaskUi(base, fom):
 	def __init__(self,projectName, user = '', parent  = uiH.getMayaWindow() ):
-		if uiH.USEPYQT:
-			super(base, self).__init__(parent)
+		if INMAYA:
+			if uiH.USEPYQT:
+				super(base, self).__init__(parent)
+			else:
+				super(NewTaskUi, self).__init__(parent)
 		else:
-			super(NewTaskUi, self).__init__(parent)
+			if uiH.USEPYQT:
+				super(base, self).__init__()
+			else:
+				super(NewTaskUi, self).__init__()
 		self.setupUi(self)
 		self._user = user
 		self.setObjectName( 'NewTaskUi' )
@@ -208,8 +219,9 @@ class NewUserUi(baseUser, fomUser):
 
 def main(projectname, user = ''):
 	"""use this to create project in maya"""
-	if mc.window( 'NewTaskUi', q = 1, ex = 1 ):
-		mc.deleteUI( 'NewTaskUi' )
+	if INMAYA:
+		if mc.window( 'NewTaskUi', q = 1, ex = 1 ):
+			mc.deleteUI( 'NewTaskUi' )
 	PyForm=NewTaskUi(projectname, user)
 	PyForm.show()
 

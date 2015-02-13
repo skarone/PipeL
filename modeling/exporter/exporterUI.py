@@ -41,7 +41,7 @@ try:
 	import maya.cmds as mc
 	import maya.mel as mm
 except:
-	print 'running from outside maya'
+	pass
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 uifile    = PYFILEDIR + '/exporter.ui'

@@ -55,8 +55,7 @@ class ProjectDataBase(object):
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
-			print 'UPDATING DATABASE',userId, priority, status, timeStart, timeEnd, assetId
-			cur.execute("UPDATE Assets SET UserId = %i, Priority = %i, Status = %i, TimeStart = %s, TimeEnd = %s  WHERE Id = %i"%(userId, priority, status, timeStart, timeEnd, assetId)) 
+			cur.execute("UPDATE Assets SET UserId = ?, Priority = ?, Status = ?, TimeStart = ?, TimeEnd = ?  WHERE Id = ?",(userId, priority, status, timeStart, timeEnd, assetId)) 
 			con.commit()
 	
 	def remAsset(self, assetName):
