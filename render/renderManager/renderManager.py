@@ -161,12 +161,13 @@ class RenderManagerUI(base,fom):
 			if w.overFrameRange_chb.isChecked():
 				frames =  str( w.frameRange_le.text() )
 			filename = mc.renderSettings( lyr = w.layer.name, gin = ('?'*pad) )[0]
-			filePrefix = filePrefix.replace( '<RenderLayer>', w.layer.name )
-			#get version number
-			if '<RenderLayerVersion>' in filePrefix:
-				versionNumber = self._getVersionNumber( filePrefix.split( '<RenderLayerVersion>' )[0] )
-				filePrefix = filePrefix.replace( '<RenderLayerVersion>', 'v' + str(versionNumber).zfill( 4 ) )
-			filename = filePrefix + '.' + ('?'*pad) + os.path.splitext( filename )[1]
+			if not mc.getAttr( "defaultRenderGlobals.ren" ) == 'mentalRay':
+				filePrefix = filePrefix.replace( '<RenderLayer>', w.layer.name )
+				#get version number
+				if '<RenderLayerVersion>' in filePrefix:
+					versionNumber = self._getVersionNumber( filePrefix.split( '<RenderLayerVersion>' )[0] )
+					filePrefix = filePrefix.replace( '<RenderLayerVersion>', 'v' + str(versionNumber).zfill( 4 ) )
+				filename = filePrefix + '.' + ('?'*pad) + os.path.splitext( filename )[1]
 			print 'RENDERING', filename, w.layer.name
 			name = ''
 			if self._project:
@@ -182,12 +183,14 @@ class RenderManagerUI(base,fom):
 							'Name'            : name + curFile.name + ' - ' + w.layer.name,
 							'OutputFilename0' : filename,
 							'Priority'        : priority,
-							'ChunkSize'       : taskSize
+							'ChunkSize'       : taskSize,
+							'OutputDirectory0': filename
 							},{'CommandLineOptions' : '-rl ' + w.layer.name + ' -mr:art ',
 								'UsingRenderLayers' : 1,
-								'ProjectPath'       : projPath,
+								#'ProjectPath'       : projPath,
 								'RenderLayer'       : w.layer.name,
 								'OutputFilePrefix'  : filePrefix,
+								'OutputPath'        : filename
 							}, curFile )
 			Job.write()
 			dead.runMayaJob( Job )

@@ -40,6 +40,9 @@ import pipe.settings.settingsUi as stiUi
 reload( stiUi )
 import pipe.textureFile.textureFile as tfl
 reload( tfl )
+import pipe.task.taskUi as tskUi
+reload(tskUi)
+
 INMAYA = False
 try:
 	import maya.cmds as mc
@@ -84,6 +87,7 @@ class ManagerUI(base,fom):
 		self.fillProjectsCombo()
 		self.fillAssetsTable()
 		self._makeConnections()
+		self.loadTaksUi()
 		self._loadConfig()
 		self.serverHelp_wg.hide()
 		self.assets_tw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -92,6 +96,11 @@ class ManagerUI(base,fom):
 		self.shots_tw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.shots_tw.customContextMenuRequested.connect(self.showMenu)
 		self.setObjectName( 'ManagerUI' )
+
+	def loadTaksUi(self):
+		"""docstring for loadTaksUi"""
+		self.taskUi = tskUi.TasksUi( str( self.projects_cmb.currentText()), None )
+		self.tasks_lay.addWidget( self.taskUi )
 
 	###################################
 	#LOAD SETTINGS
@@ -147,6 +156,12 @@ class ManagerUI(base,fom):
 							self.sequences_lw.setItemSelected( items[0], True )
 						self.sequences_lw.setCurrentItem( items[0] )
 						self.sequences_lw.itemActivated.emit( items[0] )
+			if 'lastuser' in his:
+				lastUser = his[ 'lastuser' ]
+				self.taskUi.setUser( lastUser )
+			if 'lastusernote' in his:
+				lastusernote = his[ 'lastusernote' ]
+				self.taskUi.setUserNote( lastusernote )
 		self._loadHistoryFiles()
 
 	def _loadHistoryFiles(self):
@@ -167,9 +182,13 @@ class ManagerUI(base,fom):
 		lastSeq = ''
 		if selItem:
 			lastSeq = str( selItem[0].text() )
+		lastUser = self.taskUi.currentUser
+		lastUserNote = self.taskUi.currentUserNote
 		self.settings.write( 'History', 'lastproject', lastProj )
 		self.settings.write( 'History', 'lastSequence', lastSeq )
 		self.settings.write( 'History', 'lasttab', lastTab )
+		self.settings.write( 'History', 'lastuser', lastUser  )
+		self.settings.write( 'History', 'lastusernote', lastUserNote  )
 
 	def setProjectsBasePath(self):
 		"""select a base Path for the projects"""
@@ -360,8 +379,14 @@ class ManagerUI(base,fom):
 	#FILL UI
 	def updateUi(self):
 		"""update ui"""
+		self.updateTaksUi()
 		self.fillAssetsTable()
 		self.fillSequenceList()
+
+	def updateTaksUi(self):
+		"""docstring for fname"""
+		self.taskUi.project = str( self.projects_cmb.currentText())
+		self.taskUi.refresh()
 
 	def updateFullUi(self):
 		"""docstring for updateFullUi"""

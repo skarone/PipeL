@@ -7,6 +7,7 @@ import pipe.note.note as note
 reload( note )
 import pipe.settings.settings as sti
 reload( sti )
+import os
 
 class ProjectDataBase(object):
 	"""class to handle the database of the proyect"""
@@ -18,6 +19,11 @@ class ProjectDataBase(object):
 		"""data base dataBaseFile"""
 		#return 'D:/' + self.project + '.db'
 		return sti.Settings().General[ "serverpath" ] + self.project + '/' + self.project + '.db'
+
+	@property
+	def exists(self):
+		"""docstring for exists"""
+		return os.path.exists( self.dataBaseFile )
 
 	def create(self):
 		"""create bases for database"""
@@ -44,12 +50,14 @@ class ProjectDataBase(object):
 
 	def updateAsset(self, name, area, seq, user, priority, status, timeStart, timeEnd ):
 		"""docstring for updateAsset"""
-		assetId = self.getAssetIdFromName(assetName, area, seq )
-		userId  = self.getUserIdFromName( userName )
+		assetId = self.getAssetIdFromName(name, area, seq )
+		userId  = self.getUserIdFromName( user )
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
-			cur.execute("UPDATE Assets SET UserId = %i, Prority = %i, Status = %i, TimeStart = %s, TimeEnd = %s  WHERE Id = %i"%(userId, priority, status, timeStart, timeEnd, assetId)) 
+			print 'UPDATING DATABASE',userId, priority, status, timeStart, timeEnd, assetId
+			cur.execute("UPDATE Assets SET UserId = %i, Priority = %i, Status = %i, TimeStart = %s, TimeEnd = %s  WHERE Id = %i"%(userId, priority, status, timeStart, timeEnd, assetId)) 
+			con.commit()
 	
 	def remAsset(self, assetName):
 		"""remove asset from database"""
@@ -61,6 +69,8 @@ class ProjectDataBase(object):
 
 	def getAssets(self):
 		"""return all the assets information"""
+		if not self.exists:
+			self.create()
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
@@ -130,6 +140,8 @@ class ProjectDataBase(object):
 
 	def getAsset(self, assetName, area):
 		"""return asset information from assetName and Area"""
+		if not self.exists:
+			self.create()
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			con.row_factory = lite.Row
@@ -154,6 +166,8 @@ class ProjectDataBase(object):
 
 	def getUsers(self):
 		"""docstring for getUsers"""
+		if not self.exists:
+			self.create()
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
@@ -202,7 +216,6 @@ class ProjectDataBase(object):
 			cur.execute("SELECT Note as note, Users.Name as userName, Assets.Name as assetName, Date as date FROM Notes INNER JOIN Users ON Notes.UserId = Users.Id INNER JOIN Assets ON Notes.AssetId = Assets.Id WHERE Notes.AssetId=:name ORDER BY Notes.Id DESC" , {"name": assetId})        
 			con.commit()
 			notes = cur.fetchall()
-			print notes
 			return [note.Note( n ) for n in notes]
 
 	"""

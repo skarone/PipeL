@@ -16,38 +16,55 @@ import pipe.shot.shot as sht
 import pipe.asset.asset as ass
 import pipe.sequence.sequence as sq
 
+import pipe.database.database as db
+reload( db )
+
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
 uifile = PYFILEDIR + '/newTask.ui'
 fom, base = uiH.loadUiType( uifile )
 
+uiUserfile = PYFILEDIR + '/newUser.ui'
+fomUser, baseUser = uiH.loadUiType( uiUserfile )
+
 class NewTaskUi(base, fom):
-	def __init__(self,projectName, parent  = uiH.getMayaWindow() ):
+	def __init__(self,projectName, user = '', parent  = uiH.getMayaWindow() ):
 		if uiH.USEPYQT:
 			super(base, self).__init__(parent)
 		else:
 			super(NewTaskUi, self).__init__(parent)
 		self.setupUi(self)
+		self._user = user
 		self.setObjectName( 'NewTaskUi' )
 		self._makeConnections()
 		self.settings = sti.Settings()
 		self.projectName = projectName
 		self.dataBase = db.ProjectDataBase( self.projectName )
+		self.taskName_le.setVisible( False )
 		self.fillUsers()
 		self.fillTasks()
 		self.fillStatus()
+		self.settings = sti.Settings()
+		skin = self.settings.General[ "skin" ]
+		if skin:
+			uiH.loadSkin( self, skin )
 
 	def fillStatus(self):
 		"""docstring for fillStatus"""
-		its = { 'waitingStart':'Waiting to Start', 'ready':'Ready to Start', 'inProgress':'In Progress', 'omit':'Omit', 'paused':'Paused', 'pendingReview':'Pending Review', 'final':'Final' }
-		for i in its.keys():
+		its = [ 'waitingStart', 'ready', 'inProgress', 'omit', 'paused', 'pendingReview', 'final' ]
+		itsText = [ 'Waiting to Start', 'Ready to Start', 'In Progress', 'Omit', 'Paused', 'Pending Review','Final' ]
+		for t,i in enumerate(its ):
 			icon = QtGui.QIcon( PYFILEDIR + '/icons/' + i + '.png' )
-			self.status_cmb.addItem( icon, its[i] )
+			self.status_cmb.addItem( icon, itsText[t] )
 
 	def fillUsers(self):
 		"""docstring for fillUsers"""
 		self.users_cmb.clear()
 		self.users_cmb.addItems( self.dataBase.getUsers() )
+		if not self._user == '':
+			index = self.users_cmb.findText( self._user )
+			self.users_cmb.setCurrentIndex( index )
+			
 
 	@property
 	def project(self):
@@ -77,17 +94,28 @@ class NewTaskUi(base, fom):
 		self.connect( self.newAsset_btn   , QtCore.SIGNAL("clicked()") , self.newAsset )
 		self.connect( self.createTask_btn , QtCore.SIGNAL("clicked()") , self.createTask )
 		QtCore.QObject.connect( self.isShot_chb, QtCore.SIGNAL( "stateChanged  (int)" ), self.fillTasks )
+		QtCore.QObject.connect( self.custom_chb, QtCore.SIGNAL( "stateChanged  (int)" ), self.setCustom )
 		QtCore.QObject.connect( self.assets_cmb, QtCore.SIGNAL( "activated( const QString& )" ), self.fillShots )
+
+	def setCustom(self, state):
+		"""docstring for setCustom"""
+		self.assets_cmb.setVisible( not self.custom_chb.isChecked() )
+		self.shots_cmb.setVisible( not self.custom_chb.isChecked() )
+		self.shot_lbl.setVisible( not self.custom_chb.isChecked() )
+		self.isShot_chb.setVisible( not self.custom_chb.isChecked() )
+		self.areas_cmb.setVisible( not self.custom_chb.isChecked() )
+		self.area_lbl.setVisible( not self.custom_chb.isChecked() )
+		self.taskName_le.setVisible( self.custom_chb.isChecked() )
 
 	@property
 	def startDate(self):
 		"""docstring for startDate"""
-		return self.startDate_cal.selectedDate().toString( "dd-MM-yyyy" ) 
+		return str( self.startDate_cal.selectedDate().toString( "dd-MM-yyyy" ) )
 
 	@property
 	def endDate(self):
 		"""docstring for endDate"""
-		return self.endDate_cal.selectedDate().toString( "dd-MM-yyyy" ) 
+		return str( self.endDate_cal.selectedDate().toString( "dd-MM-yyyy" ) )
 
 	@property
 	def note(self):
@@ -118,16 +146,24 @@ class NewTaskUi(base, fom):
 	def priority(self):
 		"""docstring for priority"""
 		return self.priority_spb.value()
+
+	@property
+	def custom(self):
+		"""docstring for custom"""
+		return str( self.taskName_le.text() )
 	
 	@property
 	def status(self):
 		"""docstring for status"""
-		return self.shots_cmb.currentIndex()
+		return self.status_cmb.currentIndex()
 
 	def newUser(self):
 		"""docstring for newUser"""
-		print 'in newUser'
-		pass
+		dia = NewUserUi( self.project.name, self )
+		dia.show()
+		res = dia.exec_()
+		if res:
+			self.fillUsers()
 
 	def newAsset(self):
 		"""docstring for newAsset"""
@@ -136,21 +172,45 @@ class NewTaskUi(base, fom):
 
 	def createTask(self):
 		"""docstring for createTask"""
-		if self.isShot_chb.isChecked():
-			self.dataBase.addAsset( self.shot, self.area, self.asset, self.user, self.priority, self.status, self.startDate, self.endDate )
+		if self.custom_chb.isChecked():
+			self.dataBase.addAsset( self.custom, '', '', self.user, self.priority, self.status, self.startDate, self.endDate )
 		else:
-			self.dataBase.addAsset( self.asset, self.area, '', self.user, self.priority, self.status, self.startDate, self.endDate )
-		print self.startDate, self.endDate
-		print self.user
-		print self.note
-		print 'in createTask'
-		pass
+			if self.isShot_chb.isChecked():
+				self.dataBase.addAsset( self.shot, self.area, self.asset, self.user, self.priority, self.status, self.startDate, self.endDate )
+			else:
+				self.dataBase.addAsset( self.asset, self.area, '', self.user, self.priority, self.status, self.startDate, self.endDate )
 
-def main(projectname):
+class NewUserUi(baseUser, fomUser):
+	"""docstring for NewUser"""
+	def __init__(self, project, parent = None ):
+		if uiH.USEPYQT:
+			super(baseUser, self).__init__(parent)
+		else:
+			super(NewUserUi, self).__init__(parent)
+		self.project = project
+		self.setupUi(self)
+		self.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), self.createUser)
+		self.settings = sti.Settings()
+		self.fillProjectsCMB()
+		index = self.projects_cmb.findText( project )
+		if not index == -1:
+			self.projects_cmb.setCurrentIndex(index)
+
+	def fillProjectsCMB(self):
+		"""fill combo box with projects"""
+		self.projects_cmb.clear()
+		self.projects_cmb.addItems( prj.projects( sti.Settings().General[ 'serverpath'] ) )
+
+	def createUser(self):
+		"""docstring for createUser"""
+		projName =  str( self.projects_cmb.currentText() )
+		db.ProjectDataBase( self.project ).addUser( str( self.asset_le.text() ) )
+
+def main(projectname, user = ''):
 	"""use this to create project in maya"""
 	if mc.window( 'NewTaskUi', q = 1, ex = 1 ):
 		mc.deleteUI( 'NewTaskUi' )
-	PyForm=NewTaskUi(projectname)
+	PyForm=NewTaskUi(projectname, user)
 	PyForm.show()
 
 """

@@ -6,6 +6,10 @@ from Qt import QtGui,QtCore
 import pipe.task.newTask as newTsk
 reload( newTsk )
 
+import pipe.project.project as prj
+import pipe.settings.settings as sti
+reload( sti )
+
 import maya.cmds as mc
 
 import pipe.database.database as db
@@ -30,21 +34,32 @@ class TasksUi(base, fom):
 		self.project = projectName
 		self.userName = None
 		self.fillUsers()
+		self.fillUsersNote()
 		self.fillTasks()
 		self._makeConnections()
 		self.currentTask = None
+		self.settings = sti.Settings()
+		skin = self.settings.General[ "skin" ]
+		if skin:
+			uiH.loadSkin( self, skin )
 
 	def fillUsers(self):
 		"""docstring for fillUsers"""
 		self.users_cmb.clear()
 		self.users_cmb.addItems( ['All'] + db.ProjectDataBase( self.project ).getUsers() )
 
+	def fillUsersNote(self):
+		"""docstring for fillUsersNote"""
+		self.usersNote_cmb.clear()
+		self.usersNote_cmb.addItems( db.ProjectDataBase( self.project ).getUsers() )
+
 	def fillStatus(self, widget):
 		"""docstring for fillStatus"""
-		its = { 'waitingStart':'Waiting to Start', 'ready':'Ready to Start', 'inProgress':'In Progress', 'omit':'Omit', 'paused':'Paused', 'pendingReview':'Pending Review', 'final':'Final' }
-		for i in sorted( its.keys() ):
+		its = [ 'waitingStart', 'ready', 'inProgress', 'omit', 'paused', 'pendingReview', 'final' ]
+		itsText = [ 'Waiting to Start', 'Ready to Start', 'In Progress', 'Omit', 'Paused', 'Pending Review','Final' ]
+		for t,i in enumerate(its ):
 			icon = QtGui.QIcon( PYFILEDIR + '/icons/' + i + '.png' )
-			widget.addItem( icon, its[i] )
+			widget.addItem( icon, itsText[t] )
 
 	def _makeConnections(self):
 		"""docstring for _makeConnections"""
@@ -52,22 +67,48 @@ class TasksUi(base, fom):
 		QtCore.QObject.connect( self.tasks_tw, QtCore.SIGNAL( "itemClicked (QTableWidgetItem *)" ), self.updateTaskDataUi )
 		self.connect( self.addNote_btn             , QtCore.SIGNAL("clicked()") , self.addNote )
 		self.connect( self.newTask_btn             , QtCore.SIGNAL("clicked()") , self.newTask )
-		self.connect( self.refresh_btn             , QtCore.SIGNAL("clicked()") , self.fillTasks )
+		self.connect( self.refresh_btn             , QtCore.SIGNAL("clicked()") , self.refresh )
+
+	def refresh(self):
+		"""docstring for refresh"""
+		self.fillUsers()
+		self.fillUsersNote()
+		self.fillTasks()
 
 	def newTask(self):
 		"""docstring for newTask"""
-		newTsk.main( self.project )
+		user = ''
+		if not self.currentUser == 'All':
+			user = self.currentUser
+		newTsk.main( self.project, user )
 
 	@property
 	def currentUser(self):
 		"""docstring for currentUser"""
 		return str ( self.users_cmb.currentText() )
 
+	def setUser(self, user):
+		"""docstring for setUser"""
+		index = self.users_cmb.findText( user )
+		if not index == -1:
+			self.users_cmb.setCurrentIndex(index)
+
+	def setUserNote(self, user):
+		"""docstring for setUserNote"""
+		index = self.usersNote_cmb.findText( user )
+		if not index == -1:
+			self.usersNote_cmb.setCurrentIndex(index)
+
+	@property
+	def currentUserNote(self):
+		"""docstring for currentUserNote"""
+		return str ( self.usersNote_cmb.currentText() )
+
 	def addNote(self):
 		"""add note to currentTask"""
 		if not self.currentTask:
 			return
-		self.currentTask.addNote( db.ProjectDataBase( self.project ), str( self.note_te.toPlainText()), self.currentUser, self.currentTask.name, self.currentTask.area, self.currentTask.seq)
+		self.currentTask.addNote( db.ProjectDataBase( self.project ), str( self.note_te.toPlainText()), self.currentUserNote, self.currentTask.name, self.currentTask.area, self.currentTask.seq)
 		self.updateNotes()
 		self.note_te.clear()
 
@@ -125,6 +166,7 @@ class TasksUi(base, fom):
 			self.mapper.setMapping(cmbStatus, i)
 			#Start DATE
 			dsplit =  a.timeStart.split( '-' )
+			print a.timeStart
 			if '-' in a.timeStart:
 				date = QtGui.QDateEdit( QtCore.QDate( int(dsplit[2]),int(dsplit[1]),int(dsplit[0]) ))
 			else:
@@ -152,8 +194,27 @@ class TasksUi(base, fom):
 	def updateTask(self, row):
 		"""docstring for updateTask"""
 		tas = self._getTaskByRowIndex( row )
-		print tas.user, tas.timeStart, tas.timeEnd
-		print 'in updateTask'
+		data = db.ProjectDataBase( self.project )
+		user, priority, status, timeStart, timeEnd = self._taskDataFromUi( row )
+		print 'UPDATING', tas.name, tas.area, tas.seq
+		print user, priority, status, timeStart, timeEnd
+		data.updateAsset( tas.name, tas.area, tas.seq, user, priority, status, timeStart, timeEnd )
+		#print tas.user, tas.timeStart, tas.timeEnd
+		#print 'in updateTask'
+
+	def _taskDataFromUi(self, row):
+		"""docstring for _taskDataFromUi"""
+		wid = self.tasks_tw.cellWidget( row, 1 )
+		user = str( wid.currentText() )
+		wid = self.tasks_tw.cellWidget( row, 2 )
+		priority = wid.value()
+		wid = self.tasks_tw.cellWidget( row, 3 )
+		status = wid.currentIndex()
+		wid = self.tasks_tw.cellWidget( row, 4 )
+		startDate = str( wid.date().toString( "dd-MM-yyyy" ) )
+		wid = self.tasks_tw.cellWidget( row, 5 )
+		endDate = str( wid.date().toString( "dd-MM-yyyy" ) )
+		return user, priority, status, startDate, endDate
 
 	def _getTaskByRowIndex(self, row):
 		"""docstring for _getTaskByRowIndex"""
@@ -183,9 +244,6 @@ class TasksUi(base, fom):
 			self.note_lw.addItem( itemN )
 			self.note_lw.setItemWidget(itemN, NoteUi( n ) )
 
-	def changeTaskStatus(self):
-		"""docstring for fname"""
-
 class NoteUi(baseNote, fomNote):
 	def __init__(self, note ):
 		if uiH.USEPYQT:
@@ -197,6 +255,7 @@ class NoteUi(baseNote, fomNote):
 		self.note_lbl.setText( note.note )
 		self.noteDate_lbl.setText( note.date )
 
+		
 def main(projectName):
 	"""use this to create project in maya"""
 	if mc.window( 'TasksUi', q = 1, ex = 1 ):

@@ -86,7 +86,7 @@ mc.setParent('..', menu = True )
 
 #LIGHTING
 mc.menuItem( l = 'Lighting/Render', sm = True, to = True )
-mc.menuItem( l = 'Light Rig', c = "import render.lightRig.lightRig as ltRig;reload( ltRig );ltRig.loadUnloadLightRig()" )
+mc.menuItem( l = 'Light Rig', c = "import render.lightRig.lightRig as ltRig;reload( ltRig );ltRig.main()" )
 mc.menuItem( l = 'Lighter Helper', c = "import render.lighterHelper.lighterHelperUI as litHelpUI; reload( litHelpUI ); litHelpUI.main()" )
 mc.menuItem( l = 'Render Manager', c = "import render.renderManager.renderManager as rm;reload(rm);rm.main()" )
 mc.menuItem( l = 'Mask AOV Create', c = 'import maya.mel as mm;mm.eval( \'source "'+PYFILEDIR.replace( '\\', '/' ).replace( 'install','render/mask' ) +'/AOVsArnoldMasker_1.0v.mel";\')' )
