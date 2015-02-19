@@ -141,7 +141,7 @@ class ExporterUI(base, fom):
 		if asset.exists:
 			mc.error( 'THIS ASSET ALREADY EXISTS IN THE PROYECT EDIT IT THERE! -->' + asset.name )
 			return
-		selection = mc.ls( sl = True, l = True )
+		selection = mc.ls( sl = True )
 		if not selection:
 			mc.error( 'PLEASE SELECT THE OBJECTS OF THE ASSET' )
 		self.exporter = ex.AssetExporter( asset.name, asset.project.name, selection )

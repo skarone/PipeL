@@ -180,8 +180,8 @@ class AssetExporter(object):
 	
 	def addObjectsToGroup(self):
 		"""add all the objects to the group"""
-		mc.parent( self.objects, self.grp.name )
 		mc.delete( self.objects, ch = True )
+		mc.parent( self.objects, self.grp.name )
 		mc.makeIdentity( self.objects, apply=True,t=1,r=1,s=1,n=2)
 		self.lockObjects()
 
