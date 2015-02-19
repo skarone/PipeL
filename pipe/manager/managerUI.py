@@ -57,7 +57,11 @@ except:
 	pass
 
 #load UI FILE
-PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
+try:
+    PYFILEDIR = os.path.dirname(os.path.abspath(__file__))
+except NameError:  # We are the main py2exe script, not a module
+    import sys
+    PYFILEDIR = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 uifile = PYFILEDIR + '/manager.ui'
 fom, base = uiH.loadUiType( uifile )

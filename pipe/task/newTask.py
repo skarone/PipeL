@@ -41,9 +41,9 @@ class NewTaskUi(base, fom):
 				super(NewTaskUi, self).__init__(parent)
 		else:
 			if uiH.USEPYQT:
-				super(base, self).__init__()
+				super(base, self).__init__(parent)
 			else:
-				super(NewTaskUi, self).__init__()
+				super(NewTaskUi, self).__init__(parent)
 		self.setupUi(self)
 		self._user = user
 		self.setObjectName( 'NewTaskUi' )
@@ -222,7 +222,7 @@ def main(projectname, user = ''):
 	if INMAYA:
 		if mc.window( 'NewTaskUi', q = 1, ex = 1 ):
 			mc.deleteUI( 'NewTaskUi' )
-	PyForm=NewTaskUi(projectname, user)
+	PyForm=NewTaskUi(projectname, user, parent=QtGui.QApplication.activeWindow())
 	PyForm.show()
 
 """

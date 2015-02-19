@@ -125,7 +125,7 @@ class Settings(base, fom):
 		
 def main():
 	global PyFormSettings
-	PyFormSettings=Settings()
+	PyFormSettings=Settings(parent=QtGui.QApplication.activeWindow())
 	PyFormSettings.show()
 
 

@@ -1,0 +1,40 @@
+from PySide import QtCore, QtGui
+
+class Ui_Dialog(object):
+    def setupUi(self, Dialog):
+        Dialog.setObjectName("Dialog")
+        Dialog.resize(365, 122)
+        self.verticalLayout = QtGui.QVBoxLayout(Dialog)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.horizontalLayout_3 = QtGui.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem)
+        self.filesNumber_lbl = QtGui.QLabel(Dialog)
+        self.filesNumber_lbl.setObjectName("filesNumber_lbl")
+        self.horizontalLayout_3.addWidget(self.filesNumber_lbl)
+        self.verticalLayout.addLayout(self.horizontalLayout_3)
+        self.files_pb = QtGui.QProgressBar(Dialog)
+        self.files_pb.setProperty("value", 0)
+        self.files_pb.setObjectName("files_pb")
+        self.verticalLayout.addWidget(self.files_pb)
+        self.horizontalLayout_4 = QtGui.QHBoxLayout()
+        self.horizontalLayout_4.setObjectName("horizontalLayout_4")
+        self.file_lbl = QtGui.QLabel(Dialog)
+        self.file_lbl.setObjectName("file_lbl")
+        self.horizontalLayout_4.addWidget(self.file_lbl)
+        spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_4.addItem(spacerItem1)
+        self.verticalLayout.addLayout(self.horizontalLayout_4)
+        self.file_pb = QtGui.QProgressBar(Dialog)
+        self.file_pb.setProperty("value", 0)
+        self.file_pb.setObjectName("file_pb")
+        self.verticalLayout.addWidget(self.file_pb)
+
+        self.retranslateUi(Dialog)
+        QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+    def retranslateUi(self, Dialog):
+        Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Copy Files", None, QtGui.QApplication.UnicodeUTF8))
+        self.filesNumber_lbl.setText(QtGui.QApplication.translate("Dialog", "10/50 Files", None, QtGui.QApplication.UnicodeUTF8))
+        self.file_lbl.setText(QtGui.QApplication.translate("Dialog", "D:/Projects/mierda/asda.ma", None, QtGui.QApplication.UnicodeUTF8))

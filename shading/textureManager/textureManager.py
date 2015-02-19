@@ -84,9 +84,9 @@ class Manager(object):
 			else:
 				attr = "ftn"
 			f = tfl.textureFile( n.attr( attr ).v )
-			if not f.exists:
-				continue
-			newFile = f.copy( folderPath )
+			newFile = tfl.textureFile( folderPath + '/' + f.fullName )
+			if f.exists:
+				newFile = f.copy( folderPath )
 			n.attr( attr ).v = newFile.path
 
 	def replacePath(self, textures, searchAndReplace = ['','']):
