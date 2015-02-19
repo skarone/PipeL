@@ -1,6 +1,6 @@
 *.pyc
-glTools/
 dist/
+glTools/
 general/test.py
 install/installer/build/
 pipe/manager/build/

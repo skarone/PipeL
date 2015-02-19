@@ -12,3 +12,7 @@ setup(
         }
     }
 )
+
+"""
+python basic_setup.py py2exe
+"""
