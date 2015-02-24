@@ -4,6 +4,10 @@ import re
 import os
 from glob import glob
 
+dirname, filename = os.path.split(os.path.abspath(__file__))
+dirname = dirname.split( 'pipe' )[0]
+IMAGEMAGICPATH = dirname + 'bin/ImageMagick/'
+
 class sequenceFile(fl.File):
 	"""main class to handle sequences of files"""
 	def __init__(self, path):
@@ -71,3 +75,15 @@ class sequenceFile(fl.File):
 		for f in self.files:
 			f.copy( newPath )
 		return sequenceFile( newPath + '/'  + self.basename )
+
+	def insertFrameNumber( self, outdir = '', offset = 0 ):
+		"""docstring for insertFrameNumber"""
+		if not outdir == '':
+			if not os.path.exists( outdir ):
+				os.makedirs( outdir )
+		for i,fi in enumerate( self.files ):
+			if outdir == '':
+				outdir = fi.path
+			cmd = fi.path + " -scene " + str( i + offset ) + ' -gravity SouthEast -undercolor #00000080 -fill white -font Verdana -pointsize 24 -annotate 0 "%[scene]" ' + outdir + '/' + fi.fullName
+			os.popen(  IMAGEMAGICPATH + 'convert.exe ' + cmd  )
+

@@ -660,8 +660,9 @@ class ManagerUI(base,fom):
 		"""creates new Asset"""
 		dia = assUi.AssetCreator( self )
 		dia.show()
-		index = self.projects_cmb.currentIndex()
-		dia.projects_cmb.setCurrentIndex(index)
+		index = dia.projects_cmb.findText( str( self.projects_cmb.currentText()) )
+		if not index == -1:
+			dia.projects_cmb.setCurrentIndex(index)
 		res = dia.exec_()
 		if res:
 			self.fillAssetsTable()
@@ -670,8 +671,9 @@ class ManagerUI(base,fom):
 		"""creates a new sequence"""
 		dia = sqUI.SequenceCreator(self)
 		dia.show()
-		index = self.projects_cmb.currentIndex()
-		dia.projects_cmb.setCurrentIndex(index)
+		index = dia.projects_cmb.findText( str( self.projects_cmb.currentText()) )
+		if not index == -1:
+			dia.projects_cmb.setCurrentIndex(index)
 		res = dia.exec_()
 		if res:
 			self.fillSequenceList()
@@ -680,8 +682,9 @@ class ManagerUI(base,fom):
 		"""creates a new Shot"""
 		dia = shUI.ShotCreator( self.projects_cmb.currentText(), self.sequences_lw.selectedItems()[0].text(), self )
 		dia.show()
-		index = self.projects_cmb.currentIndex()
-		dia.projects_cmb.setCurrentIndex(index)
+		index = dia.projects_cmb.findText( str( self.projects_cmb.currentText()) )
+		if not index == -1:
+			dia.projects_cmb.setCurrentIndex(index)
 		res = dia.exec_()
 		if res:
 			self.fillShotsTable()
