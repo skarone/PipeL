@@ -384,8 +384,15 @@ class ManagerUI(base,fom):
 	def updateUi(self):
 		"""update ui"""
 		self.updateTaksUi()
-		self.fillAssetsTable()
-		self.fillSequenceList()
+		print 'mierda'
+		if str( self.projects_cmb.currentText()) == 'All':
+			self.tabWidget.setTabEnabled(0, False);
+			self.tabWidget.setTabEnabled(1, False);
+		else:
+			self.tabWidget.setTabEnabled(0, True);
+			self.tabWidget.setTabEnabled(1, True);
+			self.fillAssetsTable()
+			self.fillSequenceList()
 
 	def updateTaksUi(self):
 		"""docstring for fname"""
@@ -411,7 +418,7 @@ class ManagerUI(base,fom):
 					continue
 				projects.append( s )
 		projects.extend( localProjects )
-		self.projects_cmb.addItems( projects )
+		self.projects_cmb.addItems( ['All'] + projects )
 		index = self.projects_cmb.findText( lastProj )
 		if not index == -1:
 			self.projects_cmb.setCurrentIndex(index)

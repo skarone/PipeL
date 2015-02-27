@@ -18,7 +18,7 @@ class ProjectDataBase(object):
 	def dataBaseFile(self):
 		"""data base dataBaseFile"""
 		#return 'D:/' + self.project + '.db'
-		return sti.Settings().General[ "serverpath" ] + self.project + '/' + self.project + '.db'
+		return sti.Settings().General[ "serverpath" ] + self.project + '/' + self.project + '_pipel.db'
 
 	@property
 	def exists(self):
@@ -27,6 +27,8 @@ class ProjectDataBase(object):
 
 	def create(self):
 		"""create bases for database"""
+		if not os.path.exists( os.path.dirname( self.dataBaseFile ) ):
+			return
 		con = lite.connect( self.dataBaseFile )
 		with con:
 			cur = con.cursor()    
@@ -36,6 +38,8 @@ class ProjectDataBase(object):
 
 	def addAsset(self, name, area, seq, user, priority, status, timeStart, timeEnd ):
 		"""add asset to database"""
+		if not self.exists:
+			self.create()
 		if user:
 			userId = self.getUserIdFromName( user )
 		else:
@@ -52,6 +56,8 @@ class ProjectDataBase(object):
 		"""docstring for updateAsset"""
 		assetId = self.getAssetIdFromName(name, area, seq )
 		userId  = self.getUserIdFromName( user )
+		if not userId:
+			return
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
@@ -69,7 +75,7 @@ class ProjectDataBase(object):
 	def getAssets(self):
 		"""return all the assets information"""
 		if not self.exists:
-			self.create()
+			return []
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
@@ -79,7 +85,11 @@ class ProjectDataBase(object):
 
 	def getAssetsForUser(self, userName ):
 		"""return the assets assigned to the user"""
+		if not self.exists:
+			return []
 		userId = self.getUserIdFromName( userName )
+		if not userId:
+			return []
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			con.row_factory = lite.Row
@@ -104,10 +114,11 @@ class ProjectDataBase(object):
 		"""assing user to asset"""
 		assetId = self.getAssetIdFromName(assetName, area, seq )
 		userId  = self.getUserIdFromName( userName )
-		con = lite.connect(self.dataBaseFile)
-		with con:
-			cur = con.cursor()
-			cur.execute("UPDATE Assets SET UserId = %i WHERE Id = %i"%(userId, assetId)) 
+		if userId:
+			con = lite.connect(self.dataBaseFile)
+			with con:
+				cur = con.cursor()
+				cur.execute("UPDATE Assets SET UserId = %i WHERE Id = %i"%(userId, assetId)) 
 
 	def setAssetStatus(self, assetName, area, status, seq = '' ):
 		"""set asset status"""
@@ -127,6 +138,8 @@ class ProjectDataBase(object):
 
 	def getAssetIdFromName(self, assetName, area, seq = ''):
 		"""return user id from user name"""
+		if not self.exists:
+			return
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
@@ -140,7 +153,7 @@ class ProjectDataBase(object):
 	def getAsset(self, assetName, area):
 		"""return asset information from assetName and Area"""
 		if not self.exists:
-			self.create()
+			return 
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			con.row_factory = lite.Row
@@ -151,6 +164,8 @@ class ProjectDataBase(object):
 
 	def addUser(self, userName, permisions = 0):
 		"""add user to database"""
+		if not self.exists:
+			self.create()
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
@@ -166,7 +181,7 @@ class ProjectDataBase(object):
 	def getUsers(self):
 		"""docstring for getUsers"""
 		if not self.exists:
-			self.create()
+			return []
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
@@ -185,7 +200,10 @@ class ProjectDataBase(object):
 			cur = con.cursor()
 			cur.execute("SELECT Id FROM Users WHERE Name=:name", {"name": userName})        
 			con.commit()
-			return cur.fetchone()[0]
+			userId = cur.fetchone()
+			if userId:
+				return userId[0]
+			return 
 
 	def addNote(self, note, user, asset, area, seq = '' ):
 		"""add note to database"""

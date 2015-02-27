@@ -43,12 +43,11 @@ class TasksUi(base, fom):
 		self.setObjectName( 'TasksUi' )
 		self.project = projectName
 		self.userName = None
+		self.settings = sti.Settings()
 		self.fillUsers()
 		self.fillUsersNote()
-		self.fillTasks()
 		self._makeConnections()
 		self.currentTask = None
-		self.settings = sti.Settings()
 		skin = self.settings.General[ "skin" ]
 		if skin:
 			uiH.loadSkin( self, skin )
@@ -56,12 +55,22 @@ class TasksUi(base, fom):
 	def fillUsers(self):
 		"""docstring for fillUsers"""
 		self.users_cmb.clear()
-		self.users_cmb.addItems( ['All'] + db.ProjectDataBase( self.project ).getUsers() )
+		if self.project == 'All':
+			self.users_cmb.addItems( [ 'All' ] )
+			for p in prj.projects( self.settings.General[ 'serverpath' ] ):
+				self.users_cmb.addItems( db.ProjectDataBase( p ).getUsers() )
+		else:
+			self.users_cmb.addItems( ['All'] + db.ProjectDataBase( self.project ).getUsers() )
 
 	def fillUsersNote(self):
 		"""docstring for fillUsersNote"""
 		self.usersNote_cmb.clear()
-		self.usersNote_cmb.addItems( db.ProjectDataBase( self.project ).getUsers() )
+		if self.project == 'All':
+			self.usersNote_cmb.addItems( [ 'All' ] )
+			for p in prj.projects( self.settings.General[ 'serverpath' ] ):
+				self.usersNote_cmb.addItems( db.ProjectDataBase( p ).getUsers() )
+		else:
+			self.usersNote_cmb.addItems( ['All'] + db.ProjectDataBase( self.project ).getUsers() )
 
 	def fillStatus(self, widget):
 		"""docstring for fillStatus"""
@@ -125,87 +134,111 @@ class TasksUi(base, fom):
 	def fillTasks(self):
 		"""fill tasks for project and user"""
 		self.tasks_tw.clearContents()
-		dataBase = db.ProjectDataBase( self.project )
-		if not self.currentUser:
-			return
-		if self.currentUser == 'All':
-			data = []
-			for u in db.ProjectDataBase( self.project ).getUsers():
-				data.extend(dataBase.getAssetsForUser( u ))
+		data = {}
+		if self.project == 'All':
+			for p in prj.projects( self.settings.General[ 'serverpath' ] ):
+				dataBase = db.ProjectDataBase( p )
+				if dataBase.exists:
+					data[ p ] = []
+					if not self.currentUser:
+						return
+					if self.currentUser == 'All':
+						for u in dataBase.getUsers():
+							data[ p ].extend(dataBase.getAssetsForUser( u ))
+					else:
+						data[ p ].extend( dataBase.getAssetsForUser( self.currentUser ) )
 		else:
-			data = dataBase.getAssetsForUser( self.currentUser )
-		self.tasks_tw.setRowCount( len( data ) )
+			dataBase = db.ProjectDataBase( self.project )
+			if not self.currentUser:
+				return
+			if self.currentUser == 'All':
+				data[self.project] = []
+				for u in dataBase.getUsers():
+					data[self.project].extend(dataBase.getAssetsForUser( u ))
+			else:
+				data[self.project] = dataBase.getAssetsForUser( self.currentUser )
+		dataLen = 0
+		for d in data.keys():
+			dataLen += len( data[d] )
+		self.tasks_tw.setRowCount( dataLen )
 		self.mapper = QtCore.QSignalMapper(self)
-		for i,a in enumerate(data):
-			#NAME
-			tmpA = a
-			item = QtGui.QTableWidgetItem( a.fullname )
-			item.setData(32, a )
-			self.tasks_tw.setItem( i, 0, item )
-			#USER
-			cmbStatus = QtGui.QComboBox()
-			cmbStatus.addItems( db.ProjectDataBase( self.project ).getUsers() )
-			index = cmbStatus.findText( a.user )
-			if not index == -1:
-				cmbStatus.setCurrentIndex(index)
-			item = QtGui.QTableWidgetItem( a.user )
-			self.tasks_tw.setItem( i, 1, item )
-			self.tasks_tw.setCellWidget(i,1, cmbStatus);
-			self.connect( cmbStatus, QtCore.SIGNAL("currentIndexChanged( const int& )" ), self.mapper, QtCore.SLOT("map()") )
-			self.mapper.setMapping(cmbStatus, i)
-			#PRIORITY
-			spin = QtGui.QSpinBox()
-			spin.setValue( a.priority )
-			spin.setRange( 0, 100 )
-			item = QtGui.QTableWidgetItem( str( a.priority ) )
-			self.tasks_tw.setItem( i, 2, item )
-			self.tasks_tw.setCellWidget(i,2, spin);
-			self.connect( spin, QtCore.SIGNAL("valueChanged( const int& )" ), self.mapper, QtCore.SLOT("map()") )
-			self.mapper.setMapping(spin, i)
-			#Status
-			item = QtGui.QTableWidgetItem( str( a.status ) )
-			cmbStatus = QtGui.QComboBox()
-			self.fillStatus( cmbStatus )
-			its = [ 'Waiting to Start', 'Ready to Start', 'In Progress', 'Omit', 'Paused', 'Pending Review', 'Final' ]
-			index = cmbStatus.findText( its[ a.status ] )
-			if not index == -1:
-				cmbStatus.setCurrentIndex(index)
-			self.tasks_tw.setItem( i, 3, item )
-			self.tasks_tw.setCellWidget(i,3, cmbStatus);
-			self.connect( cmbStatus, QtCore.SIGNAL("currentIndexChanged( const int& )" ), self.mapper, QtCore.SLOT("map()") )
-			self.mapper.setMapping(cmbStatus, i)
-			#Start DATE
-			dsplit =  a.timeStart.split( '-' )
-			print a.timeStart
-			if '-' in a.timeStart:
-				date = QtGui.QDateEdit( QtCore.QDate( int(dsplit[2]),int(dsplit[1]),int(dsplit[0]) ))
-			else:
-				date = QtGui.QDateEdit()
-			date.setCalendarPopup(True)
-			item = QtGui.QTableWidgetItem( a.timeStart )
-			self.tasks_tw.setItem( i, 4, item )
-			self.tasks_tw.setCellWidget(i,4, date);
-			self.connect( date, QtCore.SIGNAL("dateChanged( const QDate& )" ), self.mapper, QtCore.SLOT("map()") )
-			self.mapper.setMapping(date, i)
-			#End DATE
-			dsplit =  a.timeEnd.split( '-' )
-			if '-' in a.timeEnd:
-				date = QtGui.QDateEdit( QtCore.QDate( int(dsplit[2]),int(dsplit[1]),int(dsplit[0]) ))
-			else:
-				date = QtGui.QDateEdit()
-			date.setCalendarPopup(True)
-			item = QtGui.QTableWidgetItem( a.timeEnd )
-			self.tasks_tw.setItem( i, 5, item )
-			self.tasks_tw.setCellWidget(i,5, date);
-			self.connect( date, QtCore.SIGNAL("dateChanged( const QDate& )" ), self.mapper, QtCore.SLOT("map()") )
-			self.mapper.setMapping(date, i)
+		i = 0
+		for d in data.keys():
+			dataBase = db.ProjectDataBase( d )
+			for a in data[d]:
+				#NAME
+				tmpA = a
+				item = QtGui.QTableWidgetItem( a.fullname )
+				item.setData(32, a )
+				self.tasks_tw.setItem( i, 0, item )
+				#USER
+				cmbStatus = QtGui.QComboBox()
+				cmbStatus.addItems( dataBase.getUsers() )
+				index = cmbStatus.findText( a.user )
+				if not index == -1:
+					cmbStatus.setCurrentIndex(index)
+				item = QtGui.QTableWidgetItem( a.user )
+				self.tasks_tw.setItem( i, 1, item )
+				self.tasks_tw.setCellWidget(i,1, cmbStatus);
+				self.connect( cmbStatus, QtCore.SIGNAL("currentIndexChanged( const int& )" ), self.mapper, QtCore.SLOT("map()") )
+				self.mapper.setMapping(cmbStatus, i)
+				#PROJECT
+				item = QtGui.QTableWidgetItem( d )
+				item.setData(32, a )
+				self.tasks_tw.setItem( i, 2, item )
+				#PRIORITY
+				spin = QtGui.QSpinBox()
+				spin.setValue( a.priority )
+				spin.setRange( 0, 100 )
+				item = QtGui.QTableWidgetItem( str( a.priority ) )
+				self.tasks_tw.setItem( i, 3, item )
+				self.tasks_tw.setCellWidget(i,3, spin);
+				self.connect( spin, QtCore.SIGNAL("valueChanged( const int& )" ), self.mapper, QtCore.SLOT("map()") )
+				self.mapper.setMapping(spin, i)
+				#Status
+				item = QtGui.QTableWidgetItem( str( a.status ) )
+				cmbStatus = QtGui.QComboBox()
+				self.fillStatus( cmbStatus )
+				its = [ 'Waiting to Start', 'Ready to Start', 'In Progress', 'Omit', 'Paused', 'Pending Review', 'Final' ]
+				index = cmbStatus.findText( its[ a.status ] )
+				if not index == -1:
+					cmbStatus.setCurrentIndex(index)
+				self.tasks_tw.setItem( i, 4, item )
+				self.tasks_tw.setCellWidget(i,4, cmbStatus);
+				self.connect( cmbStatus, QtCore.SIGNAL("currentIndexChanged( const int& )" ), self.mapper, QtCore.SLOT("map()") )
+				self.mapper.setMapping(cmbStatus, i)
+				#Start DATE
+				dsplit =  a.timeStart.split( '-' )
+				if '-' in a.timeStart:
+					date = QtGui.QDateEdit( QtCore.QDate( int(dsplit[2]),int(dsplit[1]),int(dsplit[0]) ))
+				else:
+					date = QtGui.QDateEdit()
+				date.setCalendarPopup(True)
+				item = QtGui.QTableWidgetItem( a.timeStart )
+				self.tasks_tw.setItem( i, 5, item )
+				self.tasks_tw.setCellWidget(i,5, date);
+				self.connect( date, QtCore.SIGNAL("dateChanged( const QDate& )" ), self.mapper, QtCore.SLOT("map()") )
+				self.mapper.setMapping(date, i)
+				#End DATE
+				dsplit =  a.timeEnd.split( '-' )
+				if '-' in a.timeEnd:
+					date = QtGui.QDateEdit( QtCore.QDate( int(dsplit[2]),int(dsplit[1]),int(dsplit[0]) ))
+				else:
+					date = QtGui.QDateEdit()
+				date.setCalendarPopup(True)
+				item = QtGui.QTableWidgetItem( a.timeEnd )
+				self.tasks_tw.setItem( i, 6, item )
+				self.tasks_tw.setCellWidget(i,6, date);
+				self.connect( date, QtCore.SIGNAL("dateChanged( const QDate& )" ), self.mapper, QtCore.SLOT("map()") )
+				self.mapper.setMapping(date, i)
+				i += 1
 		self.mapper.mapped.connect(self.updateTask)
 
 	def updateTask(self, row):
 		"""docstring for updateTask"""
 		tas = self._getTaskByRowIndex( row )
-		data = db.ProjectDataBase( self.project )
-		user, priority, status, timeStart, timeEnd = self._taskDataFromUi( row )
+		user, priority, status, timeStart, timeEnd, project = self._taskDataFromUi( row )
+		data = db.ProjectDataBase( project )
 		print 'UPDATING', tas.name, tas.area, tas.seq
 		print user, priority, status, timeStart, timeEnd
 		data.updateAsset( tas.name, tas.area, tas.seq, user, priority, status, timeStart, timeEnd )
@@ -216,15 +249,16 @@ class TasksUi(base, fom):
 		"""docstring for _taskDataFromUi"""
 		wid = self.tasks_tw.cellWidget( row, 1 )
 		user = str( wid.currentText() )
-		wid = self.tasks_tw.cellWidget( row, 2 )
-		priority = wid.value()
 		wid = self.tasks_tw.cellWidget( row, 3 )
-		status = wid.currentIndex()
+		priority = wid.value()
 		wid = self.tasks_tw.cellWidget( row, 4 )
-		startDate = str( wid.date().toString( "dd-MM-yyyy" ) )
+		status = wid.currentIndex()
 		wid = self.tasks_tw.cellWidget( row, 5 )
+		startDate = str( wid.date().toString( "dd-MM-yyyy" ) )
+		wid = self.tasks_tw.cellWidget( row, 6 )
 		endDate = str( wid.date().toString( "dd-MM-yyyy" ) )
-		return user, priority, status, startDate, endDate
+		project =  self.tasks_tw.item( row, 2 ).text()
+		return user, priority, status, startDate, endDate, project
 
 	def _getTaskByRowIndex(self, row):
 		"""docstring for _getTaskByRowIndex"""

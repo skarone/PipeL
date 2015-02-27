@@ -50,6 +50,7 @@ class NewTaskUi(base, fom):
 		self._makeConnections()
 		self.settings = sti.Settings()
 		self.projectName = projectName
+		self.fillProjects()
 		self.dataBase = db.ProjectDataBase( self.projectName )
 		self.taskName_le.setVisible( False )
 		self.fillUsers()
@@ -60,6 +61,14 @@ class NewTaskUi(base, fom):
 		if skin:
 			uiH.loadSkin( self, skin )
 
+	def fillProjects(self):
+		"""docstring for fillProjects"""
+		projects = prj.projects( self.settings.General[ "serverpath" ] )
+		self.projects_cmb.addItems( projects )
+		index = self.projects_cmb.findText( self.projectName )
+		if not index == -1:
+			self.projects_cmb.setCurrentIndex(index)
+
 	def fillStatus(self):
 		"""docstring for fillStatus"""
 		its = [ 'waitingStart', 'ready', 'inProgress', 'omit', 'paused', 'pendingReview', 'final' ]
@@ -68,6 +77,11 @@ class NewTaskUi(base, fom):
 			icon = QtGui.QIcon( PYFILEDIR + '/icons/' + i + '.png' )
 			self.status_cmb.addItem( icon, itsText[t] )
 
+	@property
+	def database(self):
+		"""docstring for database"""
+		return db.ProjectDataBase( self.project.name )
+
 	def fillUsers(self):
 		"""docstring for fillUsers"""
 		self.users_cmb.clear()
@@ -75,12 +89,11 @@ class NewTaskUi(base, fom):
 		if not self._user == '':
 			index = self.users_cmb.findText( self._user )
 			self.users_cmb.setCurrentIndex( index )
-			
 
 	@property
 	def project(self):
 		"""docstring for project"""
-		return prj.Project( self.projectName, self.settings.General['serverpath'] )
+		return prj.Project( str( self.projects_cmb.currentText() ), self.settings.General['serverpath'] )
 
 	def fillTasks(self):
 		"""docstring for fillTasks"""
@@ -106,7 +119,14 @@ class NewTaskUi(base, fom):
 		self.connect( self.createTask_btn , QtCore.SIGNAL("clicked()") , self.createTask )
 		QtCore.QObject.connect( self.isShot_chb, QtCore.SIGNAL( "stateChanged  (int)" ), self.fillTasks )
 		QtCore.QObject.connect( self.custom_chb, QtCore.SIGNAL( "stateChanged  (int)" ), self.setCustom )
+		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "activated( const QString& )" ), self.setProject )
 		QtCore.QObject.connect( self.assets_cmb, QtCore.SIGNAL( "activated( const QString& )" ), self.fillShots )
+
+	def setProject(self):
+		"""docstring for setProject"""
+		self.dataBase = db.ProjectDataBase( self.project.name )
+		self.fillUsers()
+		self.fillTasks()
 
 	def setCustom(self, state):
 		"""docstring for setCustom"""
@@ -204,6 +224,7 @@ class NewUserUi(baseUser, fomUser):
 		self.settings = sti.Settings()
 		self.fillProjectsCMB()
 		index = self.projects_cmb.findText( project )
+		print index, project
 		if not index == -1:
 			self.projects_cmb.setCurrentIndex(index)
 
