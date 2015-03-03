@@ -3,11 +3,9 @@ import pipe.file.file as fl
 from time import sleep
 import sys
 
-def createDistVersion():
-	basePath = 'D:/PipeL'
+def createDistVersion( basePath = 'D:/PipeL', finalPath = 'D:/PipeL/dist' ):
 	compileall.compile_dir( basePath, force=True)
 	fils = fl.filesInDir( 'D:/PipeL' )
-	finalPath = 'D:/PipeL/dist'
 	extensionToIgnore = [ '.py' ]
 	foldersToSkip = [ '.git' ]
 	for f in fils:
@@ -19,6 +17,8 @@ def createDistVersion():
 			f.move( f.path.replace( basePath, finalPath ) )
 		else:
 			f.copy( f.path.replace( basePath, finalPath ) )
+		print f.path
+
 
 def compileAndMove( path, newDir = 'Y:/PipeL', basePath = 'D:/PipeL' ):
 	ret = compileall.compile_file( path, force=True )
@@ -32,5 +32,5 @@ if __name__=='__main__':
 		compileAndMove( sys.argv[1] )
 	else:#CREATE DISTRIBUTION VERSION
 		print 'creating distribution version'
-		createDistVersion()
+		createDistVersion( finalPath = 'Y:/PipeL' )
 	sleep( 10 )

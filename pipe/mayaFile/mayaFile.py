@@ -95,10 +95,10 @@ class mayaFile(fl.File):
 			tim = str( t.group('Time') )
 		m =  re.search( '(:?.+playbackOptions -min )(?P<Min>.+)(:? -max )(?P<Max>.+)(:? -ast )(?P<Ast>.+)(:? -aet )(?P<Aet>.+) ";', self.data )
 		if m:
-			amin = int( m.group('Min') )
-			amax = int( m.group('Max') )
-			aast = int( m.group('Ast') )
-			aaet = int( m.group('Aet') )
+			amin = int( float( m.group('Min') ))
+			amax = int( float( m.group('Max') ))
+			aast = int( float( m.group('Ast') ))
+			aaet = int( float( m.group('Aet') ))
 			return {'min':amin,'max':amax,'ast':aast,'aet':aaet, 'lin':lin,'angle':angle,'tim':tim}
 		return {'lin':lin,'angle':angle,'tim':tim}
 
