@@ -133,6 +133,9 @@ class CacheManagerUI(base,fom):
 	def exportCamera(self):
 		"""docstring for exportCamera"""
 		mc.file( self._selectedShot.poolCam.path, force = True, options = "v=0;", typ = "mayaAscii", pr = True, es = True )
+		sel = mc.ls( sl = True )
+		cacheFile = cfl.CacheFile( self._selectedShot.poolCam.path.replace( '.ma', '.abc' ), sel )
+		cacheFile.export()
 
 	def refresh(self):
 		"""docstring for refresh"""
