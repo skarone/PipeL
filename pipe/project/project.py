@@ -181,3 +181,24 @@ class Project(object):
 		"""return the database to work with"""
 		return lite.connect( self.databasePath )
 
+	def getAssetPath(self, name, area):
+		"""docstring for getAsset"""
+		if area == '':
+			return None
+		if area == 'Model':
+			areaNumber = 0
+		elif area == 'Shading':
+			areaNumber = 1
+		elif area == 'Hrs':
+			areaNumber = 2
+		elif area == 'Rig':
+			areaNumber = 3
+		elif area == 'Final':
+			areaNumber = 4
+		return ass.Asset( name, self ).areaPath( areaNumber )
+
+	def getShotPath(self, seq, name, area):
+		"""docstring for getShot"""
+		if area == '':
+			return None
+		return sh.Shot( name, sq.Sequence( seq ) ).areaPath( area )

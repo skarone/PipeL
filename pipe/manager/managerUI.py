@@ -384,7 +384,6 @@ class ManagerUI(base,fom):
 	def updateUi(self):
 		"""update ui"""
 		self.updateTaksUi()
-		print 'mierda'
 		if str( self.projects_cmb.currentText()) == 'All':
 			self.tabWidget.setTabEnabled(0, False);
 			self.tabWidget.setTabEnabled(1, False);

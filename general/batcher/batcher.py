@@ -14,7 +14,7 @@ import shutil
 import imp
 import pipe.mayaFile.mayaFile as mfl
 
-def batcher(modules = [], functions = [], mayaFiles = [],saveFile = False,makeLog = False,mayaBatchPath = 'C:\\Program Files\\Autodesk\\Maya2014\\bin\\mayabatch.exe', help = False):
+def batcher(modules = [], functions = [], mayaFiles = [],saveFile = False,makeLog = False,mayaBatchPath = 'C:\\Program Files\\Autodesk\\Maya2015\\bin\\mayabatch.exe', help = False):
 	""" create a Batch file """
 	helpText = 'This script is for run an array of scripts\n'
 	helpText += '(mel or python) in an array of maya files.\n'
@@ -90,7 +90,6 @@ def batcher(modules = [], functions = [], mayaFiles = [],saveFile = False,makeLo
 			print '>>something in this module is wrong',mod
 			return False
 	
-	mayaBatchPath = 'C:\\Program Files\\Autodesk\\Maya2014\\bin\\mayabatch.exe'
 	#LOOP THRU THE FILES
 	for fileName in mayaFiles:
 		finalcmd = cmd
@@ -105,7 +104,7 @@ def batcher(modules = [], functions = [], mayaFiles = [],saveFile = False,makeLo
 		finalcmd +='print (\\"done!\\n\\");'
 		
 		batch = ''
-		batch += mayaBatchPath + ' -file "'+fileName+'" '
+		batch += mayaBatchPath + ' -file "'+fileName.path+'" '
 		batch +='-command "'+finalcmd+'" '
 		
 		if(makeLog):

@@ -390,4 +390,23 @@ class Shot(object):
 		"""return pool camera file"""
 		return mfl.mayaFile( self.poolCamPath )
 
-
+	def areaPath(self, areaNumber):
+		"""docstring for areaPath"""
+		if area == '':
+			return None
+		if area == 'Lay':
+			return self.layPath
+		elif area == 'Anim':
+			return self.animPath
+		elif area == 'Hrs':
+			return self.hrsPath
+		elif area == 'Vfx':
+			return self.vfxPath
+		elif area == 'Sim':
+			return self.simPath
+		elif area == 'SkinFix':
+			return self.skinFixPath
+		elif area == 'Lit':
+			return self.litPath
+		elif area == 'Comp':
+			return self.compPath

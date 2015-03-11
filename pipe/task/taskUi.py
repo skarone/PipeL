@@ -44,21 +44,231 @@ class TasksUi(base, fom):
 		self.project = projectName
 		self.userName = None
 		self.settings = sti.Settings()
-		self.fillUsers()
-		self.fillUsersNote()
 		self._makeConnections()
 		self.currentTask = None
+		self.tasks_tw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+		self.tasks_tw.customContextMenuRequested.connect(self.showMenu)
 		skin = self.settings.General[ "skin" ]
 		if skin:
 			uiH.loadSkin( self, skin )
+
+	def showMenu(self, pos):
+		menu=QtGui.QMenu(self)
+		propIcon = QtGui.QIcon( PYFILEDIR + '/icons/question.png' )
+		actionProperties = QtGui.QAction(propIcon, "Properties", menu)
+		menu.addAction( actionProperties )
+		self.connect( actionProperties, QtCore.SIGNAL( "triggered()" ), self.properties )
+		folderIcon = QtGui.QIcon( PYFILEDIR + '/icons/folder.png' )
+		actionOpenInExplorer = QtGui.QAction(folderIcon,"Open File in explorer", menu)
+		menu.addAction( actionOpenInExplorer )
+		self.connect( actionOpenInExplorer, QtCore.SIGNAL( "triggered()" ), self.openFileLocation )
+		#COPY PATH
+		actionSaveScene = QtGui.QAction("Copy File Path", menu)
+		menu.addAction( actionSaveScene )
+		self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.copyFilePath )
+		#OPEN RENDER PATH
+		actionSaveScene = QtGui.QAction(folderIcon,"Open Render Folder", menu)
+		menu.addAction( actionSaveScene )
+		self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.openRenderFolder )
+		menu.addSeparator()
+		#DOWNLOAD UPLOAD
+		downIcon = QtGui.QIcon( PYFILEDIR + '/icons/download.png' )
+		uploIcon = QtGui.QIcon( PYFILEDIR + '/icons/upload.png' )
+		actionCopyServer = QtGui.QAction( downIcon, "Download From Server", menu)
+		actionCopyServer.setIcon( downIcon )
+		menu.addAction(actionCopyServer)
+		self.connect( actionCopyServer, QtCore.SIGNAL( "triggered()" ), self.copyFromServer )
+		actionToServer = QtGui.QAction( uploIcon, "Upload To Server", menu)
+		menu.addAction(actionToServer)
+		self.connect( actionToServer, QtCore.SIGNAL( "triggered()" ), self.copyToServer )
+		menu.addSeparator()
+		if INMAYA:
+			#OPEN IN CURRENT MAYA
+			mayaIcon = QtGui.QIcon( PYFILEDIR + '/icons/maya.png' )
+			actionOpenInCurrent = QtGui.QAction(mayaIcon,"Open in This Maya", menu)
+			menu.addAction( actionOpenInCurrent )
+			self.connect( actionOpenInCurrent, QtCore.SIGNAL( "triggered()" ), self.openFileInCurrentMaya )
+			menu.addSeparator()
+			#IMPORT
+			impIcon = QtGui.QIcon( PYFILEDIR + '/icons/import.png' )
+			actionImport = QtGui.QAction(impIcon,"Import", menu)
+			menu.addAction( actionImport )
+			self.connect( actionImport, QtCore.SIGNAL( "triggered()" ), self.importFile )
+			menu.addSeparator()
+			#COPY TIME SETTINGS
+			timeIcon = QtGui.QIcon( PYFILEDIR + '/icons/time.png' )
+			actionCopyTime = QtGui.QAction(timeIcon,"Copy Time Settings", menu)
+			menu.addAction( actionCopyTime )
+			self.connect( actionCopyTime, QtCore.SIGNAL( "triggered()" ), self.copyTimeSettings )
+			menu.addSeparator()
+			#REFERENCE
+			refIcon = QtGui.QIcon( PYFILEDIR + '/icons/reference.png' )
+			actionReference = QtGui.QAction(refIcon,"Reference", menu)
+			menu.addAction( actionReference )
+			self.connect( actionReference, QtCore.SIGNAL( "triggered()" ), self.reference )
+			menu.addSeparator()
+			#SAVE IN THIS SCENE
+			savIcon = QtGui.QIcon( PYFILEDIR + '/icons/save.png' )
+			actionSaveScene = QtGui.QAction(savIcon,"Save Scene Here!", menu)
+			menu.addAction( actionSaveScene )
+			self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.saveScene )
+		elif INNUKE:
+			#OPEN IN CURRENT MAYA
+			nukIcon = QtGui.QIcon( PYFILEDIR + '/icons/nuke.png' )
+			actionOpenInCurrent = QtGui.QAction(nukIcon,"Open in This Nuke", menu)
+			menu.addAction( actionOpenInCurrent )
+			self.connect( actionOpenInCurrent, QtCore.SIGNAL( "triggered()" ), self.openFileInCurrentNuke )
+			#SAVE IN THIS SCENE
+			savIcon = QtGui.QIcon( PYFILEDIR + '/icons/save.png' )
+			actionSaveScene = QtGui.QAction(savIcon,"Save Scene Here!", menu)
+			menu.addAction( actionSaveScene )
+			self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.saveNukeScene )
+		menu.popup(self.tasks_tw.viewport().mapToGlobal(pos))
+
+	#MENU FUNCTIONS
+	def copyFilePath(self):
+		"""docstring for copyFilePath"""
+		assetPath = self.getAssetFromTaks()
+		if assetPath:
+			command = 'echo ' + assetPath.path + '| clip'
+			os.popen(command)
+
+	def openFile(self,item):
+		"""open selected Asset"""
+		asset = self.getAssetFromTaks()
+		os.system("start "+ str( asset.path ) )
+
+	def properties(self):
+		"""get ui with properties of asset"""
+		asset = self.getAssetFromTaks()
+		if asset.extension == '.ma':
+			props = mfp.MayaFilePropertiesUi(asset,self, False )
+		elif asset.extension == '.nk':
+			props = nkp.NukeFilePropertiesUi(asset,self, False)
+		props.show()
+
+	def openFileLocation(self):
+		"""openFile in explorer"""
+		asset = self.getAssetFromTaks()
+		subprocess.Popen(r'explorer /select,"'+ asset.path.replace( '/','\\' ) +'"')
+
+	def saveScene(self):
+		"""save scene here"""
+		quit_msg = "Are you sure you want to save in this file?"
+		reply = QtGui.QMessageBox.question(self, 'Message', quit_msg, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+		if reply == QtGui.QMessageBox.Yes:
+			asset = self.getAssetFromTaks()
+			asset.newVersion()
+			asset.save()
+
+	def openRenderFolder(self):
+		"""docstring for openRenderFolder"""
+		asset = self.getAssetFromTaks()
+		if not asset:
+			return
+		assOrShot = prj.shotOrAssetFromFile( asset )
+		if assOrShot:
+			if assOrShot.type == 'asset':
+				#versionNumber = self._getVersionNumber( renderPath + assOrShot.project.name + '/Asset/' + assOrShot.name )
+				pat = self.settings.General[ 'renderpath' ] + assOrShot.project.name + '/Asset/' + assOrShot.name + '/'
+			elif assOrShot.type == 'shot':
+				#R:\Pony_Halloween_Fantasmas\Terror\s013_T13\Chicos_Beauty
+				#versionNumber = self._getVersionNumber( renderPath + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name )
+				pat =  self.settings.General[ 'renderpath' ] + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name + '/'
+			subprocess.Popen(r'explorer "'+ pat.replace( '/','\\' ) +'"')
+
+	def importFile(self):
+		"""import file to current Maya"""
+		asset = self.getAssetFromTaks()
+		if not asset:
+			return
+		asset.imp()
+
+	def copyTimeSettings(self):
+		"""copy time settings from selected scene"""
+		asset = self.getAssetFromTaks()
+		if not asset:
+			return
+		tim = asset.time
+		mc.currentUnit( time=tim['tim'], linear = tim['lin'], angle = tim[ 'angle' ] )
+		mc.playbackOptions( min = tim[ 'min' ],
+							ast = tim[ 'ast' ], 
+							max = tim[ 'max' ], 
+							aet = tim[ 'aet' ] )
+
+	def reference(self):
+		"""reference file into scene"""
+		asset = self.getAssetFromTaks()
+		if not asset:
+			return
+		#TODO HERE WE NEED TO DETECT IF WE ARE IN A SHOT
+		gen = self.settings.General
+		assetPerShot = gen[ "useassetspershot" ]
+		if assetPerShot == 'True':
+			shotSel = prj.shotOrAssetFromFile( mfl.currentFile() )
+			#assetspath + assetname + department + file
+			newFil = asset.copy( shotSel.assetsPath + asset.path.split( 'Assets/' )[-1] )
+			newFil.reference()
+		else:
+			asset.reference()
+
+	def saveNukeScene(self):
+		"""docstring for saveNukeScene"""
+		asset = self.getAssetFromTaks()
+		if not asset:
+			return
+		asset.newVersion()
+		asset.save()
+
+	def openFileInCurrentMaya(self):
+		"""docstring for openFileInCurrentMaya"""
+		asset = self.getAssetFromTaks()
+		if not asset:
+			return
+		if asset.isZero:
+			mc.file( new = True, force = True )
+			asset.save()
+		else:
+			asset.open()
+
+	def copyFromServer(self):
+		"""copy selected asset from server"""
+		asset = self.getAssetFromTaks()
+		if not asset:
+			return
+		self.copyAssetFromServer( asset )
+		self.updateUi()
+
+	def copyToServer(self):
+		"""copy selected asset to server"""
+		quit_msg = "Are you sure you want to copy this file to SERVER?"
+		reply = QtGui.QMessageBox.question(self, 'Message', quit_msg, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+		if reply == QtGui.QMessageBox.Yes:
+			asset = self.getAssetFromTaks()
+			if not asset:
+				return
+			self.copyAssetToServer( asset )
+			self.updateUi()
+
+	def getAssetFromTaks(self):
+		"""docstring for getAssetFromTaks"""
+		if self.currentTask.seq == '':
+			return prj.Project( self.project, self.settings.General[ 'serverpath' ] ).getAssetPath( self.currentTask.name, self.currentTask.area )
+		else:
+			return prj.Project( self.project, self.settings.General[ 'serverpath' ] ).getShotPath( self.currentTask.seq, self.currentTask.name, self.currentTask.area )
+
+	#END MENU FUNCTIONS
 
 	def fillUsers(self):
 		"""docstring for fillUsers"""
 		self.users_cmb.clear()
 		if self.project == 'All':
 			self.users_cmb.addItems( [ 'All' ] )
+			users = []
 			for p in prj.projects( self.settings.General[ 'serverpath' ] ):
-				self.users_cmb.addItems( db.ProjectDataBase( p ).getUsers() )
+				users.extend( db.ProjectDataBase( p ).getUsers() )
+			print list(set( users ))
+			self.users_cmb.addItems( list(set( users )) )
 		else:
 			self.users_cmb.addItems( ['All'] + db.ProjectDataBase( self.project ).getUsers() )
 
@@ -66,11 +276,12 @@ class TasksUi(base, fom):
 		"""docstring for fillUsersNote"""
 		self.usersNote_cmb.clear()
 		if self.project == 'All':
-			self.usersNote_cmb.addItems( [ 'All' ] )
+			users = []
 			for p in prj.projects( self.settings.General[ 'serverpath' ] ):
-				self.usersNote_cmb.addItems( db.ProjectDataBase( p ).getUsers() )
+				users.extend( db.ProjectDataBase( p ).getUsers() )
+			self.usersNote_cmb.addItems( list(set( users )) )
 		else:
-			self.usersNote_cmb.addItems( ['All'] + db.ProjectDataBase( self.project ).getUsers() )
+			self.usersNote_cmb.addItems( [' '] + db.ProjectDataBase( self.project ).getUsers() )
 
 	def fillStatus(self, widget):
 		"""docstring for fillStatus"""
@@ -237,6 +448,7 @@ class TasksUi(base, fom):
 	def updateTask(self, row):
 		"""docstring for updateTask"""
 		tas = self._getTaskByRowIndex( row )
+		print row
 		user, priority, status, timeStart, timeEnd, project = self._taskDataFromUi( row )
 		data = db.ProjectDataBase( project )
 		print 'UPDATING', tas.name, tas.area, tas.seq
@@ -254,6 +466,7 @@ class TasksUi(base, fom):
 		wid = self.tasks_tw.cellWidget( row, 4 )
 		status = wid.currentIndex()
 		wid = self.tasks_tw.cellWidget( row, 5 )
+		print user, priority, status
 		startDate = str( wid.date().toString( "dd-MM-yyyy" ) )
 		wid = self.tasks_tw.cellWidget( row, 6 )
 		endDate = str( wid.date().toString( "dd-MM-yyyy" ) )
@@ -275,6 +488,7 @@ class TasksUi(base, fom):
 		else:
 			taskItem = item.data(32)
 		self.currentTask = taskItem
+		self.project = self.tasks_tw.item( item.row(), 2 ).text()
 		self.updateNotes()
 		
 	def updateNotes(self):

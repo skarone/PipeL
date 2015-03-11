@@ -208,6 +208,9 @@ class ProjectDataBase(object):
 	def addNote(self, note, user, asset, area, seq = '' ):
 		"""add note to database"""
 		userId = self.getUserIdFromName( user )
+		if not userId:
+			self.addUser( user )
+			userId = self.getUserIdFromName( user )
 		assetId = self.getAssetIdFromName( asset, area, seq )
 		date = strftime("%d-%m-%Y %H:%M:%S", gmtime())
 		con = lite.connect(self.dataBaseFile)
