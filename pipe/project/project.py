@@ -197,8 +197,8 @@ class Project(object):
 			areaNumber = 4
 		return ass.Asset( name, self ).areaPath( areaNumber )
 
-	def getShotPath(self, seq, name, area):
+	def getShotPath(self, sequ, name, area):
 		"""docstring for getShot"""
 		if area == '':
 			return None
-		return sh.Shot( name, sq.Sequence( seq ) ).areaPath( area )
+		return sh.Shot( name, seq.Sequence( sequ, self ) ).areaPath( area )

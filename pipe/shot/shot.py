@@ -390,7 +390,7 @@ class Shot(object):
 		"""return pool camera file"""
 		return mfl.mayaFile( self.poolCamPath )
 
-	def areaPath(self, areaNumber):
+	def areaPath(self, area):
 		"""docstring for areaPath"""
 		if area == '':
 			return None
