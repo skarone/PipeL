@@ -64,13 +64,14 @@ class ProjectDataBase(object):
 			cur.execute("UPDATE Assets SET UserId = ?, Priority = ?, Status = ?, TimeStart = ?, TimeEnd = ?  WHERE Id = ?",(userId, priority, status, timeStart, timeEnd, assetId)) 
 			con.commit()
 	
-	def remAsset(self, assetName):
+	def remAsset( self, name, area, seq ):
 		"""remove asset from database"""
+		assetId = self.getAssetIdFromName(name, area, seq )
 		con = lite.connect(self.dataBaseFile)
 		with con:
 			cur = con.cursor()
 			#
-			cur.execute("DELETE FROM Assets WHERE Name=%s"%assetName )
+			cur.execute("DELETE FROM Assets WHERE Id=%i"%(assetId ))
 
 	def getAssets(self):
 		"""return all the assets information"""

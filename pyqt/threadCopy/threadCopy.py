@@ -6,8 +6,8 @@ from Qt import QtGui,QtCore
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
-import pyqt.threadCopy.progressBar as prBar
-
+uifile = PYFILEDIR + '/progressBar.ui'
+fom, base = uiH.loadUiType( uifile )
 
 class ProgressDialog(QtGui.QProgressDialog):
 
@@ -73,15 +73,14 @@ class CopyThread(QtCore.QThread):
 		source.close()
 		target.close()
 
-class MultiProgressDialog(QtGui.QDialog):
+class MultiProgressDialog(base, fom):
 
 	def __init__(self, sources, basePath, finalPath, parent):
 		if uiH.USEPYQT:
 			super(base, self).__init__(parent)
 		else:
 			super(MultiProgressDialog, self).__init__(parent)
-		self.ui=prBar.Ui_Dialog()
-		self.ui.setupUi(self)
+		self.setupUi(self)
 		
 		self.parent = parent
 		self.sources = sources

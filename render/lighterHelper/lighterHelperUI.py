@@ -20,6 +20,8 @@ from functools import partial
 import pipe.mayaFile.mayaFile as mfl
 reload( mfl )
 import general.undo.undo as undo
+import shading.textureManager.textureManager as tm
+reload(tm)
 
 #load UI FILE
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
@@ -63,6 +65,15 @@ class LighterHelperUI(base,fom):
 		self.connect( self.addObject_btn            , QtCore.SIGNAL("clicked()") , self.addObjectToLayer )
 		self.connect( self.removeObject_btn         , QtCore.SIGNAL("clicked()") , self.removeObjectToLayer )
 		self.connect( self.removeAllObjects_btn     , QtCore.SIGNAL("clicked()") , self.removeAllObjectsToLayer )
+		#OBJECTS QUALITY
+		self.connect( self.toLow_btn     , QtCore.SIGNAL("clicked()") , self.toLow )
+		self.connect( self.toMid_btn     , QtCore.SIGNAL("clicked()") , self.toMid )
+		self.connect( self.toHigh_btn     , QtCore.SIGNAL("clicked()") , self.toHigh )
+		self.connect( self.dispOff_btn     , QtCore.SIGNAL("clicked()") , self.dispOff )
+		self.connect( self.dispOn_btn     , QtCore.SIGNAL("clicked()") , self.dispOn )
+		self.connect( self.plusSub_btn     , QtCore.SIGNAL("clicked()") , self.plusSub )
+		self.connect( self.zeroSub_btn     , QtCore.SIGNAL("clicked()") , self.zeroSub )
+		self.connect( self.minusSub_btn     , QtCore.SIGNAL("clicked()") , self.minusSub )
 		#SHADING
 		self.connect( self.mateInArnold_btn         , QtCore.SIGNAL("clicked()") , self.createMateColorShaderUI )
 		self.connect( self.blackNoAlpha_btn         , QtCore.SIGNAL("clicked()") , lambda shader=["BLACK_NO_ALPHA",[0,0,0,0]]: self.createAssignColor(shader) )
@@ -229,6 +240,53 @@ class LighterHelperUI(base,fom):
 		"""docstring for remove"""
 		rlay = rlayer.current()
 		rlay.clean()
+
+
+	##########################
+	#OBJECTS QUALITY
+	def getTexturesForSelection(self):
+		"""docstring for getTexturesForSelection"""
+		textures = []
+		for n in mn.ls(sl = True):
+			for t in mn.listHistory( n.shader ):
+				if t.type == 'file':
+					textures.append( t )
+		return textures
+
+	def toLow(self):
+		manager = tm.Manager()
+		manager.toLow( self.getTexturesForSelection() )
+	
+	def toMid(self):
+		manager = tm.Manager()
+		manager.toMid( self.getTexturesForSelection() )
+		
+	def toHigh(self):
+		manager = tm.Manager()
+		manager.toHigh( self.getTexturesForSelection() )
+		
+	def dispOff(self):
+		for n in mn.ls( sl = True ):
+			n.shape.a.aiDispHeight.v = 0
+		
+	def dispOn(self):
+		for n in mn.ls( sl = True ):
+			n.shape.a.aiDispHeight.v = 1
+
+	def plusSub(self):
+		for n in mn.ls( sl = True ):
+			n.shape.a.aiSubdivType.v = 1
+			n.shape.a.aiSubdivIterations.v = 1 + n.shape.a.aiSubdivIterations.v
+		
+	def zeroSub(self):
+		for n in mn.ls( sl = True ):
+			n.shape.a.aiSubdivType.v = 0
+		
+	def minusSub(self):
+		for n in mn.ls( sl = True ):
+			if not n.shape.a.aiSubdivIterations.v == 0:
+				n.shape.a.aiSubdivType.v = 1
+				n.shape.a.aiSubdivIterations.v = n.shape.a.aiSubdivIterations.v - 1
 
 	############################
 	#SHADING

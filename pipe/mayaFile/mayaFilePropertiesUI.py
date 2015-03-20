@@ -243,6 +243,7 @@ class MayaFilePropertiesUi(base, fom):
 			self.textures_tw.setItem( i, 1, item )
 			#HASTX
 			item = QtGui.QTableWidgetItem( '' )
+			colVal = 1
 			if f.hasTx:
 				if f.exists and f.exists:
 					if f.toTx().isOlderThan(f):

@@ -108,6 +108,9 @@ class mayaFile(fl.File):
 		textures = []
 		pat = re.compile( '(:?".ftn" -type "string" ")(?P<Path>.+)"' )
 		search = pat.search
+		print 'in textures',self.path
+		if not self.exists:
+			return []
 		matches = (search(line) for line in file(self.path, "rb"))
 		refs = [match.group('Path') for match in matches if match]
 		for r in refs:

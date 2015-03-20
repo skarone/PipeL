@@ -41,6 +41,7 @@ class TasksUi(base, fom):
 				super(TasksUi, self).__init__()
 		self.setupUi(self)
 		self.setObjectName( 'TasksUi' )
+		self.baseProject = projectName
 		self.project = projectName
 		self.userName = None
 		self.settings = sti.Settings()
@@ -123,9 +124,18 @@ class TasksUi(base, fom):
 			actionSaveScene = QtGui.QAction(savIcon,"Save Scene Here!", menu)
 			menu.addAction( actionSaveScene )
 			self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.saveNukeScene )
+		menu.addSeparator()
+		actionDeleteTask = QtGui.QAction("Delete Task", menu)
+		menu.addAction( actionDeleteTask )
+		self.connect( actionDeleteTask, QtCore.SIGNAL( "triggered()" ), self.deleteTask )
 		menu.popup(self.tasks_tw.viewport().mapToGlobal(pos))
 
 	#MENU FUNCTIONS
+	def deleteTask(self):
+		"""docstring for deleteTask"""
+		db.ProjectDataBase( self.project ).remAsset( self.currentTask.name, self.currentTask.area,  self.currentTask.seq )
+		self.refresh()
+
 	def copyFilePath(self):
 		"""docstring for copyFilePath"""
 		assetPath = self.getAssetFromTaks()
@@ -262,7 +272,7 @@ class TasksUi(base, fom):
 	def fillUsers(self):
 		"""docstring for fillUsers"""
 		self.users_cmb.clear()
-		if self.project == 'All':
+		if self.baseProject == 'All':
 			self.users_cmb.addItems( [ 'All' ] )
 			users = []
 			for p in prj.projects( self.settings.General[ 'serverpath' ] ):
@@ -270,18 +280,18 @@ class TasksUi(base, fom):
 			print list(set( users ))
 			self.users_cmb.addItems( list(set( users )) )
 		else:
-			self.users_cmb.addItems( ['All'] + db.ProjectDataBase( self.project ).getUsers() )
+			self.users_cmb.addItems( ['All'] + db.ProjectDataBase( self.baseProject ).getUsers() )
 
 	def fillUsersNote(self):
 		"""docstring for fillUsersNote"""
 		self.usersNote_cmb.clear()
-		if self.project == 'All':
+		if self.baseProject == 'All':
 			users = []
 			for p in prj.projects( self.settings.General[ 'serverpath' ] ):
 				users.extend( db.ProjectDataBase( p ).getUsers() )
 			self.usersNote_cmb.addItems( list(set( users )) )
 		else:
-			self.usersNote_cmb.addItems( [' '] + db.ProjectDataBase( self.project ).getUsers() )
+			self.usersNote_cmb.addItems( [' '] + db.ProjectDataBase( self.baseProject ).getUsers() )
 
 	def fillStatus(self, widget):
 		"""docstring for fillStatus"""
@@ -346,7 +356,7 @@ class TasksUi(base, fom):
 		"""fill tasks for project and user"""
 		self.tasks_tw.clearContents()
 		data = {}
-		if self.project == 'All':
+		if self.baseProject == 'All':
 			for p in prj.projects( self.settings.General[ 'serverpath' ] ):
 				dataBase = db.ProjectDataBase( p )
 				if dataBase.exists:
@@ -359,15 +369,15 @@ class TasksUi(base, fom):
 					else:
 						data[ p ].extend( dataBase.getAssetsForUser( self.currentUser ) )
 		else:
-			dataBase = db.ProjectDataBase( self.project )
+			dataBase = db.ProjectDataBase( self.baseProject )
 			if not self.currentUser:
 				return
 			if self.currentUser == 'All':
 				data[self.project] = []
 				for u in dataBase.getUsers():
-					data[self.project].extend(dataBase.getAssetsForUser( u ))
+					data[self.baseProject].extend(dataBase.getAssetsForUser( u ))
 			else:
-				data[self.project] = dataBase.getAssetsForUser( self.currentUser )
+				data[self.baseProject] = dataBase.getAssetsForUser( self.currentUser )
 		dataLen = 0
 		for d in data.keys():
 			dataLen += len( data[d] )
@@ -498,7 +508,7 @@ class TasksUi(base, fom):
 		for n in self.currentTask.notes(db.ProjectDataBase( self.project )):
 			itemN = QtGui.QListWidgetItem()
 			itemN.setData(32, n )
-			itemN.setSizeHint(QtCore.QSize(200,70))
+			itemN.setSizeHint(QtCore.QSize(200,100))
 			self.note_lw.addItem( itemN )
 			self.note_lw.setItemWidget(itemN, NoteUi( n ) )
 

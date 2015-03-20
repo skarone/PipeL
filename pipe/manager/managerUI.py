@@ -963,10 +963,13 @@ class ManagerUI(base,fom):
 				localFile.newVersion()
 				asset.copy( localFile.path )
 				if self.changeInternalPaths:
+					print 'in changeInternalPaths'
 					deps, textures = self.getDependenciesToCopy( localFile )
 					self.changeIntPaths( [localFile.path ], self.serverPath, prj.BASE_PATH + '/' )
 					toCopy = self.filesToCopy( deps, self.serverPath, prj.BASE_PATH + '/' )
 					if toCopy:
+						print toCopy
+					"""
 						dia = trhC.MultiProgressDialog( toCopy, self.serverPath, prj.BASE_PATH + '/', self )
 						dia.show()
 						res = dia.exec_()
@@ -975,6 +978,7 @@ class ManagerUI(base,fom):
 							if self.autoMakeTx:
 								for t in textures:
 									self.makeTxForTexture( t, self.serverPath, prj.BASE_PATH + '/' )
+					"""
 			else:
 				serverFile = mfl.mayaFile( filePath.replace( prj.BASE_PATH + '/', self.serverPath ) )
 				asset.newVersion()

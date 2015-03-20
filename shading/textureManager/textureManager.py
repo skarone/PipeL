@@ -131,9 +131,11 @@ class Manager(object):
 			else:
 				attr = "ftn"
 			f = tfl.textureFile( n.attr( attr ).v )
-			if f.hasLow:
-				toPng = f.toLow()
-				n.attr( attr ).v = toPng.path
+			if not f.hasLow:
+				low = f.makeLow()
+				low.makeTx()
+			toPng = f.toLow()
+			n.attr( attr ).v = toPng.path
 
 	def toHigh(self, textures):
 		"""docstring for toHigh"""
@@ -155,6 +157,8 @@ class Manager(object):
 			else:
 				attr = "ftn"
 			f = tfl.textureFile( n.attr( attr ).v )
-			if f.hasMid:
-				toPng = f.toMid()
-				n.attr( attr ).v = toPng.path
+			if not f.hasMid:
+				mid = f.makeMid()
+				mid.makeTx()
+			toPng = f.toMid()
+			n.attr( attr ).v = toPng.path

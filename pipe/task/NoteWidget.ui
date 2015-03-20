@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>410</width>
-    <height>133</height>
+    <width>395</width>
+    <height>142</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -62,7 +62,19 @@ font-weight: bold;</string>
        <item>
         <widget class="QLabel" name="note_lbl">
          <property name="text">
-          <string>Note</string>
+          <string>sadasdasdasdasdasdasdadsadsasdasdadassdsahjksadhfbasidbaibdkafsd fbjahbddasdas hjabdjhabd asdadsasdasdahjas</string>
+         </property>
+         <property name="scaledContents">
+          <bool>true</bool>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+         <property name="openExternalLinks">
+          <bool>true</bool>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
          </property>
         </widget>
        </item>

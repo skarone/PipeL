@@ -24,7 +24,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tabWidgetPage1">
        <property name="styleSheet">
@@ -345,6 +345,145 @@ color: rgb(255, 255, 255);</string>
         </item>
         <item>
          <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Objects Quality</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_17">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_15">
+          <item>
+           <widget class="QLabel" name="label_17">
+            <property name="text">
+             <string>Textures:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_24">
+            <item>
+             <widget class="QPushButton" name="toLow_btn">
+              <property name="text">
+               <string>To Low</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="toMid_btn">
+              <property name="text">
+               <string>To Mid</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="toHigh_btn">
+              <property name="text">
+               <string>To High</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QLabel" name="label_19">
+            <property name="text">
+             <string>Displacement:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_25">
+            <item>
+             <widget class="QPushButton" name="dispOff_btn">
+              <property name="text">
+               <string>Off</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="dispOn_btn">
+              <property name="text">
+               <string>On</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_16">
+          <item>
+           <widget class="QLabel" name="label_18">
+            <property name="text">
+             <string>Subdivisions:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_23">
+            <item>
+             <widget class="QPushButton" name="plusSub_btn">
+              <property name="maximumSize">
+               <size>
+                <width>31</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>+1</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="zeroSub_btn">
+              <property name="maximumSize">
+               <size>
+                <width>21</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="minusSub_btn">
+              <property name="maximumSize">
+               <size>
+                <width>31</width>
+                <height>23</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>-1</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_3">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
