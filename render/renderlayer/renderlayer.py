@@ -68,28 +68,31 @@ class RenderLayer(mn.Node):
 		inpSize = self.a.adjustments.size
 		tweaks = {}
 		for i in range(inpSize):
-			plg = self.attr( 'adjustments[' +str(i) + '].plug' ).input
-			valAttr = self.attr( 'adjustments[' +str(i) + '].value' )
-			if plg:
-				if valAttr.input: #THere is a connection to the value to override
-					tweaks[ plg ] = valAttr.input
-				else: #Store plug and new value
-					if plg.children:
-						count = 0
-						for p in plg.children:
-							try:
-								if 'Angle' in p.type:
-									tweaks[ p ] = valAttr.v[0][ count ]/0.0174532925 #deg to rad
-								else:
-									tweaks[ p ] = valAttr.v[0][ count ]
-								count += 1
-							except:
-								continue
-					else:
-						if 'Angle' in plg.type:
-							tweaks[ plg ] = valAttr.v/0.0174532925 #deg to rad
+			try:
+				plg = self.attr( 'adjustments[' +str(i) + '].plug' ).input
+				valAttr = self.attr( 'adjustments[' +str(i) + '].value' )
+				if plg:
+					if valAttr.input: #THere is a connection to the value to override
+						tweaks[ plg ] = valAttr.input
+					else: #Store plug and new value
+						if plg.children:
+							count = 0
+							for p in plg.children:
+								try:
+									if 'Angle' in p.type:
+										tweaks[ p ] = valAttr.v[0][ count ]/0.0174532925 #deg to rad
+									else:
+										tweaks[ p ] = valAttr.v[0][ count ]
+									count += 1
+								except:
+									continue
 						else:
-							tweaks[ plg ] = valAttr.v
+							if 'Angle' in plg.type:
+								tweaks[ plg ] = valAttr.v/0.0174532925 #deg to rad
+							else:
+								tweaks[ plg ] = valAttr.v
+			except:
+				continue
 		return tweaks
 
 	@overridesWithValues.setter

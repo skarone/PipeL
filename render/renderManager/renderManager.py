@@ -229,12 +229,11 @@ class RenderLayerUI(baseLay,fomLay):
 
 	def _updateUi(self):
 		"""update ui based on layer info"""
-		if self.layer.a.renderable.v:
+		if self._layer.a.renderable.v:
 			self.renderMe_chb.setCheckState( QtCore.Qt.Checked )
 		else:
 			self.renderMe_chb.setCheckState( QtCore.Qt.Unchecked )
-		#print 'error'
-		tw = self.layer.overridesWithValues
+		tw = self._layer.overridesWithValues
 		startFrame = ''
 		endFrame   = ''
 		for o in tw.keys():
@@ -250,7 +249,7 @@ class RenderLayerUI(baseLay,fomLay):
 			if not endFrame:
 				endFrame = renderGlobals.a.endFrame.v
 			self.frameRange_le.setText( str( int( startFrame ) ) + '-' + str( int ( endFrame ) ) )
-		self.renderLayer_lbl.setText( self.layer.name )
+		self.renderLayer_lbl.setText( self._layer.name )
 
 	def setEnabled(self, val):
 		"""docstring for setEnabled"""

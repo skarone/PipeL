@@ -1,0 +1,14 @@
+Notificaciones:
+-Cuando se asigna una tarea    [TASK]
+-Cuando se guarda un shading   [SHADING]
+-Cuando se guarda un rig       [RIG]
+-Cuando se guarda un final     [FINAL]
+-Cuando se guarda un anim      [ANIM]
+-Cuando se exporta un cache    [CACHE]
+-Cuando se guarda un lit       [LIT]
+-Cuando se tira un render      [LIT RENDER]
+-Cuando se tira un render Nuke [COMP RENDER]
+-Cuando termina un render      [LIT RENDER FINISH]
+-Cuando termina un render Nuje [COMP RENDER FINISH]
+
+

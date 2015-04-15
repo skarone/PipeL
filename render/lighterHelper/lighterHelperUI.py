@@ -40,7 +40,7 @@ class LighterHelperUI(base,fom):
 		self.loadArnold()
 		self.setObjectName( 'ligther_Helper_WIN' )
 		self._makeConnections()
-		self._addAllAovs()
+		#self._addAllAovs()
 		#create an scriptjob thats update the UI on renderlayer change
 		mc.scriptJob( e = ["renderLayerManagerChange", partial( self.updateLighterUI )], p = 'ligther_Helper_WIN' )
 		self.updateLighterUI()
@@ -722,12 +722,14 @@ class LighterHelperUI(base,fom):
 		mc.setAttr( "defaultRenderGlobals.periodInExt", 1)
 		mc.setAttr( "defaultArnoldDriver.mergeAOVs", 1 )
 		mc.setAttr( "defaultArnoldRenderOptions.use_existing_tiled_textures", 1 )
+		"""
 		try:
 			for c in mn.ls( typ = 'camera' ):
 				c.a.aiShutterEnd.v = 0
 				c.a.motionBlurOverride.v = 1
 		except:
 			pass
+		"""
 		
 		
 

@@ -273,7 +273,7 @@ class CacheManagerUI(base,fom):
 	def _fillProyects(self):
 		"""docstring for _fillProyects"""
 		self.projects_cmb.clear()
-		self.projects_cmb.addItems( prj.projects() )
+		self.projects_cmb.addItems( prj.projects( self.serverPath ) )
 		self._fillSequences()
 
 	def _fillSequences(self):

@@ -881,6 +881,10 @@ class NodeAttribute(object):
 		:type newName: str"""
 		mc.aliasAttr( newName, self.fullname )
 
+	def key(self):
+		"""docstring for key"""
+		mc.setKeyframe( self.fullname )
+
 
 ##################################################
 # ATTRIBUTES COLLECTION CLASS
