@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>282</width>
-    <height>117</height>
+    <width>255</width>
+    <height>129</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,20 +16,6 @@
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Project:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="projects_cmb"/>
-       </item>
-      </layout>
-     </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
@@ -41,6 +27,109 @@
        </item>
        <item>
         <widget class="QLineEdit" name="asset_le"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Area:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="area_cmb">
+           <item>
+            <property name="text">
+             <string>Modeling</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Shading</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Rigging</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Hrs</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Layout</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Animation</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Scene Composing</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Skin Fix</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Simulation</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Vfx</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Lighting</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Composition</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Render Manager</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string/>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Mail:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="mail_le"/>
+         </item>
+        </layout>
        </item>
       </layout>
      </item>

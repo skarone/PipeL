@@ -24,13 +24,31 @@ class Settings(fl.File):
 		"""has general Settings"""
 		if not self.exists:
 			return False
+		self.read()
 		return self.hasSection( "General" )
+
+	@property
+	def hasStatusFilter(self):
+		"""docstring for hasStatusFilter"""
+		if not self.exists:
+			return False
+		self.read()
+		return self.hasSection( "StatusFilter" )
+
+	@property
+	def hasUserFilter(self):
+		"""docstring for hasStatusFilter"""
+		if not self.exists:
+			return False
+		self.read()
+		return self.hasSection( "UserFilter" )
 
 	@property
 	def hasHistory(self):
 		"""has history settings"""
 		if not self.exists:
 			return False
+		self.read()
 		return self.hasSection( "History" )
 
 	@property
@@ -40,6 +58,24 @@ class Settings(fl.File):
 		if self.exists:
 			if self.hasSection( "History" ):
 				return self.ConfigSectionMap( "History" )
+		return {}
+
+	@property
+	def UserFilter(self):
+		"""docstring for UserFilter"""
+		self.read()
+		if self.exists:
+			if self.hasSection( "UserFilter" ):
+				return self.ConfigSectionMap( "UserFilter" )
+		return {}
+
+	@property
+	def StatusFilter(self):
+		"""docstring for UserFilter"""
+		self.read()
+		if self.exists:
+			if self.hasSection( "StatusFilter" ):
+				return self.ConfigSectionMap( "StatusFilter" )
 		return {}
 
 	@property

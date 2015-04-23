@@ -33,7 +33,6 @@ class ProjectDataBase(object):
 		with con:
 			cur = con.cursor()    
 			cur.execute("CREATE TABLE Assets( Id INTEGER PRIMARY KEY, Name TEXT, Area TEXT,Sequence TEXT, UserId INTEGER, Priority INTEGER, Status INTEGER, TimeStart TEXT, TimeEnd TEXT );")
-			cur.execute("CREATE TABLE Users( Id INTEGER PRIMARY KEY, Name TEXT UNIQUE, Permisions INTEGER );")
 			cur.execute("CREATE TABLE Notes( Id INTEGER PRIMARY KEY, Note TEXT, UserId INTEGER, AssetId INTEGER, Date TEXT );")
 
 	def addAsset(self, name, area, seq, user, priority, status, timeStart, timeEnd ):
@@ -96,6 +95,7 @@ class ProjectDataBase(object):
 			con.row_factory = lite.Row
 			cur = con.cursor()
 			#(1, u'Brocoli', u'Shading', u'', 1, 50, 0, u'Now', u'Tomorrow')
+			cur.execute("ATTACH DATABASE '"+ BaseDataBase().dataBaseFile +"' AS dbOne" )
 			cur.execute("SELECT Assets.Id as id, Assets.Name as name, Assets.Area as area, Assets.Sequence as seq, Users.Name as userName, Assets.Priority as priority, Assets.Status as status, Assets.TimeStart as timeStart, Assets.TimeEnd as timeEnd FROM Assets INNER JOIN Users ON Assets.UserId = Users.Id WHERE UserId=:user", {"user": userId})        
 			con.commit()
 			tasks = []
@@ -159,52 +159,36 @@ class ProjectDataBase(object):
 		with con:
 			con.row_factory = lite.Row
 			cur = con.cursor()
+			cur.execute("ATTACH DATABASE '"+ BaseDataBase().dataBaseFile +"' AS dbOne" )
 			cur.execute("SELECT Assets.Name AS assetName, Users.Name AS userName, Assets.Area, Assets.Priority, Assets.Status, Assets.TimeStart, Assets.TimeEnd FROM Assets INNER JOIN Users ON Assets.UserId = Users.Id WHERE Assets.Name=:name AND Assets.Area=:area", {"name": assetName, "area": area})        
 			con.commit()
 			return cur.fetchone()
 
-	def addUser(self, userName, permisions = 0):
+	def addUser(self, userName, Mail, Area = 0):
 		"""add user to database"""
-		if not self.exists:
-			self.create()
-		con = lite.connect(self.dataBaseFile)
-		with con:
-			cur = con.cursor()
-			cur.execute("INSERT INTO Users(Name, Permisions) VALUES(?,?)",(userName,permisions))
+		baseData = BaseDataBase()
+		if not baseData.exists:
+			baseData.create()
+		baseData.addUser( userName, Mail, Area )
 
 	def remUser(self, userName):
 		"""remove user from database"""
-		con = lite.connect(self.dataBaseFile)
-		with con:
-			cur = con.cursor()
-			cur.execute("DELETE FROM Users WHERE Name=%s"%userName )
+		baseData = BaseDataBase()
+		if not baseData.exists:
+			return
+		baseData.remUser( userName )
 
 	def getUsers(self):
 		"""docstring for getUsers"""
-		if not self.exists:
-			return []
-		con = lite.connect(self.dataBaseFile)
-		with con:
-			cur = con.cursor()
-			cur.execute("SELECT Name FROM Users")        
-			con.commit()
-			res = cur.fetchall()
-			final = []
-			for r in res:
-				final.append( r[0] )
-			return final
+		baseData = BaseDataBase()
+		return baseData.getUsers()
 
 	def getUserIdFromName(self, userName):
 		"""return user id from user name"""
-		con = lite.connect(self.dataBaseFile)
-		with con:
-			cur = con.cursor()
-			cur.execute("SELECT Id FROM Users WHERE Name=:name", {"name": userName})        
-			con.commit()
-			userId = cur.fetchone()
-			if userId:
-				return userId[0]
-			return 
+		baseData = BaseDataBase()
+		if not baseData.exists:
+			return
+		return baseData.getUserIdFromName( userName )
 
 	def addNote(self, note, user, asset, area, seq = '' ):
 		"""add note to database"""
@@ -234,20 +218,93 @@ class ProjectDataBase(object):
 		with con:
 			con.row_factory = lite.Row
 			cur = con.cursor()
+			cur.execute("ATTACH DATABASE '"+ BaseDataBase().dataBaseFile +"' AS dbOne" )
 			cur.execute("SELECT Note as note, Users.Name as userName, Assets.Name as assetName, Date as date FROM Notes INNER JOIN Users ON Notes.UserId = Users.Id INNER JOIN Assets ON Notes.AssetId = Assets.Id WHERE Notes.AssetId=:name ORDER BY Notes.Id DESC" , {"name": assetId})        
 			con.commit()
 			notes = cur.fetchall()
 			return [note.Note( n ) for n in notes]
 
-	"""
-	con = lite.connect( 'D:/' + 'testProject3' + '.db' )
-	with con:
-		con.row_factory = lite.Row 
-		cur = con.cursor()
-		cur.execute("SELECT Assets.Name AS assetName, Users.Name AS userName, Assets.Priority, Assets.Status, Assets.TimeStart, Assets.TimeEnd, Notes.Note, Notes.Date FROM Assets INNER JOIN Users ON Assets.UserId = Users.Id INNER JOIN Notes ON Assets.Id = Notes.AssetId;")
-		con.commit()
-		asd = cur.fetchall()
-	for row in asd:
-		print row[ "assetName"]
-	"""
+
+
+class BaseDataBase(object):
+	"""docstring for BaseDataBase"""
+	def __init__(self):
+		pass
+
+	def create(self):
+		"""create bases for database"""
+		if not os.path.exists( os.path.dirname( self.dataBaseFile ) ):
+			return
+		con = lite.connect( self.dataBaseFile )
+		with con:
+			cur = con.cursor()    
+			cur.execute("CREATE TABLE Users( Id INTEGER PRIMARY KEY, Name TEXT UNIQUE, Area INTEGER, Mail TEXT );")
+
+	@property
+	def exists(self):
+		"""docstring for exists"""
+		return os.path.exists( self.dataBaseFile )
+
+	@property
+	def dataBaseFile(self):
+		"""data base dataBaseFile"""
+		#return 'D:/' + self.project + '.db'
+		return sti.Settings().General[ "serverpath" ] + 'pipel_database.db'
+
+	def addUser(self, userName, Mail, Area = 0 ):
+		"""add user to database"""
+		if not self.exists:
+			self.create()
+		con = lite.connect(self.dataBaseFile)
+		with con:
+			cur = con.cursor()
+			cur.execute("INSERT INTO Users(Name, Area, Mail) VALUES(?,?,?)",( userName, Area, Mail ))
+
+	def remUser(self, userName):
+		"""docstring for remUser"""
+		con = lite.connect(self.dataBaseFile)
+		with con:
+			cur = con.cursor()
+			cur.execute("DELETE FROM Users WHERE Name=%s"%userName )
+
+	def getUserIdFromName(self, userName):
+		"""return user id from user name"""
+		con = lite.connect(self.dataBaseFile)
+		with con:
+			cur = con.cursor()
+			cur.execute("SELECT Id FROM Users WHERE Name=:name", {"name": userName})        
+			con.commit()
+			userId = cur.fetchone()
+			if userId:
+				return userId[0]
+			return 
+
+	def getUsers(self):
+		"""docstring for getUsers"""
+		if not self.exists:
+			return []
+		con = lite.connect(self.dataBaseFile)
+		with con:
+			cur = con.cursor()
+			cur.execute("SELECT Name FROM Users")        
+			con.commit()
+			res = cur.fetchall()
+			final = []
+			for r in res:
+				final.append( r[0] )
+			return final
+
+	def getMailFromUser(self, userName):
+		"""return mail from userName"""
+		userId = sefl.getUserIdFromName( userName )
+		con = lite.connect(self.dataBaseFile)
+		with con:
+			cur = con.cursor()
+			cur.execute("SELECT Mail FROM Users WHERE Id=:name", {"name": userId})        
+			con.commit()
+			userId = cur.fetchone()
+			if userId:
+				return userId[0]
+
 		
+

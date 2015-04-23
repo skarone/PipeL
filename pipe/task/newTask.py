@@ -190,7 +190,7 @@ class NewTaskUi(base, fom):
 
 	def newUser(self):
 		"""docstring for newUser"""
-		dia = NewUserUi( self.project.name, self )
+		dia = NewUserUi( self )
 		dia.show()
 		res = dia.exec_()
 		if res:
@@ -213,30 +213,17 @@ class NewTaskUi(base, fom):
 
 class NewUserUi(baseUser, fomUser):
 	"""docstring for NewUser"""
-	def __init__(self, project, parent = None ):
+	def __init__(self, parent = None ):
 		if uiH.USEPYQT:
 			super(baseUser, self).__init__(parent)
 		else:
 			super(NewUserUi, self).__init__(parent)
-		self.project = project
 		self.setupUi(self)
 		self.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), self.createUser)
-		self.settings = sti.Settings()
-		self.fillProjectsCMB()
-		index = self.projects_cmb.findText( project )
-		print index, project
-		if not index == -1:
-			self.projects_cmb.setCurrentIndex(index)
-
-	def fillProjectsCMB(self):
-		"""fill combo box with projects"""
-		self.projects_cmb.clear()
-		self.projects_cmb.addItems( prj.projects( sti.Settings().General[ 'serverpath'] ) )
 
 	def createUser(self):
 		"""docstring for createUser"""
-		projName =  str( self.projects_cmb.currentText() )
-		db.ProjectDataBase( self.project ).addUser( str( self.asset_le.text() ) )
+		db.BaseDataBase().addUser( str( self.asset_le.text() ), str( self.mail_le.text() ), self.area_cmb.currentIndex() )
 
 def main(projectname, user = ''):
 	"""use this to create project in maya"""

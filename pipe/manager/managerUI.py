@@ -160,9 +160,6 @@ class ManagerUI(base,fom):
 							self.sequences_lw.setItemSelected( items[0], True )
 						self.sequences_lw.setCurrentItem( items[0] )
 						self.sequences_lw.itemActivated.emit( items[0] )
-			if 'lastuser' in his:
-				lastUser = his[ 'lastuser' ]
-				self.taskUi.setUser( lastUser )
 			if 'lastusernote' in his:
 				lastusernote = his[ 'lastusernote' ]
 				self.taskUi.setUserNote( lastusernote )
@@ -186,12 +183,10 @@ class ManagerUI(base,fom):
 		lastSeq = ''
 		if selItem:
 			lastSeq = str( selItem[0].text() )
-		lastUser = self.taskUi.currentUser
 		lastUserNote = self.taskUi.currentUserNote
 		self.settings.write( 'History', 'lastproject', lastProj )
 		self.settings.write( 'History', 'lastSequence', lastSeq )
 		self.settings.write( 'History', 'lasttab', lastTab )
-		self.settings.write( 'History', 'lastuser', lastUser  )
 		self.settings.write( 'History', 'lastusernote', lastUserNote  )
 
 	def setProjectsBasePath(self):

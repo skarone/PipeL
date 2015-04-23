@@ -46,6 +46,8 @@ class Settings(base, fom):
 			if gen.has_key( 'renderpath' ):
 				renderPath = gen[ "renderpath" ]
 				self.renderPath_le.setText( renderPath )
+			if gen.has_key( 'maketxpath' ):
+				self.makeTxPath_le.setText( gen[ 'maketxpath' ] )
 			if gen.has_key( 'autoload' ):
 				autoLoad = gen[ "autoload" ]
 				if autoLoad == 'True': 

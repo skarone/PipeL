@@ -16,6 +16,13 @@ except:
 	INMAYA = False
 	pass
 
+INNUKE = True
+try:
+	import nuke
+except:
+	INNUKE = False
+	pass
+
 import pipe.database.database as db
 reload( db )
 
@@ -26,6 +33,12 @@ fom, base = uiH.loadUiType( uifile )
 
 uiNotefile = PYFILEDIR + '/NoteWidget.ui'
 fomNote, baseNote = uiH.loadUiType( uiNotefile )
+
+uiFilUserfile = PYFILEDIR + '/filterByUser.ui'
+fomFilUser, baseFilUser = uiH.loadUiType( uiFilUserfile )
+
+uiFilStatusfile = PYFILEDIR + '/filterByStatus.ui'
+fomFilStatus, baseFilStatus = uiH.loadUiType( uiFilStatusfile )
 
 class TasksUi(base, fom):
 	def __init__(self,projectName, parent  = uiH.getMayaWindow() ):
@@ -43,7 +56,6 @@ class TasksUi(base, fom):
 		self.setObjectName( 'TasksUi' )
 		self.baseProject = projectName
 		self.project = projectName
-		self.userName = None
 		self.settings = sti.Settings()
 		self._makeConnections()
 		self.currentTask = None
@@ -269,69 +281,107 @@ class TasksUi(base, fom):
 
 	#END MENU FUNCTIONS
 
-	def fillUsers(self):
-		"""docstring for fillUsers"""
-		self.users_cmb.clear()
-		if self.baseProject == 'All':
-			self.users_cmb.addItems( [ 'All' ] )
-			users = []
-			for p in prj.projects( self.settings.General[ 'serverpath' ] ):
-				users.extend( db.ProjectDataBase( p ).getUsers() )
-			print list(set( users ))
-			self.users_cmb.addItems( list(set( users )) )
-		else:
-			self.users_cmb.addItems( ['All'] + db.ProjectDataBase( self.baseProject ).getUsers() )
-
 	def fillUsersNote(self):
 		"""docstring for fillUsersNote"""
 		self.usersNote_cmb.clear()
-		if self.baseProject == 'All':
-			users = []
-			for p in prj.projects( self.settings.General[ 'serverpath' ] ):
-				users.extend( db.ProjectDataBase( p ).getUsers() )
-			self.usersNote_cmb.addItems( list(set( users )) )
-		else:
-			self.usersNote_cmb.addItems( [' '] + db.ProjectDataBase( self.baseProject ).getUsers() )
+		self.usersNote_cmb.addItems( db.BaseDataBase().getUsers() )
 
 	def fillStatus(self, widget):
 		"""docstring for fillStatus"""
 		its = [ 'waitingStart', 'ready', 'inProgress', 'omit', 'paused', 'pendingReview', 'final' ]
 		itsText = [ 'Waiting to Start', 'Ready to Start', 'In Progress', 'Omit', 'Paused', 'Pending Review','Final' ]
 		for t,i in enumerate(its ):
-			icon = QtGui.QIcon( PYFILEDIR + '/icons/' + i + '.png' )
+			iconDir = PYFILEDIR + '/icons/' + i + '.png'
+			icon = QtGui.QIcon( iconDir )
 			widget.addItem( icon, itsText[t] )
 
 	def _makeConnections(self):
 		"""docstring for _makeConnections"""
-		QtCore.QObject.connect( self.users_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self.fillTasks )
 		QtCore.QObject.connect( self.tasks_tw, QtCore.SIGNAL( "itemClicked (QTableWidgetItem *)" ), self.updateTaskDataUi )
 		self.connect( self.addNote_btn             , QtCore.SIGNAL("clicked()") , self.addNote )
 		self.connect( self.newTask_btn             , QtCore.SIGNAL("clicked()") , self.newTask )
+		self.connect( self.newUser_btn             , QtCore.SIGNAL("clicked()") , self.newTask )
+		self.connect( self.filterUser_btn             , QtCore.SIGNAL("clicked()") , self.filterUser )
+		self.connect( self.filterStatus_btn             , QtCore.SIGNAL("clicked()") , self.filterStatus )
 		self.connect( self.refresh_btn             , QtCore.SIGNAL("clicked()") , self.refresh )
+
+	def filterUser(self):
+		"""docstring for filterUser"""
+		if INMAYA:
+			if mc.window( 'FilterByUser', q = 1, ex = 1 ):
+				mc.deleteUI( 'FilterByUser' )
+		PyForm=FilterByUser(parent=QtGui.QApplication.activeWindow())
+		PyForm.filterChange.connect( self.filterTasks )
+		PyForm.show()
+
+	def filterStatus(self):
+		"""docstring for filterStatus"""
+		if INMAYA:
+			if mc.window( 'FilterByStatus', q = 1, ex = 1 ):
+				mc.deleteUI( 'FilterByStatus' )
+		PyForm=FilterByStatus(parent=QtGui.QApplication.activeWindow())
+		PyForm.filterChange.connect( self.filterTasks )
+		PyForm.show()
 
 	def refresh(self):
 		"""docstring for refresh"""
-		self.fillUsers()
 		self.fillUsersNote()
 		self.fillTasks()
+		self.filterTasks()
+
+	def filterTasks(self):
+		"""docstring for filterTasks"""
+		usersToHide = self.getUsersFilters()
+		statusToHide = self.getStatusFilters()
+		for i in range( self.tasks_tw.rowCount() ):
+			match = True
+			item = self.tasks_tw.item( i, 1 )
+			if any( str( item.text() ).lower() == u.lower() for u in usersToHide ):
+				match = False
+			self.tasks_tw.setRowHidden( i, not match )
+			if not match:
+				continue
+			item = self.tasks_tw.item( i, 4 )
+			if any( item.text() == str( u ) for u in statusToHide ):
+				match = False
+			self.tasks_tw.setRowHidden( i, not match )
+
+	def getUsersFilters(self):
+		"""docstring for getUsersFilters"""
+		if self.settings.hasUserFilter:
+			status = self.settings.UserFilter
+			users = []
+			for u in status.keys():
+				if status[u] == 'False':
+					users.append( u )
+			return users
+		return []
+
+	def getStatusFilters(self):
+		"""docstring for getStatusFilters"""
+		states = []
+		if self.settings.hasStatusFilter:
+			status = self.settings.StatusFilter
+			if status['waiting_chb'] == 'False':
+				states.append(0)
+			if status['ready_chb'] == 'False':
+				states.append(1)
+			if status['inprogress_chb'] == 'False':
+				states.append(2)
+			if status['omit_chb'] == 'False':
+				states.append(3)
+			if status['paused_chb'] == 'False':
+				states.append(4)
+			if status['pending_chb'] == 'False':
+				states.append(5)
+			if status['final_chb'] == 'False':
+				states.append(6)
+		return states
 
 	def newTask(self):
 		"""docstring for newTask"""
 		user = ''
-		if not self.currentUser == 'All':
-			user = self.currentUser
 		newTsk.main( self.project, user )
-
-	@property
-	def currentUser(self):
-		"""docstring for currentUser"""
-		return str ( self.users_cmb.currentText() )
-
-	def setUser(self, user):
-		"""docstring for setUser"""
-		index = self.users_cmb.findText( user )
-		if not index == -1:
-			self.users_cmb.setCurrentIndex(index)
 
 	def setUserNote(self, user):
 		"""docstring for setUserNote"""
@@ -355,29 +405,20 @@ class TasksUi(base, fom):
 	def fillTasks(self):
 		"""fill tasks for project and user"""
 		self.tasks_tw.clearContents()
+		self.tasks_tw.setSortingEnabled(False)
 		data = {}
-		if self.baseProject == 'All':
+		if self.project == 'All':
 			for p in prj.projects( self.settings.General[ 'serverpath' ] ):
 				dataBase = db.ProjectDataBase( p )
 				if dataBase.exists:
 					data[ p ] = []
-					if not self.currentUser:
-						return
-					if self.currentUser == 'All':
-						for u in dataBase.getUsers():
-							data[ p ].extend(dataBase.getAssetsForUser( u ))
-					else:
-						data[ p ].extend( dataBase.getAssetsForUser( self.currentUser ) )
+					for u in dataBase.getUsers():
+						data[ p ].extend(dataBase.getAssetsForUser( u ))
 		else:
-			dataBase = db.ProjectDataBase( self.baseProject )
-			if not self.currentUser:
-				return
-			if self.currentUser == 'All':
-				data[self.project] = []
-				for u in dataBase.getUsers():
-					data[self.baseProject].extend(dataBase.getAssetsForUser( u ))
-			else:
-				data[self.baseProject] = dataBase.getAssetsForUser( self.currentUser )
+			dataBase = db.ProjectDataBase( self.project )
+			data[self.project] = []
+			for u in dataBase.getUsers():
+				data[self.project].extend(dataBase.getAssetsForUser( u ))
 		dataLen = 0
 		for d in data.keys():
 			dataLen += len( data[d] )
@@ -402,7 +443,7 @@ class TasksUi(base, fom):
 				self.tasks_tw.setItem( i, 1, item )
 				self.tasks_tw.setCellWidget(i,1, cmbStatus);
 				self.connect( cmbStatus, QtCore.SIGNAL("currentIndexChanged( const int& )" ), self.mapper, QtCore.SLOT("map()") )
-				self.mapper.setMapping(cmbStatus, i)
+				self.mapper.setMapping(cmbStatus, a.fullname)
 				#PROJECT
 				item = QtGui.QTableWidgetItem( d )
 				item.setData(32, a )
@@ -415,7 +456,7 @@ class TasksUi(base, fom):
 				self.tasks_tw.setItem( i, 3, item )
 				self.tasks_tw.setCellWidget(i,3, spin);
 				self.connect( spin, QtCore.SIGNAL("valueChanged( const int& )" ), self.mapper, QtCore.SLOT("map()") )
-				self.mapper.setMapping(spin, i)
+				self.mapper.setMapping(spin, a.fullname )
 				#Status
 				item = QtGui.QTableWidgetItem( str( a.status ) )
 				cmbStatus = QtGui.QComboBox()
@@ -427,7 +468,7 @@ class TasksUi(base, fom):
 				self.tasks_tw.setItem( i, 4, item )
 				self.tasks_tw.setCellWidget(i,4, cmbStatus);
 				self.connect( cmbStatus, QtCore.SIGNAL("currentIndexChanged( const int& )" ), self.mapper, QtCore.SLOT("map()") )
-				self.mapper.setMapping(cmbStatus, i)
+				self.mapper.setMapping(cmbStatus, a.fullname)
 				#Start DATE
 				dsplit =  a.timeStart.split( '-' )
 				if '-' in a.timeStart:
@@ -439,7 +480,7 @@ class TasksUi(base, fom):
 				self.tasks_tw.setItem( i, 5, item )
 				self.tasks_tw.setCellWidget(i,5, date);
 				self.connect( date, QtCore.SIGNAL("dateChanged( const QDate& )" ), self.mapper, QtCore.SLOT("map()") )
-				self.mapper.setMapping(date, i)
+				self.mapper.setMapping(date, a.fullname)
 				#End DATE
 				dsplit =  a.timeEnd.split( '-' )
 				if '-' in a.timeEnd:
@@ -451,21 +492,30 @@ class TasksUi(base, fom):
 				self.tasks_tw.setItem( i, 6, item )
 				self.tasks_tw.setCellWidget(i,6, date);
 				self.connect( date, QtCore.SIGNAL("dateChanged( const QDate& )" ), self.mapper, QtCore.SLOT("map()") )
-				self.mapper.setMapping(date, i)
+				self.mapper.setMapping(date, a.fullname)
 				i += 1
-		self.mapper.mapped.connect(self.updateTask)
+		self.mapper.connect(QtCore.SIGNAL("mapped(const QString &)"), self.updateTask)
+		#self.mapper.mapped.connect(self.updateTask)
+		self.tasks_tw.setSortingEnabled(True)
 
-	def updateTask(self, row):
+	def updateTask(self, taskName):
 		"""docstring for updateTask"""
+		row = self._getRowByTaskName( taskName )
 		tas = self._getTaskByRowIndex( row )
-		print row
 		user, priority, status, timeStart, timeEnd, project = self._taskDataFromUi( row )
 		data = db.ProjectDataBase( project )
 		print 'UPDATING', tas.name, tas.area, tas.seq
 		print user, priority, status, timeStart, timeEnd
 		data.updateAsset( tas.name, tas.area, tas.seq, user, priority, status, timeStart, timeEnd )
-		#print tas.user, tas.timeStart, tas.timeEnd
-		#print 'in updateTask'
+		self.updateRow( row, user, priority, status, timeStart, timeEnd )
+
+	def updateRow(self, row, user, priority, status, timeStart, timeEnd ):
+		"""docstring for fname"""
+		self.tasks_tw.item( row, 1 ).setText( user )
+		self.tasks_tw.item( row, 3 ).setText( str( priority ) )
+		self.tasks_tw.item( row, 4 ).setText( str( status ) )
+		self.tasks_tw.item( row, 5 ).setText( timeStart )
+		self.tasks_tw.item( row, 6 ).setText( timeEnd )
 
 	def _taskDataFromUi(self, row):
 		"""docstring for _taskDataFromUi"""
@@ -476,12 +526,16 @@ class TasksUi(base, fom):
 		wid = self.tasks_tw.cellWidget( row, 4 )
 		status = wid.currentIndex()
 		wid = self.tasks_tw.cellWidget( row, 5 )
-		print user, priority, status
 		startDate = str( wid.date().toString( "dd-MM-yyyy" ) )
 		wid = self.tasks_tw.cellWidget( row, 6 )
 		endDate = str( wid.date().toString( "dd-MM-yyyy" ) )
 		project =  self.tasks_tw.item( row, 2 ).text()
 		return user, priority, status, startDate, endDate, project
+
+	def _getRowByTaskName(self, taskName):
+		"""docstring for _getRowByt"""
+		item = self.tasks_tw.findItems( taskName, QtCore.Qt.MatchExactly )[0]
+		return item.row()
 
 	def _getTaskByRowIndex(self, row):
 		"""docstring for _getTaskByRowIndex"""
@@ -511,6 +565,123 @@ class TasksUi(base, fom):
 			itemN.setSizeHint(QtCore.QSize(200,100))
 			self.note_lw.addItem( itemN )
 			self.note_lw.setItemWidget(itemN, NoteUi( n ) )
+
+
+
+class FilterByUser(baseFilUser, fomFilUser):
+	"""docstring for FilterByUser"""
+	filterChange = QtCore.Signal(bool)
+	def __init__(self, parent):
+		if uiH.USEPYQT:
+			super(baseFilUser, self).__init__(parent)
+		else:
+			super(FilterByUser, self).__init__(parent)
+		self.settings = sti.Settings()
+		self.setupUi(self)
+		self.fillUsers()
+		self.setObjectName( 'FilterByUser' )
+
+	def fillUsers(self):
+		"""docstring for fillUsers"""
+		for u in db.BaseDataBase().getUsers():
+			chb = QtGui.QCheckBox( u )
+			if self.settings.hasUserFilter:
+				status = self.settings.UserFilter
+				if u.lower() in status:
+					if status[u.lower()] == 'True':
+						state = QtCore.Qt.Checked
+					else:
+						state = QtCore.Qt.Unchecked
+				else:
+					state = QtCore.Qt.Checked
+			else:
+				state = QtCore.Qt.Checked
+			chb.setCheckState( state )
+			self.connect( chb, QtCore.SIGNAL("stateChanged(int)") , self.saveFilter )
+			self.checkbox_lay.addWidget( chb )
+
+	def saveFilter(self, val):
+		"""docstring for saveFilter"""
+		items = (self.checkbox_lay.itemAt(i) for i in range(self.checkbox_lay.count()))
+		for i in items:
+			self.settings.write( 'UserFilter', i.widget().text(), str( i.widget().isChecked() ) )
+		self.filterChange.emit(True)
+
+class FilterByStatus(baseFilStatus, fomFilStatus):
+	"""docstring for FilterByStatus"""
+	filterChange = QtCore.Signal(bool)
+	def __init__(self, parent):
+		if uiH.USEPYQT:
+			super(baseFilStatus, self).__init__(parent)
+		else:
+			super(FilterByStatus, self).__init__(parent)
+		self.settings = sti.Settings()
+		self.setupUi(self)
+		self.fillFilters()
+		self._makeConnections()
+		self.setObjectName( 'FilterByStatus' )
+
+	def fillFilters(self):
+		"""docstring for fillFilters"""
+		if self.settings.hasStatusFilter:
+			status = self.settings.StatusFilter
+			if status['waiting_chb'] == 'True':
+				state = QtCore.Qt.Checked
+			else:
+				state = QtCore.Qt.Unchecked
+			self.waiting_chb.setCheckState(state)
+			if status['ready_chb'] == 'True':
+				state = QtCore.Qt.Checked
+			else:
+				state = QtCore.Qt.Unchecked
+			self.ready_chb.setCheckState(state)
+			if status['inprogress_chb'] == 'True':
+				state = QtCore.Qt.Checked
+			else:
+				state = QtCore.Qt.Unchecked
+			self.inProgress_chb.setCheckState(state)
+			if status['omit_chb'] == 'True':
+				state = QtCore.Qt.Checked
+			else:
+				state = QtCore.Qt.Unchecked
+			self.omit_chb.setCheckState(state)
+			if status['paused_chb'] == 'True':
+				state = QtCore.Qt.Checked
+			else:
+				state = QtCore.Qt.Unchecked
+			self.paused_chb.setCheckState(state)
+			if status['pending_chb'] == 'True':
+				state = QtCore.Qt.Checked
+			else:
+				state = QtCore.Qt.Unchecked
+			self.pending_chb.setCheckState(state)
+			if status['final_chb'] == 'True':
+				state = QtCore.Qt.Checked
+			else:
+				state = QtCore.Qt.Unchecked
+			self.final_chb.setCheckState(state)
+		
+	def _makeConnections(self):
+		"""docstring for _makeConnections"""
+		self.connect( self.waiting_chb, QtCore.SIGNAL("stateChanged(int)") , self.saveFilter )
+		self.connect( self.ready_chb, QtCore.SIGNAL("stateChanged(int)") , self.saveFilter )
+		self.connect( self.inProgress_chb, QtCore.SIGNAL("stateChanged(int)") , self.saveFilter )
+		self.connect( self.omit_chb, QtCore.SIGNAL("stateChanged(int)") , self.saveFilter )
+		self.connect( self.paused_chb, QtCore.SIGNAL("stateChanged(int)") , self.saveFilter )
+		self.connect( self.pending_chb, QtCore.SIGNAL("stateChanged(int)") , self.saveFilter )
+		self.connect( self.final_chb, QtCore.SIGNAL("stateChanged(int)") , self.saveFilter )
+		
+	def saveFilter(self, val):
+		"""docstring for saveFilter"""
+		self.settings.write( 'StatusFilter', 'waiting_chb', str(self.waiting_chb.isChecked() ) )
+		self.settings.write( 'StatusFilter', 'ready_chb', str(self.ready_chb.isChecked() ) )
+		self.settings.write( 'StatusFilter', 'inprogress_chb', str(self.inProgress_chb.isChecked() ) )
+		self.settings.write( 'StatusFilter', 'omit_chb', str(self.omit_chb.isChecked() ) )
+		self.settings.write( 'StatusFilter', 'paused_chb', str(self.paused_chb.isChecked() ) )
+		self.settings.write( 'StatusFilter', 'pending_chb', str(self.pending_chb.isChecked() ) )
+		self.settings.write( 'StatusFilter', 'final_chb', str(self.final_chb.isChecked() ) )
+		self.filterChange.emit(True)
+		
 
 class NoteUi(baseNote, fomNote):
 	def __init__(self, note ):

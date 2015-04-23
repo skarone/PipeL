@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1148</width>
+    <width>1219</width>
     <height>606</height>
    </rect>
   </property>
@@ -20,25 +20,32 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>User:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="users_cmb">
-            <property name="minimumSize">
-             <size>
-              <width>100</width>
-              <height>0</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QPushButton" name="filterUser_btn">
+          <property name="text">
+           <string>Filter By User</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="filterStatus_btn">
+          <property name="text">
+           <string>Filter By Status</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="newUser_btn">
+          <property name="text">
+           <string>+ User</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="newTask_btn">
@@ -50,6 +57,13 @@
           </property>
           <property name="flat">
            <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
           </property>
          </widget>
         </item>
@@ -86,6 +100,9 @@
         <property name="editTriggers">
          <set>QAbstractItemView::NoEditTriggers</set>
         </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
         <property name="textElideMode">
          <enum>Qt::ElideRight</enum>
         </property>
@@ -102,7 +119,7 @@
          <number>120</number>
         </attribute>
         <attribute name="verticalHeaderVisible">
-         <bool>false</bool>
+         <bool>true</bool>
         </attribute>
         <column>
          <property name="text">
