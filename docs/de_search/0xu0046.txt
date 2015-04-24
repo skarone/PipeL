@@ -1,0 +1,11 @@
+FILE; 4,7;
+FILES; 3;
+FINAL; 5;
+FIND; 7,3;
+FIX; 8,7;
+FOLDER; 4,7,5;
+FOR; 5,7,8,4;
+FPS; 4;
+FRAME; 4;
+FRAMES; 8;
+FROM; 5,8,4,7;

@@ -1,0 +1,8 @@
+BACKUP; 4;
+BASED; 5;
+BASIC; 2;
+BE; 7,8;
+BEFORE; 5;
+BEGINING; 8;
+BITT; 1;
+BY; 7;

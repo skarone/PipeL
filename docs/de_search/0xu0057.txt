@@ -1,0 +1,7 @@
+WANT; 7,5,3;
+WE; 4;
+WHERE; 7,5;
+WILL; 4,7,5;
+WINDOW; 4;
+WITH; 5,4,2,8,3;
+WORK; 5,2,3;

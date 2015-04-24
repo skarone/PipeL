@@ -395,6 +395,10 @@ class Node(object):
 		return mc.objExists( self._name )
 
 	@property
+	def isReference(self):
+		return mc.referenceQuery( self.name, isNodeReferenced = True )
+
+	@property
 	def type(self):
 		""":return: Node Type
 		:rtype: str"""

@@ -9,6 +9,6 @@ Notificaciones:
 -Cuando se tira un render      [LIT RENDER]
 -Cuando se tira un render Nuke [COMP RENDER]
 -Cuando termina un render      [LIT RENDER FINISH]
--Cuando termina un render Nuje [COMP RENDER FINISH]
+-Cuando termina un render Nuke [COMP RENDER FINISH]
 
 

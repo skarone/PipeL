@@ -106,6 +106,12 @@ mc.menuItem( divider = True )
 mc.menuItem( l = 'Reload Menu', c = "import install.pipelMenu as pM;reload ( pM )" )
 mc.setParent('..', menu = True )
 
+
+#HELP
+mc.menuItem( divider = True )
+mc.menuItem( l = 'Help', c = 'import os;os.system(\'start ' + PYFILEDIR.replace( '\\', '/' ).replace( 'install','docs' ) + '/index.htm\')' ) 
+mc.setParent('..', menu = True )
+
 sett = sti.Settings()
 gen = sett.General
 if gen:

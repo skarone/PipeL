@@ -1,0 +1,14 @@
+TAB; 5,8,7;
+TASKS; 2;
+TEXTURES; 4;
+THAT; 8,7,3;
+THE; 5,7,8,4,3,6,2;
+THEM; 7,4;
+THEN; 7;
+THERE; 4;
+THIS; 4,8,7,6,5;
+TIME; 8,7,5,4;
+TO; 5,7,4,8,6,3,2;
+TOOL; 6,5,3;
+TOOLS; 2;
+TYPE; 3;

@@ -38,6 +38,7 @@ class CacheFile(fl.File):
 			self._nodes =[]
 			for n in nodes:
 				self._nodes.extend(mn.ls( n, s = True, dag = True, ni = True ) )
+			print self._nodes
 			self._nodes = mn.Nodes( self._nodes )
 		else:
 			self._nodes = None
@@ -54,9 +55,6 @@ class CacheFile(fl.File):
 		cmd = '-f ' + self.path + ' -uv -ro -wv '
 		if self.nodes:
 			if asset:
-				print self.nodes[0].name
-				print self.nodes[0].name.rindex(':')
-				print self.nodes[0].name[:self.nodes[0].name.rindex(':')]
 				self._nodes = sorted( mc.ls( self.nodes[0].name[:self.nodes[0].name.rindex(':')] + ':*', dag = True, ni = True, typ = ['mesh','nurbsCurve'] ) )
 				self._nodes = mn.Nodes( self._nodes )
 			self._nodes.select()

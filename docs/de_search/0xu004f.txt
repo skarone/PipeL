@@ -1,0 +1,10 @@
+OBJECT; 8;
+OBJECTS; 7;
+OF; 5,7,4,8,3;
+ON; 4,5,3;
+ONE; 5;
+ONLY; 5;
+OPEN; 7,4,8,3,2;
+OR; 5,8,4,3;
+ORIGIN; 8;
+OTHER; 5;

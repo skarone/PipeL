@@ -41,8 +41,8 @@ def getAssetsFromSelection( project ):
 def getAssetFromNode(s, project):
 	"""return the asset from a selected Node based on node name"""
 	assetName = s.namespace.firstParent.name[1:]
-	area = assetName[ assetName.rindex( '_' ):]
-	index = [AREAS.index(i) for i in AREAS if i in area]
+	area = assetName[ assetName.rindex( '_' )+1:]
+	index = [AREAS.index(i) for i in AREAS if i.lower() in area.lower()]
 	if not index:
 		index.append(0)
 	return Asset( assetName[ :assetName.rindex( '_' )], project, index[0] ) 

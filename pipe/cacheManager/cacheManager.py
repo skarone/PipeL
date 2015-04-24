@@ -121,14 +121,12 @@ class CacheManagerUI(base,fom):
 		"""docstring for reference"""
 		sht = self._selectedShot.poolCam
 		sht.reference()
-		tim = sht.time
+		tim = self._selectedShot.animPath.time
 		mc.currentUnit( time=tim['tim'], linear = tim['lin'], angle = tim[ 'angle' ] )
-		"""
 		mc.playbackOptions( min = tim[ 'min' ],
 							ast = tim[ 'ast' ], 
 							max = tim[ 'max' ], 
 							aet = tim[ 'aet' ] )
-		"""
 
 	def exportCamera(self):
 		"""docstring for exportCamera"""
