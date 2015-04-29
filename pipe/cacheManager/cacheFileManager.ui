@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>407</width>
+    <width>494</width>
     <height>612</height>
    </rect>
   </property>
@@ -383,6 +383,24 @@
         </property>
         <property name="text">
          <string>Load Selected</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_10">
+      <item>
+       <widget class="QPushButton" name="exportAnimationScene_btn">
+        <property name="text">
+         <string>Export Animation Scene</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="createLitScene_btn">
+        <property name="text">
+         <string>Create Lit Scene</string>
         </property>
        </widget>
       </item>

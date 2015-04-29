@@ -180,17 +180,22 @@ class ManagerUI(base,fom):
 			if not f.exists:
 				item = QtGui.QTableWidgetItem( "0 MB" )
 			else:
-				item = QtGui.QTableWidgetItem( "%0.2f MB" %f.size )
+				if f.hasUdim:
+					item = QtGui.QTableWidgetItem( "UDIM")
+				else:
+					item = QtGui.QTableWidgetItem( "%0.2f MB" %f.size )
 			self.textures_tw.setItem( i, 1, item )
 			#HASTX
 			item = QtGui.QTableWidgetItem( '' )
-
 			if f.exists:
-				if f.hasTx:
-					if f.toTx().isOlderThan(f):
-						colVal = 1
+				if not f.hasUdim:
+					if f.hasTx:
+						if f.toTx().isOlderThan(f):
+							colVal = 1
+						else:
+							colVal = 0
 					else:
-						colVal = 0
+						colVal = 1
 				else:
 					colVal = 1
 			else:

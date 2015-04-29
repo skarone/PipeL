@@ -6,7 +6,7 @@ from glob import glob
 
 dirname, filename = os.path.split(os.path.abspath(__file__))
 dirname = dirname.split( 'pipe' )[0]
-IMAGEMAGICPATH = dirname + 'bin/ImageMagick/'
+IMAGEMAGICPATH = dirname.replace( '\\','/') + 'bin/ImageMagick/'
 
 class sequenceFile(fl.File):
 	"""main class to handle sequences of files"""
@@ -76,7 +76,7 @@ class sequenceFile(fl.File):
 			f.copy( newPath )
 		return sequenceFile( newPath + '/'  + self.basename )
 
-	def insertFrameNumber( self, outdir = '', offset = 0 ):
+	def insertFrameNumber( self, outdir = '', offset = 0, extraText = '' ):
 		"""docstring for insertFrameNumber"""
 		if not outdir == '':
 			if not os.path.exists( outdir ):
@@ -84,6 +84,22 @@ class sequenceFile(fl.File):
 		for i,fi in enumerate( self.files ):
 			if outdir == '':
 				outdir = fi.path
-			cmd = fi.path + " -scene " + str( i + offset ) + ' -gravity SouthEast -undercolor #00000080 -fill white -font Verdana -pointsize 24 -annotate 0 "%[scene]" ' + outdir + '/' + fi.fullName
+			cmd = fi.path + ' -gravity SouthEast -undercolor #00000080 -fill white -font Verdana -pointsize 24 -annotate 0 "'+ extraText +' '+ str( i + offset ).zfill( 4 ) + '" ' + outdir + '/' + fi.fullName
 			os.popen(  IMAGEMAGICPATH + 'convert.exe ' + cmd  )
+
+	def createMov(self, outdir = '', audioPath = '', fps = 24, extraText = '' ):
+		"""docstring for createMov"""
+		audioCmd = ''
+		if audioPath:
+			audioCmd = '-i '+audioPath+' -acodec pcm_s16le'
+		if not outdir:
+			outdir = self.dirPath
+		cmdFrameNum = '-vf "drawtext=fontfile='+IMAGEMAGICPATH.replace( ':', '\\\\:')+'verdana.ttf: fontsize=24: text='+ extraText + ' %{eif\\\\:n+'+str(self.start)+'\\\\: u\\\\: 4}: x=(w-tw)/2: y=h-(2*lh): fontcolor=white: box=1: boxborderw=3: boxcolor=0x00000099"'
+		cmd = ' -y -start_number '+str(self.start)+' -r '+ str(fps)+'/1 -i "'+ self.dirPath + self.name + '.%04d.png" '+ cmdFrameNum+ ' ' +audioCmd+' -r '+ str(fps) + ' -qscale 0 -pix_fmt yuv420p -vcodec mjpeg \"'+outdir + self.name +'.mov\"'
+		print cmd
+		#process = os.popen(IMAGEMAGICPATH + 'ffmpeg.exe ' + cmd )
+		import subprocess
+		process = subprocess.Popen(IMAGEMAGICPATH + 'ffmpeg.exe ' + cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+		output, error = process.communicate()
+		print output, error
 

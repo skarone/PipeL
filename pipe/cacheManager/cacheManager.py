@@ -17,6 +17,8 @@ import pipe.cacheFile.cacheFile as cfl
 reload( cfl )
 import pipe.settings.settings as sti
 reload( sti )
+import pipe.cacheManager.sceneCreator as sc
+reload( sc )
 
 try:
 	import maya.cmds as mc
@@ -111,6 +113,8 @@ class CacheManagerUI(base,fom):
 		self.connect( self.exportCamera_btn        , QtCore.SIGNAL("clicked()") , self.exportCamera )
 		self.connect( self.exportSelectedToSet_btn , QtCore.SIGNAL("clicked()") , self.exportSet )
 		self.connect( self.replaceAlembic_btn      , QtCore.SIGNAL("clicked()") , self.replaceAlembic )
+		self.connect( self.createLitScene_btn      , QtCore.SIGNAL("clicked()") , self.createLitScene )
+		self.connect( self.exportAnimationScene_btn      , QtCore.SIGNAL("clicked()") , self.exportAnimationScene )
 
 		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._fillSequences )
 		QtCore.QObject.connect( self.sequences_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._fillShots )
@@ -181,6 +185,14 @@ class CacheManagerUI(base,fom):
 				serverFile = mfl.mayaFile( maFile.path.replace( prj.BASE_PATH, self.serverPath ) )
 				serverFile.newVersion()
 				maFile.copy( serverFile.path )
+
+	def exportAnimationScene(self):
+		"""docstring for exportAnimationScene"""
+		sc.exportAllFromAnim( str ( self.projects_cmb.currentText() ), str( self.sequences_cmb.currentText() ), str( self.shots_cmb.currentText() ), self.serverPath )
+
+	def createLitScene(self):
+		"""docstring for createLitScene"""
+		sc.createLitScene( str ( self.projects_cmb.currentText() ), str( self.sequences_cmb.currentText() ), str( self.shots_cmb.currentText() ), self.serverPath )
 
 	def _getCurrentTab(self):
 		"""return the visible table in the ui"""
