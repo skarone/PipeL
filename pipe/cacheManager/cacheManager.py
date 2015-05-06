@@ -181,7 +181,7 @@ class CacheManagerUI(base,fom):
 				continue
 			a = ass.getAssetFromNode(n, self._selectedProject)
 			cacFile = cfl.CacheFile( baseDir + '/' + baseName + '.abc', [n] )
-			cacFile.exportAsset( a, self.useFinalToExport_chb.isChecked(), False, steps )
+			cacFile.exportAsset( a, False, False, steps )
 			exportedAsset.append( baseName )
 			if self.copyToServer_chb.isChecked():
 				serverFile = cfl.CacheFile( cacFile.path.replace( prj.BASE_PATH, self.serverPath ) )
