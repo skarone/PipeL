@@ -3,7 +3,10 @@ import pipe.project.project as prj
 import pipe.sequence.sequence as sq
 import pipe.asset.asset as ass
 reload(ass )
-import maya.cmds as mc
+try:
+	import maya.cmds as mc
+except:
+	pass
 import pipe.cacheFile.cacheFile as cfl
 reload( cfl )
 import general.mayaNode.mayaNode as mn

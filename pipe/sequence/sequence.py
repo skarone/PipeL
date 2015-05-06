@@ -75,3 +75,7 @@ class Sequence(object):
 		if os.path.exists(self.path + '/Shots/'):
 			return [ sht.Shot( a, self ) for a in sorted(os.listdir( self.path + '/Shots/' )) if os.path.isdir( self.path + '/Shots/' + a ) ]
 		return []
+
+	def shot(self, shtName):
+		"""return shot object"""
+		return sht.Shot( shtName, self)

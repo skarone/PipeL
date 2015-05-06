@@ -21,15 +21,18 @@ import pipe.cacheManager.sceneCreator as sc
 reload( sc )
 
 try:
+	import general.mayaNode.mayaNode as mn
 	import maya.cmds as mc
 	mc.loadPlugin( 'AbcImport' )
+	INMAYA = True
 except:
 	pass
 
+INHOU = False
 try:
-	import general.mayaNode.mayaNode as mn
-	import maya.cmds as mc
-	INMAYA = True
+	import general.houdini.utils as hu
+	reload(hu)
+	INHOU = True
 except:
 	pass
 
@@ -45,15 +48,20 @@ settingsFile =  str( os.getenv('USERPROFILE') ) + '/settings.ini'
 
 class CacheManagerUI(base,fom):
 	"""manager ui class"""
-	def __init__(self):
+	def __init__(self, parent = None):
 		if INMAYA:
 			if uiH.USEPYQT:
 				super(base, self).__init__(uiH.getMayaWindow())
 			else:
 				super(CacheManagerUI, self).__init__(uiH.getMayaWindow())
 		else:
-			super(base, self).__init__()
+			if uiH.USEPYQT:
+				super(base, self).__init__(parent)
+			else:
+				super(CacheManagerUI, self).__init__(parent)
 		self.setupUi(self)
+		if not INHOU:
+			self.connectToGlobalScale_chb.setVisible( False )
 		self._makeConnections()
 		self.settings = sti.Settings()
 		gen = self.settings.General
@@ -78,7 +86,10 @@ class CacheManagerUI(base,fom):
 
 	def _loadConfig(self):
 		"""load config settings"""
-		sht = prj.shotOrAssetFromFile(mfl.currentFile())
+		if INMAYA:
+			sht = prj.shotOrAssetFromFile(mfl.currentFile())
+		else:
+			sht = None
 		if sht:
 			if str( type(sht) ) == "<class 'pipe.shot.shot.Shot'>":
 				index = self.projects_cmb.findText( sht.project.name )
@@ -123,14 +134,19 @@ class CacheManagerUI(base,fom):
 
 	def referenceCamera(self):
 		"""docstring for reference"""
-		sht = self._selectedShot.poolCam
-		sht.reference()
-		tim = self._selectedShot.animPath.time
-		mc.currentUnit( time=tim['tim'], linear = tim['lin'], angle = tim[ 'angle' ] )
-		mc.playbackOptions( min = tim[ 'min' ],
-							ast = tim[ 'ast' ], 
-							max = tim[ 'max' ], 
-							aet = tim[ 'aet' ] )
+		sht = self._selectedShot
+		if INMAYA:
+			sht.poolCam.reference()
+			tim = self._selectedShot.animPath.time
+			mc.currentUnit( time=tim['tim'], linear = tim['lin'], angle = tim[ 'angle' ] )
+			mc.playbackOptions( min = tim[ 'min' ],
+								ast = tim[ 'ast' ], 
+								max = tim[ 'max' ], 
+								aet = tim[ 'aet' ] )
+		elif INHOU:
+			hu.loadCamera(sht.project.name, sht.sequence.name, sht.name )
+			hu.copyTimeSettings( sht.project.name, sht.sequence.name, sht.name )
+
 
 	def exportCamera(self):
 		"""docstring for exportCamera"""
@@ -232,11 +248,13 @@ class CacheManagerUI(base,fom):
 						n = i.data(32).toPyObject()
 					else:
 						n = i.data( 32 )
-					if '_' in n.name:
-						print 'ROW',self.area_lw.currentRow()
-						n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), self.area_lw.currentRow() , n.name, not importAsset, assetPerShot, shotSel )
-					else:
-						n.imp()
+					if INMAYA:
+						if '_' in n.name:
+							n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], self._selectedProject ), self.area_lw.currentRow() , n.name, not importAsset, assetPerShot, shotSel )
+						else:
+							n.imp()
+					elif INHOU:
+						hu.loadAlembic( n, self.connectToGlobalScale_chb.isChecked() )
 		elif tabNum == 1:
 			for v in xrange(self.files_lw.count()):
 				i = self.files_lw.item(v)
@@ -344,9 +362,13 @@ class CacheManagerUI(base,fom):
 		return str( pathDir )
 
 def main():
-	if mc.window( 'cacheManager_WIN', q = 1, ex = 1 ):
-		mc.deleteUI( 'cacheManager_WIN' )
-	PyForm=CacheManagerUI()
+	try:
+		if mc.window( 'cacheManager_WIN', q = 1, ex = 1 ):
+			mc.deleteUI( 'cacheManager_WIN' )
+	except:
+		pass
+	global PyForm
+	PyForm=CacheManagerUI(parent=QtGui.QApplication.activeWindow())
 	PyForm.show()
 
 

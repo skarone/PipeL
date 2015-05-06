@@ -202,3 +202,11 @@ class Project(object):
 		if area == '':
 			return None
 		return sh.Shot( name, seq.Sequence( sequ, self ) ).areaPath( area )
+
+	def sequence(self, seqName):
+		"""return sequence object"""
+		return seq.Sequence( seqName, self )
+
+	def asset(self, assName):
+		"""return asset object"""
+		return ass.Asset( assName, self )

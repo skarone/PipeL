@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mainMenu>
+  <menuBar>
+    <subMenu id="my_submenu">
+      <label>PipeL</label>
+
+      <scriptItem>
+        <label>Project Manager</label>
+        <scriptCode><![CDATA[import pipe.manager.managerUI as manUI; reload( manUI ); manUI.main()]]></scriptCode>
+      </scriptItem>
+      <separatorItem/>
+      <scriptItem>
+        <label>Cache Manager</label>
+        <scriptCode><![CDATA[import pipe.cacheManager.cacheManager as chM;reload( chM );chM.main()]]></scriptCode>
+      </scriptItem>
+      <separatorItem/>
+      <scriptItem>
+        <label>Save</label>
+        <scriptCode><![CDATA[import pipe.houdiniFile.houdiniFile as hfl;reload(hfl);curFile = hfl.currentFile();curFile.newVersion();curFile.save()]]></scriptCode>
+      </scriptItem>
+      <scriptItem>
+        <label>Playblast</label>
+        <scriptCode><![CDATA[import animation.playblast.playblastUi as plb;reload(plb); plb.main();]]></scriptCode>
+      </scriptItem>
+    </subMenu>
+  </menuBar>
+</mainMenu>
+
+

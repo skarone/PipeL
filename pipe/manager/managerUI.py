@@ -56,6 +56,17 @@ try:
 except:
 	pass
 
+INHOU = False
+try:
+	import hou
+	import pipe.houdiniFile.houdiniFile as hfl
+	import pipe.houdiniFile.houdiniNewFile as hflNew
+	reload(hflNew )
+	reload( hfl )
+	INHOU = True
+except:
+	pass
+
 #load UI FILE
 try:
     PYFILEDIR = os.path.dirname(os.path.abspath(__file__))
@@ -281,7 +292,26 @@ class ManagerUI(base,fom):
 
 	def showMenu(self, pos):
 		tabwid = self._getCurrentTab()
+		item = tabwid.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
 		menu=QtGui.QMenu(self)
+		if INHOU:
+			fils = menu.addMenu('Files')
+			nukIcon = QtGui.QIcon( PYFILEDIR + '/icons/houdini.png' )
+			actionNewFile = QtGui.QAction(nukIcon,"New File", fils)
+			fils.addAction( actionNewFile )
+			self.connect( actionNewFile, QtCore.SIGNAL( "triggered()" ), self.newHoudiniFile )
+			fils.addSeparator()
+			#OPEN IN CURRENT NUKE
+			fls = [ hfl.houdiniFile( a.path ) for a in fl.filesInDir( asset.dirPath, False ) if a.path.endswith('.hip')]
+			for f in fls:
+				nukIcon = QtGui.QIcon( PYFILEDIR + '/icons/houdini.png' )
+				actionOpenInCurrent = QtGui.QAction(nukIcon,f.name, fils)
+				fils.addAction( actionOpenInCurrent )
+				self.connect( actionOpenInCurrent, QtCore.SIGNAL( "triggered()" ), lambda val = f : self.openHoudiniFile(val) )
 		propIcon = QtGui.QIcon( PYFILEDIR + '/icons/question.png' )
 		actionProperties = QtGui.QAction(propIcon, "Properties", menu)
 		menu.addAction( actionProperties )
@@ -341,7 +371,7 @@ class ManagerUI(base,fom):
 			menu.addAction( actionSaveScene )
 			self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.saveScene )
 		elif INNUKE:
-			#OPEN IN CURRENT MAYA
+			#OPEN IN CURRENT NUKE
 			nukIcon = QtGui.QIcon( PYFILEDIR + '/icons/nuke.png' )
 			actionOpenInCurrent = QtGui.QAction(nukIcon,"Open in This Nuke", menu)
 			menu.addAction( actionOpenInCurrent )
@@ -352,7 +382,24 @@ class ManagerUI(base,fom):
 			menu.addAction( actionSaveScene )
 			self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.saveNukeScene )
 
+
 		menu.popup(tabwid.viewport().mapToGlobal(pos))
+
+	def openHoudiniFile(self, fil):
+		"""open houdini File in current Scene"""
+		fil.open()
+
+	def newHoudiniFile(self):
+		"""docstring for fname"""
+		tabwid = self._getCurrentTab()
+		item = tabwid.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		dia = hflNew.HoudiniNewFile( asset, self )
+		dia.show()
+		res = dia.exec_()
 
 	def searchAsset(self, fil):
 		"""search asset based on line edit string"""
@@ -372,6 +419,9 @@ class ManagerUI(base,fom):
 
 	def closeEvent(self, event):
 		self._saveConfig()
+
+	def dragEnterEvent(self, event): 
+		event.acceptProposedAction()
 
 	# 
 	###################################
@@ -550,7 +600,7 @@ class ManagerUI(base,fom):
 		shots = sequence.shots
 		color = [QtGui.QColor( "grey" ),
 				QtGui.QColor( "green" ),
-				QtGui.QColor( "red" ),
+				QtGui.QColor( "#FF0000" ),
 				QtGui.QColor( "#000000" )    #FILE NOT EXISTS
 				]
 		serverComColor = [QtGui.QColor( "#CACAD4" ), #BOTH IN ZERO
@@ -1095,6 +1145,7 @@ def main():
 	if INMAYA:
 		if mc.window( 'ManagerUI', q = 1, ex = 1 ):
 			mc.deleteUI( 'ManagerUI' )
+	global PyForm
 	PyForm=ManagerUI(parent=QtGui.QApplication.activeWindow())
 	PyForm.show()
 

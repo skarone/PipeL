@@ -2,6 +2,7 @@
 import os
 import json
 import pipe.mayaFile.mayaFile as mfl
+reload( mfl )
 import pipe.file.file as fl
 import pipe.dependency.dependency as dp
 import pipe.cacheFile.cacheFile as cfl

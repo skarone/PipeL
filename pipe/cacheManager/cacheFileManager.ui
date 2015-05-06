@@ -222,12 +222,15 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
-           <widget class="QCheckBox" name="useFinalToExport_chb">
+           <widget class="QCheckBox" name="connectToGlobalScale_chb">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text">
-             <string>Import FINAL to Export</string>
+             <string>Connect to global Scale</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>

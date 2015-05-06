@@ -88,19 +88,36 @@ class mayaFile(fl.File):
 	@property
 	def time(self):
 		"""return time setted in the file"""
-		t =  re.search( '(:?currentUnit -l )(?P<Linear>.+)(:? -a )(?P<Angle>.+)(:? -t )(?P<Time>.+);', self.data )
-		if t:
-			lin = str( t.group('Linear') )
-			angle = str( t.group('Angle') )
-			tim = str( t.group('Time') )
-		m =  re.search( '(:?.+playbackOptions -min )(?P<Min>.+)(:? -max )(?P<Max>.+)(:? -ast )(?P<Ast>.+)(:? -aet )(?P<Aet>.+) ";', self.data )
-		if m:
-			amin = int( float( m.group('Min') ))
-			amax = int( float( m.group('Max') ))
-			aast = int( float( m.group('Ast') ))
-			aaet = int( float( m.group('Aet') ))
-			return {'min':amin,'max':amax,'ast':aast,'aet':aaet, 'lin':lin,'angle':angle,'tim':tim}
-		return {'lin':lin,'angle':angle,'tim':tim}
+		lin = ''
+		angle = ''
+		tim = ''
+		with open(self.path) as infile:
+			for line in infile:
+				if not 'currentUnit' in line:
+					continue
+				t =  re.search( '(:?currentUnit -l )(?P<Linear>.+)(:? -a )(?P<Angle>.+)(:? -t )(?P<Time>.+);', line )
+				if t:
+					lin = str( t.group('Linear') )
+					angle = str( t.group('Angle') )
+					tim = str( t.group('Time') )
+					break
+
+		amin = ''
+		amax = ''
+		aast = ''
+		aaet = ''
+		with open(self.path) as infile:
+			for line in infile:
+				if not 'playbackOptions' in line:
+					continue
+				m =  re.search( '(:?.+playbackOptions -min )(?P<Min>.+)(:? -max )(?P<Max>.+)(:? -ast )(?P<Ast>.+)(:? -aet )(?P<Aet>.+) ";', line )
+				if m:
+					amin = int( float( m.group('Min') ))
+					amax = int( float( m.group('Max') ))
+					aast = int( float( m.group('Ast') ))
+					aaet = int( float( m.group('Aet') ))
+					break
+		return {'min':amin,'max':amax,'ast':aast,'aet':aaet, 'lin':lin,'angle':angle,'tim':tim}
 
 	@property
 	def textures(self):

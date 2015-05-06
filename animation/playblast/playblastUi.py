@@ -11,17 +11,37 @@ PYFILEDIR = os.path.dirname(os.path.abspath(__file__))
 uifile = PYFILEDIR + '/playblast.ui'
 fom, base = uiH.loadUiType( uifile )
 
-import animation.playblast.playblast as plb
-reload(plb)
-import maya.cmds as mc
+INMAYA = False
+try:
+	import animation.playblast.playblast as plb
+	reload(plb)
+	import maya.cmds as mc
+	INMAYA = True
+except:
+	pass
+INHOU = False
+try:
+	import general.houdini.utils as hut
+	reload( hut )
+	import pipe.houdiniFile.houdiniFile as hfl
+	reload( hfl )
+	INHOU = True
+except:
+	pass
 
 class PlayblastUi(base,fom):
 	"""manager ui class"""
-	def __init__(self, parent = uiH.getMayaWindow() ):
-		if uiH.USEPYQT:
-			super(base, self).__init__(parent)
+	def __init__(self, parent = None ):
+		if INMAYA:
+			if uiH.USEPYQT:
+				super(base, self).__init__(uiH.getMayaWindow())
+			else:
+				super(PlayblastUi, self).__init__(uiH.getMayaWindow())
 		else:
-			super(PlayblastUi, self).__init__(parent)
+			if uiH.USEPYQT:
+				super(base, self).__init__(parent)
+			else:
+				super(PlayblastUi, self).__init__(parent)
 		self.setupUi(self)
 		self._makeConnections()
 		self.setObjectName( 'PlayblastUi' )
@@ -33,20 +53,34 @@ class PlayblastUi(base,fom):
 
 	def playblast(self):
 		"""docstring for playblast"""
-		plb.playblastCurrentFile()
+		if INMAYA:
+			plb.playblastCurrentFile()
+		elif INHOU:
+			hut.playblastCurrentFile()
 
 	def publish(self):
 		"""docstring for publish"""
-		fil = mfl.currentFile()
-		if not fil:
-			print 'Please Save File To create Playblast'
-			return
-		movFil = fl.File( fil.versionPath + fil.name + '_v' + str( fil.version ).zfill( 3 ) + '.mov' )
+		if INMAYA:
+			fil = mfl.currentFile()
+			if not fil:
+				print 'Please Save File To create Playblast'
+				return
+			movFil = fl.File( fil.versionPath + fil.name + '_v' + str( fil.version ).zfill( 3 ) + '.mov' )
+		elif INHOU:
+			fil = hfl.currentFile()
+			if not fil:
+				print 'Please Save File To create Playblast'
+				return
+			movFil = fl.File( fil.versionPath + fil.name + '_v' + str( fil.version ).zfill( 3 ) + '.mov' )
 		if movFil.exists:
 			movFil.copy( fil.dirPath + fil.name + '.mov' )
 
 def main():
-	if mc.window( 'PlayblastUi', q = 1, ex = 1 ):
-		mc.deleteUI( 'PlayblastUi' )
-	PyForm=PlayblastUi()
+	try:
+		if mc.window( 'PlayblastUi', q = 1, ex = 1 ):
+			mc.deleteUI( 'PlayblastUi' )
+	except:
+		pass
+	global PyForm
+	PyForm=PlayblastUi(parent=QtGui.QApplication.activeWindow())
 	PyForm.show()
