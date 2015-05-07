@@ -144,7 +144,7 @@ class CacheManagerUI(base,fom):
 								max = tim[ 'max' ], 
 								aet = tim[ 'aet' ] )
 		elif INHOU:
-			hu.loadCamera(sht.project.name, sht.sequence.name, sht.name )
+			hu.loadCamera(sht.project.name, sht.sequence.name, sht.name, self.connectToGlobalScale_chb.isChecked() )
 			hu.copyTimeSettings( sht.project.name, sht.sequence.name, sht.name )
 
 

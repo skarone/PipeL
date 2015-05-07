@@ -8,7 +8,7 @@ import pipe.file.file as fl
 import os
 
 
-def loadCamera( projName, seqName, shotName ):
+def loadCamera( projName, seqName, shotName, globalScale = False ):
 	"""load alembic camera for shot"""
 	proj = prj.Project( projName )
 	seq  = proj.sequence( seqName )
@@ -17,6 +17,11 @@ def loadCamera( projName, seqName, shotName ):
 	al.setName( 'CameraPool' )
 	al.parm( 'fileName').set( sht.poolCamPath.replace( '.ma', '.abc' ))
 	al.parm('buildHierarchy').pressButton()
+	if globalScale:
+		gScale = hou.node( '/obj/globalScale' )
+		if not gScale:
+			gScale = hou.node( '/obj' ).createNode( 'null', 'globalScale' )
+		al.setInput(0, gScale)
 
 def copyTimeSettings( projName, seqName, shotName ):
 	"""copy time settings from animation file"""
