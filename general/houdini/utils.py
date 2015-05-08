@@ -76,7 +76,7 @@ def playblast( fi ):
 	gl.parm( 'camera' ).set( cam.path() )
 	#set frame range
 	gl.parm( 'trange' ).set(1)
-	gl.parm( 'aamode' ).set( 2 )
+	gl.parm( 'aamode' ).set( 3 )
 	gl.parm( 'gamma' ).set( 2.2 )
 	frameRange = getFrameRangeFromTimeline()
 	gl.parm( 'f1' ).set(frameRange[0])
@@ -96,6 +96,7 @@ def playblastCurrentFile():
 		print 'Please Save File To create Playblast'
 		return
 	movFil = fl.File( fil.versionPath + fil.name + '_v' + str( fil.version ).zfill( 3 ) + '.mov' )
+	fil.newVersion();fil.save()
 	playblast( movFil )
 
 

@@ -409,6 +409,13 @@
       </item>
      </layout>
     </item>
+    <item>
+     <widget class="QPushButton" name="swapShot_btn">
+      <property name="text">
+       <string>Swap Shot</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
  </widget>

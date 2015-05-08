@@ -24,6 +24,8 @@ try:
 	import general.mayaNode.mayaNode as mn
 	import maya.cmds as mc
 	mc.loadPlugin( 'AbcImport' )
+	import pipe.cacheManager.swapShot as ssh
+	reload( ssh )
 	INMAYA = True
 except:
 	pass
@@ -126,6 +128,7 @@ class CacheManagerUI(base,fom):
 		self.connect( self.replaceAlembic_btn      , QtCore.SIGNAL("clicked()") , self.replaceAlembic )
 		self.connect( self.createLitScene_btn      , QtCore.SIGNAL("clicked()") , self.createLitScene )
 		self.connect( self.exportAnimationScene_btn      , QtCore.SIGNAL("clicked()") , self.exportAnimationScene )
+		self.connect( self.swapShot_btn      , QtCore.SIGNAL("clicked()") , self.swapShot )
 
 		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._fillSequences )
 		QtCore.QObject.connect( self.sequences_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._fillShots )
@@ -278,6 +281,11 @@ class CacheManagerUI(base,fom):
 					else:
 						n = i.data( 32 )
 					n.replace()
+
+	def swapShot(self):
+		"""swap current shot with selected one"""
+		sho = self._selectedShot
+		ssh.swapShot( sho.project.name, sho.sequence.name, sho.name )
 
 	def _fillUi(self):
 		"""fill ui based on current scene or selected shot"""
