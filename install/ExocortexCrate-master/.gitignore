@@ -1,0 +1,11 @@
+bin
+install
+Testing/node_modules
+build/vs*
+build/unix*
+build/Unix*
+_build/vs*
+_build/unix*
+_build/Unix*
+*~
+*.zip
