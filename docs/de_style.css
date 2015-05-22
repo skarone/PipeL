@@ -6,7 +6,7 @@ border: 0px none black;
 }
 .de_list
 {
-margin: 0;padding: 0;
+margin: 0;
 }
 div.p
 {
@@ -22,17 +22,10 @@ font-style:normal;
 text-decoration:none;
 font-weight:normal;
 }
-div.description_on_page div.p a
-{font-family:"Arial";
-font-size: 11pt;color:#000000;
-font-style:normal;
-text-decoration:none;
-font-weight:normal;
-}
 h1
 {
 font-family:"Arial";
-font-size: 13pt;color:#375db0;
+font-size: 13pt;color:#000000;
 font-style:normal;
 text-decoration:none;
 font-weight:normal;
@@ -43,7 +36,7 @@ padding:0;
 h2
 {
 font-family:"Arial";
-font-size: 11pt;color:#4f87fd;
+font-size: 11pt;color:#000000;
 font-style:normal;
 text-decoration:none;
 font-weight:normal;
@@ -67,9 +60,6 @@ font-style:italic;
 text-decoration:none;
 font-weight:normal;
 }
-img.de_75F9C4A440
-{
-margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px;}
 img.de_780D01ADE8
 {
 margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px;}
@@ -77,6 +67,10 @@ span.de_2B94C39861
 {
 	color:#0000ff;
 	text-decoration:underline;
+}
+span.de_4539019894
+{
+	color:#da4b25;
 }
 span.de_476D3D315E
 {
@@ -89,128 +83,4 @@ span.de_51752156DC
 span.de_542C360C74
 {
 	color:#b5c837;
-}
-span.de_8875473D98
-{
-	color:#ff3600;
-}
-span.de_B261420348
-{
-	font-size: 14pt;
-}
-span.de_E9C26A8FA3
-{
-	color:#000000;
-	text-decoration:underline;
-}
-.list-element {
-	list-style-type: none;
-}
-.list-counter-0 > div > * {
-	text-indent: 0px;}
-.list-counter-0 > div > div[class='list-marker']:before {
-	display: inline-block;
-	text-align: left;
-	padding: 0;
-	margin: 0;
-	content: '' counter(list-counter-0, decimal) '.\00a0';
-	counter-increment: list-counter-0;
-}
-.list-counter-0 > div > div[class='list-marker-chm'] {
-	display: inline-block;
-	text-align: left;
-	zoom: 1;
-	padding: 0;
-	margin: 0;
-	*display: inline;
-}
-.list-counter-1 > div > * {
-	text-indent: 0px;}
-.list-counter-1 > div > div[class='list-marker']:before {
-	display: inline-block;
-	text-align: left;
-	padding: 0;
-	margin: 0;
-	content: '' counter(list-counter-1, decimal) '.\00a0';
-	counter-increment: list-counter-1;
-}
-.list-counter-1 > div > div[class='list-marker-chm'] {
-	display: inline-block;
-	text-align: left;
-	zoom: 1;
-	padding: 0;
-	margin: 0;
-	*display: inline;
-}
-.list-counter-2 > div > * {
-	text-indent: 0px;}
-.list-counter-2 > div > div[class='list-marker']:before {
-	display: inline-block;
-	text-align: left;
-	padding: 0;
-	margin: 0;
-	content: '' counter(list-counter-2, decimal) '.\00a0';
-	counter-increment: list-counter-2;
-}
-.list-counter-2 > div > div[class='list-marker-chm'] {
-	display: inline-block;
-	text-align: left;
-	zoom: 1;
-	padding: 0;
-	margin: 0;
-	*display: inline;
-}
-.list-counter-3 > div > * {
-	text-indent: 0px;}
-.list-counter-3 > div > div[class='list-marker']:before {
-	display: inline-block;
-	text-align: left;
-	padding: 0;
-	margin: 0;
-	content: '' counter(list-counter-3, decimal) '.\00a0';
-	counter-increment: list-counter-3;
-}
-.list-counter-3 > div > div[class='list-marker-chm'] {
-	display: inline-block;
-	text-align: left;
-	zoom: 1;
-	padding: 0;
-	margin: 0;
-	*display: inline;
-}
-.list-counter-4 > div > * {
-	text-indent: 0px;}
-.list-counter-4 > div > div[class='list-marker']:before {
-	display: inline-block;
-	text-align: left;
-	padding: 0;
-	margin: 0;
-	content: '' counter(list-counter-4, decimal) '.\00a0';
-	counter-increment: list-counter-4;
-}
-.list-counter-4 > div > div[class='list-marker-chm'] {
-	display: inline-block;
-	text-align: left;
-	zoom: 1;
-	padding: 0;
-	margin: 0;
-	*display: inline;
-}
-.list-counter-5 > div > * {
-	text-indent: 0px;}
-.list-counter-5 > div > div[class='list-marker']:before {
-	display: inline-block;
-	text-align: left;
-	padding: 0;
-	margin: 0;
-	content: '' counter(list-counter-5, decimal) '.\00a0';
-	counter-increment: list-counter-5;
-}
-.list-counter-5 > div > div[class='list-marker-chm'] {
-	display: inline-block;
-	text-align: left;
-	zoom: 1;
-	padding: 0;
-	margin: 0;
-	*display: inline;
 }

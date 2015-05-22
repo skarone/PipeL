@@ -27,6 +27,10 @@ try:
 	import pipe.cacheManager.swapShot as ssh
 	reload( ssh )
 	INMAYA = True
+	try:
+		mc.loadPlugin( 'MayaExocortexAlembic' )
+	except:
+		pass
 except:
 	pass
 
@@ -40,7 +44,6 @@ except:
 
 #load UI FILE
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
-MAYAPATH = 'C:/"Program Files"/Autodesk/Maya2013/bin/maya.exe'
 
 uifile = PYFILEDIR + '/cacheFileManager.ui'
 fom, base = uiH.loadUiType( uifile )
@@ -81,6 +84,7 @@ class CacheManagerUI(base,fom):
 		self._fillUi()
 		self._loadConfig()
 		self.setObjectName( 'cacheManager_WIN' )
+		cfl.USE_EXOCORTEX = self.useExocortex_chb.isChecked()
 		if gen:
 			skin = gen[ "skin" ]
 			if skin:
@@ -134,6 +138,11 @@ class CacheManagerUI(base,fom):
 		QtCore.QObject.connect( self.sequences_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._fillShots )
 		QtCore.QObject.connect( self.shots_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._fillCacheList )
 		QtCore.QObject.connect( self.shots_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._fillFileList )
+		QtCore.QObject.connect( self.useExocortex_chb, QtCore.SIGNAL( "stateChanged  (int)" ), self.setUseExocortex )
+		
+	def setUseExocortex(self, val):
+		"""docstring for setUseExocortex"""
+		cfl.USE_EXOCORTEX = self.useExocortex_chb.isChecked()
 
 	def referenceCamera(self):
 		"""docstring for reference"""
@@ -149,7 +158,6 @@ class CacheManagerUI(base,fom):
 		elif INHOU:
 			hu.loadCamera(sht.project.name, sht.sequence.name, sht.name, self.connectToGlobalScale_chb.isChecked() )
 			hu.copyTimeSettings( sht.project.name, sht.sequence.name, sht.name )
-
 
 	def exportCamera(self):
 		"""docstring for exportCamera"""
@@ -207,11 +215,11 @@ class CacheManagerUI(base,fom):
 
 	def exportAnimationScene(self):
 		"""docstring for exportAnimationScene"""
-		sc.exportAllFromAnim( str ( self.projects_cmb.currentText() ), str( self.sequences_cmb.currentText() ), str( self.shots_cmb.currentText() ), self.serverPath )
+		sc.exportAllFromAnim( str ( self.projects_cmb.currentText() ), str( self.sequences_cmb.currentText() ), str( self.shots_cmb.currentText() ), self.serverPath, self.useExocortex_chb.isChecked() )
 
 	def createLitScene(self):
 		"""docstring for createLitScene"""
-		sc.createLitScene( str ( self.projects_cmb.currentText() ), str( self.sequences_cmb.currentText() ), str( self.shots_cmb.currentText() ), self.serverPath )
+		sc.createLitScene( str ( self.projects_cmb.currentText() ), str( self.sequences_cmb.currentText() ), str( self.shots_cmb.currentText() ), self.serverPath, self.useExocortex_chb.isChecked() )
 
 	def _getCurrentTab(self):
 		"""return the visible table in the ui"""
@@ -227,6 +235,8 @@ class CacheManagerUI(base,fom):
 			tabwid = self.skinFixCaches_lw
 		elif currentTab == 2:
 			tabwid = self.simCaches_lw
+		elif currentTab == 3:
+			tabwid = self.vfxCaches_lw
 		return tabwid, currentTab
 
 	def loadExternalCache(self):
@@ -331,6 +341,7 @@ class CacheManagerUI(base,fom):
 		self.animCaches_lw.clear()
 		self.skinFixCaches_lw.clear()
 		self.simCaches_lw.clear()
+		self.vfxCaches_lw.clear()
 		for s in caches.keys():
 			for f in sorted( caches[s], key=lambda x: x.name, reverse=False):
 				item = QtGui.QListWidgetItem( f.name + ' - ' + s )
@@ -343,6 +354,8 @@ class CacheManagerUI(base,fom):
 					self.skinFixCaches_lw.addItem( item )
 				elif s == 'sim':
 					self.simCaches_lw.addItem( item )
+				elif s == 'vfx':
+					self.vfxCaches_lw.addItem( item )
 
 	def _fillFileList(self):
 		"""docstring for _fillFileList"""

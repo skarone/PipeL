@@ -3,7 +3,7 @@
 <!--[if IE 7 ]> <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" class="ie ie7 no-js"> <![endif]-->
 <!--[if IE 8 ]> <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" class="ie ie8 no-js"> <![endif]-->
 <!--[if IE 9 ]> <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" class="ie ie9 no-js"> <![endif]-->
-<!--[if (gt IE 9)|!(IE)]><!--><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><!--<![endif]-->
+<!---[if (gt IE 9)|!(IE)]><!--><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><!--<![endif]--><!--class="no-ie no-js"-->
 <head>
 
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
@@ -14,13 +14,12 @@
 		drex_file_name = "pipeline.htm";
 	</script>
 	
-			<title>Pipeline</title>
+				<title>Pipeline</title>
 	
 	<link rel="stylesheet" type="text/css" href="css/all.css" media="all" />
 	<link rel="stylesheet" href="de_style.css" type="text/css" media="all" />
 	<link rel="stylesheet" href="custom.css" type="text/css" media="all" />
 	
-	<script type="text/javascript" src="js/xregexp.js"></script>
 	<script type="text/javascript" src="js/all.js"></script>
 	<script type="text/javascript" src="js/drexplain.data.index.js"></script>
 	<script type="text/javascript" src="js/all2.js"></script>
@@ -72,7 +71,8 @@ else if (1 == 1 && !is_touch_device())
 			<table class="b-pageContent__layout">
 				<tr class="b-pageContent__row m-pageContent__row__header" id="pageContentHeader">
 					<td class="b-pageContent__side m-pageContent__side__header">
-						<div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><span style="font-size: 8pt;"><strong>Production Help</strong></span></div>
+						<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<strong>Bitt Documentation</strong></div>
 					</td>
 				</tr>
 				<tr>
@@ -113,17 +113,17 @@ else if (1 == 1 && !is_touch_device())
 
 							<div class="b-tabs__selectorItem m-tabs__selectorItem__selected m-tabs__selectorItem__first" id="tabSelector_menu">
 								<span class="b-tabs__selectorItemIcon b-interfaceIcon m-interfaceIcon__menu"></span>
-								<span class="b-tabs__selectorContent">Men&#x00FA;</span>
+								<span class="b-tabs__selectorContent">Menu</span>
 							</div>
 	
 							<div class="b-tabs__selectorItem m-tabs__selectorItem__unselected" id="tabSelector_index">
 							 	<span class="b-tabs__selectorItemIcon b-interfaceIcon m-interfaceIcon__index"></span>
-							 	<span class="b-tabs__selectorContent">&#x00CD;ndice</span>
+							 	<span class="b-tabs__selectorContent">Index</span>
 							 </div>
 	
 							<div class="b-tabs__selectorItem m-tabs__selectorItem__unselected" id="tabSelector_search">
 								<span class="b-tabs__selectorItemIcon b-interfaceIcon m-interfaceIcon__search"></span>
-								<span class="b-tabs__selectorContent">B&#x00FA;squeda</span>
+								<span class="b-tabs__selectorContent">Search</span>
 							</div>
 						</div><!-- /b-tabs__selectorItems -->
 
@@ -153,7 +153,7 @@ else if (1 == 1 && !is_touch_device())
 			<tr>
 				<td class="b-search__side m-search__side__input">
 					<div class="b-search__gap">
-						<label id="tabs_searchInput_label" for="tabs_searchInput" class="b-search__labelPlaceholder">B&#x00FA;squeda</label>
+						<label id="tabs_searchInput_label" for="tabs_searchInput" class="b-search__labelPlaceholder">Search</label>
 						<input id="tabs_searchInput" type="text" value="" class="b-search__inputText" />
 					</div>
 				</td>
@@ -162,7 +162,7 @@ else if (1 == 1 && !is_touch_device())
 						<span class="b-button__wrapper">
 							<span class="b-button__text"></span>
 						</span>
-						<input type="submit" class="b-button__submit" value="B&#x00FA;squeda" id="tabs_searchSubmit" />
+						<input type="submit" class="b-button__submit" value="Search" id="tabs_searchSubmit" />
 					</span>
 				</td>
 			</tr>
@@ -209,7 +209,7 @@ else if (1 == 1 && !is_touch_device())
 				<td class="b-search__side m-search__side__input">
 					<div class="b-search__gap">
 						<span class="b-interfaceIcon m-interfaceIcon__search m-interfaceIcon__search__input b-search__inputTextIcon"></span>
-						<label id="workZone_searchInput_label" for="workZone_searchInput" class="b-search__labelPlaceholder">B&#x00FA;squeda</label>
+						<label id="workZone_searchInput_label" for="workZone_searchInput" class="b-search__labelPlaceholder">Search</label>
 						<input id="workZone_searchInput" type="text" value="" class="b-search__inputText" />
 					</div>
 				</td>
@@ -218,7 +218,7 @@ else if (1 == 1 && !is_touch_device())
 						<span class="b-button__wrapper">
 							<span class="b-button__text"></span>
 						</span>
-						<input type="submit" class="b-button__submit" value="B&#x00FA;squeda" id="workZone_searchSubmit" />
+						<input type="submit" class="b-button__submit" value="Search" id="workZone_searchSubmit" />
 					</span>
 				</td>
 			</tr>
@@ -233,13 +233,15 @@ else if (1 == 1 && !is_touch_device())
 			<tr>
 				<td id="headerSide__nav" class="b-article__headerSide m-article__headerSide__nav">
 					<div id="headerSide__nav__breadCrumbs" class="b-breadCrumbs">
-						<ul class="b-breadCrumbs__items"><li class="b-breadCrumbs__item">Pipeline</li>
+						<ul class="b-breadCrumbs__items"><li class="b-breadCrumbs__item"><a href="bitt_documentation.htm" class="b-breadCrumbs__link">Bitt Documentation</a></li>
+
+<li class="b-breadCrumbs__item">Pipeline</li>
 </ul>					</div>
 				</td>
 				<td id="headerSide__buttons" class="b-article__headerSide m-article__headerSide__buttons">
 					<div class="b-controlButtons">
-							&#xa0;	<div class="b-controlButtons__item"><a href="index.htm" class="b-controlButtons__link">&#8592;&#xa0;Anterior</a></div>
-							&#xa0;	<div class="b-controlButtons__item"><a href="project_manager.htm" class="b-controlButtons__link">Siguiente&#xa0;&#8594;</a></div>
+							&#xa0;	<div class="b-controlButtons__item"><a href="bitt_documentation.htm" class="b-controlButtons__link">&#8592;&#xa0;Previous page</a></div>
+							&#xa0;	<div class="b-controlButtons__item"><a href="project_manager.htm" class="b-controlButtons__link">Next page&#xa0;&#8594;</a></div>
 							&#xa0;					</div>
 				</td>
 			</tr>
@@ -267,7 +269,7 @@ else if (1 == 1 && !is_touch_device())
 							.addClass("b-article__headerSide m-article__headerSide__buttons")
 							.append(
 								$("<div></div>").addClass("b-controlButtons")
-								.html("		&#xa0;	<div class=\"b-controlButtons__item\"><a href=\"index.htm\" class=\"b-controlButtons__link\">&#8592;&#xa0;Anterior</a></div>\r\n		&#xa0;	<div class=\"b-controlButtons__item\"><a href=\"project_manager.htm\" class=\"b-controlButtons__link\">Siguiente&#xa0;&#8594;</a></div>\r\n		&#xa0;")
+								.html("		&#xa0;	<div class=\"b-controlButtons__item\"><a href=\"bitt_documentation.htm\" class=\"b-controlButtons__link\">&#8592;&#xa0;Previous page</a></div>\r\n		&#xa0;	<div class=\"b-controlButtons__item\"><a href=\"project_manager.htm\" class=\"b-controlButtons__link\">Next page&#xa0;&#8594;</a></div>\r\n		&#xa0;")
 							)
 						)
 					)
@@ -300,7 +302,8 @@ else if (1 == 1 && !is_touch_device())
 							hideContentFooter();
 						//]]>
 						</script>
-						<div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><span style="font-size: 8pt;">&lt;TAREAS PENDIENTES&gt;: Configure el contenido del pie de página a través del menú de Dr.Explain <strong>Configuración-&gt;Configuración del proyecto-&gt;Exportación a HTML (CHM)-&gt;Configurar la plantilla HTML (CHM) y presentación</strong></span></div>
+						<div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+&#160;</div>
 					</td>
 				</tr>
 			</table>
@@ -311,14 +314,16 @@ else if (1 == 1 && !is_touch_device())
 </div><!-- /pageLayout -->
 <div id="hiddenContent" class="hiddenContent">
 	<noscript>
-	<div>To properly display this page you need a browser with JavaScript support.</div>
-	</noscript>
-				<div class="description_on_page"><div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="ic"><h1><strong>Pipeline</strong></h1></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;">Here you can learn the basic tools to work with the pipeline.</div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;">How to open, create, and work with assets, shots, tasks, caches.</div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;">&#160;</div>
-</div>					<div class="menu_on_page">
-		<h2>Contenido Pipeline</h2>
+	<div class="noscript"><a href="bitt_documentation.htm" title="Bitt Documentation">Bitt Documentation</a><div><a href="pipeline.htm" title="Pipeline">Pipeline</a><div><a href="project_manager.htm" title="Project Manager">Project Manager</a><div><a href="_menu_bar.htm" title=" menu bar"> menu bar</a></div><div><a href="right_click_menu.htm" title="Right Click Menu">Right Click Menu</a></div></div><div><a href="cache_manager.htm" title="Cache Manager">Cache Manager</a></div><div><a href="animation_to_lighting_workflow.htm" title="Animation To Lighting Workflow">Animation To Lighting Workflow</a><div><a href="export_animation_data.htm" title="Export Animation Data">Export Animation Data</a></div><div><a href="import_animation_data.htm" title="Import Animation Data">Import Animation Data</a></div></div></div><div><a href="general_tools.htm" title="General Tools">General Tools</a><div><a href="multi_attribute.htm" title="Multi-Attribute">Multi-Attribute</a><div><a href="apply_a_new_value_to_group_of_nodes.htm" title="Apply a New Value to group of nodes">Apply a New Value to group of nodes</a></div><div><a href="connect_attributes_between_lists_of_nodes.htm" title="Connect attributes between lists of nodes">Connect attributes between lists of nodes</a></div></div><div><a href="rename_tools.htm" title="Rename Tools">Rename Tools</a></div><div><a href="references.htm" title="References">References</a></div></div><div><a href="lighting.htm" title="Lighting">Lighting</a><div><a href="tools.htm" title="Tools">Tools</a><div><a href="lighting_helper.htm" title="Lighting Helper">Lighting Helper</a><div><a href="objects_tab.htm" title="Objects Tab">Objects Tab</a></div><div><a href="objects_quality.htm" title="Objects Quality">Objects Quality</a></div><div><a href="toolbar.htm" title="toolBar">toolBar</a></div></div></div></div></div>	</noscript>
+				<div class="description_on_page"><div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="ic"><h1><strong>Pipeline</strong></h1></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+Here you can learn the basic tools to work with the pipeline.</div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+How to open, create, and work with assets, shots, tasks, caches.</div>
+</div>
+					<div class="menu_on_page">
+			<h2>The contents of Pipeline</h2>
 		<div class="m-workZone_seeAlso_itemContent">
 	<span class="b-tree__spacer">
 		<span class="b-tree__i_article">
@@ -339,12 +344,9 @@ else if (1 == 1 && !is_touch_device())
 			<span class="b-tree__i_article_inner"></span>
 		</span>
 	</span>
-	<span class="b-tree__itemText"><a class="b-breadCrumbs__link" href="create_lighting_scene.htm">Create Lighting Scene</a></span>
+	<span class="b-tree__itemText"><a class="b-breadCrumbs__link" href="animation_to_lighting_workflow.htm">Animation To Lighting Workflow</a></span>
 </div>	</div>
 								
-											<h6 class="b-article__generatorCopyright">
-					<a href="http://www.drexplain.es" class="b-link b-article__generatorCopyrightLink">El manual de usuario se hace con Dr.Explain</a>
-				</h6>
-				<br /><b>Unregistered version</b></div>
+							</div>
 </body>
 </html>

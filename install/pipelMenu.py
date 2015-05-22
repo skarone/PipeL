@@ -34,7 +34,7 @@ mc.setParent('..', menu = True )
 #TOOLS
 mc.menuItem( l = 'General', sm = True, to = True )
 mc.menuItem( l = 'File Manager', c = "import pipe.mayaFile.mayaFilePropertiesUI as mflProp;reload(mflProp);mflProp.main()" )
-mc.menuItem( l = 'Save', c = "import pipe.mayaFile.mayaFile as mfl;reload(mfl);curFile = mfl.currentFile();curFile.newVersion();curFile.save()" )
+mc.menuItem( l = 'Save', c = "import pipe.mayaFile.savePerArea as sv;reload(sv);sv.customSavePerArea()" )
 mc.menuItem( l = 'Curve Scatter', c = "import general.curveScatter.curveScatterUi as crvScatterUi;reload( crvScatterUi );crvScatterUi.main()" )
 mc.menuItem( l = 'Multi-Attribute', c = "import general.multiAttribute.multiAttributeUi as maUI; reload( maUI ); maUI.main()" )
 mc.menuItem( l = 'Select Duplicated Names', c = "import general.utils.utils as gutils;reload( gutils );gutils.selectDuplicatedNamesNodes()" )

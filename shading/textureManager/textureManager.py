@@ -1,5 +1,8 @@
 import general.mayaNode.mayaNode as mn
 import pipe.textureFile.textureFile as tfl
+import pipe.settings.settings as sti
+reload( sti )
+
 
 class Manager(object):
 	"""
@@ -162,3 +165,16 @@ class Manager(object):
 				mid.makeTx()
 			toPng = f.toMid()
 			n.attr( attr ).v = toPng.path
+
+	def texturesNotInServerPath(self):
+		"""return all the textures that are not pointing to serverPath"""
+		serverPath = sti.Settings().General[ "serverpath" ]
+		texturesNotInServer = []
+		for n in self.textures:
+			if n.type == 'aiImage':
+				attr = "filename"
+			else:
+				attr = "ftn"
+			if not n.attr( attr ).v.startswith( serverPath ):
+				texturesNotInServer.append( n )
+		return texturesNotInServer

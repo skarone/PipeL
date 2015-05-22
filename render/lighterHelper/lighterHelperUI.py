@@ -396,8 +396,19 @@ class LighterHelperUI(base,fom):
 		if not sels:
 			rlay.overridedShader = shader
 		else:
-			sels.select()
-			mc.hyperShade( a = shader.name )
+			for s in sels:
+				try:
+					sha = s.shader.a.surfaceShader.input.node
+					sha.a.aiEnableMatte.overrided = 1
+					sha.a.aiEnableMatte.v = 1
+					sha.a.aiMatteColor.overrided = 1
+					shader.a.outColor >> sha.a.aiMatteColor
+					sha.a.aiMatteColorA.overrided = 1
+					sha.a.aiMatteColorA.v = 1
+				except:
+					continue
+			#sels.select()
+			#mc.hyperShade( a = shader.name )
 		self.applyShaderToHair( shader, sels )
 	
 	def applyShaderToHair(self,shader, sels):

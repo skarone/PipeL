@@ -13,7 +13,7 @@ def swapShot( projName, seqName, shotName ):
 	new      = []
 	removed = []
 	refs = mc.ls( '*_RIG*', typ = 'reference' )
-	for c in sh.caches[ 'anim' ]:
+	for c in getCachesFromScene( projName, seqName, shotName ):
 		sel = mc.ls( c.name + ':*', dag = True, ni = True, typ = ['mesh','nurbsCurve'] )
 		if sel:#REPLACE
 			mc.select(sel[0])
@@ -31,6 +31,10 @@ def swapShot( projName, seqName, shotName ):
 		print 'REMOVED', r
 		rf.removeSelected()
 		removed.append( r )
+		try:
+			mc.delete( r + '*' )
+		except:
+			pass
 		
 	print 'CACHES ADDED'
 	print new
@@ -61,4 +65,14 @@ def swapShot( projName, seqName, shotName ):
 	mc.sets( groupsToAdd, include = set )
 
 
+def getCachesFromScene( projName, seqName, shotName ):
+	proj = prj.Project( projName )
+	seq  = proj.sequence( seqName )
+	sh = seq.shot( shotName )
 
+	finalCaches = []
+	for ck in sh.cachesPriorities:
+		for c in sh.caches[ck]:
+			if not any( c.name == ca.name for ca in finalCaches ):
+				finalCaches.append( c )
+	return finalCaches

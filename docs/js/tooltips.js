@@ -1,4 +1,4 @@
-bTooltipShouldBeMade = false;
+bTooltipShouldBeMade = true;
 var constShowTimeout = 300;
 var constHideTimeout = 750;
 var ShowNum = 0;
@@ -218,6 +218,7 @@ function TooltipHide(objid)
 function HideAndMove(objid)
 {
 	TooltipHideTimed(objid, 0);
+	window.open("#id_" + objid, "_self");
 }
 
 function getBrowserType()
@@ -254,22 +255,22 @@ $(document).ready(function()
 	if (!wndImgs || wndImgs.length == 0) 
 		return;
 		
-	wndImgs.prop("alt", "");
+	wndImgs.removeProp("alt");
 
 	$("area").each(function(){
-		var curId = $(this).prop("href").substring($(this).prop("href").indexOf("#") + 1, $(this).prop("href").length);
-		$(this).prop("id", "area_" + curId);
+		var curId = lastElement($(this).prop("href").split("_"));
+		$(this).addClass("area_id_" + curId);
 	});
 
 	$(".de_ctrl").each(function(){
 		var $anchors = $(this).find("a");
 		if (!$anchors || $anchors.length < 2)
 			return;
-		var curId = $($anchors[0]).prop("id");
+		var curId = $($anchors[1]).prop("id");
 		if (curId == "top")
 			return;
 		var $curCtrlDiv = $(this);
-		$("area[id=\"area_" + curId + "\"]").each(function(){
+		$("area.area_" + curId).each(function(){
 			$(this).mouseover(function(event){TooltipShow(event, curId);});
 			$(this).mouseout(function(event){TooltipHide(curId);});
 			$(this).click(function(event){HideAndMove(curId);});

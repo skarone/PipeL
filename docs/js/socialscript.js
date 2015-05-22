@@ -1,5 +1,4 @@
 
-	
 	var DREXPLAIN_SOCIALSCRIPT =  [	 ];
 		 /*
 			"//apis.google.com/js/plusone.js"

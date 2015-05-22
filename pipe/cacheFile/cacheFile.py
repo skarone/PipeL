@@ -19,6 +19,8 @@ cac = cfl.CacheFile( r'P:\Pony_Halloween_Fantasmas\Maya\Sequences\Terror\Shots\s
 cac.importForAsset2( ass.Asset( 'Chico_01', prj.Project( 'Pony_Halloween_Fantasmas' ) ), customNamespace = cac.name )
 
 """
+USE_EXOCORTEX = True
+
 def createBlendshape( replace = [ 'Rig', 'Final' ]):
 	"""create blendshape between RIG and FINAL
 	FINAL allways is the render asset"""
@@ -52,6 +54,13 @@ class CacheFile(fl.File):
 		"""export cache for selected file"""
 		if self.exists:
 			super(CacheFile, self).newVersion()
+		if not USE_EXOCORTEX: #USE STANDARD ALEMBIC
+			self._exportAlembic( fr, asset, useDefaultName, steps )
+		else: #USE EXOCORTEX
+			self._exportExocortex( fr, asset, useDefaultName, steps )
+
+	def _exportAlembic(self, fr = None, asset = None, useDefaultName = False, steps = 1 ):
+		"""export default alembic"""
 		cmd = '-f ' + self.path + ' -uv -ro -wv '
 		if self.nodes:
 			if asset:
@@ -72,6 +81,21 @@ class CacheFile(fl.File):
 		mc.AbcExport( j = cmd )
 		mc.refresh( su = False )
 
+	def _exportExocortex(self, fr = None, asset = None, useDefaultName = False, steps = 1):
+		"""export with Exocortex"""
+		if asset:
+			objs = [o.parent for o in mn.ls( self.nodes[0].name[:self.nodes[0].name.index(':')] + ':*', dag = True, ni = True, typ = ['mesh','nurbsCurve'] )]
+			objToExport = ','.join( [o.name for o in objs ] )
+		else:
+			objToExport = ",".join( mc.ls( sl = True ) )
+		start = mc.playbackOptions(q = True, min = True )
+		end   = mc.playbackOptions(q = True, max = True )
+		cmd = 'in='+str(start)+';out='+str(end)+';step='+str( steps )+';substep=1;filename=' + self.path + ';objects=' + objToExport + ';ogawa=0;purepointcache=0;uvs=0;facesets=0;useInitShadGrp=0;normals=1;dynamictopology=0;globalspace=0;withouthierarchy=0;transformcache=0'
+		print cmd
+		mc.refresh( su = True )
+		mc.ExocortexAlembic_export( j = cmd )
+		mc.refresh( su = False )
+
 	def exportAsset(self, asset, importFinal = False, useDefaultName = False, steps = 1 ):
 		"""export all the geometry for the selected asset"""
 		#get asset..
@@ -85,13 +109,36 @@ class CacheFile(fl.File):
 
 	def imp( self, **args ):
 		"""import cache to scene"""
-		cmd = '"' + self.path + '",'
+		if not USE_EXOCORTEX: #USE STANDARD ALEMBIC
+			cmd = '"' + self.path + '",'
+		else:
+			cmd = ''
 		for a in args.keys():
 			val = args[a]
 			if isinstance(val, str):
 				cmd += a + '="' + args[a] + '",'
 			else:
 				cmd += a + '=' + str( args[a] ) + ','
+		if not USE_EXOCORTEX: #USE STANDARD ALEMBIC
+			result = self._impAlembic( cmd )
+		else: #USE EXOCORTEX
+			result = self._impExocortex( cmd )
+		return result
+
+	def _impExocortex(self, cmd ):
+		"""docstring for _impExocortex"""
+		if not cmd: #just Import path
+			cmd = "filename=" + self.path + ";normals=1" + ";uvs=0" + ";facesets=0;attachToExisting=0;overXforms=1;overDforms=1"
+		else:# attach :)
+			cmd = "filename=" + self.path + ";normals=1" + ";uvs=0" + ";facesets=0;attachToExisting=1;overXforms=1;overDforms=1"
+		try:
+			result = mc.ExocortexAlembic_import( j = cmd )
+			return result
+		except:
+			return 'Imported'
+
+	def _impAlembic(self, cmd ):
+		"""docstring for _impAlembic"""
 		finalCmd = "mc.AbcImport(" + cmd + ")"
 		print finalCmd
 		abcNode = mn.Node( eval( "mc.AbcImport(" + cmd + ")" ) )
@@ -120,32 +167,29 @@ class CacheFile(fl.File):
 			#filter meshes
 		mshs.select()
 		abcNode = self.imp( mode = 'import', connect = "/", createIfNotFound = True )
-		"""
-		mn.Nodes( mn.ls( mn.ls(sl = True)[0].namespace.name[1:] + ':*', typ = ['mesh'] )).select()
-		#reconnect via polyTransfer so we can use the original uvs from shape
-		attrs = abcNode.listAttr( c = True, m = True, ro = True, hd = True )
-		for a in attrs:
-			out = a.output
-			if not out:
-				continue
-			for o in out:
-				midMesh = mn.createNode( 'mesh' )
-				midMesh.a.intermediateObject.v = 1
-				polyTrans = mn.createNode( 'polyTransfer' )
-				polyTrans.a.vertices.v = 1
-				polyTrans.a.uvSets.v = 0
-				a >> polyTrans.a.otherPoly
-				midMesh.a.outMesh >> polyTrans.a.inputPolymesh
-				o.node.a.outMesh >> midMesh.a.inMesh
-				polyTrans.a.output >> o
-		nodes[0]()
-		rf.reloadSelected()
-		"""
+		if USE_EXOCORTEX:
+			mshsAttrDict = {}
+			for m in mshs:
+				his = [a for a in mn.listHistory( m, f = True ) if a.type == 'mesh']
+				if len(his) == 2:
+					attrs = ['castsShadows', 'receiveShadows', 'motionBlur','primaryVisibility','smoothShading','visibleInReflections','visibleInRefractions','doubleSided','opposite','aiSelfShadows','aiOpaque','aiVisibleInDiffuse','aiVisibleInGlossy','aiMatte','aiSubdivType','aiSubdivIterations','aiSubdivAdaptiveMetric','aiSubdivUvSmoothing','aiSubdivSmoothDerivs','aiDispHeight','aiDispZeroValue','aiDispAutobump','aiStepSize']
+					for a in attrs:
+						if his[0].attr(a).exists:
+							his[1].attr( a ).v = his[0].attr( a ).v
+
 
 	def replace(self):
 		"""docstring for replace"""
-		mn.Nodes( mn.ls( mn.ls(sl = True)[0].namespace.name[1:] + ':*', typ = ['mesh'] )).select()
-		self.imp( mode = 'import', connect = "/", createIfNotFound = True )
+		if not USE_EXOCORTEX:
+			mn.Nodes( mn.ls( mn.ls(sl = True)[0].namespace.name[1:] + ':*', typ = ['mesh'] )).select()
+			self.imp( mode = 'import', connect = "/", createIfNotFound = True )
+		else:
+			sel = mn.ls( sl = True )
+			his = mn.listHistory(sel[0])
+			if his:
+				caFileNode = [n for n in his if n.type == 'ExocortexAlembicFile']
+				if caFileNode:
+					caFileNode[0].a.fileName.v = self.path
 
 	def replace2(self, alembicNodeName):
 		"""replace alembic Node with this alembic"""

@@ -54,8 +54,16 @@ def transformsWithoutFreeze():
 
 def _removeCamerasFromArray(nodes):
 	"""remove camera for array"""
-	cameras = [ 'front','persp', 'side', 'top' ]
-	return mn.Nodes( [ a for a in nodes if not a.name in cameras ] )
+	nods = []
+	for n in nodes:
+		sha = n.shape
+		if not sha: #transform without shape
+			nods.append( n )
+			continue
+		else:
+			if not sha.type == 'camera':
+				nods.append( n )
+	return mn.Nodes( nods )
 
 def isAllInOneGroup():
 	"""return true if there is all in the same group"""
@@ -88,7 +96,6 @@ def withFace():
 		cur = mfl.currentFile()
 		fil = fl.File( 'D:/conCaras/' + cur.name + '.txt' )
 		fil.write( 'mierda' )
-
 
 #####FIXES
 def groupAll():

@@ -3,7 +3,7 @@
 <!--[if IE 7 ]> <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" class="ie ie7 no-js"> <![endif]-->
 <!--[if IE 8 ]> <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" class="ie ie8 no-js"> <![endif]-->
 <!--[if IE 9 ]> <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" class="ie ie9 no-js"> <![endif]-->
-<!--[if (gt IE 9)|!(IE)]><!--><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><!--<![endif]-->
+<!---[if (gt IE 9)|!(IE)]><!--><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><!--<![endif]--><!--class="no-ie no-js"-->
 <head>
 
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
@@ -14,13 +14,12 @@
 		drex_file_name = "cache_manager.htm";
 	</script>
 	
-			<title>Cache Manager</title>
+				<title>Cache Manager</title>
 	
 	<link rel="stylesheet" type="text/css" href="css/all.css" media="all" />
 	<link rel="stylesheet" href="de_style.css" type="text/css" media="all" />
 	<link rel="stylesheet" href="custom.css" type="text/css" media="all" />
 	
-	<script type="text/javascript" src="js/xregexp.js"></script>
 	<script type="text/javascript" src="js/all.js"></script>
 	<script type="text/javascript" src="js/drexplain.data.index.js"></script>
 	<script type="text/javascript" src="js/all2.js"></script>
@@ -72,7 +71,8 @@ else if (1 == 1 && !is_touch_device())
 			<table class="b-pageContent__layout">
 				<tr class="b-pageContent__row m-pageContent__row__header" id="pageContentHeader">
 					<td class="b-pageContent__side m-pageContent__side__header">
-						<div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><span style="font-size: 8pt;"><strong>Production Help</strong></span></div>
+						<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<strong>Bitt Documentation</strong></div>
 					</td>
 				</tr>
 				<tr>
@@ -113,17 +113,17 @@ else if (1 == 1 && !is_touch_device())
 
 							<div class="b-tabs__selectorItem m-tabs__selectorItem__selected m-tabs__selectorItem__first" id="tabSelector_menu">
 								<span class="b-tabs__selectorItemIcon b-interfaceIcon m-interfaceIcon__menu"></span>
-								<span class="b-tabs__selectorContent">Men&#x00FA;</span>
+								<span class="b-tabs__selectorContent">Menu</span>
 							</div>
 	
 							<div class="b-tabs__selectorItem m-tabs__selectorItem__unselected" id="tabSelector_index">
 							 	<span class="b-tabs__selectorItemIcon b-interfaceIcon m-interfaceIcon__index"></span>
-							 	<span class="b-tabs__selectorContent">&#x00CD;ndice</span>
+							 	<span class="b-tabs__selectorContent">Index</span>
 							 </div>
 	
 							<div class="b-tabs__selectorItem m-tabs__selectorItem__unselected" id="tabSelector_search">
 								<span class="b-tabs__selectorItemIcon b-interfaceIcon m-interfaceIcon__search"></span>
-								<span class="b-tabs__selectorContent">B&#x00FA;squeda</span>
+								<span class="b-tabs__selectorContent">Search</span>
 							</div>
 						</div><!-- /b-tabs__selectorItems -->
 
@@ -153,7 +153,7 @@ else if (1 == 1 && !is_touch_device())
 			<tr>
 				<td class="b-search__side m-search__side__input">
 					<div class="b-search__gap">
-						<label id="tabs_searchInput_label" for="tabs_searchInput" class="b-search__labelPlaceholder">B&#x00FA;squeda</label>
+						<label id="tabs_searchInput_label" for="tabs_searchInput" class="b-search__labelPlaceholder">Search</label>
 						<input id="tabs_searchInput" type="text" value="" class="b-search__inputText" />
 					</div>
 				</td>
@@ -162,7 +162,7 @@ else if (1 == 1 && !is_touch_device())
 						<span class="b-button__wrapper">
 							<span class="b-button__text"></span>
 						</span>
-						<input type="submit" class="b-button__submit" value="B&#x00FA;squeda" id="tabs_searchSubmit" />
+						<input type="submit" class="b-button__submit" value="Search" id="tabs_searchSubmit" />
 					</span>
 				</td>
 			</tr>
@@ -209,7 +209,7 @@ else if (1 == 1 && !is_touch_device())
 				<td class="b-search__side m-search__side__input">
 					<div class="b-search__gap">
 						<span class="b-interfaceIcon m-interfaceIcon__search m-interfaceIcon__search__input b-search__inputTextIcon"></span>
-						<label id="workZone_searchInput_label" for="workZone_searchInput" class="b-search__labelPlaceholder">B&#x00FA;squeda</label>
+						<label id="workZone_searchInput_label" for="workZone_searchInput" class="b-search__labelPlaceholder">Search</label>
 						<input id="workZone_searchInput" type="text" value="" class="b-search__inputText" />
 					</div>
 				</td>
@@ -218,7 +218,7 @@ else if (1 == 1 && !is_touch_device())
 						<span class="b-button__wrapper">
 							<span class="b-button__text"></span>
 						</span>
-						<input type="submit" class="b-button__submit" value="B&#x00FA;squeda" id="workZone_searchSubmit" />
+						<input type="submit" class="b-button__submit" value="Search" id="workZone_searchSubmit" />
 					</span>
 				</td>
 			</tr>
@@ -233,15 +233,17 @@ else if (1 == 1 && !is_touch_device())
 			<tr>
 				<td id="headerSide__nav" class="b-article__headerSide m-article__headerSide__nav">
 					<div id="headerSide__nav__breadCrumbs" class="b-breadCrumbs">
-						<ul class="b-breadCrumbs__items"><li class="b-breadCrumbs__item"><a href="pipeline.htm" class="b-breadCrumbs__link">Pipeline</a></li>
+						<ul class="b-breadCrumbs__items"><li class="b-breadCrumbs__item"><a href="bitt_documentation.htm" class="b-breadCrumbs__link">Bitt Documentation</a></li>
+
+<li class="b-breadCrumbs__item"><a href="pipeline.htm" class="b-breadCrumbs__link">Pipeline</a></li>
 
 <li class="b-breadCrumbs__item">Cache Manager</li>
 </ul>					</div>
 				</td>
 				<td id="headerSide__buttons" class="b-article__headerSide m-article__headerSide__buttons">
 					<div class="b-controlButtons">
-							&#xa0;	<div class="b-controlButtons__item"><a href="asset_right_click.htm" class="b-controlButtons__link">&#8592;&#xa0;Anterior</a></div>
-							&#xa0;	<div class="b-controlButtons__item"><a href="create_lighting_scene.htm" class="b-controlButtons__link">Siguiente&#xa0;&#8594;</a></div>
+							&#xa0;	<div class="b-controlButtons__item"><a href="right_click_menu.htm" class="b-controlButtons__link">&#8592;&#xa0;Previous page</a></div>
+							&#xa0;	<div class="b-controlButtons__item"><a href="animation_to_lighting_workflow.htm" class="b-controlButtons__link">Next page&#xa0;&#8594;</a></div>
 							&#xa0;					</div>
 				</td>
 			</tr>
@@ -269,7 +271,7 @@ else if (1 == 1 && !is_touch_device())
 							.addClass("b-article__headerSide m-article__headerSide__buttons")
 							.append(
 								$("<div></div>").addClass("b-controlButtons")
-								.html("		&#xa0;	<div class=\"b-controlButtons__item\"><a href=\"asset_right_click.htm\" class=\"b-controlButtons__link\">&#8592;&#xa0;Anterior</a></div>\r\n		&#xa0;	<div class=\"b-controlButtons__item\"><a href=\"create_lighting_scene.htm\" class=\"b-controlButtons__link\">Siguiente&#xa0;&#8594;</a></div>\r\n		&#xa0;")
+								.html("		&#xa0;	<div class=\"b-controlButtons__item\"><a href=\"right_click_menu.htm\" class=\"b-controlButtons__link\">&#8592;&#xa0;Previous page</a></div>\r\n		&#xa0;	<div class=\"b-controlButtons__item\"><a href=\"animation_to_lighting_workflow.htm\" class=\"b-controlButtons__link\">Next page&#xa0;&#8594;</a></div>\r\n		&#xa0;")
 							)
 						)
 					)
@@ -302,7 +304,8 @@ else if (1 == 1 && !is_touch_device())
 							hideContentFooter();
 						//]]>
 						</script>
-						<div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><span style="font-size: 8pt;">&lt;TAREAS PENDIENTES&gt;: Configure el contenido del pie de página a través del menú de Dr.Explain <strong>Configuración-&gt;Configuración del proyecto-&gt;Exportación a HTML (CHM)-&gt;Configurar la plantilla HTML (CHM) y presentación</strong></span></div>
+						<div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+&#160;</div>
 					</td>
 				</tr>
 			</table>
@@ -313,133 +316,267 @@ else if (1 == 1 && !is_touch_device())
 </div><!-- /pageLayout -->
 <div id="hiddenContent" class="hiddenContent">
 	<noscript>
-	<div>To properly display this page you need a browser with JavaScript support.</div>
-	</noscript>
-				<div class="description_on_page"><div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="ic"><h1><strong>Cache Manager</strong></h1></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;">The Cache Manager is the main tool to export and import, caches, cameras, and sets from the animation scene or any other scene.</div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;">
-<map name="controlmap3ca13905_0c86_457b_b53e_ba6836163c60" id="controlmap3ca13905_0c86_457b_b53e_ba6836163c60">
-<area shape="rect" alt="" href="#id_1" coords="831,7,859,35"  />
-<area shape="rect" alt="" href="#id_2" coords="235,44,263,72"  />
-<area shape="rect" alt="" href="#id_3" coords="831,77,859,105"  />
-<area shape="rect" alt="" href="#id_4" coords="235,171,263,199"  />
-<area shape="rect" alt="" href="#id_5" coords="831,147,859,175"  />
-<area shape="rect" alt="" href="#id_6" coords="235,109,263,137"  />
-<area shape="rect" alt="" href="#id_7" coords="831,217,859,245"  />
-<area shape="rect" alt="" href="#id_8" coords="831,287,859,315"  />
-<area shape="rect" alt="" href="#id_9" coords="235,219,263,247"  />
-<area shape="rect" alt="" href="#id_10" coords="831,358,859,386"  />
-<area shape="rect" alt="" href="#id_11" coords="235,278,263,306"  />
-<area shape="rect" alt="" href="#id_12" coords="235,336,263,364"  />
-<area shape="rect" alt="" href="#id_13" coords="831,428,859,456"  />
-<area shape="rect" alt="" href="#id_14" coords="235,395,263,423"  />
-<area shape="rect" alt="" href="#id_15" coords="235,453,263,481"  />
-<area shape="rect" alt="" href="#id_16" coords="831,498,859,526"  />
-<area shape="rect" alt="" href="#id_17" coords="235,512,263,540"  />
-<area shape="rect" alt="" href="#id_18" coords="833,563,861,591"  />
-<area shape="rect" alt="" href="#id_19" coords="235,570,263,598"  />
-<area shape="rect" alt="" href="#id_20" coords="235,629,263,657"  />
-<area shape="rect" alt="" href="#id_21" coords="831,638,859,666"  />
-<area shape="rect" alt="" href="#id_22" coords="831,709,859,737"  />
-<area shape="rect" alt="" href="#id_23" coords="235,688,263,716"  />
-</map><img usemap="#controlmap3ca13905_0c86_457b_b53e_ba6836163c60"  alt="Cache Manager" style="border: solid 0px;  " width="1171" height="748" class="de_wndimg de_780D01ADE8" src="drex_cache_manager_screen.png"/></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_1"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="1" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_1_3.png"/></a><div class="ic"><h2><strong>Project Selector</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="1. Project Selector" style="border: solid 0px;  " width="202" height="30" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_1.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Select the project you want to work</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_2"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="2" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_2_3.png"/></a><div class="ic"><h2><strong>Casilla de verificación Copy To Server</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="2. Casilla de verificaci&#x00F3;n Copy To Server" style="border: solid 0px;  " width="176" height="27" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_2.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">This will copy the generated cache or set to the server( <span class="de_8875473D98">USE ONLY IF YOU WORK IN LOCAL!</span> )</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_3"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="3" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_3_3.png"/></a><div class="ic"><h2><strong>Sequence Selector</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="3. Sequence Selector" style="border: solid 0px;  " width="202" height="30" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_3.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Select the sequence you want to work</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_4"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="4" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_4_3.png"/></a><div class="ic"><h2><strong>Tab Sets</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="4. Tab Sets" style="border: solid 0px;  " width="57" height="51" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_4.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Change to tab sets, to import/export the set from the scene</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_5"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="5" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_5_3.png"/></a><div class="ic"><h2><strong>Shot Selector</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="5. Shot Selector" style="border: solid 0px;  " width="202" height="30" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_5.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Select the shot you want to work</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_6"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="6" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_6_3.png"/></a><div class="ic"><h2><strong>Export Selected Camera</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="6. Export Selected Camera" style="border: solid 0px;  " width="200" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_6.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Select the camera from scene and export to the selected shot pool</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_7"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="7" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_7_2.png"/></a><div class="ic"><h2><strong>Copy Asset to Shot Folder Before reference/import</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="7. Copy Asset to Shot Folder Before reference/import" style="border: solid 0px;  " width="175" height="27" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_7.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Copy the asset to the shots/assets folder before import/reference to the scene</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_8"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="8" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_8_2.png"/></a><div class="ic"><h2><strong>Refresh</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="8. Refresh" style="border: solid 0px;  " width="40" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_8.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Refresh lists</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_9"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="9" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_9_2.png"/></a><div class="ic"><h2><strong>Tab Caches</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="9. Tab Caches" style="border: solid 0px;  " width="73" height="51" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_9.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Select to work with the caches in the shot or export</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_10"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="10" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_10_2.png"/></a><div class="ic"><h2><strong>Reference Camera And Time Settings</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="10. Reference Camera And Time Settings" style="border: solid 0px;  " width="199" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_10.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Reference the camera from the selected Pool Shot</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_11"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="11" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_11_2.png"/></a><div class="ic"><h2><strong>Export Cache For Selected Geometry</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="11. Export Cache For Selected Geometry" style="border: solid 0px;  " width="377" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_11.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Export selected geometry cache to any where you want</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_12"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="12" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_12.png"/></a><div class="ic"><h2><strong>Export Cache For Selected Asset</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="12. Export Cache For Selected Asset" style="border: solid 0px;  " width="178" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_12.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Export the selected asset cache based on selection</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_13"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="13" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_13.png"/></a><div class="ic"><h2><strong>Steps for export Alembic</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="13. Steps for export Alembic" style="border: solid 0px;  " width="62" height="30" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_13.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Steps of the alembic to export</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_14"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="14" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_14.png"/></a><div class="ic"><h2><strong>Import FINAL to Export</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="14. Import FINAL to Export" style="border: solid 0px;  " width="190" height="27" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_14.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">&#160;</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_15"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="15" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_15.png"/></a><div class="ic"><h2><strong>Caches From Anim</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="15. Caches From Anim" style="border: solid 0px;  " width="61" height="51" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_15.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">See caches from the Anim Pool</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_16"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="16" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_16.png"/></a><div class="ic"><h2><strong>Import instead of reference asset</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="16. Import instead of reference asset" style="border: solid 0px;  " width="189" height="27" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_16.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Import the asset with the cache instead of reference it</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_17"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="17" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_17.png"/></a><div class="ic"><h2><strong>Caches From SkinFix</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="17. Caches From SkinFix" style="border: solid 0px;  " width="69" height="51" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_17.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">See caches from the SkinFix Pool</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_18"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="18" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_18.png"/></a><div class="ic"><h2><strong>Area for import/Reference</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="18. Area for import/Reference" style="border: solid 0px;  " width="124" height="254" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_18.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Select the area of the asset you want to connect the selected cache</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_19"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="19" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_19.png"/></a><div class="ic"><h2><strong>Caches From Sim</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="19. Caches From Sim" style="border: solid 0px;  " width="52" height="51" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_19.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">See caches from the Sim Pool</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_20"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="20" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_20.png"/></a><div class="ic"><h2><strong>Caches List</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="20. Caches List" style="border: solid 0px;  " width="215" height="209" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_20.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">List of the available caches in the selected Pool</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_21"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="21" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_21.png"/></a><div class="ic"><h2><strong>Replace Cache</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="21. Replace Cache" style="border: solid 0px;  " width="377" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_21.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Select one geometry of the asset in maya, and choose from UI the cache to use for the replace</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_22"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="22" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_22.png"/></a><div class="ic"><h2><strong>Load Selected</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="22. Load Selected" style="border: solid 0px;  " width="199" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_22.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Load selected cache to scene</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;"><div class="de_ctrl"><table><tr><td><a class="anchor" id="id_23"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px; text-indent: 0px;"><a class="anchor" href="#top"><img  alt="23" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_23.png"/></a><div class="ic"><h2><strong>Load External</strong></h2></div></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;"><img  alt="23. Load External" style="border: solid 0px;  " width="200" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_23.png"/></div>
-<div class="p" style="text-align: left; direction: ltr; margin-left: 50px; text-indent: 0px;">Load external cache to scene</div>
-</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Arriba</a></div></td></tr></table></div></div>
-<div class="p" style="text-align: center; direction: ltr; margin-left: 0px; text-indent: 0px;">&#160;</div>
-</div>												
-											<h6 class="b-article__generatorCopyright">
-					<a href="http://www.drexplain.es" class="b-link b-article__generatorCopyrightLink">El manual de usuario se hace con Dr.Explain</a>
-				</h6>
-				<br /><b>Unregistered version</b></div>
+	<div class="noscript"><a href="bitt_documentation.htm" title="Bitt Documentation">Bitt Documentation</a><div><a href="pipeline.htm" title="Pipeline">Pipeline</a><div><a href="project_manager.htm" title="Project Manager">Project Manager</a><div><a href="_menu_bar.htm" title=" menu bar"> menu bar</a></div><div><a href="right_click_menu.htm" title="Right Click Menu">Right Click Menu</a></div></div><div><a href="cache_manager.htm" title="Cache Manager">Cache Manager</a></div><div><a href="animation_to_lighting_workflow.htm" title="Animation To Lighting Workflow">Animation To Lighting Workflow</a><div><a href="export_animation_data.htm" title="Export Animation Data">Export Animation Data</a></div><div><a href="import_animation_data.htm" title="Import Animation Data">Import Animation Data</a></div></div></div><div><a href="general_tools.htm" title="General Tools">General Tools</a><div><a href="multi_attribute.htm" title="Multi-Attribute">Multi-Attribute</a><div><a href="apply_a_new_value_to_group_of_nodes.htm" title="Apply a New Value to group of nodes">Apply a New Value to group of nodes</a></div><div><a href="connect_attributes_between_lists_of_nodes.htm" title="Connect attributes between lists of nodes">Connect attributes between lists of nodes</a></div></div><div><a href="rename_tools.htm" title="Rename Tools">Rename Tools</a></div><div><a href="references.htm" title="References">References</a></div></div><div><a href="lighting.htm" title="Lighting">Lighting</a><div><a href="tools.htm" title="Tools">Tools</a><div><a href="lighting_helper.htm" title="Lighting Helper">Lighting Helper</a><div><a href="objects_tab.htm" title="Objects Tab">Objects Tab</a></div><div><a href="objects_quality.htm" title="Objects Quality">Objects Quality</a></div><div><a href="toolbar.htm" title="toolBar">toolBar</a></div></div></div></div></div>	</noscript>
+				<div class="description_on_page"><div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="ic"><h1><strong>Cache Manager</strong></h1></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+
+<map name="controlmap2750d202_3908_4055_98ca_e289cfec3fa3" id="controlmap2750d202_3908_4055_98ca_e289cfec3fa3">
+<area shape="rect" alt="" href="#id_0910B8F8_1" coords="875,5,898,27"  />
+<area shape="rect" alt="" href="#id_0910B8F8_2" coords="877,66,899,88"  />
+<area shape="rect" alt="" href="#id_0910B8F8_4" coords="200,63,223,85"  />
+<area shape="rect" alt="" href="#id_0910B8F8_6" coords="877,188,899,211"  />
+<area shape="rect" alt="" href="#id_0910B8F8_8" coords="877,250,899,272"  />
+<area shape="rect" alt="" href="#id_0910B8F8_7" coords="200,172,223,195"  />
+<area shape="rect" alt="" href="#id_0910B8F8_9" coords="877,311,899,334"  />
+<area shape="rect" alt="" href="#id_0910B8F8_11" coords="877,372,899,394"  />
+<area shape="rect" alt="" href="#id_0910B8F8_12" coords="200,282,223,305"  />
+<area shape="rect" alt="" href="#id_0910B8F8_14" coords="877,434,899,456"  />
+<area shape="rect" alt="" href="#id_0910B8F8_13" coords="200,338,223,360"  />
+<area shape="rect" alt="" href="#id_0910B8F8_18" coords="877,494,899,517"  />
+<area shape="rect" alt="" href="#id_0910B8F8_22" coords="200,669,223,691"  />
+<area shape="rect" alt="" href="#id_0910B8F8_17" coords="200,503,223,526"  />
+<area shape="rect" alt="" href="#id_0910B8F8_16" coords="200,448,223,470"  />
+<area shape="rect" alt="" href="#id_0910B8F8_15" coords="200,393,223,415"  />
+<area shape="rect" alt="" href="#id_0910B8F8_19" coords="200,558,223,581"  />
+<area shape="rect" alt="" href="#id_0910B8F8_21" coords="200,613,223,636"  />
+<area shape="rect" alt="" href="#id_0910B8F8_20" coords="877,556,899,578"  />
+<area shape="rect" alt="" href="#id_0910B8F8_23" coords="877,617,899,640"  />
+<area shape="rect" alt="" href="#id_0910B8F8_10" coords="200,227,223,250"  />
+<area shape="rect" alt="" href="#id_0910B8F8_5" coords="200,117,223,139"  />
+<area shape="rect" alt="" href="#id_0910B8F8_25" coords="200,724,223,746"  />
+<area shape="rect" alt="" href="#id_0910B8F8_24" coords="877,678,899,701"  />
+<area shape="rect" alt="" href="#id_0910B8F8_27" coords="200,779,223,801"  />
+<area shape="rect" alt="" href="#id_0910B8F8_26" coords="877,740,899,762"  />
+<area shape="rect" alt="" href="#id_0910B8F8_28" coords="877,801,899,824"  />
+<area shape="rect" alt="" href="#id_0910B8F8_3" coords="877,127,899,150"  />
+</map><img usemap="#controlmap2750d202_3908_4055_98ca_e289cfec3fa3"  alt="Cache Manager" style="border: solid 0px;  " width="1123" height="833" class="de_wndimg de_780D01ADE8" src="drex_cache_manager_screen.png"/></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_1"></a><a class="anchor" id="id_1"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="1" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_1.png"/></a><div class="ic"><h2><strong>Project Selector</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="1. Project Selector" style="border: solid 0px;  " width="245" height="30" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_1.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+&#160;</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_2"></a><a class="anchor" id="id_2"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="2" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_2.png"/></a><div class="ic"><h2><strong>Sequence Selector</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="2. Sequence Selector" style="border: solid 0px;  " width="245" height="30" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_2.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+&#160;</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_3"></a><a class="anchor" id="id_3"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="3" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_3.png"/></a><div class="ic"><h2><strong>Shot Selector</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="3. Shot Selector" style="border: solid 0px;  " width="245" height="30" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_3.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+&#160;</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_4"></a><a class="anchor" id="id_4"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="4" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_4.png"/></a><div class="ic"><h2><strong>Copy To Server check</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="4. Copy To Server check" style="border: solid 0px;  " width="219" height="27" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_4.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+&#160;</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_5"></a><a class="anchor" id="id_5"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="5" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_5.png"/></a><div class="ic"><h2><strong>Sets tab</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="5. Sets tab" style="border: solid 0px;  " width="57" height="51" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_5.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+&#160;</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_6"></a><a class="anchor" id="id_6"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="6" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_6.png"/></a><div class="ic"><h2><strong>Use Shot Folder check</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="6. Use Shot Folder check" style="border: solid 0px;  " width="219" height="27" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_6.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+&#160;</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_7"></a><a class="anchor" id="id_7"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="7" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_7.png"/></a><div class="ic"><h2><strong>Export Selected Camera button</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="7. Export Selected Camera button" style="border: solid 0px;  " width="243" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_7.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+&#160;</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_8"></a><a class="anchor" id="id_8"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="8" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_8.png"/></a><div class="ic"><h2><strong>R button</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="8. R button" style="border: solid 0px;  " width="40" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_8.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+&#160;</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_9"></a><a class="anchor" id="id_9"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="9" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_9.png"/></a><div class="ic"><h2><strong>Reference Camera And Time Settings button</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="9. Reference Camera And Time Settings button" style="border: solid 0px;  " width="243" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_9.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+Reference Camera from Pool and Copy Frame Range and Fps</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_10"></a><a class="anchor" id="id_10"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="10" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_10.png"/></a><div class="ic"><h2><strong>Caches tab</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="10. Caches tab" style="border: solid 0px;  " width="73" height="51" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_10.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+See Caches in selected Shot</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_11"></a><a class="anchor" id="id_11"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="11" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_11.png"/></a><div class="ic"><h2><strong>Export Cache For Selected Geometry button</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="11. Export Cache For Selected Geometry button" style="border: solid 0px;  " width="464" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_11.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+Export Cache for selected geometry</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_12"></a><a class="anchor" id="id_12"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="12" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_12.png"/></a><div class="ic"><h2><strong>Export Cache For Selected Asset button</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="12. Export Cache For Selected Asset button" style="border: solid 0px;  " width="178" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_12.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+Export Cache for selected asset</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_13"></a><a class="anchor" id="id_13"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="13" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_13.png"/></a><div class="ic"><h2><strong>Import instead of reference it check</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="13. Import instead of reference it check" style="border: solid 0px;  " width="233" height="27" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_13.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+Instead of reference asset, import it</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_14"></a><a class="anchor" id="id_14"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="14" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_14.png"/></a><div class="ic"><h2><strong>Steps for export</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="14. Steps for export" style="border: solid 0px;  " width="62" height="30" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_14.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+&#160;</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_15"></a><a class="anchor" id="id_15"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="15" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_15.png"/></a><div class="ic"><h2><strong>SkinFix tab</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="15. SkinFix tab" style="border: solid 0px;  " width="69" height="51" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_15.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+&#160;</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_16"></a><a class="anchor" id="id_16"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="16" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_16.png"/></a><div class="ic"><h2><strong>Anim tab</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="16. Anim tab" style="border: solid 0px;  " width="61" height="51" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_16.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+Caches Exported From animation</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_17"></a><a class="anchor" id="id_17"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="17" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_17.png"/></a><div class="ic"><h2><strong>Pagetab list control</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="17. Pagetab list control" style="border: solid 0px;  " width="204" height="51" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_17.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+&#160;</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_18"></a><a class="anchor" id="id_18"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="18" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_18.png"/></a><div class="ic"><h2><strong>Use Exocortex check</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="18. Use Exocortex check" style="border: solid 0px;  " width="233" height="27" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_18.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+Use Exocortex Plugin instead of alembic to import cache</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_19"></a><a class="anchor" id="id_19"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="19" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_19.png"/></a><div class="ic"><h2><strong>Sim tab</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="19. Sim tab" style="border: solid 0px;  " width="52" height="51" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_19.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+&#160;</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_20"></a><a class="anchor" id="id_20"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="20" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_20.png"/></a><div class="ic"><h2><strong>Client area</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="20. Client area" style="border: solid 0px;  " width="160" height="183" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_20.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+Choose the area to import/reference the asset</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_21"></a><a class="anchor" id="id_21"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="21" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_21.png"/></a><div class="ic"><h2><strong>Vfx tab</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="21. Vfx tab" style="border: solid 0px;  " width="52" height="51" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_21.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+&#160;</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_22"></a><a class="anchor" id="id_22"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="22" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_22.png"/></a><div class="ic"><h2><strong>Caches area</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="22. Caches area" style="border: solid 0px;  " width="281" height="138" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_22.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+Available Caches</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_23"></a><a class="anchor" id="id_23"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="23" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_23.png"/></a><div class="ic"><h2><strong>Replace Cache button</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="23. Replace Cache button" style="border: solid 0px;  " width="464" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_23.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+Select one mesh of the asset in maya, and choose from UI the new alembic Node </div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_24"></a><a class="anchor" id="id_24"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="24" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_24.png"/></a><div class="ic"><h2><strong>Load Selected button</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="24. Load Selected button" style="border: solid 0px;  " width="243" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_24.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+Select the cache from the list and load selected</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_25"></a><a class="anchor" id="id_25"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="25" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_25.png"/></a><div class="ic"><h2><strong>Load External button</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="25. Load External button" style="border: solid 0px;  " width="243" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_25.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+Load External cache from file</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_26"></a><a class="anchor" id="id_26"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="26" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_26.png"/></a><div class="ic"><h2><strong>Create Lit Scene button</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="26. Create Lit Scene button" style="border: solid 0px;  " width="243" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_26.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+This will import all the available caches and sets, reference the camera and copy the frame range and fps</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_27"></a><a class="anchor" id="id_27"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="27" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_27.png"/></a><div class="ic"><h2><strong>Export Animation Scene button</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="27. Export Animation Scene button" style="border: solid 0px;  " width="243" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_27.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+This will export all the caches from Rig, sets from Shading and export the camera, if use Exocortex is On, shading will be also cache</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+<div class="p" style="text-align: center; direction: ltr; margin-left: 0px">
+<div class="de_ctrl"><table><tr><td><a class="anchor" id="id_0910B8F8_28"></a><a class="anchor" id="id_28"></a><div class="p" style="text-align: left; direction: ltr; margin-left: 0px">
+<a class="anchor" href="#top"><img  alt="28" style="border: solid 0px;  float: left; " width="40" height="40" class="de_ctrlbullet de_780D01ADE8" src="drex_bullet_28.png"/></a><div class="ic"><h2><strong>Swap Shot button</strong></h2></div></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+<img  alt="28. Swap Shot button" style="border: solid 0px;  " width="486" height="33" class="de_ctrlimg de_780D01ADE8" src="drex_cache_manager_control_28.png"/></div>
+<div class="p" style="text-align: left; direction: ltr; margin-left: 50px">
+Replace current shot for the selected one, replacing the cache paths, removing the current camera and referencing the one of the selected shot, removing the assets that not exists in the shot, and adding the new ones</div>
+</td></tr><tr class="topLinkRow" style="border-style:none"><td style="border-style:none; text-align: right;"><div style="text-align: right; font-size:8pt"><a href="#top">Top</a></div></td></tr></table></div></div>
+</div>
+												
+							</div>
 </body>
 </html>

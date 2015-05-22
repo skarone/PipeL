@@ -98,6 +98,8 @@ def playblastCurrentFile():
 	movFil = fl.File( fil.versionPath + fil.name + '_v' + str( fil.version ).zfill( 3 ) + '.mov' )
 	fil.newVersion();fil.save()
 	playblast( movFil )
+	if movFil.exists:
+		movFil.copy( fil.dirPath + fil.name + '.mov' )
 
 
 def getRenderCamera():

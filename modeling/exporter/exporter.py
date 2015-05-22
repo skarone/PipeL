@@ -183,7 +183,7 @@ class AssetExporter(object):
 		mc.delete( self.objects, ch = True )
 		mc.parent( self.objects, self.grp.name )
 		mc.makeIdentity( self.objects, apply=True,t=1,r=1,s=1,n=2)
-		self.lockObjects()
+		#self.lockObjects()
 
 	def lockObjects(self):
 		for o in self.objects:
@@ -230,12 +230,12 @@ class AssetExporter(object):
 		mc.select( self.grp.name )
 		#move referenced file to final position!
 		if referenced:
-			mc.file( self.asset.finalPath.path, type='mayaAscii', namespace=self.asset.name, exportAsReference=referenced, force = True)
+			mc.file( self.asset.shadingPath.path, type='mayaAscii', namespace=self.asset.name, exportAsReference=referenced, force = True)
 			self.grp = self.asset.name + ':' + self.grp.name
 		else:
-			mc.file( self.asset.finalPath.path, type='mayaAscii', es = True, force = True)
+			mc.file( self.asset.shadingPath.path, type='mayaAscii', es = True, force = True)
 		self.setCoordsToMainFromPivot()
-		shutil.copy( self.asset.finalPath.path, self.asset.modelPath.path )
+		shutil.copy( self.asset.shadingPath.path, self.asset.modelPath.path )
 
 	def saveCoordsForSet(self, setName):
 		"""save the coords of the asset in set.breakdown"""

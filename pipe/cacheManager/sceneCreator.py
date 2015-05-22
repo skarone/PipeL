@@ -14,7 +14,7 @@ reload(mn)
 import pipe.mayaFile.mayaFile as mfl
 
 
-def createLitScene( projectName, sequenceName, shotName, serverPath = 'P:/' ):
+def createLitScene( projectName, sequenceName, shotName, serverPath = 'P:/', useExocortex = False ):
 	mc.refresh( su = True )
 	proje = prj.Project( projectName, serverPath )
 	sho = sh.Shot( shotName, sq.Sequence( sequenceName, proje ) )
@@ -22,13 +22,13 @@ def createLitScene( projectName, sequenceName, shotName, serverPath = 'P:/' ):
 	shtCam = sho.poolCam
 	shtCam.reference()
 	#load Caches
-	caches = sho.caches
-	for s in caches.keys():
-		for n in caches[s]:
-			if '_' in n.name:
-				n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], proje ), 1, n.name, True, False, None )
-			else:
-				n.imp()
+	cfl.USE_EXOCORTEX = useExocortex
+	caches = getCachesFromScene( projectName, sequenceName, shotName )
+	for n in caches:
+		if '_' in n.name:
+			n.importForAsset( ass.Asset( n.name[:n.name.rindex( '_' )], proje ), 1, n.name, True, False, None )
+		else:
+			n.imp()
 	#load set
 	for n in sho.sets:
 		n.reference()
@@ -38,24 +38,53 @@ def createLitScene( projectName, sequenceName, shotName, serverPath = 'P:/' ):
 	mc.playbackOptions( min = tim[ 'min' ],ast = tim[ 'ast' ], max = tim[ 'max' ], aet = tim[ 'aet' ] )
 	mc.refresh( su = False )
 
-def exportAllFromAnim( projectName, sequenceName, shotName, serverPath = 'P:/' ):
+def getCachesFromScene( projName, seqName, shotName ):
+	proj = prj.Project( projName )
+	seq  = proj.sequence( seqName )
+	sh = seq.shot( shotName )
+
+	finalCaches = []
+	for ck in sh.cachesPriorities:
+		for c in sh.caches[ck]:
+			if not any( c.name == ca.name for ca in finalCaches ):
+				finalCaches.append( c )
+	return finalCaches
+
+def exportAllFromAnim( projectName, sequenceName, shotName, serverPath = 'P:/', useExocortex = False ):
 	"""docstring for exportAllFromAnim"""
 	proje = prj.Project( projectName, serverPath )
 	sho = sh.Shot( shotName, sq.Sequence( sequenceName, proje ) )
 	#Export Camera
 	cam = getCamera()
+	
 	if not len( cam ) == 1:
 		print 'There are more than one camera or no camera to export... so I cant know what camera to export, delete other cameras or create one to export'
 	else:
 		exportCamera( cam, sho )
-	#Export Rigs
-	rigs = getRigsInScene()
-	if rigs:
-		exportCaches( rigs, sho )
-	#Export Sets
-	sets = getSetsInScene()
-	if sets:
-		exportSets( sets, sho )
+	cfl.USE_EXOCORTEX = useExocortex
+	if not useExocortex:
+		#Export Rigs
+		rigs = getRigsInScene()
+		if rigs:
+			exportCaches( rigs, sho )
+		#Export Sets
+		sets = getSetsInScene()
+		if sets:
+			exportSets( sets, sho )
+	else:
+		toExport = getAssetsForExocortex( sho )
+		exportCaches( toExport, sho )
+
+def getAssetsForExocortex( sho ):
+	"""export all using exocortex"""
+	mc.namespace( set=':' )
+	refs = mc.namespaceInfo( lon = True )
+	toExport = []
+	for r in refs:
+			sel = mc.ls( r + ':*', typ = 'transform' )
+			if sel:
+				toExport.append( r )
+	return toExport
 
 def getSetsInScene():
 	"""docstring for getSetsInScene"""

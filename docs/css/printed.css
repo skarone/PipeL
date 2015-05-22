@@ -7,12 +7,3 @@ table.pagetable
 	border: 0px #ffffff none;
 	text-align: center;
 }
-div.de_ctrl
-{
-	width: 100%;
-}
-div.de_ctrl > table
-{
-	border-style: none;
-	width: 100%;
-}
