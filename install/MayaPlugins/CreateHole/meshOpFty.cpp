@@ -64,7 +64,7 @@ void meshOpFty::setMeshOperation( MeshOperation operationType )
 	fOperationType = operationType;
 }
 
-void meshOpFty::setHoleData(float radius, float distance, bool outerRing, float outerRingValue,int outRingsCount, bool createHole )
+void meshOpFty::setHoleData(float radius, float distance, bool outerRing, float outerRingValue,int outRingsCount, bool createHole, float innerRadius, bool additionalEdges, int innerRingsCount, int extrudeRingsCount, float rotationAngle,float flatCap )
 {
 	fRadius = radius;
 	fDistance = distance;
@@ -72,6 +72,12 @@ void meshOpFty::setHoleData(float radius, float distance, bool outerRing, float 
 	fOuterRingValue = outerRingValue;
 	iOutRingsCount  = outRingsCount;
 	bCreateHole = createHole;
+	fInnerRadius = innerRadius;
+	bAdditionalEdges = additionalEdges;
+	iInnerRingsCount = innerRingsCount;
+	iExtrudeRingsCount = extrudeRingsCount;
+	fRotationAngle  = rotationAngle;
+	fFlatCap = flatCap;
 }
 
 

@@ -37,6 +37,7 @@
 #include <maya/MString.h>
 #include <maya/MItMeshEdge.h>
 #include <maya/MItMeshVertex.h>
+#include <maya/MMatrix.h>
 
 class MFnMesh;
 
@@ -70,7 +71,7 @@ public:
 	void		setComponentList( MObject& componentList );
 	void		setComponentIDs( MIntArray& componentIDs );
 	void		setMeshOperation( MeshOperation operationType );
-	void		setHoleData(float radius, float distance, bool outerRing, float outerRingValue, int outRingsCount, bool createHole );
+	void		setHoleData(float radius, float distance, bool outerRing, float outerRingValue, int outRingsCount, bool createHole, float innerRadius, bool additionalEdges, int innerRingsCount, int extrudeRingsCount, float rotationAngle, float flatCap );
 
 	// Returns the type of component expected by a given mesh operation
 	//
@@ -100,15 +101,27 @@ private:
 	float			fOuterRingValue;
 	int				iOutRingsCount;
 	bool			bCreateHole;
+	float			fInnerRadius;
+	bool			bAdditionalEdges;
+	int				iInnerRingsCount;
+	int				iExtrudeRingsCount;
+	float			fRotationAngle;
+	float			fFlatCap;
 
 	MStatus doLightningSplit(MFnMesh& meshFn);
 	MStatus doHoleVertex(MFnMesh& meshFn);
 	void createChamfer(MFnMesh &meshFn, MItMeshVertex &vIt, int vertexIndex, float offset );
-	void extrudeHole(MFnMesh &meshFn, MItMeshVertex &vIt);
-	void makeHole(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex);
+	void extrudeHole(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex);
+	void makeHole(MFnMesh &meshFn, MIntArray faces);
 	void scaleHole(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex);
-
+	void createAdditionalEdges(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex );
+	MIntArray getFacesToDelete(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex );
+	void BubbleSort(MIntArray &a);
+	void subdivideExtrude(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex );
+	void orderForCircle(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex);
 	float getNormalizedFactorOfEdge( MItMeshEdge& itEdge,int edge, float distance, int originVertex );
+	MFloatVector getAverageNormal(MItMeshVertex &vIt, int vertex);
+	MVector rotatePointAroundVector(MVector input, MVector axis, float angle );
 
 };
 

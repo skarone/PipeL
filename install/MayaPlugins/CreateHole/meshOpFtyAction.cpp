@@ -28,6 +28,7 @@
 #include <maya/MItMeshPolygon.h>
 #include <maya/MItMeshEdge.h>
 #include <maya/MItMeshVertex.h>
+#include <maya/MUintArray.h>
 
 #define CHECK_STATUS(st) if ((st) != MS::kSuccess) { break; }
 
@@ -182,14 +183,18 @@ MStatus meshOpFty::doIt()
 MStatus meshOpFty::doHoleVertex(MFnMesh& meshFn)
 {
 	
-	MItMeshVertex vIt(fMesh);	
-	
+	MIntArray facesToDelete;
 	for (int i = 0; i < fComponentIDs.length(); i++)
 	{
+		//create additional edges
+		MItMeshVertex vIt(fMesh);	
+		if (bAdditionalEdges)
+			createAdditionalEdges( meshFn, vIt, fComponentIDs[i] );
 		//create Outer Loop
 		if (bOuterRing){
 			createChamfer(meshFn, vIt, fComponentIDs[i], 1.0f + fOuterRingValue);
-			//TODO MOVE VERTECES TO CREATE PERFECT CIRCLE
+			//reorder verteces to make perfect circle!
+			orderForCircle( meshFn, vIt, fComponentIDs[i] );
 			for (int out = iOutRingsCount; out > 0; out-- )
 			{
 				//MGlobal::displayInfo(  MString("Offset: ") + (1.0 + (fOuterRingValue/(iOutRingsCount+1) * out ) ));
@@ -198,23 +203,314 @@ MStatus meshOpFty::doHoleVertex(MFnMesh& meshFn)
 		}
 		//Create Main Ring
 		createChamfer(meshFn, vIt, fComponentIDs[i], 1.0f);
+		
+		if(!bOuterRing)
+			orderForCircle( meshFn, vIt, fComponentIDs[i] );
+			
 		//create Inner Ring
 		if (fDistance != 0.0){
 			createChamfer(meshFn, vIt, fComponentIDs[i], 0.999f);
 			//Extrude Face
-			extrudeHole( meshFn , vIt );
+			extrudeHole( meshFn , vIt, fComponentIDs[i] );
+			//Scale Hole
+			scaleHole( meshFn, vIt, fComponentIDs[i] );
+			//Subdivide Extrude
+			subdivideExtrude( meshFn, vIt, fComponentIDs[i] );
 		}
-		//Scale Hole
-		scaleHole( meshFn, vIt, fComponentIDs[i] );
-		//Make Hole
-		if (bCreateHole){
-			makeHole(meshFn, vIt, fComponentIDs[i]);
+		//Create Inner rings for cap
+		if (!bCreateHole){
+			for (int in = iInnerRingsCount; in > 0; in-- )
+			{
+				//MGlobal::displayInfo(  MString("Offset: ") + (1.0 + (fOuterRingValue/(innerRingsCount+1) * out ) ));
+				createChamfer(meshFn, vIt, fComponentIDs[i], ( fInnerRadius/(iInnerRingsCount+1.0) * in) );
+			}
 		}
+
+	}
+
+	//Make Hole
+	if (bCreateHole){
+			for (int i = 0; i < fComponentIDs.length(); i++)
+			{
+				MItMeshVertex vIt(fMesh);	
+				MIntArray currentFacesToDelete;
+				currentFacesToDelete = getFacesToDelete( meshFn, vIt, fComponentIDs[i] );
+				for (int f = 0; f < currentFacesToDelete.length(); f++ ){
+					facesToDelete.append( currentFacesToDelete[f] );
+				}
+			}
+			BubbleSort(facesToDelete);
+			makeHole(meshFn, facesToDelete);
 	}
 	
 	return MS::kSuccess;
 
 }
+
+MFloatVector meshOpFty::getAverageNormal(MItMeshVertex &vIt, int vertex)
+{
+	MFloatVector averageNormal(0, 0, 0);
+	MVectorArray normals;
+	int prevIndex;
+	vIt.setIndex( vertex, prevIndex);
+	vIt.getNormals(normals);
+	for ( int n = 0; n < normals.length(); n++)
+	{
+		averageNormal += normals[n];
+	}
+	averageNormal.normalize();
+	return averageNormal;
+}
+
+void meshOpFty::orderForCircle(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex)
+{
+	int prevIndex;
+	vIt.setIndex( vertex, prevIndex );
+	MIntArray connVerteces, connFaces;
+	vIt.getConnectedVertices( connVerteces );
+	vIt.getConnectedFaces( connFaces );
+	MPoint v0 = vIt.position();
+	MFloatVector axisToRotate = getAverageNormal(vIt, vertex);
+	vIt.setIndex( connVerteces[0], prevIndex );
+	MVector v1 = vIt.position();
+	MVector v0v1( v1 - v0 );
+	float radius = v0v1.length();
+	float anglePerVert = (-360.0 / connVerteces.length() ) ;
+	anglePerVert = anglePerVert * 0.0174532925; //angle in radians
+	float baseAngle = anglePerVert;
+	for( int v = 0; v < connVerteces.length(); v++ )
+	{
+		MVector vFinal;
+		if ( v == 0 )
+			vFinal = rotatePointAroundVector( v0v1,  axisToRotate,  (fRotationAngle * 0.0174532925) );
+		else
+			vFinal = rotatePointAroundVector( v0v1,  axisToRotate,  baseAngle + (fRotationAngle * 0.0174532925) );
+		vFinal = vFinal + v0;
+		//hitFacePtr = OpenMaya.MScriptUtil().asIntPtr()
+		//accelParams  = None
+		MFloatPoint	hitPoint;
+		meshFn.closestIntersection( MFloatPoint( vFinal ),
+									axisToRotate,
+									NULL,
+									NULL,
+									false,
+									MSpace::kWorld,
+									1e+99,
+									true,
+									NULL,
+									hitPoint,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL );
+		vIt.setIndex( connVerteces[v], prevIndex );
+		vIt.setPosition( MPoint( hitPoint ) );
+		if ( v != 0 )
+			baseAngle += anglePerVert;
+	}
+}
+
+MVector meshOpFty::rotatePointAroundVector(MVector input, MVector axis, float angle )
+{
+	float ux = axis[0]*input[0];
+	float uy = axis[0]*input[1];
+	float uz = axis[0]*input[2];
+	float vx = axis[1]*input[0];
+	float vy = axis[1]*input[1];
+	float vz = axis[1]*input[2];
+	float wx = axis[2]*input[0];
+	float wy = axis[2]*input[1];
+	float wz = axis[2]*input[2];
+	float sa = sin(angle);
+	float ca = cos(angle);
+	float x = axis[0]*(ux+vy+wz)+(input[0]*(axis[1]*axis[1]+axis[2]*axis[2])-axis[0]*(vy+wz))*ca+(-wy+vz)*sa;
+	float y = axis[1]*(ux+vy+wz)+(input[1]*(axis[0]*axis[0]+axis[2]*axis[2])-axis[1]*(ux+wz))*ca+(wx-uz)*sa;
+	float z = axis[2]*(ux+vy+wz)+(input[2]*(axis[0]*axis[0]+axis[1]*axis[1])-axis[2]*(ux+vy))*ca+(-vx+uy)*sa;
+	return MVector(x, y , z);
+}
+
+void meshOpFty::subdivideExtrude(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex )
+{
+	MIntArray connFaces;
+	int prevIndex;
+	float edgeFactor;
+	int counter = 0;
+	for( int ex = iExtrudeRingsCount; ex > 0; ex-- ){
+		vIt.setIndex(vertex, prevIndex);
+		vIt.getConnectedFaces( connFaces );
+		MIntArray  ringEdges, faceEdges;
+		MItMeshPolygon pIt(fMesh);
+		//get edges the that are connected to the faces of the main vertex but not connected to him
+		for (int f = 0; f < connFaces.length(); f++)
+		{
+			MIntArray edges;
+			pIt.setIndex( connFaces[f], prevIndex );
+			pIt.getEdges( edges );
+			int edge;
+			for (int e = 0; e < edges.length(); e++)
+			{
+				bool edgeMatch = false;
+				if (vIt.connectedToEdge( edges[e]))
+					edgeMatch = true;
+				if (!edgeMatch)
+					faceEdges.append( edges[e] );
+					//MGlobal::displayInfo(  MString("Border Edge: ") + edges[e] );
+					//break;
+			}
+		}
+		BubbleSort( faceEdges );
+		MItMeshEdge eIt(fMesh);
+		for( int e = 0; e < faceEdges.length(); e++ )
+		{
+			eIt.setIndex( faceEdges[e], prevIndex );
+			int v0 = eIt.index(0);
+			vIt.setIndex( v0, prevIndex );
+			MIntArray edges;
+			vIt.getConnectedEdges( edges );
+			for( int ev = 0; ev < edges.length(); ev++ )
+			{
+				eIt.setIndex( edges[ev], prevIndex );
+				bool edgeMatch = false;
+				for( int f = 0; f < connFaces.length(); f++ )
+				{
+					if (eIt.connectedToFace(connFaces[f]))
+					{
+						edgeMatch = true;
+						break;
+					}
+				}
+				if (!edgeMatch)
+					ringEdges.append( edges[ev] );
+			}
+
+		}
+		//create splits
+		MIntArray placements;
+		MIntArray edgeIDs;
+		MFloatArray edgeFactors;
+		MFloatPointArray internalPoints;
+		float factorE0;
+		for (int e = 0; e < ringEdges.length(); e++)
+		{
+			float factor;
+			factor = ( 1.0/(iExtrudeRingsCount - counter + 1));
+			eIt.setIndex( ringEdges[e], prevIndex );
+			int v0 = eIt.index(0);
+			vIt.setIndex( v0, prevIndex );
+			MIntArray connVerteces;
+			vIt.getConnectedVertices(connVerteces);
+			//check if this v is the one closest to main vertex
+			bool vertClosestMainVertex = false;
+			for (int v = 0; v < connVerteces.length(); v++)
+			{
+				if (vertex == connVerteces[v])
+					vertClosestMainVertex = true;
+			}
+			if( vertClosestMainVertex )
+				factor = 1.0 - factor;
+			if (e == 0)
+				factorE0 = factor;
+			placements.append( (int) MFnMesh::kOnEdge );
+			edgeFactors.append(  factor );
+			edgeIDs.append( ringEdges[e] );
+			//MGlobal::displayInfo(  MString("vertex 0 of the edge: ") +v0);
+			//MGlobal::displayInfo(  MString("Edges To Split: ") + ringEdges[e] );
+			//MGlobal::displayInfo(  MString("Factor") +factor);
+			//MGlobal::displayInfo(  MString("Factor: ") +factor);
+		}
+
+		placements.append( (int) MFnMesh::kOnEdge );
+		edgeFactors.append( factorE0 );
+		//MGlobal::displayInfo(  MString("Factor: ") + factorE0);
+		edgeIDs.append( ringEdges[0] );
+		meshFn.split(placements, edgeIDs, edgeFactors, internalPoints );
+		counter++;
+	}
+
+}
+
+MIntArray meshOpFty::getFacesToDelete(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex )
+{	
+	MIntArray faceToDelete;
+	int prevIndex;
+	vIt.setIndex(vertex, prevIndex);
+	vIt.getConnectedFaces( faceToDelete );
+	return faceToDelete;
+}
+
+void meshOpFty::BubbleSort(MIntArray &a)
+{
+     int i, j, temp;
+	 for (i = 0; i < (a.length() - 1); ++i)
+     {
+          for (j = 0; j < a.length() - 1 - i; ++j )
+          {
+               if (a[j] > a[j+1])
+               {
+                    temp = a[j+1];
+                    a[j+1] = a[j];
+                    a[j] = temp;
+               }
+          }
+     }
+
+}
+
+void meshOpFty::createAdditionalEdges(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex )
+{
+	int prevIndex;
+	vIt.setIndex(vertex, prevIndex);
+	MIntArray connVertecies, connFaces, nonConnVertices, edges;
+	vIt.getConnectedEdges( edges );
+	vIt.getConnectedVertices( connVertecies );
+	vIt.getConnectedFaces( connFaces );
+	MItMeshPolygon pIt( fMesh );
+	for ( int f = 0; f < connFaces.length(); f++ )
+	{
+		pIt.setIndex( connFaces[f], prevIndex );
+		MIntArray vertFaces;
+		pIt.getVertices( vertFaces );
+		for (int fv = 0; fv < vertFaces.length(); fv ++)
+		{
+			bool vertMatch = false;
+			if ( vertFaces[fv] == vertex )
+				vertMatch = true;
+			else{
+
+				for (int v = 0; v < connVertecies.length(); v++)
+				{
+					if ( vertFaces[fv] == connVertecies[v] )
+					{
+						vertMatch = true; 
+					}
+				}
+			}
+			if (!vertMatch)
+				nonConnVertices.append( vertFaces[fv] );
+		}
+	}
+	for (int v = 0; v < nonConnVertices.length(); v++)
+	{
+		vIt.setIndex(nonConnVertices[v], prevIndex);
+		MIntArray nonConnEdges, placements, edgeIDs;
+		MFloatPointArray internalPoints;
+		MFloatArray edgeFactors;
+		vIt.getConnectedEdges( nonConnEdges );
+		placements.append( (int) MFnMesh::kOnEdge );
+		edgeFactors.append( 1.0 );
+		edgeIDs.append( nonConnEdges[0] );
+		placements.append( (int) MFnMesh::kOnEdge );
+		edgeFactors.append( 0.0 );
+		edgeIDs.append( edges[0] );
+		placements.append( (int) MFnMesh::kOnEdge );
+		edgeFactors.append( 0.0 );
+		edgeIDs.append( nonConnEdges[0] );
+		meshFn.split( placements, edgeIDs, edgeFactors, internalPoints);
+		//MGlobal::displayInfo(  MString("Vertices in Face: ") + nonConnVertices[v] );
+	}
+}
+
 void meshOpFty::scaleHole(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex)
 {
 	int prevIndex;
@@ -226,53 +522,47 @@ void meshOpFty::scaleHole(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex)
 	{
 		vIt.setIndex(vertexes[v], prevIndex);
 		MPoint vPos2( vIt.position() );
-
+		MVector vFinal( vPos2 - vPos );
+		//vFinal.normalize();
+		MPoint vfi( vPos2 + (vFinal * (fInnerRadius-1) )  );
+		vIt.setPosition( vfi );
 	}
 
 }
 
 
-void meshOpFty::makeHole(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex)
+void meshOpFty::makeHole(MFnMesh &meshFn, MIntArray faces)
 {
-	MIntArray faces, faceToDelete;
-	int prevIndex;
-	vIt.setIndex(vertex, prevIndex);
-	vIt.getConnectedFaces( faces );
-	for (int f = 0; f < faces.length(); f++)
+
+	for (int f = faces.length(); f > 0; f--)
 	{
-		vIt.getConnectedFaces( faceToDelete );
-		meshFn.deleteFace( faceToDelete[0] );
-		
+		meshFn.deleteFace( faces[f-1] );
+		meshFn.updateSurface();
 	}
 }
 
-void meshOpFty::extrudeHole(MFnMesh &meshFn, MItMeshVertex &vIt)
-{
-		MFloatVector averageNormal(0, 0, 0);
-		MVectorArray normals;
-		vIt.getNormals(normals);
-		for ( int n = 0; n < normals.length(); n++)
-		{
-			averageNormal += normals[n];
-		}
-		averageNormal.normalize();
-		averageNormal = averageNormal * fDistance;
 
-		MIntArray vertexes;
-		vIt.getConnectedVertices( vertexes );
-		int prevIndex;
-		MPoint point;
-		point = vIt.position();
-		vIt.setPosition( point + MPoint( averageNormal ) );
-		for (int v = 0; v < vertexes.length(); v++)
-		{
-			vIt.setIndex( vertexes[v], prevIndex );
-			
-			point = vIt.position();
-			vIt.setPosition( point + MPoint( averageNormal ) );
-			
-		}
-		//move vertices of the edges Down!
+
+void meshOpFty::extrudeHole(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex)
+{
+	MFloatVector averageNormal;
+	averageNormal = getAverageNormal( vIt, vertex );
+	//averageNormal = averageNormal * fDistance;
+
+	MIntArray vertexes;
+	vIt.getConnectedVertices( vertexes );
+	int prevIndex;
+	//IF make cap flat
+	//project al vectors with the normal and see wichone is the longuest
+	MVector point0( vIt.position() );
+	vIt.setPosition( vIt.position() + MPoint( (averageNormal ) * fDistance ) );
+	for (int v = 0; v < vertexes.length(); v++)
+	{
+		vIt.setIndex( vertexes[v], prevIndex );
+		MVector pointN( point0 - MVector( vIt.position()) );
+		MVector projNtoNorm(( (pointN * averageNormal) / averageNormal.length() * averageNormal.length() ) * averageNormal );
+		vIt.setPosition( vIt.position() + MPoint(projNtoNorm * fFlatCap) +  MPoint( (averageNormal ) * fDistance ) );
+	}
 }
 
 void meshOpFty::createChamfer(MFnMesh &meshFn, MItMeshVertex &vIt, int vertexIndex, float offset )
@@ -308,6 +598,7 @@ void meshOpFty::createChamfer(MFnMesh &meshFn, MItMeshVertex &vIt, int vertexInd
 		edgeIDs.append( edges[0] );
 		edgeFactors.append( edgeFactor0 );
 		//internalPoints.append( point1 );
+		
 		meshFn.split(placements, edgeIDs, edgeFactors, internalPoints);
 }
 

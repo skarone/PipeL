@@ -51,7 +51,12 @@ MObject		meshOpNode::outRing;
 MObject		meshOpNode::outRingValue;
 MObject		meshOpNode::outRingsCount;
 MObject		meshOpNode::createHole;
-
+MObject		meshOpNode::innerRadius;
+MObject		meshOpNode::additionalEdges;
+MObject		meshOpNode::innerRingsCount;
+MObject		meshOpNode::extrudeRingsCount;
+MObject		meshOpNode::rotationAngle;
+MObject		meshOpNode::flatCap;
 meshOpNode::meshOpNode()
 {}
 
@@ -118,6 +123,18 @@ MStatus meshOpNode::compute( const MPlug& plug, MDataBlock& data )
 			MDataHandle opTypeData = data.inputValue( opType, &status);
 			MCheckStatus(status,"ERROR getting opType"); 
 
+			MDataHandle additionalEdgesData = data.inputValue( additionalEdges, &status);
+			MCheckStatus(status,"ERROR getting outRing"); 
+			bool qAdditionalEdges = additionalEdgesData.asBool();
+
+			MDataHandle innerRadiusData = data.inputValue( innerRadius, &status);
+			MCheckStatus(status,"ERROR getting distance"); 
+			float qInnerRadius = innerRadiusData.asFloat();
+			
+			MDataHandle flatCapData = data.inputValue( flatCap, &status);
+			MCheckStatus(status,"ERROR getting distance"); 
+			float qFlatCap = flatCapData.asFloat();
+
 			MDataHandle distanceData = data.inputValue( distance, &status);
 			MCheckStatus(status,"ERROR getting distance"); 
 			float qDistance = distanceData.asFloat();
@@ -125,6 +142,11 @@ MStatus meshOpNode::compute( const MPlug& plug, MDataBlock& data )
 			MDataHandle radiusData = data.inputValue( radius, &status);
 			MCheckStatus(status,"ERROR getting radius"); 
 			float qRadius = radiusData.asFloat();
+
+			
+			MDataHandle rotationData = data.inputValue( rotationAngle, &status);
+			MCheckStatus(status,"ERROR getting radius"); 
+			float qRotation = rotationData.asFloat();
 
 			MDataHandle createHoleData = data.inputValue( createHole, &status);
 			MCheckStatus(status,"ERROR getting outRing"); 
@@ -138,9 +160,18 @@ MStatus meshOpNode::compute( const MPlug& plug, MDataBlock& data )
 			MCheckStatus(status,"ERROR getting outRingValue"); 
 			float qOutRingValue = outRingValueData.asFloat();
 
+			
+			MDataHandle extrudeRingsCountData = data.inputValue( extrudeRingsCount, &status);
+			MCheckStatus(status,"ERROR getting outRingsCount"); 
+			int qExtrudeRingsCount = extrudeRingsCountData.asInt();
+
+			MDataHandle innerRingsCountData = data.inputValue( innerRingsCount, &status);
+			MCheckStatus(status,"ERROR getting outRingsCount"); 
+			int qInnerRignsCount = innerRingsCountData.asInt();
+
 			MDataHandle outRingsCountData = data.inputValue( outRingsCount, &status);
 			MCheckStatus(status,"ERROR getting outRingsCount"); 
-			float qOutRingsCount = outRingsCountData.asInt();
+			int qOutRingsCount = outRingsCountData.asInt();
 			// Copy the inMesh to the outMesh, so you can
 			// perform operations directly on outMesh
 			//
@@ -183,7 +214,7 @@ MStatus meshOpNode::compute( const MPlug& plug, MDataBlock& data )
 			fmeshOpFactory.setComponentList( compList );
 			fmeshOpFactory.setComponentIDs( cpIds );
 			fmeshOpFactory.setMeshOperation( operationType );
-			fmeshOpFactory.setHoleData( qRadius, qDistance, qOutRing, qOutRingValue, qOutRingsCount, qCreateHole );
+			fmeshOpFactory.setHoleData( qRadius, qDistance, qOutRing, qOutRingValue, qOutRingsCount, qCreateHole, qInnerRadius, qAdditionalEdges, qInnerRignsCount, qExtrudeRingsCount, qRotation, qFlatCap );
 
 			// Now, perform the meshOp
 			//
@@ -252,15 +283,39 @@ MStatus meshOpNode::initialize()
 	enumFn.setKeyable(true);
 	enumFn.setStorable(true);	// To be stored during file-save
 
+	flatCap = nAttr.create("flatCap", "fc",MFnNumericData::kFloat, 1.0, &status);
+	nAttr.setMin( 0.0 );
+	nAttr.setMax( 1.0 );
+	nAttr.setHidden(false);
+	nAttr.setKeyable(true);
+	nAttr.setStorable(true);	// To be stored during file-save
+
+	innerRadius = nAttr.create("innerRadius", "ir",MFnNumericData::kFloat, 1.0, &status);
+	nAttr.setMin( 0.0 );
+	nAttr.setHidden(false);
+	nAttr.setKeyable(true);
+	nAttr.setStorable(true);	// To be stored during file-save
+
 	distance = nAttr.create("distance", "dist",MFnNumericData::kFloat, 0.5, &status);
 	nAttr.setHidden(false);
 	nAttr.setKeyable(true);
 	nAttr.setStorable(true);	// To be stored during file-save
 
 	radius = nAttr.create("radius", "rad",MFnNumericData::kFloat, 0.5, &status);
+	nAttr.setMin( 0.0 );
 	nAttr.setHidden(false);
 	nAttr.setKeyable(true);
 	nAttr.setStorable(true);	// To be stored during file-save
+
+	rotationAngle = nAttr.create("rotation", "rot",MFnNumericData::kFloat, 0.0, &status);
+	nAttr.setHidden(false);
+	nAttr.setKeyable(true);
+	nAttr.setStorable(true);	// To be stored during file-save
+
+	additionalEdges = nAttr.create("additionalEdges", "ae",MFnNumericData::kBoolean, true, &status);
+	nAttr.setHidden(false);
+	nAttr.setKeyable(true);
+	nAttr.setStorable(true);	
 
 	createHole = nAttr.create("createHole", "ch",MFnNumericData::kBoolean, true, &status);
 	nAttr.setHidden(false);
@@ -273,11 +328,25 @@ MStatus meshOpNode::initialize()
 	nAttr.setStorable(true);	// To be stored during file-save
 
 	outRingValue = nAttr.create("outRingValue", "ov",MFnNumericData::kFloat, 0.5, &status);
+	nAttr.setMin( 0.0 );
 	nAttr.setHidden(false);
 	nAttr.setKeyable(true);
 	nAttr.setStorable(true);	// To be stored during file-save
 
-	outRingsCount = nAttr.create("outRingsCount", "oc",MFnNumericData::kInt, 3, &status);
+	innerRingsCount = nAttr.create("innerRingsCount", "ic",MFnNumericData::kInt, 0, &status);
+	nAttr.setMin(0);
+	nAttr.setHidden(false);
+	nAttr.setKeyable(true);
+	nAttr.setStorable(true);	// To be stored during file-save
+
+	extrudeRingsCount = nAttr.create("extrudeRingsCount", "ec",MFnNumericData::kInt, 3, &status);
+	nAttr.setMin(0);
+	nAttr.setHidden(false);
+	nAttr.setKeyable(true);
+	nAttr.setStorable(true);	// To be stored during file-save
+
+	outRingsCount = nAttr.create("outRingsCount", "oc",MFnNumericData::kInt, 1, &status);
+	nAttr.setMin(0);
 	nAttr.setHidden(false);
 	nAttr.setKeyable(true);
 	nAttr.setStorable(true);	// To be stored during file-save
@@ -293,8 +362,21 @@ MStatus meshOpNode::initialize()
 
 	// Add the attributes we have created to the node
 	//
-
+	
+	status = addAttribute( additionalEdges );
+		if (!status)
+		{
+			status.perror("addAttribute");
+			return status;
+		}
 	status = addAttribute( createHole );
+		if (!status)
+		{
+			status.perror("addAttribute");
+			return status;
+		}
+
+	status = addAttribute( rotationAngle );
 		if (!status)
 		{
 			status.perror("addAttribute");
@@ -313,6 +395,30 @@ MStatus meshOpNode::initialize()
 			return status;
 		}
 	status = addAttribute( outRingsCount );
+		if (!status)
+		{
+			status.perror("addAttribute");
+			return status;
+		}
+	status = addAttribute( extrudeRingsCount );
+		if (!status)
+		{
+			status.perror("addAttribute");
+			return status;
+		}
+	status = addAttribute( innerRadius );
+		if (!status)
+		{
+			status.perror("addAttribute");
+			return status;
+		}
+	status = addAttribute( flatCap );
+		if (!status)
+		{
+			status.perror("addAttribute");
+			return status;
+		}
+	status = addAttribute( innerRingsCount );
 		if (!status)
 		{
 			status.perror("addAttribute");
@@ -359,6 +465,42 @@ MStatus meshOpNode::initialize()
 	// the output to be marked dirty when the input changes.  The output will
 	// then be recomputed the next time the value of the output is requested.
 	//
+	status = attributeAffects( flatCap, outMesh );
+		if (!status)
+		{
+			status.perror("attributeAffects");
+			return status;
+		}
+	status = attributeAffects( rotationAngle, outMesh );
+		if (!status)
+		{
+			status.perror("attributeAffects");
+			return status;
+		}
+	status = attributeAffects( extrudeRingsCount, outMesh );
+		if (!status)
+		{
+			status.perror("attributeAffects");
+			return status;
+		}
+	status = attributeAffects( innerRingsCount, outMesh );
+		if (!status)
+		{
+			status.perror("attributeAffects");
+			return status;
+		}
+	status = attributeAffects( additionalEdges, outMesh );
+		if (!status)
+		{
+			status.perror("attributeAffects");
+			return status;
+		}
+	status = attributeAffects( innerRadius, outMesh );
+		if (!status)
+		{
+			status.perror("attributeAffects");
+			return status;
+		}
 	status = attributeAffects( createHole, outMesh );
 		if (!status)
 		{

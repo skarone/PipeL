@@ -48,6 +48,12 @@ public:
 	static  MObject		outRingValue;
 	static  MObject		outRingsCount;
 	static  MObject		createHole;
+	static  MObject		innerRadius;
+	static  MObject		additionalEdges;
+	static  MObject		innerRingsCount;
+	static  MObject		extrudeRingsCount;
+	static  MObject		rotationAngle;
+	static  MObject		flatCap;
 
 	// The typeid is a unique 32bit indentifier that describes this node.
 	// It is used to save and retrieve nodes of this type from the binary

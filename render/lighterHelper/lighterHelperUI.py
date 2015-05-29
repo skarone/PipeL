@@ -402,7 +402,8 @@ class LighterHelperUI(base,fom):
 					sha.a.aiEnableMatte.overrided = 1
 					sha.a.aiEnableMatte.v = 1
 					sha.a.aiMatteColor.overrided = 1
-					shader.a.outColor >> sha.a.aiMatteColor
+					if not sha.a.aiMatteColor.input:
+						shader.a.outColor >> sha.a.aiMatteColor
 					sha.a.aiMatteColorA.overrided = 1
 					sha.a.aiMatteColorA.v = 1
 				except:
