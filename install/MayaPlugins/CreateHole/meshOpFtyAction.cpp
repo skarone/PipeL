@@ -209,7 +209,7 @@ MStatus meshOpFty::doHoleVertex(MFnMesh& meshFn)
 			
 		//create Inner Ring
 		if (fDistance != 0.0){
-			createChamfer(meshFn, vIt, fComponentIDs[i], 0.999f);
+			createChamfer(meshFn, vIt, fComponentIDs[i], 0.5f);
 			//Extrude Face
 			extrudeHole( meshFn , vIt, fComponentIDs[i] );
 			//Scale Hole
@@ -414,10 +414,6 @@ void meshOpFty::subdivideExtrude(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex
 			placements.append( (int) MFnMesh::kOnEdge );
 			edgeFactors.append(  factor );
 			edgeIDs.append( ringEdges[e] );
-			//MGlobal::displayInfo(  MString("vertex 0 of the edge: ") +v0);
-			//MGlobal::displayInfo(  MString("Edges To Split: ") + ringEdges[e] );
-			//MGlobal::displayInfo(  MString("Factor") +factor);
-			//MGlobal::displayInfo(  MString("Factor: ") +factor);
 		}
 
 		placements.append( (int) MFnMesh::kOnEdge );
@@ -521,10 +517,11 @@ void meshOpFty::scaleHole(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex)
 	for (int v = 0; v < vertexes.length(); v++)
 	{
 		vIt.setIndex(vertexes[v], prevIndex);
-		MPoint vPos2( vIt.position() );
+		MVector vPos2( vIt.position() );
 		MVector vFinal( vPos2 - vPos );
+		
 		//vFinal.normalize();
-		MPoint vfi( vPos2 + (vFinal * (fInnerRadius-1) )  );
+		MVector vfi(  vPos + vFinal.normal() *fRadius* fInnerRadius  );
 		vIt.setPosition( vfi );
 	}
 
@@ -547,11 +544,15 @@ void meshOpFty::extrudeHole(MFnMesh &meshFn, MItMeshVertex &vIt, int vertex)
 {
 	MFloatVector averageNormal;
 	averageNormal = getAverageNormal( vIt, vertex );
+
 	//averageNormal = averageNormal * fDistance;
 
-	MIntArray vertexes;
-	vIt.getConnectedVertices( vertexes );
 	int prevIndex;
+	vIt.setIndex( vertex, prevIndex );
+	MIntArray vertexes;
+	//vIt.getConnectedFaces(faces);
+	//meshFn.extrudeFaces(faces, 1, &averageNormal, true);
+	vIt.getConnectedVertices( vertexes );
 	//IF make cap flat
 	//project al vectors with the normal and see wichone is the longuest
 	MVector point0( vIt.position() );
