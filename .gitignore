@@ -5,3 +5,5 @@ general/test.py
 install/installer/build/
 pipe/manager/build/
 install/MayaPlugins/CreateHole/x64/
+install/MayaPlugins/stretchmesh/_UpgradeReport_Files/
+install/MayaPlugins/stretchmesh/Release/
