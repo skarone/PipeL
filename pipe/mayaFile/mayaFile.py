@@ -162,6 +162,8 @@ class mayaFile(fl.File):
 	def changeXgens(self, newDir = '', srchAndRep = []):
 		"""docstring for changeXgens"""
 		file_str = re.sub( '(?:.+".xfn" -type "string" ")(?P<Path>.+)(?:")', partial( self._changeXgen, newDir, srchAndRep ), self.data )
+		#self.write( file_str )
+		file_str = re.sub( '(?:.+"xgFileName" " -type \\\\"string\\\\" \\\\")(?P<Path>.+)(?:\\\\"")', partial( self._changeXgen, newDir, srchAndRep ), file_str )
 		self.write( file_str )
 
 	def _changeXgen(self, newDir, srchAndRep, matchobj):
@@ -172,6 +174,7 @@ class mayaFile(fl.File):
 			newPath = newDir + fl.File( newPath ).basename
 		if srchAndRep:
 			newPath = newPath.replace( srchAndRep[0], srchAndRep[1] )
+		print matchobj.group( 0 )
 		return matchobj.group( 0 ).replace( path, newPath )
 
 	def changePathsBrutForce(self, srchAndRep = []):
@@ -357,7 +360,8 @@ class mayaFile(fl.File):
 			print 'using default'
 			nodes = mc.file( self.path, r = True, type = "mayaAscii", gl = True, loadReferenceDepth = "all",rnn = True, options = "v=0;", dns = True )
 		else:
-			nodes = mc.file( self.path, r = True, type = "mayaAscii", gl = True, loadReferenceDepth = "all",rnn = True, shd = ["renderLayersByName", "shadingNetworks"] , mergeNamespacesOnClash = False, namespace = namespa, options = "v=0;" )
+			#nodes = mc.file( self.path, r = True, type = "mayaAscii", gl = True, loadReferenceDepth = "all",rnn = True, shd = ["renderLayersByName", "shadingNetworks"] , mergeNamespacesOnClash = False, namespace = namespa, options = "v=0;" )
+			nodes = mc.file( self.path, r = True, type = "mayaAscii", gl = True, loadReferenceDepth = "all",rnn = True, mergeNamespacesOnClash = False, namespace = namespa, options = "v=0;" )
 		return mn.Nodes(nodes)
 
 	def open(self):

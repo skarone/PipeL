@@ -46,6 +46,7 @@ mc.setParent('..', menu = True )
 mc.menuItem( l = 'Modeling', sm = True, to = True )
 mc.menuItem( l = 'Modeling Checker', c = "import modeling.check.check as chk; reload(chk); chk.main();" )
 mc.menuItem( l = 'Mirror Selected Curve', c = "import modeling.curve.mirrorCurve.mirrorCurve as mCrv; reload( mCrv );mCrv.main();" )
+mc.menuItem( l = 'Create Hole Tool', c = "import maya.cmds as mc; mc.loadPlugin( 'meshOpCmd' ); mc.meshOp( 9 );" )
 mc.menuItem( l = 'Spider Web Creator', c = "import modeling.spiderWebCreator.spiderWebCreatorUi as spw; reload( spw ); spw.main();" )
 mc.setParent('..', menu = True )
 
