@@ -53,7 +53,7 @@ global proc create_aov()
                 select -hierarchy;
                 
                 string $jransforms[] = `ls -sl -typ "mesh"`;
-                string $shave_s[] = `ls -sl -typ "shaveHair" -typ "pfxHair"`;
+                string $shave_s[] = `ls -sl -typ "pfxHair" -typ "pgYetiMaya"`;
                 
                 string $str[];                
                 
@@ -61,7 +61,7 @@ global proc create_aov()
                 for($l=0;$l<size($shave_s);$l++)
                 {
                    select $shave_s[$l];
-                    
+                   print $shave_s[$l]; 
                    $p = (size($jransforms));
                    string $sel_t[] = `ls -sl`;
                    $jransforms[$p] = $sel_t[0]; 

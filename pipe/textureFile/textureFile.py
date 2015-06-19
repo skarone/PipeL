@@ -55,7 +55,10 @@ class textureFile(fl.File):
 	@property
 	def udimPaths(self):
 		"""return the textures that correspond to the udim path"""
-		return [ textureFile( self.dirPath + a ) for a in os.listdir( self.dirPath ) if self.name + '.' in a ]
+		try:
+			return [ textureFile( self.dirPath + a ) for a in os.listdir( self.dirPath ) if self.name + '.' in a ]
+		except:
+			return []
 		
 	@property
 	def hasTx(self):
@@ -76,7 +79,10 @@ class textureFile(fl.File):
 		"""return the name of the texture"""
 		nam = super( textureFile, self ).name
 		if self.hasUdim:
-			return nam[:nam.rindex( '.' )]
+			try:
+				return nam[:nam.rindex( '.' )]
+			except:
+				return nam
 		return nam
 
 	@property
