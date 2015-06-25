@@ -95,7 +95,8 @@ class sequenceFile(fl.File):
 		if not outdir:
 			outdir = self.dirPath
 		cmdFrameNum = '-vf "drawtext=fontfile='+IMAGEMAGICPATH.replace( ':', '\\\\:')+'verdana.ttf: fontsize=24: text='+ extraText + ' %{eif\\\\:n+'+str(self.start)+'\\\\: u\\\\: 4}: x=(w-tw)/2: y=h-(2*lh): fontcolor=white: box=1: boxborderw=3: boxcolor=0x00000099"'
-		cmd = '-i "'+ self.dirPath + self.name + '.%04d.png" ' + audioCmd + ' -y -start_number '+str(self.start)+' -r '+ str(fps)+'/1 ' + cmdFrameNum+ ' -r '+ str(fps) + ' -qscale 0 -pix_fmt yuv420p -vcodec mjpeg \"'+outdir + self.name +'.mov\"'
+		cmd = ' -r ' + str(fps) + ' -i "'+ self.dirPath + self.name + '.%04d.png" ' + audioCmd + ' -r '+ str(fps) + ' -y -start_number '+str(self.start)+ ' ' + cmdFrameNum + ' -qscale 0 -pix_fmt yuv420p \"'+  outdir + self.name +'.mov\"'
+		#-vcodec mjpeg
 		print cmd
 		#process = os.popen(IMAGEMAGICPATH + 'ffmpeg.exe ' + cmd )
 		import subprocess
