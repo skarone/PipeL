@@ -1,0 +1,1200 @@
+// Copyright (C) 1997-2014 Autodesk, Inc., and/or its licensors.
+// All rights reserved.
+//
+// The coded instructions, statements, computer programs, and/or related
+// material (collectively the "Data") in these files contain unpublished
+// information proprietary to Autodesk, Inc. ("Autodesk") and/or its licensors,
+// which is protected by U.S. and Canadian federal copyright law and by
+// international treaties.
+//
+// The Data is provided for use exclusively by You. You have the right to use,
+// modify, and incorporate this Data into other products for purposes authorized 
+// by the Autodesk software license agreement, without fee.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. AUTODESK
+// DOES NOT MAKE AND HEREBY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTIES
+// INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF NON-INFRINGEMENT,
+// MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR ARISING FROM A COURSE 
+// OF DEALING, USAGE, OR TRADE PRACTICE. IN NO EVENT WILL AUTODESK AND/OR ITS
+// LICENSORS BE LIABLE FOR ANY LOST REVENUES, DATA, OR PROFITS, OR SPECIAL,
+// DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES, EVEN IF AUTODESK AND/OR ITS
+// LICENSORS HAS BEEN ADVISED OF THE POSSIBILITY OR PROBABILITY OF SUCH DAMAGES.
+
+//
+//	Procedure Name:
+//	AEikHandleTemplate
+//
+//	Description Name;
+//	Creates the attribute editor controls for the ikHandle node
+//
+//	Input Value:
+//	nodeName
+//
+//	Output Value:
+//	None
+//
+
+global string $gAEIKHandleMenus[];
+
+//	these arrays are used to keep track of the
+//	"World Up" and "World Up End" widgets in ik handle
+//	Attribute Editors.  Because users can tear off AE
+//	panels, there can be multiple such controls in 
+//	existence at once.
+//
+global string $gAEikWorldUpWidgets[];
+global string $gAEikWorldUp2Widgets[];
+
+
+proc string getCurrentikHandleMenu(string $nodeName)
+{
+	global string $gAEIKHandleMenus[];
+
+	// look for correct parent
+	//
+	string $curParent = `setParent -q`;
+	int $index = -1;
+	int $i;
+	for ($i = 0; $i < size($gAEIKHandleMenus); $i += 3 ) {
+		if ( $curParent == $gAEIKHandleMenus[$i+1] ) {
+			$index = $i+2;
+			break;
+		}
+	}
+	string $menu = ($curParent+"|ikSolverOptionMenu");
+	if ($index != -1) {
+		$menu = $gAEIKHandleMenus[$index];
+		$gAEIKHandleMenus[$index-2] = $nodeName;
+	}
+	return $menu;
+}
+
+global proc checkIKHandleIKBlendEnable( string $nodeName )
+{
+	int $enable = `getAttr ($nodeName+".ikFkManipulation")`;
+	editorTemplate -dimControl $nodeName "snapEnable" $enable;
+}
+
+global proc checkIkHandleSolverEnable ( string $nodeName )
+{
+	global string $gAEIKHandleMenus[];
+
+	string $nodeAttr = $nodeName + ".ikBlend";
+	float $ikBlend = `getAttr $nodeAttr`;
+	int $solverEnable = ($ikBlend != 0.0);
+
+	// loop through the ikHandle AEs and dim the appropriate
+	// optionMenus
+	//
+	int $i;
+	for ( $i = 0; $i < size($gAEIKHandleMenus); $i += 3 ) {
+		if ( $gAEIKHandleMenus[$i] == $nodeName
+			&& `optionMenuGrp -exists $gAEIKHandleMenus[$i+2]` )
+		{
+			if ($solverEnable) {
+				optionMenuGrp -e -en 1 $gAEIKHandleMenus[$i+2];
+			} else {
+				optionMenuGrp -e -en 0 $gAEIKHandleMenus[$i+2];
+			} 
+		}
+	}
+
+	string $solver[] = `listConnections ( $nodeName + ".ikSolver" )`;
+	string $solverType = `objectType $solver[0]`;
+	
+	switch ($solverType){
+		case "ikRPsolver":
+			editorTemplate -dimControl $nodeName "poleVector" false;
+			editorTemplate -dimControl $nodeName "twist" false;
+			if ( !MAYALT_ENABLE_2015_EXTENSION_1)
+			{
+				editorTemplate -dimControl $nodeName "offset" true;
+				editorTemplate -dimControl $nodeName "roll" true;
+				editorTemplate -dimControl $nodeName "rootOnCurve" true;
+				editorTemplate -dimControl $nodeName "rootTwistMode" true;
+				editorTemplate -dimControl $nodeName "twistType" true;
+			}
+			break;
+		case "ikSCsolver":
+		case "ikMCsolver":
+			editorTemplate -dimControl $nodeName "poleVector" true;
+			editorTemplate -dimControl $nodeName "twist" true;
+			if ( !MAYALT_ENABLE_2015_EXTENSION_1)
+			{
+				editorTemplate -dimControl $nodeName "offset" true;
+				editorTemplate -dimControl $nodeName "roll" true;
+				editorTemplate -dimControl $nodeName "rootOnCurve" true;
+				editorTemplate -dimControl $nodeName "rootTwistMode" true;
+				editorTemplate -dimControl $nodeName "twistType" true;
+			}
+			break;
+		case "ikSplineSolver":
+			editorTemplate -dimControl $nodeName "poleVector" true;
+			editorTemplate -dimControl $nodeName "twist" false;
+			if ( !MAYALT_ENABLE_2015_EXTENSION_1)
+			{
+				editorTemplate -dimControl $nodeName "offset" false;
+				editorTemplate -dimControl $nodeName "roll" false;
+				editorTemplate -dimControl $nodeName "rootOnCurve" false;
+				editorTemplate -dimControl $nodeName "rootTwistMode" false;
+				editorTemplate -dimControl $nodeName "twistType" false;
+			}
+			break;
+		default:
+			editorTemplate -dimControl $nodeName "poleVector" false;
+			editorTemplate -dimControl $nodeName "twist" false;
+			if ( !MAYALT_ENABLE_2015_EXTENSION_1)
+			{
+				editorTemplate -dimControl $nodeName "offset" false;
+				editorTemplate -dimControl $nodeName "roll" false;
+				editorTemplate -dimControl $nodeName "rootOnCurve" false;
+				editorTemplate -dimControl $nodeName "rootTwistMode" false;
+				editorTemplate -dimControl $nodeName "twistType" false;
+			}
+			break;
+	}
+
+}
+
+
+global proc AEupdateSolverMenu(string $menu, string $nodeName)
+{
+
+	setParent $menu;
+
+	// loop through the menu items to check that one of them
+	// matches the current solver
+	//
+	int $i;
+	string $plug = $nodeName + ".ikSolver";
+	string $connections[] = `listConnections $plug`;
+	string $currentSolver = $connections[0];
+	int $numMenuItems = `optionMenuGrp -q -ni $menu`;
+	string $menuItems[] = `optionMenuGrp -q -ill $menu`;
+	for ( $i = 0; $i < $numMenuItems; $i++ ) {
+		if ( $menuItems[$i] == $currentSolver ) {
+			optionMenuGrp -e -v $currentSolver $menu;
+			checkIkHandleSolverEnable $nodeName;
+			return;
+		}
+	}
+
+	// if we've made it this far, the currentSolver doesn't
+	// exist in the optionMenu - we need to rebuild the
+	// optionMenuGrp
+	//
+
+	// get the current solver type
+	//
+	string $solverType = `objectType $currentSolver`;
+
+	// get a list of all solvers
+	//
+	string $solverList[]= `ikSystem -q -ls`;
+	int $sListSize = size($solverList);
+
+	// get only the solvers we're interested in
+	//
+	string $relevantSolvers[];
+	if ($solverType == "ikSplineSolver") {
+		for ($i = 0; $i < $sListSize; $i++) {
+			if (`objectType $solverList[$i]` == "ikSplineSolver") {
+				$relevantSolvers[size($relevantSolvers)] = $solverList[$i];
+			}
+		}
+	} else {
+		for ($i = 0; $i < $sListSize; $i++) {
+			if (`objectType $solverList[$i]` != "ikSplineSolver") {
+				// Skip hikSolver for Maya LT EXT 1.
+				if ( !MAYALT_ENABLE_2015_EXTENSION_1 || `objectType $solverList[$i]` != "hikSolver") {
+					$relevantSolvers[size($relevantSolvers)] = $solverList[$i];
+				}
+			}
+		}
+	}
+	int $rListSize = size($relevantSolvers);
+	for ($i=0; $i<$rListSize; $i++)
+		$relevantSolvers[$i] = ikSolverLocalize($relevantSolvers[$i]);
+
+	// rebuild the menuItems now
+	//
+	setParent -m ($menu+"|OptionMenu");
+	string $menuItemName = "AEikSolverItem";
+	if ( $rListSize <= $numMenuItems ) {
+
+		// replace existing menu items
+		//
+		for ( $i = 0; $i < $rListSize; $i++ ) {
+			menuItem -e -label $relevantSolvers[$i] ($menuItemName+$i);
+		}
+
+		//  delete unused menu items
+		//
+		for ( $i = $rListSize; $i < $numMenuItems; $i++) {
+			deleteUI -mi ($menuItemName+$i);
+		}
+
+	} else {
+
+		// replace existing menu items
+		//
+		for ( $i = 0; $i < $numMenuItems; $i++ ) {
+			menuItem -e -label $relevantSolvers[$i] ($menuItemName+$i);
+		}
+
+		// build new menu items
+		//
+		for ( $i = $numMenuItems; $i < $rListSize; $i++) {
+			menuItem -label $relevantSolvers[$i] ($menuItemName+$i);
+		}
+
+	}
+
+	string $l10n = ikSolverLocalize($currentSolver);
+	optionMenuGrp -e -v $l10n $menu;
+	checkIkHandleSolverEnable $nodeName;
+}
+
+global proc AEikUpdateSolver(string $menu, string $nodeName)
+{
+	setParent $menu;
+	string $solver = ikSolverUnlocalize(`optionMenuGrp -q -v $menu`);
+	ikHandle -e -solver $solver $nodeName;
+	checkIkHandleSolverEnable $nodeName;
+}
+
+global proc AEikHandleSolverNew(string $ikSolver)
+{
+	global string $gAEIKHandleMenus[];
+
+	// get the nodeName
+	//
+	string $buffer[];
+	tokenize($ikSolver,".|",$buffer);
+	string $nodeName = $buffer[0];
+
+	int $numIKHandleAEs = size($gAEIKHandleMenus);
+	$gAEIKHandleMenus[$numIKHandleAEs] = $nodeName;
+	$gAEIKHandleMenus[$numIKHandleAEs+1] = `setParent -q`;
+
+	// build the optionMenuGrp
+	//
+	string $menu = `optionMenuGrp -label (uiRes("m_AEikHandleTemplate.kIKSolver"))  ikSolverOptionMenu`;
+	optionMenuGrp -e
+		-cc ("AEikUpdateSolver " + $menu + " " + $nodeName ) 
+		$menu;
+
+	$gAEIKHandleMenus[$numIKHandleAEs+2] = $menu;
+
+	// only interested if there are solvers attached
+	//
+	string $solver[];
+	if (!catch ($solver = `listConnections $ikSolver`)) {
+
+		int $i;
+
+		// get all the solvers in the system
+		//
+		string $solverList[] = `ikSystem -q -ls`;
+		int $sListSize = size($solverList);
+
+		// get the current solver type
+		//
+		string $solverType = `objectType $solver[0]`;
+
+		// get only the solvers we're interested in
+		//
+		string $relevantSolvers[];
+		if ($solverType == "ikSplineSolver") {
+			for ($i = 0; $i < $sListSize; $i++) {
+				if (`objectType $solverList[$i]` == "ikSplineSolver") {
+					$relevantSolvers[size($relevantSolvers)] = $solverList[$i];
+				}
+			}
+		} else {
+			for ($i = 0; $i < $sListSize; $i++) {
+				if (`objectType $solverList[$i]` != "ikSplineSolver") {
+					// Skip hikSolver for Maya LT EXT 1.
+					if ( !MAYALT_ENABLE_2015_EXTENSION_1 || `objectType $solverList[$i]` != "hikSolver") {
+						$relevantSolvers[size($relevantSolvers)] = $solverList[$i];
+					}
+				}
+			}
+		}
+
+		for ($i=0; $i<size($relevantSolvers); $i++)
+			$relevantSolvers[$i] = ikSolverLocalize($relevantSolvers[$i]);
+
+		// build the menuItems
+		//
+		string $menuItemName = "AEikSolverItem";
+		for ($i = 0; $i < size($relevantSolvers); $i++ ) 
+			menuItem -label $relevantSolvers[$i] ($menuItemName+$i);
+
+		setParent -m ..;
+
+		// build the callback mechanisms
+		//
+		string $l10n = ikSolverLocalize($solver[0]);
+		optionMenuGrp -e -v $l10n $menu;
+		string $cmd = "AEupdateSolverMenu " + $menu + " " + $nodeName;
+		scriptJob -rp -p $menu -attributeChange $ikSolver $cmd;
+
+		checkIkHandleSolverEnable $nodeName;
+	}
+}
+
+
+global proc AEikHandleSolverReplace(string $ikSolver)
+{
+	// get the nodeName
+	//
+	string $buffer[];
+	tokenize($ikSolver,".|",$buffer);
+	string $nodeName = $buffer[0];
+
+	// get parent
+	string $menu = getCurrentikHandleMenu( $nodeName );
+	string $menuItemName = "AEikSolverItem";
+
+	// only need to worry about the replace if a solver is connected
+	//
+	string $solver[];
+	if (!catch ($solver = `listConnections $ikSolver`)) {
+
+		// get the current solver type
+		//
+		string $solverType = `objectType $solver[0]`;
+
+		// get a list of all solvers
+		//
+		string $solverList[]= `ikSystem -q -ls`;
+		int $sListSize = size($solverList);
+
+		// get only the solvers we're interested in
+		//
+		string $relevantSolvers[];
+		if ($solverType == "ikSplineSolver") {
+			for ($i = 0; $i < $sListSize; $i++) {
+				if (`objectType $solverList[$i]` == "ikSplineSolver") {
+					$relevantSolvers[size($relevantSolvers)] = $solverList[$i];
+				}
+			}
+		} else {
+			for ($i = 0; $i < $sListSize; $i++) {
+				if (`objectType $solverList[$i]` != "ikSplineSolver") {
+					// Skip hikSolver for Maya LT EXT 1.
+					if ( !MAYALT_ENABLE_2015_EXTENSION_1 || `objectType $solverList[$i]` != "hikSolver") {
+						$relevantSolvers[size($relevantSolvers)] = $solverList[$i];
+					}
+				}
+			}
+		}
+		int $rListSize = size($relevantSolvers);
+
+		// get the number of items currently in the optionMenu
+		//
+		int $mListSize = `optionMenuGrp -q -ni $menu`;
+
+		int $i;
+
+		// rebuild the menuItems now
+		//
+		setParent -m ($menu+"|OptionMenu");
+		if ( $rListSize <= $mListSize) {
+
+			// replace existing menu items
+			//
+			for ( $i = 0; $i < $rListSize; $i++ ) {
+				string $l10n = ikSolverLocalize($relevantSolvers[$i]);
+				menuItem -e -label $l10n ($menuItemName+$i);
+			}
+
+			//  delete unused menu items
+			//
+			for ( $i = $rListSize; $i < $mListSize; $i++) {
+				deleteUI -mi ($menuItemName+$i);
+			}
+
+		} else {
+
+			// replace existing menu items
+			//
+			for ( $i = 0; $i < $mListSize; $i++ ) {
+				string $l10n = ikSolverLocalize($relevantSolvers[$i]);
+				menuItem -e -label $l10n ($menuItemName+$i);
+			}
+
+			// build new menu items
+			//
+			for ( $i = $mListSize; $i < $rListSize; $i++) {
+				string $l10n = ikSolverLocalize($relevantSolvers[$i]);
+				menuItem -label $l10n ($menuItemName+$i);
+			}
+
+		}
+
+		setParent -m ..;
+
+		// update the optionMenuGrp and callback mechanisms
+		optionMenuGrp -e
+			-v  (ikSolverLocalize($solver[0]))
+			-cc ("AEikUpdateSolver "+$menu+" "+$nodeName)
+			$menu;
+		string $cmd = "AEupdateSolverMenu " + $menu + " " + $nodeName;
+		scriptJob -rp -p $menu -attributeChange $ikSolver $cmd;
+
+		checkIkHandleSolverEnable $nodeName;
+	}
+}
+
+//=====================================================================
+//
+//	Advanced Twist Controls code:
+//
+//		This section contains routines that maintain the UI for
+//		the Advanced Twist controls for spline IK handles.  
+//
+//		Most of the controls are straightforward numeric or enum values
+//		that drive the chain twisting, with the exception of the
+//		"World Up Object" and "World Up Object 2" controls.  The spline
+//		handle allows the user to specify target objects for the start
+//		and end of the joint chain to orient themselves against.  Internally,
+//		this is done via a matrix connection - the object's object->world
+//		matrix is connected to a matrix attribute on the ik handle.  The 
+//		controls presented in the AE for these attributes are text boxes
+//		into which the user types the names of the desired target objects.
+//		Behind the scenes, the appropriate matrix attribute connections are
+//		established.  Much of the code in this section is devoted to 
+//		maintaining these custom controls.  It is further complicated by the
+//		fact that multiple Attribute Editors can be in existenace at any
+//		time, so we must make sure that all AEs stay in sync with their
+//		corresponding IK handles.
+//
+//		The routines in this section are:
+//
+//			AEikWorldUpObjectNew() 
+//				- creates the World Up Object control
+//
+//			AEikWorldUpObjectReplace()
+//				- updates the World Up Object control when the AE
+//				  shifts focus
+//
+//			AEikWorldUpObject2New() 
+//				- creates the World Up Object 2 control
+//
+//			AEikWorldUpObject2Replace()
+//				- updates the World Up Object 2 control when the AE
+//				  shifts focus
+//
+//			AEikWorldUpObjectControlProc()
+//				- called whenever a user enters the name of an object
+//				  into the World Up Object or World Up Object 2 text
+//				  boxes
+//
+//			getIkWorldUpObject()
+//				- utility function to retrieve the name of the object
+//				  currently driving either the World Up Object or
+//				  World Up Object 2 attributes
+//
+//			updateIkWorldUpObject()
+//				- updates one of the World Up Object/World Up Object 2
+//				  controls when the AE shifts focus
+//
+//			twistControlDimUI()
+//			worldUpTypeDimUI()
+//			twistValueTypeDimUI()
+//			setStateIkWorldUpObject()
+//				- routines for dimming various pieces of UI when the 
+//				  "Enabled Twist Controls", "World Up Type", and
+//				  "Twist Value Type" values are changed.
+//
+//=====================================================================
+
+global proc AEikWorldUpObjectNew( string $plug )
+//
+//	Description:
+//
+//		Creates a new "World Up Object" text box control
+//		in the IK handle AE.
+//
+{
+	//	There may be many AEs in existence, and each one will
+	//	have a text box for displaying the name of the World Up
+	//	Object.  This array keeps track of all such controls
+	//	currently in existence.
+	//
+	//	The array contains 3 elements for each control:
+	//	
+	//		1) the name of the ik handle node
+	//		2) the name of the UI parent under which the text
+	//		   box lives
+	//		3) the name of the text box control
+	//
+	//	When a text control is updated, we use this array to 
+	//	determine which ik handle that control is referring to.
+	//
+	global string $gAEikWorldUpWidgets[];
+
+	//	get the node name
+	//
+	string $buffer[];
+	tokenize($plug,".|",$buffer);
+	string $nodeName = $buffer[0];
+
+	// save the node name and the parent info in the global
+	// string array
+	//
+	int $numIkAEs = size($gAEikWorldUpWidgets);
+	$gAEikWorldUpWidgets[$numIkAEs] = $nodeName;
+	$gAEikWorldUpWidgets[$numIkAEs+1] = `setParent -q`;
+
+	//	create the textFieldGrp
+	//
+	setUITemplate -pst attributeEditorTemplate;
+	string $worldUpObjectControl =
+		`textFieldGrp -vis 0 -label (uiRes("m_AEikHandleTemplate.kWorldUpObject"))  AEikWorldUpObjectField`;
+
+	//	save the control for possible later reuse
+	//
+	$gAEikWorldUpWidgets[$numIkAEs+2] = $worldUpObjectControl;
+
+	setUITemplate -ppt;
+
+	//	synchronize the control with the current state of the ik handle
+	//
+	updateIkWorldUpObject( $nodeName, $plug, $worldUpObjectControl );
+}
+
+global proc AEikWorldUpObject2New( string $plug )
+//
+//	Description:
+//
+//		Same as AEikWorldUpObjectNew, but creates a control for
+//		the World Up Object 2 attribute.  
+//
+{
+	global string $gAEikWorldUp2Widgets[];
+
+	//	get the node name
+	//
+	string $buffer[];
+	tokenize($plug,".|",$buffer);
+	string $nodeName = $buffer[0];
+
+	// save the node name and the parent info in the global
+	// string array
+	//
+	int $numIkAEs = size($gAEikWorldUp2Widgets);
+	$gAEikWorldUp2Widgets[$numIkAEs] = $nodeName;
+	$gAEikWorldUp2Widgets[$numIkAEs+1] = `setParent -q`;
+
+	//	create the textFieldGrp
+	//
+	setUITemplate -pst attributeEditorTemplate;
+
+	string $worldUpObjectControl =
+		`textFieldGrp -vis 0 -label (uiRes("m_AEikHandleTemplate.kWorldUpObject2"))  AEikWorldUpObject2Field`;
+
+	//	save the control for possible later reuse
+	//
+	$gAEikWorldUp2Widgets[$numIkAEs+2] = $worldUpObjectControl;
+
+	setUITemplate -ppt;
+
+	//	synchronize the control with the current state of the ik handle
+	//
+	updateIkWorldUpObject( $nodeName, $plug, $worldUpObjectControl );
+}
+
+
+global proc AEikWorldUpObjectReplace( string $plug )
+//
+//	Description:
+//
+//		Updates the World Up Object AE control when the AE
+//		shifts focus to another ik handle node.
+//
+{
+	global string $gAEikWorldUpWidgets[];
+
+	//	get the node name
+	//
+	string $buffer[];
+	tokenize($plug,".|",$buffer);
+	string $nodeName = $buffer[0];
+
+	//	if there is already a control created for this
+	//	AE window, then find it in the array (we search 
+	//	using the name of the UI parent for the control).
+	//	Such a control must exist, but we still make sure
+	//	that we actually find it.
+	//
+	string $curParent = `setParent -q`;
+	int $index = -1;
+	int $i;
+    for ( $i = 0; $i < size($gAEikWorldUpWidgets); $i += 3 ) 
+	{
+        if ( $curParent == $gAEikWorldUpWidgets[$i+1] )
+		{
+            $index = $i;
+            break;
+        }
+    }
+
+	//	update the entry in the array, as this control is now
+	//	referring to a different node
+	//
+    string $worldUpObjectControl = "AEikWorldUpObjectField";
+    if ($index != -1)
+	{
+        $gAEikWorldUpWidgets[$index] = $nodeName;
+        $worldUpObjectControl = $gAEikWorldUpWidgets[$index+2];
+    }
+
+	//	synchronize the control with the current state of the node
+	//
+	updateIkWorldUpObject( $nodeName, $plug, $worldUpObjectControl );
+}
+
+global proc AEikWorldUpObject2Replace( string $plug )
+//
+//	Description:
+//
+//		Same as above, but for the World Up Object 2 attribute.
+//
+{
+	global string $gAEikWorldUp2Widgets[];
+
+	//	get the node name
+	//
+	string $buffer[];
+	tokenize($plug,".|",$buffer);
+	string $nodeName = $buffer[0];
+
+	//	if there is already a control created for this
+	//	AE window, then find it in the array (we search 
+	//	using the name of the UI parent for the control).
+	//	Such a control must exist, but we still make sure
+	//	that we actually find it.
+	//
+	string $curParent = `setParent -q`;
+	int $index = -1;
+	int $i;
+    for ( $i = 0; $i < size($gAEikWorldUp2Widgets); $i += 3 ) 
+	{
+        if ( $curParent == $gAEikWorldUp2Widgets[$i+1] )
+		{
+            $index = $i;
+            break;
+        }
+    }
+
+	//	update the entry in the array, as this control is now
+	//	referring to a different node
+	//
+    string $worldUpObjectControl = "AEikWorldUpObject2Field";
+    if ($index != -1)
+	{
+        $gAEikWorldUp2Widgets[$index] = $nodeName;
+        $worldUpObjectControl = $gAEikWorldUp2Widgets[$index+2];
+    }
+
+	//	synchronize the control with the current state of the node
+	//
+	updateIkWorldUpObject( $nodeName, $plug, $worldUpObjectControl );
+}
+
+
+global proc AEikWorldUpObjectControlProc(string $plug,
+										 string $widget)
+//
+//	Description:
+//
+//		Gets called when the contents of a World Up Object
+//		or World Up Object 2 text box control in the AE
+//		is modified.  This code must then go find the
+//		specified object and connect its object->world
+//		matrix to the ik handle's appropriate matrix
+//		attribute.
+//
+{
+	//	get the current value of the widget
+	//
+	string $value = `textFieldGrp -q -text $widget`;
+
+	//	find the specified object
+	//
+	string $found[] = `ls $value`;
+	if( size($found) > 0 )
+	{
+		//	connect the object->world matrix of that object
+		//	to the ik handle
+		//
+		connectAttr -f ($value + ".worldMatrix") $plug;
+	}
+	else
+	{
+		//	named object is invalid, flag an error
+		//
+		string $format = (uiRes("m_AEikHandleTemplate.kObjectNotFound"));
+		string $errorMsg = `format -stringArg $value $format`;
+		error($errorMsg);
+	}
+}
+
+proc string getIkWorldUpObject( string $plug )
+//
+//	Description:
+//
+//		Given one of the matrix attributes on the ik handle
+//		(World Up Object or World Up Object 2), finds the
+//		name of the object that is driving that attribute.
+//
+{
+	//	make sure that the attribute actually exists on the
+	//	node (remember, these are dynamic attributes)
+	//
+	string $buf[];
+	tokenize( $plug, ".", $buf );
+	string $node = $buf[0];
+	string $attr = $buf[1];
+
+	if( `attributeQuery -ex -n $node $attr` )
+	{
+		//	find the object connected to the attribute
+		//
+		string $inputs[] = `listConnections $plug`;
+		
+		if( size($inputs) > 0 )
+		{
+			return $inputs[0];
+		}
+		else
+		{
+			return "";
+		}
+	}
+	else
+	{
+		return "";
+	}
+}
+
+global proc updateIkWorldUpObject( string $nodeName, 
+								   string $plug, 
+								   string $worldUpObjectControl )
+//
+//	Description:
+//		
+//		Updates the specified text field control for
+//		either the World Up Object or World Up Object 2 
+//		attribute when the AE shifts focus to another IK handle.
+//
+{
+	//	figure out the currently connected up object
+	//
+	string $curObject = getIkWorldUpObject( $plug );
+
+	//	update the current contents of the text, and the change
+	//	callback function
+	//
+	string $cmd1 = "AEikWorldUpObjectControlProc "+ $plug + " " + $worldUpObjectControl;
+	textFieldGrp -e
+		-text $curObject
+		-cc $cmd1
+		$worldUpObjectControl;
+	
+	//	set the visibility of the text box, based on whether or
+	//	not the advanced controls are enabled
+	//
+	if( `attributeQuery -ex -n $nodeName "dTwistControlEnable"` )
+	{
+		textFieldGrp -e -vis 1 $worldUpObjectControl;
+	}
+	else
+	{
+		textFieldGrp -e -vis 0 $worldUpObjectControl;
+	}
+}
+
+global proc twistControlDimUI( string $nodeName )
+//
+//	Description:
+//
+//		Dims UI when the Enable Twist Controls checkbox
+//		is enabled/disabled.  This will dim or undim all
+//		advanced twist control UI.
+//
+{
+	if( `attributeQuery -ex -n $nodeName "dTwistControlEnable"` )
+	{
+		int $enable = `getAttr ($nodeName + ".dTwistControlEnable")`;
+
+		if( $enable )
+		{
+			editorTemplate -dimControl $nodeName "dWorldUpType" false;
+			editorTemplate -dimControl $nodeName "dWorldUpAxis" false;
+			editorTemplate -dimControl $nodeName "dTwistValueType" false;
+			worldUpTypeDimUI( $nodeName );
+			twistValueTypeDimUI( $nodeName );
+		}
+		else
+		{
+			editorTemplate -dimControl $nodeName "twist" false;
+			editorTemplate -dimControl $nodeName "twistType" false;
+
+			setStateIkWorldUpObject( $nodeName, false, false );
+			editorTemplate -dimControl $nodeName "dWorldUpType" true;
+			editorTemplate -dimControl $nodeName "dWorldUpAxis" true;
+			editorTemplate -dimControl $nodeName "dWorldUpVector" true;
+			editorTemplate -dimControl $nodeName "dWorldUpVectorEnd" true;
+			editorTemplate -dimControl $nodeName "dTwistValueType" true;
+			editorTemplate -dimControl $nodeName "dTwistStartEnd" true;
+			editorTemplate -dimControl $nodeName "dTwistRamp" true;
+			editorTemplate -dimControl $nodeName "dTwistRampMult" true;
+		}
+	}
+}
+
+global proc worldUpTypeDimUI( string $nodeName )
+//
+//	Description:
+//
+//		Dims/undims UI when the World Up Type dropdown menu
+//		is changed.  The different options in this menu
+//		use different attributes for control.
+//
+{
+	if( `attributeQuery -ex -n $nodeName "dWorldUpType"` )
+	{
+		int $worldUpType = `getAttr ($nodeName + ".dWorldUpType")`;
+		if( $worldUpType == 0 )
+		{
+			// scene up - uses no controls, so dim everything
+			//
+			editorTemplate -dimControl $nodeName "dWorldUpVector" true;
+			editorTemplate -dimControl $nodeName "dWorldUpVectorEnd" true;
+			setStateIkWorldUpObject( $nodeName, false, false );
+		}
+		else if( $worldUpType == 1 )
+		{
+			// object up - just undim World Up Object
+			//
+			editorTemplate -dimControl $nodeName "dWorldUpVector" true;
+			editorTemplate -dimControl $nodeName "dWorldUpVectorEnd" true;
+			setStateIkWorldUpObject( $nodeName, true, false );
+		}
+		else if( $worldUpType == 2 )
+		{
+			// object up start,end - undim World Up Object, World Up Object 2
+			//
+			editorTemplate -dimControl $nodeName "dWorldUpVector" true;
+			editorTemplate -dimControl $nodeName "dWorldUpVectorEnd" true;
+			setStateIkWorldUpObject( $nodeName, true, true );
+		}
+		else if( $worldUpType == 3 )
+		{
+			// object rotation up - just undim World Up Object
+			//
+			editorTemplate -dimControl $nodeName "dWorldUpVector" false;
+			editorTemplate -dimControl $nodeName "dWorldUpVectorEnd" true;
+			setStateIkWorldUpObject( $nodeName, true, false );
+		}
+		else if( $worldUpType == 4 )
+		{
+			// object rotation up start/end - undim World Up Object, World Up Object 2
+			//
+			editorTemplate -dimControl $nodeName "dWorldUpVector" false;
+			editorTemplate -dimControl $nodeName "dWorldUpVectorEnd" false;
+			setStateIkWorldUpObject( $nodeName, true, true );
+		}
+		else if( $worldUpType == 5 )
+		{
+			// vector - just undim Up Vector control
+			//
+			editorTemplate -dimControl $nodeName "dWorldUpVector" false;
+			editorTemplate -dimControl $nodeName "dWorldUpVectorEnd" true;
+			setStateIkWorldUpObject( $nodeName, false, false );
+		}
+		else if( $worldUpType == 6 )
+		{
+			// vector start/end - undim Up Vector and Up Vector 2 controls
+			//
+			editorTemplate -dimControl $nodeName "dWorldUpVector" false;
+			editorTemplate -dimControl $nodeName "dWorldUpVectorEnd" false;
+			setStateIkWorldUpObject( $nodeName, false, false );
+		}
+		else if( $worldUpType == 7 )
+		{
+			// relative mode - no twist controls, so dim everything
+			//
+			editorTemplate -dimControl $nodeName "dWorldUpVector" true;
+			editorTemplate -dimControl $nodeName "dWorldUpVectorEnd" true;
+			setStateIkWorldUpObject( $nodeName, false, false );
+		}
+	}
+}
+
+global proc twistValueTypeDimUI( string $nodeName )
+//
+//	Description:
+//
+//		Dims/undims UI appropriate to the currently selected
+//		Twist Value Type setting.
+//
+{
+	if( `attributeQuery -ex -n $nodeName "dTwistValueType"` )
+	{
+		int $twistValueType = `getAttr ($nodeName + ".dTwistValueType")`;
+
+		if( $twistValueType == 0 )
+		{
+			// total twist - uses the Twist and Twist Type values
+			//
+			editorTemplate -dimControl $nodeName "twist" false;
+			editorTemplate -dimControl $nodeName "twistType" false;
+			editorTemplate -dimControl $nodeName "dTwistStartEnd" true;
+			editorTemplate -dimControl $nodeName "dTwistRamp" true;
+			editorTemplate -dimControl $nodeName "dTwistRampMult" true;
+		}
+		else if( $twistValueType == 1 )
+		{
+			// start/end twist - uses Type Type and Start/End Twist
+			// controls
+			editorTemplate -dimControl $nodeName "twist" true;
+			editorTemplate -dimControl $nodeName "twistType" false;
+			editorTemplate -dimControl $nodeName "dTwistStartEnd" false;
+			editorTemplate -dimControl $nodeName "dTwistRamp" true;
+			editorTemplate -dimControl $nodeName "dTwistRampMult" true;
+		}
+		else if( $twistValueType == 2 )
+		{
+			// ramp - just uses the Twist Ramp and Twist Ramp Multiplier
+			// controls.
+			editorTemplate -dimControl $nodeName "twist" true;
+			editorTemplate -dimControl $nodeName "twistType" true;
+			editorTemplate -dimControl $nodeName "dTwistStartEnd" true;
+			editorTemplate -dimControl $nodeName "dTwistRamp" false;
+			editorTemplate -dimControl $nodeName "dTwistRampMult" false;
+		}
+
+	}
+}
+
+global proc setStateIkWorldUpObject( string $nodeName, 
+									 int $state1, 
+									 int $state2 )
+//
+//	Description:
+//
+//		Sets the dimmed state of the World Up Object and
+//		World Up Object 2 controls for the specified node.
+//
+{
+	//	use these arrays to find any existing UI that 
+	//	refers to the specified node
+	//
+	global string $gAEikWorldUpWidgets[];
+	global string $gAEikWorldUp2Widgets[];
+
+	int $vis = 1;
+	if( !`attributeQuery -ex -n $nodeName "dTwistControlEnable"` )
+	{
+		$vis = 0;
+	}
+
+	//	Update the world up object text field for all attribute
+	//	editors looking at this node
+	//
+	int $i;
+    for ($i = 0; $i < size($gAEikWorldUpWidgets); $i += 3 )
+	{
+        if ( $nodeName == $gAEikWorldUpWidgets[$i] ) 
+		{
+			string $worldUpObjectControl = $gAEikWorldUpWidgets[$i+2];
+			if ( `textFieldGrp -exists $worldUpObjectControl` )
+			{
+				textFieldGrp -e -vis $vis $worldUpObjectControl;
+				textFieldGrp -e -enable $state1 $worldUpObjectControl;
+			}
+        }
+    }
+
+	//	Update the world up object 2 text field for all attribute
+	//	editors looking at this node
+	//
+    for ($i = 0; $i < size($gAEikWorldUp2Widgets); $i += 3 )
+	{
+        if ( $nodeName == $gAEikWorldUp2Widgets[$i] ) 
+		{
+			string $worldUpObjectControl = $gAEikWorldUp2Widgets[$i+2];
+			if ( `textFieldGrp -exists $worldUpObjectControl` )
+			{
+				textFieldGrp -e -vis $vis $worldUpObjectControl;
+				textFieldGrp -e -enable $state2 $worldUpObjectControl;
+			}
+        }
+    }
+}
+
+global proc AEikHandleTemplate( string $nodeName )
+{
+
+	editorTemplate -beginScrollLayout;
+
+		// include/call base class/node attributes
+		AEtransformMain($nodeName);
+	
+		editorTemplate -beginLayout (uiRes("m_AEikHandleTemplate.kSkeletonInfo"))  -collapse false;
+			editorTemplate -addControl "startJoint";
+			editorTemplate -addControl "endEffector";
+		editorTemplate -endLayout;
+
+		editorTemplate -beginLayout (uiRes("m_AEikHandleTemplate.kIKHandleAttributes")) ;
+			editorTemplate -addControl "snapEnable";
+			editorTemplate -addControl "stickiness";
+			editorTemplate -addSeparator;
+			editorTemplate -addControl "priority";
+			editorTemplate -addControl "weight";
+			editorTemplate -addControl "poWeight";
+		editorTemplate -endLayout;
+
+		editorTemplate -beginLayout (uiRes("m_AEikHandleTemplate.kIKSolverAttributes")) ;
+			editorTemplate -addControl "ikBlend"
+						"checkIkHandleSolverEnable";
+		    editorTemplate -label (uiRes("m_AEikHandleTemplate.kIkFkControl"))  -addControl "ikFkManipulation" "checkIKHandleIKBlendEnable";
+			editorTemplate -callCustom "AEikHandleSolverNew"
+						"AEikHandleSolverReplace"
+						"ikSolver";
+
+			editorTemplate -addSeparator;
+
+			editorTemplate -addControl "poleVector";
+			if ( !MAYALT_ENABLE_2015_EXTENSION_1)
+			{
+				editorTemplate -addControl "offset";
+				editorTemplate -addControl "roll";
+			}
+			editorTemplate -addControl "twist";
+			if ( !MAYALT_ENABLE_2015_EXTENSION_1 )
+			{
+				editorTemplate -addControl "twistType";
+				editorTemplate -beginNoOptimize;
+				editorTemplate -addControl "rootOnCurve";
+				editorTemplate -addControl "rootTwistMode";
+				editorTemplate -endNoOptimize;
+			}
+
+			if ( !MAYALT_ENABLE_2015_EXTENSION_1 )
+			{
+				//----------------------------------------------
+				// Advanced Twist Attributes Section
+				//----------------------------------------------
+
+				// button to add the new twist controls
+				//
+				editorTemplate -beginLayout (uiRes("m_AEikHandleTemplate.kAdvancedTwistControls")) ;
+
+					//	control to enable/disable all advanced twist controls
+					//
+					editorTemplate -addControl -label (uiRes("m_AEikHandleTemplate.kEnableTwistControls"))  dTwistControlEnable "twistControlDimUI";
+					editorTemplate -addControl -label (uiRes("m_AEikHandleTemplate.kWorldUpType"))  dWorldUpType "worldUpTypeDimUI";
+					editorTemplate -addControl -label (uiRes("m_AEikHandleTemplate.kUpAxis"))  dWorldUpAxis;
+					editorTemplate -addControl -label (uiRes("m_AEikHandleTemplate.kUpVector"))  dWorldUpVector;
+					editorTemplate -addControl -label (uiRes("m_AEikHandleTemplate.kUpVector2"))  dWorldUpVectorEnd;
+
+					//	World Up Object and World Up Object 2 matrix attributes
+					//	are controlled by these custom text boxes
+					//
+					editorTemplate -callCustom
+						"AEikWorldUpObjectNew"
+						"AEikWorldUpObjectReplace"
+						"dWorldUpMatrix";
+
+					editorTemplate -callCustom
+						"AEikWorldUpObject2New"
+						"AEikWorldUpObject2Replace"
+						"dWorldUpMatrixEnd";
+
+					//	controls for the twist value type
+					//
+					editorTemplate -addControl -label (uiRes("m_AEikHandleTemplate.kTwistValueType"))  dTwistValueType "twistValueTypeDimUI";
+					editorTemplate -addControl -label (uiRes("m_AEikHandleTemplate.kStartEndTwist"))  dTwistStartEnd;
+					editorTemplate -addControl -label (uiRes("m_AEikHandleTemplate.kTwistRamp"))  dTwistRamp;
+					editorTemplate -addControl -label (uiRes("m_AEikHandleTemplate.kTwistRampMultiplier"))  dTwistRampMult;
+
+				editorTemplate -endLayout;
+				//----------------------------------------------
+				//	End of Advanced Twist Controls section
+				//----------------------------------------------
+			}
+			//----------------------------------------------
+			// ikSpringSolver Attributes Section
+			//----------------------------------------------
+
+			editorTemplate -beginLayout (uiRes("m_AEikHandleTemplate.kIKSpringSolverAttributes")) ;
+
+			AEikSpringRestPoseControl "springRestPose";
+			AEaddDynRampStaticEPControl "springAngleBias";
+
+			editorTemplate -endLayout;
+
+			//----------------------------------------------
+			//	End of ikSpringSolver Attributes Section
+			//----------------------------------------------
+		editorTemplate -endLayout;
+	
+		// include/call base class/node attributes
+		AEtransformNoScroll($nodeName);
+
+		// supressed attributes
+		editorTemplate -suppress "handlePlaybackSolve";
+		editorTemplate -suppress "inCurve";
+		editorTemplate -suppress "rootTwistMode";
+		editorTemplate -suppress "splineIkOldStyle";
+		if ( MAYALT_ENABLE_2015_EXTENSION_1 )
+		{
+			editorTemplate -suppress "offset";
+			editorTemplate -suppress "roll";
+			editorTemplate -suppress "twistType";
+			editorTemplate -suppress "rootOnCurve";
+			editorTemplate -suppress "rootTwistMode";
+
+			editorTemplate -suppress "dWorldUpType";
+			editorTemplate -suppress "dWorldUpAxis";
+			editorTemplate -suppress "dWorldUpVector";
+			editorTemplate -suppress "dWorldUpVectorEnd";
+			editorTemplate -suppress "dWorldUpMatrix";
+			editorTemplate -suppress "dWorldUpMatrixEnd";
+			editorTemplate -suppress "dTwistValueType";
+			editorTemplate -suppress "dTwistStartEnd";
+			editorTemplate -suppress "dTwistRamp";
+			editorTemplate -suppress "dTwistRampMult";
+			editorTemplate -suppress "dTwistControlEnable";
+		}
+	//ikSplineSolver
+	string $solver[] = `listConnections ( $nodeName + ".ikSolver" )`;
+	string $solverType = `objectType $solver[0]`;
+	if ($solverType == "splineSolverNode")
+	{
+		editorTemplate -beginLayout "Spline Solver" -collapse 0;
+		editorTemplate -addControl "stretchRatio";
+		editorTemplate -addControl "anchorPosition";
+		editorTemplate -addControl "startTwist";
+		editorTemplate -addControl "endTwist";
+		AEaddRampControl( $nodeName + ".twistRamp" );
+		if (`getAttr -silent -size ($nodeName+"."+"twistRamp")` == 0)
+		{
+			setAttr ($nodeName + ".twistRamp[0].twistRamp_FloatValue") 0.0;
+			setAttr ($nodeName + ".twistRamp[0].twistRamp_Position") 0.0;
+			setAttr ($nodeName + ".twistRamp[0].twistRamp_Interp") 1;
+			setAttr ($nodeName + ".twistRamp[1].twistRamp_FloatValue") 1.0;
+			setAttr ($nodeName + ".twistRamp[1].twistRamp_Position") 1.0;
+			setAttr ($nodeName + ".twistRamp[1].twistRamp_Interp") 1;
+		}
+	}
+
+	editorTemplate -addExtraControls;
+	editorTemplate -endScrollLayout;
+
+}

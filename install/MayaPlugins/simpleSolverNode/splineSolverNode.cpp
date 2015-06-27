@@ -66,6 +66,7 @@ select -cl;
 #include <vector>
 #include <maya/MGlobal.h>
 #include <maya/MAngle.h>
+#include <maya/MRampAttribute.h>
 
 
 #define MAX_ITERATIONS 1
@@ -222,6 +223,36 @@ MStatus splineSolverNode::preSolve()
 		fnAttr.setStorable(1);
 		fnAttr.setReadable(1);
 		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
+		attr = fnAttr.create("startTwist", "strtw", MFnNumericData::kDouble, 0);
+		fnAttr.setKeyable(1);
+		fnAttr.setWritable(1);
+		fnAttr.setHidden(0);
+		fnAttr.setStorable(1);
+		fnAttr.setReadable(1);
+		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
+		attr = fnAttr.create("endTwist", "endtw", MFnNumericData::kDouble, 0);
+		fnAttr.setKeyable(1);
+		fnAttr.setWritable(1);
+		fnAttr.setHidden(0);
+		fnAttr.setStorable(1);
+		fnAttr.setReadable(1);
+		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
+		attr = fnAttr.create("prevStartTwist", "prestrtw", MFnNumericData::kDouble, 0);
+		fnAttr.setKeyable(1);
+		fnAttr.setWritable(1);
+		fnAttr.setHidden(1);
+		fnAttr.setStorable(1);
+		fnAttr.setReadable(1);
+		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
+		attr = fnAttr.create("preEndTwist", "preendtw", MFnNumericData::kDouble, 0);
+		fnAttr.setKeyable(1);
+		fnAttr.setWritable(1);
+		fnAttr.setHidden(1);
+		fnAttr.setStorable(1);
+		fnAttr.setReadable(1);
+		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
+		MObject twistRamp = MRampAttribute::createCurveRamp("twistRamp", "twr");
+		fnHandle.addAttribute(twistRamp, MFnDependencyNode::kLocalDynamicAttr);
 	} else
 	{
 			MPlug strPlug = fnHandle.findPlug("str");
@@ -285,6 +316,20 @@ MStatus splineSolverNode::doSimpleSolver()
 	float curCurveLength = curveFn.length();
 	MPlug crvLengPlug = fnHandle.findPlug("cvLen");
 	double initCurveLength = crvLengPlug.asDouble();
+	//Twist
+	MPlug twistRamp = fnHandle.findPlug("twistRamp");
+	MRampAttribute curveAttribute( twistRamp, &stat );
+	MPlug startTwistPlug = fnHandle.findPlug("strtw");
+	double startTwist = startTwistPlug.asDouble();
+	MPlug endTwistPlug = fnHandle.findPlug("endtw");
+	double endTwist = endTwistPlug.asDouble();
+	MPlug prestartTwistPlug = fnHandle.findPlug("prestrtw");
+	double preStartTwist = prestartTwistPlug.asDouble();
+	MPlug preendTwistPlug = fnHandle.findPlug("preendtw");
+	double preEndTwist = preendTwistPlug.asDouble();
+	//float twistValue;
+	// curveAttribute.getValueAtPosition(rampPosition, twistValue, &stat);
+	// startTwist + twistValue *( endTwist - startTwist );
 	//Roll
 	MPlug rollPlug = fnHandle.findPlug("roll");
 	double roll = rollPlug.asDouble();
@@ -307,6 +352,13 @@ MStatus splineSolverNode::doSimpleSolver()
 	curveFn.getPointAtParam( parm, pBaseJoint );
 	MFnIkJoint j( joints[0] );
 	j.setTranslation( MVector( pBaseJoint ), MSpace::kWorld );
+	float jointRotPercent = 1.0/joints.size();
+	float currJointRot = 0;
+	float prevTwist = 0;
+	float v0 = startTwist - preStartTwist;
+	float v1 = endTwist - preEndTwist;
+	prestartTwistPlug.setDouble( startTwist );
+	preendTwistPlug.setDouble( endTwist );
 	//j.setScale(scale);
 	for (int i = 0; i < joints.size(); i++)
 	{
@@ -332,6 +384,20 @@ MStatus splineSolverNode::doSimpleSolver()
 
 		MVector crosVec = vBaseJoint^vFinalJoint;
 		float w = sqrt((vBaseJoint.length() * vBaseJoint.length()) * (vFinalJoint.length() * vFinalJoint.length())) + vBaseJoint*vFinalJoint;
+		//Calculate Twist
+		{
+			float twistValue;
+			curveAttribute.getValueAtPosition(currJointRot, twistValue, &stat);
+			//float rotVal = startTwist - preStartTwist + twistValue *( endTwist - preEndTwist - startTwist - preStartTwist );
+			float rotVal = (1-twistValue)*v0 + twistValue*v1;
+			MQuaternion qTwist( MAngle(rotVal - prevTwist, MAngle::kDegrees).asRadians(), vBaseJoint );
+			j.rotateBy( qTwist, MSpace::kWorld );
+			currJointRot += jointRotPercent;
+			prevTwist = rotVal;
+			//MGlobal::displayInfo(MString("CurrJointRot: ") + currJointRot);
+			//MGlobal::displayInfo(MString("Rot Val: ") + rotVal);
+		}
+		//Calculate Roll
 		if (i == 0)
 		{
 			if ( preRoll != roll ){
