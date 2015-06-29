@@ -193,7 +193,7 @@ MStatus splineSolverNode::preSolve()
 		fnAttr.setStorable(1);
 		fnAttr.setReadable(1);
 		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
-		attr = fnAttr.create("anchorPosition", "ancp", MFnNumericData::kDouble, 0);
+		attr = fnAttr.create("anchorPosition", "ancp", MFnNumericData::kDouble, 0.0);
 		fnAttr.setKeyable(1);
 		fnAttr.setWritable(1);
 		fnAttr.setMin(0);
@@ -216,43 +216,43 @@ MStatus splineSolverNode::preSolve()
 		fnAttr.setStorable(1);
 		fnAttr.setReadable(1);
 		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
-		attr = fnAttr.create("prevRoll", "preRoll", MFnNumericData::kDouble, 0);
+		attr = fnAttr.create("prevRoll", "preRoll", MFnNumericData::kDouble, 0.0);
 		fnAttr.setKeyable(0);
 		fnAttr.setWritable(1);
 		fnAttr.setHidden(1);
 		fnAttr.setStorable(1);
 		fnAttr.setReadable(1);
 		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
-		attr = fnAttr.create("startTwist", "strtw", MFnNumericData::kDouble, 0);
+		attr = fnAttr.create("startTwist", "strtw", MFnNumericData::kDouble, 0.0);
 		fnAttr.setKeyable(1);
 		fnAttr.setWritable(1);
 		fnAttr.setHidden(0);
 		fnAttr.setStorable(1);
 		fnAttr.setReadable(1);
 		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
-		attr = fnAttr.create("endTwist", "endtw", MFnNumericData::kDouble, 0);
+		attr = fnAttr.create("endTwist", "endtw", MFnNumericData::kDouble, 0.0);
 		fnAttr.setKeyable(1);
 		fnAttr.setWritable(1);
 		fnAttr.setHidden(0);
 		fnAttr.setStorable(1);
 		fnAttr.setReadable(1);
-		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
-		attr = fnAttr.create("prevStartTwist", "prestrtw", MFnNumericData::kDouble, 0);
-		fnAttr.setKeyable(1);
-		fnAttr.setWritable(1);
-		fnAttr.setHidden(1);
-		fnAttr.setStorable(1);
-		fnAttr.setReadable(1);
-		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
-		attr = fnAttr.create("preEndTwist", "preendtw", MFnNumericData::kDouble, 0);
-		fnAttr.setKeyable(1);
-		fnAttr.setWritable(1);
-		fnAttr.setHidden(1);
-		fnAttr.setStorable(1);
-		fnAttr.setReadable(1);
-		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
 		MObject twistRamp = MRampAttribute::createCurveRamp("twistRamp", "twr");
 		fnHandle.addAttribute(twistRamp, MFnDependencyNode::kLocalDynamicAttr);
+		attr = fnAttr.create("preTwistJoint", "preTwJ", MFnNumericData::kDouble, 0.0);
+		fnAttr.setKeyable(0);
+		fnAttr.setWritable(1);
+		fnAttr.setHidden(1);
+		fnAttr.setStorable(1);
+		fnAttr.setReadable(1);
+		fnAttr.setArray(true);
+		fnAttr.setUsesArrayDataBuilder(true);
+		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
+		MPlug preJointTwistPlug = fnHandle.findPlug( "preTwJ" );
+		for (int i = 0; i < joints.size(); i++)
+		{
+			MPlug asd = preJointTwistPlug.elementByLogicalIndex( i, &stat );
+			asd.setValue(0);
+		}
 	} else
 	{
 			MPlug strPlug = fnHandle.findPlug("str");
@@ -323,13 +323,7 @@ MStatus splineSolverNode::doSimpleSolver()
 	double startTwist = startTwistPlug.asDouble();
 	MPlug endTwistPlug = fnHandle.findPlug("endtw");
 	double endTwist = endTwistPlug.asDouble();
-	MPlug prestartTwistPlug = fnHandle.findPlug("prestrtw");
-	double preStartTwist = prestartTwistPlug.asDouble();
-	MPlug preendTwistPlug = fnHandle.findPlug("preendtw");
-	double preEndTwist = preendTwistPlug.asDouble();
-	//float twistValue;
-	// curveAttribute.getValueAtPosition(rampPosition, twistValue, &stat);
-	// startTwist + twistValue *( endTwist - startTwist );
+	MPlug preJointTwistPlug = fnHandle.findPlug( "preTwJ" );
 	//Roll
 	MPlug rollPlug = fnHandle.findPlug("roll");
 	double roll = rollPlug.asDouble();
@@ -355,10 +349,6 @@ MStatus splineSolverNode::doSimpleSolver()
 	float jointRotPercent = 1.0/joints.size();
 	float currJointRot = 0;
 	float prevTwist = 0;
-	float v0 = startTwist - preStartTwist;
-	float v1 = endTwist - preEndTwist;
-	prestartTwistPlug.setDouble( startTwist );
-	preendTwistPlug.setDouble( endTwist );
 	//j.setScale(scale);
 	for (int i = 0; i < joints.size(); i++)
 	{
@@ -389,12 +379,17 @@ MStatus splineSolverNode::doSimpleSolver()
 			float twistValue;
 			curveAttribute.getValueAtPosition(currJointRot, twistValue, &stat);
 			//float rotVal = startTwist - preStartTwist + twistValue *( endTwist - preEndTwist - startTwist - preStartTwist );
-			float rotVal = (1-twistValue)*v0 + twistValue*v1;
-			MQuaternion qTwist( MAngle(rotVal - prevTwist, MAngle::kDegrees).asRadians(), vBaseJoint );
+			double rotVal = (1-twistValue)*startTwist + twistValue*endTwist;
+			MPlug jointPreTwistPlug = preJointTwistPlug.elementByLogicalIndex( i, &stat );
+			double prevRotVal = 0;
+			jointPreTwistPlug.getValue( prevRotVal );
+			MQuaternion qTwist( MAngle(rotVal - prevTwist - prevRotVal, MAngle::kDegrees).asRadians(), vBaseJoint );
 			j.rotateBy( qTwist, MSpace::kWorld );
 			currJointRot += jointRotPercent;
+			jointPreTwistPlug.setValue( rotVal - prevTwist );
 			prevTwist = rotVal;
-			//MGlobal::displayInfo(MString("CurrJointRot: ") + currJointRot);
+			//MGlobal::displayInfo(MString("prevRotVal: ") + prevRotVal);
+			//MGlobal::displayInfo(MString("rotVal: ") + rotVal);
 			//MGlobal::displayInfo(MString("Rot Val: ") + rotVal);
 		}
 		//Calculate Roll
