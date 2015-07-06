@@ -361,7 +361,7 @@ class mayaFile(fl.File):
 			nodes = mc.file( self.path, r = True, type = "mayaAscii", gl = True, loadReferenceDepth = "all",rnn = True, options = "v=0;", dns = True )
 		else:
 			#nodes = mc.file( self.path, r = True, type = "mayaAscii", gl = True, loadReferenceDepth = "all",rnn = True, shd = ["renderLayersByName", "shadingNetworks"] , mergeNamespacesOnClash = False, namespace = namespa, options = "v=0;" )
-			nodes = mc.file( self.path, r = True, type = "mayaAscii", gl = True, loadReferenceDepth = "all",rnn = True, mergeNamespacesOnClash = False, namespace = namespa, options = "v=0;" )
+			nodes = mc.file( self.path, r = True, type = "mayaAscii", gl = True, loadReferenceDepth = "all",rnn = True, shd = "renderLayersByName" , mergeNamespacesOnClash = False, namespace = namespa, options = "v=0;" )
 		return mn.Nodes(nodes)
 
 	def open(self):

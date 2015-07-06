@@ -78,7 +78,7 @@ class ShotCreator(base, fom):
 		if len(shots):
 			lastShot = shots[-1].name
 			lastShotNumber = int( lastShot.split( '_' )[0][1:] )
-		newAsset = sh.Shot( 's' + str(lastShotNumber + 1 ).zfill( 3 ) + '_' +  str( assetName ),  se )
+		newAsset = sh.Shot( 's' + str(lastShotNumber + 1 ).zfill( 3 ) + '_' + seqName + '_'  + str( assetName ),  se )
 		if not newAsset.exists:
 			newAsset.create()
 			print 'New Shot Created : ', newAsset.name, ' for ',  projName

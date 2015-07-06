@@ -94,7 +94,7 @@ class RenderManagerUI(base,fom):
 	def _fillLayers(self):
 		"""fill ui with render layers"""
 		for r in rlayer.renderlayers():
-			if ':' in r.name:
+			if ':defaultRenderLayer' in r.name:
 				continue
 			self.renderLayers_lay.addWidget( RenderLayerUI( r ) )
 
@@ -162,18 +162,20 @@ class RenderManagerUI(base,fom):
 			if w.overFrameRange_chb.isChecked():
 				frames =  str( w.frameRange_le.text() )
 			filename = mc.renderSettings( lyr = w.layer.name, gin = ('?'*pad) )[0]
+			print filename
 			if not mc.getAttr( "defaultRenderGlobals.ren" ) == 'mentalRay':
-				filePrefix = filePrefix.replace( '<RenderLayer>', w.layer.name )
+				filePrefix = filePrefix.replace( '<RenderLayer>', w.layer.name.replace( ':', '_' ) )
 				#get version number
 				if '<RenderLayerVersion>' in filePrefix:
 					versionNumber = self._getVersionNumber( filePrefix.split( '<RenderLayerVersion>' )[0] )
 					filePrefix = filePrefix.replace( '<RenderLayerVersion>', 'v' + str(versionNumber).zfill( 4 ) )
 				filename = filePrefix + '.' + ('?'*pad) + os.path.splitext( filename )[1]
 			print 'RENDERING', filename, w.layer.name
+			#filename = filename.replace( ':', '_' )
 			name = ''
 			if self._project:
 				name = self._project + ' - '
-			Job = dl.Job( w.layer.name,
+			Job = dl.Job( w.layer.name.replace( ':', '_' ),
 					{		'Plugin'          : plugin,
 							'Group'           : group,
 							'Pool'            : pool,

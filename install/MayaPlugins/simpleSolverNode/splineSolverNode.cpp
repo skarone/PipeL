@@ -97,6 +97,8 @@ public:
 private:
 	MStatus			doSimpleSolver();
 	double			getJointsTotalLenght();
+	MQuaternion     quaternionFromVectors(MVector vec1, MVector vec2);
+	void			gsOrthonormalize( MVector &normal, MVector &tangent );
 	std::vector<MDagPath> joints;
 	std::vector<MDagPath> jointsScales;
 	MFnNurbsCurve curveFn;
@@ -160,6 +162,8 @@ MStatus splineSolverNode::preSolve()
 	MObject inputCurveObject = curveHandle.asNurbsCurveTransformed();
 	curveFn.setObject( inputCurveObject );
 	float initCurveLength = curveFn.length();
+	MVector initNormal = curveFn.normal(0);
+	MVector initTangent = curveFn.tangent(0);
 	float stretchRatio = 1;
 	// Get the position of the end_effector
 	//
@@ -209,14 +213,23 @@ MStatus splineSolverNode::preSolve()
 		fnAttr.setStorable(1);
 		fnAttr.setReadable(1);
 		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
-		attr = fnAttr.create("jointsLength", "jsLen", MFnNumericData::kDouble, getJointsTotalLenght());
+		attr = fnAttr.create("initNormal", "norm", MFnNumericData::k3Double);
+		fnAttr.setDefault(initNormal.x, initNormal.y, initNormal.z);
 		fnAttr.setKeyable(0);
 		fnAttr.setWritable(1);
 		fnAttr.setHidden(1);
 		fnAttr.setStorable(1);
 		fnAttr.setReadable(1);
 		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
-		attr = fnAttr.create("prevRoll", "preRoll", MFnNumericData::kDouble, 0.0);
+		attr = fnAttr.create("initTangent", "tang", MFnNumericData::k3Double);
+		fnAttr.setDefault(initTangent.x, initTangent.y, initTangent.z);
+		fnAttr.setKeyable(0);
+		fnAttr.setWritable(1);
+		fnAttr.setHidden(1);
+		fnAttr.setStorable(1);
+		fnAttr.setReadable(1);
+		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
+		attr = fnAttr.create("jointsLength", "jsLen", MFnNumericData::kDouble, getJointsTotalLenght());
 		fnAttr.setKeyable(0);
 		fnAttr.setWritable(1);
 		fnAttr.setHidden(1);
@@ -236,23 +249,9 @@ MStatus splineSolverNode::preSolve()
 		fnAttr.setHidden(0);
 		fnAttr.setStorable(1);
 		fnAttr.setReadable(1);
+		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
 		MObject twistRamp = MRampAttribute::createCurveRamp("twistRamp", "twr");
 		fnHandle.addAttribute(twistRamp, MFnDependencyNode::kLocalDynamicAttr);
-		attr = fnAttr.create("preTwistJoint", "preTwJ", MFnNumericData::kDouble, 0.0);
-		fnAttr.setKeyable(0);
-		fnAttr.setWritable(1);
-		fnAttr.setHidden(1);
-		fnAttr.setStorable(1);
-		fnAttr.setReadable(1);
-		fnAttr.setArray(true);
-		fnAttr.setUsesArrayDataBuilder(true);
-		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
-		MPlug preJointTwistPlug = fnHandle.findPlug( "preTwJ" );
-		for (int i = 0; i < joints.size(); i++)
-		{
-			MPlug asd = preJointTwistPlug.elementByLogicalIndex( i, &stat );
-			asd.setValue(0);
-		}
 	} else
 	{
 			MPlug strPlug = fnHandle.findPlug("str");
@@ -301,6 +300,25 @@ double splineSolverNode::getJointsTotalLenght()
 	}
 	return totalLength;
 }
+MQuaternion splineSolverNode::quaternionFromVectors(MVector vec1, MVector vec2)
+{
+		MVector crosVec = vec1^vec2;
+		float w = sqrt((vec1.length() * vec1.length()) * (vec2.length() * vec2.length())) + vec1*vec2;
+		//float w = 1.0f + vBaseJoint*vFinalJoint;
+		MQuaternion q(crosVec.x, crosVec.y, crosVec.z, w );
+		q.normalizeIt();
+		return q;
+}
+
+void splineSolverNode::gsOrthonormalize( MVector &normal, MVector &tangent )
+{
+    // Gram-Schmidt Orthonormalization
+    normal.normalize();
+    MVector proj = normal * ( tangent * normal ); // normal * dotProduct(tangent,normal)
+    tangent = tangent - proj;
+    tangent.normalize();
+    
+}
 
 MStatus splineSolverNode::doSimpleSolver()
 //
@@ -323,13 +341,9 @@ MStatus splineSolverNode::doSimpleSolver()
 	double startTwist = startTwistPlug.asDouble();
 	MPlug endTwistPlug = fnHandle.findPlug("endtw");
 	double endTwist = endTwistPlug.asDouble();
-	MPlug preJointTwistPlug = fnHandle.findPlug( "preTwJ" );
 	//Roll
 	MPlug rollPlug = fnHandle.findPlug("roll");
 	double roll = rollPlug.asDouble();
-	MPlug preRollPlug = fnHandle.findPlug("preRoll");
-	double preRoll = preRollPlug.asDouble();
-
 	MPlug strPlug = fnHandle.findPlug("str");
 	float stretchRatio = strPlug.asDouble();
 	float normCrvLength = curCurveLength / initCurveLength;
@@ -344,11 +358,25 @@ MStatus splineSolverNode::doSimpleSolver()
 	float parm = curveFn.findParamFromLength( startLength );
 	MPoint pBaseJoint, pEndJoint;
 	curveFn.getPointAtParam( parm, pBaseJoint );
+	//get Init normal
+	MPlug initNormalPlug = fnHandle.findPlug("norm");
+	double nx = initNormalPlug.child(0).asDouble();
+	double ny = initNormalPlug.child(1).asDouble();
+	double nz = initNormalPlug.child(2).asDouble();
+	MVector eyeUp( nx, ny, nz );
+	//get Init Tangent
+	MPlug initTangentPlug = fnHandle.findPlug("tang");
+	double tx = initTangentPlug.child(0).asDouble();
+	double ty = initTangentPlug.child(1).asDouble();
+	double tz = initTangentPlug.child(2).asDouble();
+	MVector eyeV( tx, ty, tz );
+	
 	MFnIkJoint j( joints[0] );
 	j.setTranslation( MVector( pBaseJoint ), MSpace::kWorld );
 	float jointRotPercent = 1.0/joints.size();
 	float currJointRot = 0;
 	float prevTwist = 0;
+	double angle;
 	//j.setScale(scale);
 	for (int i = 0; i < joints.size(); i++)
 	{
@@ -367,43 +395,37 @@ MStatus splineSolverNode::doSimpleSolver()
 		}
 		MVector vBaseJoint(pBaseJoint[0]-pEndJoint[0], pBaseJoint[1]-pEndJoint[1], pBaseJoint[2]-pEndJoint[2]);
 		startLength += vBaseJoint.length();
-		float parm = curveFn.findParamFromLength( startLength );
+		MVector eyeAim(1.0,0.0,0.0);
 		MPoint pFinalPos;
-		curveFn.getPointAtParam( parm, pFinalPos );
-		MVector vFinalJoint(pBaseJoint[0]-pFinalPos[0], pBaseJoint[1]-pFinalPos[1], pBaseJoint[2]-pFinalPos[2]);
-
-		MVector crosVec = vBaseJoint^vFinalJoint;
-		float w = sqrt((vBaseJoint.length() * vBaseJoint.length()) * (vFinalJoint.length() * vFinalJoint.length())) + vBaseJoint*vFinalJoint;
+		float parm = curveFn.findParamFromLength( startLength );
+		//Aim to final Pos
+		curveFn.getPointAtParam( parm, pFinalPos, MSpace::kWorld );
+		MVector eyeU(pBaseJoint[0]-pFinalPos[0], pBaseJoint[1]-pFinalPos[1], pBaseJoint[2]-pFinalPos[2]);
+		eyeU.normalize();
+		MVector eyeW( eyeU ^ eyeV );
+		eyeW.normalize();
+		eyeV = eyeW ^ eyeU;
+		MQuaternion qU( -eyeAim, eyeU );
+		
+		MVector upRotated( eyeUp.rotateBy( qU ));
+		angle = acos( upRotated*eyeV );
+		
 		//Calculate Twist
 		{
 			float twistValue;
 			curveAttribute.getValueAtPosition(currJointRot, twistValue, &stat);
-			//float rotVal = startTwist - preStartTwist + twistValue *( endTwist - preEndTwist - startTwist - preStartTwist );
 			double rotVal = (1-twistValue)*startTwist + twistValue*endTwist;
-			MPlug jointPreTwistPlug = preJointTwistPlug.elementByLogicalIndex( i, &stat );
-			double prevRotVal = 0;
-			jointPreTwistPlug.getValue( prevRotVal );
-			MQuaternion qTwist( MAngle(rotVal - prevTwist - prevRotVal, MAngle::kDegrees).asRadians(), vBaseJoint );
-			j.rotateBy( qTwist, MSpace::kWorld );
+			angle += MAngle(rotVal, MAngle::kDegrees).asRadians();
 			currJointRot += jointRotPercent;
-			jointPreTwistPlug.setValue( rotVal - prevTwist );
-			prevTwist = rotVal;
-			//MGlobal::displayInfo(MString("prevRotVal: ") + prevRotVal);
-			//MGlobal::displayInfo(MString("rotVal: ") + rotVal);
-			//MGlobal::displayInfo(MString("Rot Val: ") + rotVal);
 		}
 		//Calculate Roll
-		if (i == 0)
-		{
-			if ( preRoll != roll ){
-				MQuaternion qRoll( roll - preRoll, vBaseJoint );
-				j.rotateBy( qRoll, MSpace::kWorld );
-				preRollPlug.setDouble( roll );
-			}
-		}
-		MQuaternion q(crosVec.x, crosVec.y, crosVec.z, w );
-		//q.normalizeIt();
-		j.rotateBy( q, MSpace::kWorld );
+		angle += roll;
+		
+		MQuaternion qV(angle, eyeU);
+		
+		MQuaternion q(qU*qV);
+		
+		j.setRotation( q, MSpace::kWorld );
 	}
 
 	return MS::kSuccess;
