@@ -252,6 +252,8 @@ MStatus splineSolverNode::preSolve()
 		fnHandle.addAttribute(attr, MFnDependencyNode::kLocalDynamicAttr);
 		MObject twistRamp = MRampAttribute::createCurveRamp("twistRamp", "twr");
 		fnHandle.addAttribute(twistRamp, MFnDependencyNode::kLocalDynamicAttr);
+		MObject scaleRamp = MRampAttribute::createCurveRamp("scaleRamp", "scr");
+		fnHandle.addAttribute(scaleRamp, MFnDependencyNode::kLocalDynamicAttr);
 	} else
 	{
 			MPlug strPlug = fnHandle.findPlug("str");
@@ -341,6 +343,9 @@ MStatus splineSolverNode::doSimpleSolver()
 	double startTwist = startTwistPlug.asDouble();
 	MPlug endTwistPlug = fnHandle.findPlug("endtw");
 	double endTwist = endTwistPlug.asDouble();
+	//Scale Ramp
+	MPlug scaleRamp = fnHandle.findPlug("scaleRamp");
+	MRampAttribute curveScaleAttribute( scaleRamp, &stat );
 	//Roll
 	MPlug rollPlug = fnHandle.findPlug("roll");
 	double roll = rollPlug.asDouble();
@@ -382,6 +387,18 @@ MStatus splineSolverNode::doSimpleSolver()
 	{
 		MFnIkJoint j( joints[i]);
 		pBaseJoint = j.rotatePivot(MSpace::kWorld);
+		//Calculate Scale
+		float scaleValue;
+		curveScaleAttribute.getValueAtPosition(currJointRot, scaleValue, &stat);
+		//if ( scale[0] >= 1 ) // Stretch
+			scale[1] = 1 + scaleValue * ( 1 - scale[0] );
+		/*
+		else //Squash
+			scale[1] = 1 + scaleValue * ( 1.0 - scale[0] );
+		*/
+		if (scale[1] < 0)
+			scale[1] = 0;
+		scale[2] = scale[1];
 		j.setScale(scale);
 		//j.setRotation( rot, j.rotationOrder()  );
 		if( i == joints.size() - 1)
