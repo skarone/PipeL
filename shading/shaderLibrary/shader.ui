@@ -2,13 +2,11 @@
 <ui version="4.0">
  <class>Form</class>
  <widget class="QWidget" name="Form">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>298</width>
-    <height>432</height>
-   </rect>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -25,13 +23,13 @@
    </property>
    <item>
     <widget class="QFrame" name="sdf">
-     <property name="maximumSize">
-      <size>
-       <width>200</width>
-       <height>250</height>
-      </size>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
-     <property name="baseSize">
+     <property name="maximumSize">
       <size>
        <width>200</width>
        <height>250</height>
@@ -78,18 +76,6 @@
       </item>
       <item>
        <widget class="QLabel" name="imageShader_img">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>150</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>150</width>
-          <height>150</height>
-         </size>
-        </property>
         <property name="styleSheet">
          <string notr="true">background-color: rgb(255, 255, 255);</string>
         </property>

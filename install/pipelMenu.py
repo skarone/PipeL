@@ -66,6 +66,7 @@ mc.setParent('..', menu = True )
 #SHADING
 mc.menuItem( l = 'Shading', sm = True, to = True )
 mc.menuItem( l = 'Texture Manager', c = "import shading.textureManager.textureManagerUi as tmu;reload(tmu);tmu.main()" )
+mc.menuItem( l = 'Shader Library', c = "import shading.shaderLibrary.shaderLibraryUi as shdUi;reload( shdUi );shdUi.main()" )
 mc.menuItem( l = 'Gamma For Selection', c = "import shading.utils.utils as shu;reload(shu);shu.createGammaForSelectedNodes()" )
 mc.setParent('..', menu = True )
 

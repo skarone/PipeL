@@ -12,6 +12,7 @@ Description:
 
 import general.mayaNode.mayaNode as mn
 reload( mn )
+import pipe.mayaFile.mayaFile as mfl
 try:
 	import maya.cmds as mc
 	import maya.mel as mm
@@ -21,6 +22,7 @@ import json
 import datetime
 import os
 import shutil
+import general.ui.progressRender.progressRender as prR
 
 
 ARNOLD_SETTINGS = { 'defaultResolution.width' : 400,
@@ -126,12 +128,12 @@ class Shader(object):
 	@property
 	def datatextures(self):
 		"""return the textures of the exported shader"""
-		return self._data['textures']
+		return self.data['textures']
 
 	@property
 	def datanodes(self):
 		"""return the nodes of the exported shader"""
-		return self._data['nodes']
+		return self.data['nodes']
 
 	@property
 	def assets(self):
@@ -180,49 +182,75 @@ class Shader(object):
 
 	def publish(self, makePreview = False, tags = '', notes = '' ):
 		"""export shader to library"""
-		mc.select( self.name )
+		shad = mn.Node( self.name )
+		mc.select( shad.shader, ne = True )
 		exportPath = self.path + self.name + '.ma'
-		self._savedata( tags, notes, previewtime )
-		n = mn.Node( self.name )
-		n.a.id.add()
-		n.a.id.v = self.id
-		n.a.category.add()
-		n.a.category = self.category
-		n.a.path.add()
-		n.a.path.v = exportPath
 		if self.published: #Make a bakup
+			self.saveVersion()
 			print 'make a fucking backup!'
 		else:
 			os.makedirs( self.path )
-		self.settexturespath( self.path + 'textures/' )
+		self._savedata( tags, notes, None )
+		n = mn.Node( self.name )
+		"""
+		if not n.a.id.exists:
+			n.a.id.add()
+			print self.id
+			n.a.id.v = self.id
+		if not n.a.category.exists:
+			n.a.category.add()
+			n.a.category = self.category
+		if not n.a.path.exists:
+			n.a.path.add()
+			n.a.path.v = exportPath
+		"""
 		mc.file( exportPath , force = True, options = "v=0", typ = "mayaAscii", pr = True, es = True )
+		self.settexturespath( self.path + 'Textures/', exportPath )
 		previewtime = 0
 		if makePreview:
+			print 'creating preview'
 			previewtime = self.preview()
 
-	def settexturespath( self, newPath ):
+	def settexturespath( self, newPath, mayaFile ):
 		"""move textures to new path and set that path in the nodes"""
 		if not os.path.exists( newPath ):
 			os.makedirs( newPath )
 		for t in self.textures:
 			curPath = t.a.ftn.v
-			newPath = newPath + curPath.split( '/' )[-1]
-			if curPath == newPath:
+			finalPath = newPath + curPath.split( '/' )[-1]
+			if curPath == finalPath:
 				continue
-			shutil.copy2( curPath, newPath )
-			t.a.ftn.v = newPath
+			shutil.copy2( curPath, finalPath )
+			mayaFile = mfl.mayaFile( mayaFile )
+			mayaFile.changeTextures( newDir = newPath )
+
+	def saveVersion(self):
+		"""make backup"""
+		#get all files in path and move it to a folder inside the folder versions with the name of the shader + _v000 in it
+		files = [a for a in os.listdir( self.path ) if not 'Versions' == a ]
+		if os.path.exists( self.path + 'Versions' ):
+			versionsNum = len( os.listdir( self.path + 'Versions' ) ) 
+		else:
+			versionsNum = 1
+		versionsFolder = self.path + 'Versions' + self.name + '_v' + str( versionsNum ).zfill( 3 ) + '/'
+		for f in files:
+			fil = self.path + f
+			if os.path.isdir( f ):
+				os.copytree( fil, versionsFolder )
+			else:
+				os.copy( fil, versionsFolder + f )
 
 	@property
 	def date(self):
 		"""return the creating time"""
-		return self._data['date']
+		return self.data['date']
 
 	@property
 	def id(self):
 		"""return the id of the shader"""
-		return self._data['id']
+		return self.data['id']
 
-	def _savedata( self, tags, notes, previewtime ):
+	def _savedata( self, tags, notes, previewtime = None ):
 		"""recollect the data from scene and save the data"""
 		data = {}
 		ti = datetime.datetime.now()
@@ -253,23 +281,41 @@ class Shader(object):
 
 	def preview(self):
 		"""render shader to create thumbnail"""
-		pass
+		self.createPreviewMayaFile()
+		#render preview
+		prR.runBar( self.path + self.name + 'Preview.ma' )
+
+	def createPreviewMayaFile(self):
+		"""docstring for createPreviewMayaFile"""
+		createPrevScript = os.path.dirname(os.path.abspath(__file__)) + '/createPreview.py'
+		cmd = 'C:/"Program Files"/Autodesk/Maya2015/bin/' + 'mayapy.exe ' + createPrevScript + ' ' + self.path + self.name + '.ma'
+		print cmd
+		#create preview scene
+		os.popen( cmd )
 
 	@property
 	def previewpath(self):
 		"""return the path of the preview image"""
-		return self.path + self.name + '.jpg'
+		return self.path + self.name + '.png'
+
+	@property
+	def previewMayaFile(self):
+		"""return the preview maya file"""
+		return mfl.mayaFile( self.path + self.name + 'Preview' + '.ma' )
 
 	def delete(self):
 		"""delete shader from library"""
+		if os.path.exists(self.path, self._library.path + 'Deleted/' + self.category + '/' + self.name):
+			shutil.rmtree( self.path, self._library.path + 'Deleted/' + self.category + '/' + self.name )
+		shutil.copytree( self.path, self._library.path + 'Deleted/' + self.category + '/' + self.name )
 		shutil.rmtree(self.path)
 
 	def assign(self):
 		"""assign shader to selection"""
 		sel = mn.ls( sl = True )
-		if not self.exists:
-			self.importShader()
 		if sel:
+			if not self.exists:
+				self.importShader()
 			mc.select( sel )
 			mc.hyperShade( a = self.name )
 
@@ -322,7 +368,8 @@ class ShaderLibrary( object ):
 	@property
 	def categories(self):
 		"""return the categories in the library"""
-		return os.listdir( self.path )
+		cats = [a for a in os.listdir(self.path) if not a == 'Deleted' and os.path.isdir( self.path + a ) ]
+		return cats
 
 	def shadersincategory(self, category):
 		"""return the shaders inside a category"""
@@ -351,9 +398,18 @@ class ShaderLibrary( object ):
 		"""create a library"""
 		os.makedirs( self._path )
 
+	def createCategory(self, newCatName):
+		"""docstring for createCategory"""
+		os.makedirs( self._path + '/' + newCatName )
+
 	def delete(self):
 		"""delete the library"""
 		os.remove( self.path )
+
+	def deleteCategory(self, category):
+		"""docstring for deleteCategory"""
+		shutil.copytree( self.path + category, self.path + 'Deleted/' + category )
+		shutil.rmtree( self.path + category )
 
 	def zip(self):
 		"""zip library =)"""
