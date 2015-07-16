@@ -221,24 +221,26 @@ class Shader(object):
 			if curPath == finalPath:
 				continue
 			shutil.copy2( curPath, finalPath )
-			mayaFile = mfl.mayaFile( mayaFile )
-			mayaFile.changeTextures( newDir = newPath )
+			mayFile = mfl.mayaFile( mayaFile )
+			mayFile.changeTextures( newDir = newPath )
 
 	def saveVersion(self):
 		"""make backup"""
 		#get all files in path and move it to a folder inside the folder versions with the name of the shader + _v000 in it
 		files = [a for a in os.listdir( self.path ) if not 'Versions' == a ]
 		if os.path.exists( self.path + 'Versions' ):
-			versionsNum = len( os.listdir( self.path + 'Versions' ) ) 
+			versionsNum = len( os.listdir( self.path + 'Versions' ) ) + 1 
 		else:
 			versionsNum = 1
-		versionsFolder = self.path + 'Versions' + self.name + '_v' + str( versionsNum ).zfill( 3 ) + '/'
+		versionsFolder = self.path + 'Versions/' + self.name + '_v' + str( versionsNum ).zfill( 3 ) + '/'
+		if not os.path.exists(versionsFolder):
+			os.makedirs( versionsFolder )
 		for f in files:
 			fil = self.path + f
-			if os.path.isdir( f ):
-				os.copytree( fil, versionsFolder )
+			if os.path.isdir( fil ):
+				shutil.copytree( fil, versionsFolder + f )
 			else:
-				os.copy( fil, versionsFolder + f )
+				shutil.copy2( fil, versionsFolder + f )
 
 	@property
 	def date(self):
