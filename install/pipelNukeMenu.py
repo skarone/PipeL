@@ -13,6 +13,8 @@ m.addCommand( 'Turn ON|OFF Heavy Nodes', 'import nuk.utils.utils as ut;reload(ut
 m.addSeparator()
 m.addCommand( 'Submit To Deadline', 'import nuk.deadline.SubmitToDeadline as deadline; deadline.main();') 
 m.addSeparator()
+m.addCommand( 'MultiChannelSplit', 'import nuk.MultiChannelSplit.MultiChannelSplit as MultiChannelSplit; MultiChannelSplit.MultiChannelSplit()', 'alt+m') 
+m.addSeparator()
 m.addCommand( 'Reload Menu', 'import install.pipelNukeMenu as pNM; reload( pNM );' )
 
 def addSRPanel():

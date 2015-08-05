@@ -156,9 +156,22 @@ class Asset(object):
 			cur.execute(sql)
 
 	@property
+	def previewImagePath(self):
+		"""docstring for previewImagePath"""
+		return tfl.textureFile( self.finalPath.path.replace( '.ma', '.png' ) )
+
+	@property
+	def hasPreviewImage(self):
+		"""return bool if it has preview image file"""
+		if self.previewImagePath.exists:
+			return not self.previewImagePath.isZero
+		else:
+			return False
+
+	@property
 	def rigPath(self):
 		"""return the path of the rig"""
-		return mfl.mayaFile( self.path + '/Rig/' + self.name + "_RIG.ma" )
+		return mfl.mayaFile( self.path + '/Rig/' + self.name + "_Rig.ma" )
 
 	@property
 	def hasRig(self):

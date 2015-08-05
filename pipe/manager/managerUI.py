@@ -42,6 +42,7 @@ import pipe.textureFile.textureFile as tfl
 reload( tfl )
 import pipe.task.taskUi as tskUi
 reload(tskUi)
+from sys import platform as _platform
 
 INMAYA = False
 try:
@@ -500,6 +501,7 @@ class ManagerUI(base,fom):
 				finalAssets.append( a )
 			assets.extend( finalAssets )
 		self.assets_tw.setRowCount( len( assets ) )
+		self.assets_tw.setColumnWidth( 0, 200 )
 		if not assets:
 			return
 		for i,a in enumerate( assets ):
@@ -507,6 +509,11 @@ class ManagerUI(base,fom):
 			#item.setFlags(QtCore.Qt.ItemIsEnabled)
 			item.setCheckState(QtCore.Qt.Unchecked )
 			item.setData(32, a )
+			if a.hasPreviewImage:
+				imagePath = a.previewImagePath.path
+			else:
+				imagePath = PYFILEDIR + '/icons/no_Preview.jpg'
+			item.setData(QtCore.Qt.DecorationRole, QtGui.QPixmap( imagePath ).scaled(56, 56, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation));
 			self.assets_tw.setItem( i, 0, item )
 			files = [
 				a.modelPath,
@@ -825,7 +832,10 @@ class ManagerUI(base,fom):
 			asset = item.data(32).toPyObject()
 		else:
 			asset = item.data(32)
-		subprocess.Popen(r'explorer /select,"'+ asset.path.replace( '/','\\' ) +'"')
+		if _platform == 'win32':
+			subprocess.Popen(r'explorer /select,"'+ asset.path.replace( '/','\\' ) +'"')
+		else:
+			subprocess.Popen(['nautilus',asset.path])
 
 	def openFileInCurrentMaya(self):
 		"""docstring for openFileInCurrentMaya"""

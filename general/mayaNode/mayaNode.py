@@ -857,9 +857,9 @@ class NodeAttribute(object):
 		if not other.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		if inOrder:
-			return mc.isConnected( self.name, other.name )
+			return mc.isConnected( self.fullname, other.fullname )
 		else:
-			return mc.isConnected( other.name, self.name )
+			return mc.isConnected( other.fullname, self.fullname )
 
 	def delete(self):
 		"""delete attribute"""

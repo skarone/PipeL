@@ -304,7 +304,7 @@ class CacheManagerUI(base,fom):
 	@property
 	def _selectedProject(self):
 		"""docstring for _selectedProyect"""
-		return prj.Project( str ( self.projects_cmb.currentText() ) )
+		return prj.Project( str ( self.projects_cmb.currentText() ), self.serverPath )
 
 	@property
 	def _selectedSequence(self):

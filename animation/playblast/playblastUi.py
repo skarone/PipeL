@@ -2,6 +2,8 @@ import os
 import pipe.mayaFile.mayaFile as mfl
 import pipe.file.file as fl
 import general.ui.pySideHelper as uiH
+import render.deadline.deadline as dl
+reload( dl )
 reload( uiH )
 uiH.set_qt_bindings()
 from Qt import QtGui,QtCore
@@ -17,6 +19,8 @@ try:
 	reload(plb)
 	import maya.cmds as mc
 	INMAYA = True
+	import render.renderOcc.renderOcc as renOcc
+	reload( renOcc )
 except:
 	pass
 INHOU = False
@@ -45,11 +49,18 @@ class PlayblastUi(base,fom):
 		self.setupUi(self)
 		self._makeConnections()
 		self.setObjectName( 'PlayblastUi' )
+		dead = dl.Deadline()
+		self.group_cmb.addItems( dead.groups )
 
 	def _makeConnections(self):
 		"""docstring for _makeConnections"""
 		self.connect( self.playblast_btn , QtCore.SIGNAL("clicked()") , self.playblast )
+		self.connect( self.renderOcc_btn , QtCore.SIGNAL("clicked()") , self.renderOcc )
 		self.connect( self.publish_btn , QtCore.SIGNAL("clicked()") , self.publish )
+
+	def renderOcc(self):
+		"""render occ for current camera"""
+		renOcc.renderOcc( self.motionBlur_chb.isChecked(), str( self.group_cmb.currentText() ) )
 
 	def playblast(self):
 		"""docstring for playblast"""

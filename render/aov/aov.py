@@ -32,10 +32,11 @@ def addAllAovs():
 		aovNodeName = addAOV( ao )
 		aovNode.a.enabled.v = False #TURN IT OFF
 
+
+"""
 def create(  customAovName = '' ,name ='' , typ = '' , enabled = '' ):
-	"""create Aov Node"""
 	if mn.Node( customAovName ).exists:
-		return
+		return mn.Node( customAovName )
 	customAov = pm.createNode( 'aiAOV' )
 	customAov.setAttr( 'name', name       )
 	customAov.setAttr( 'enabled', enabled )
@@ -48,6 +49,13 @@ def create(  customAovName = '' ,name ='' , typ = '' , enabled = '' ):
 	customAov.message >> arnoldRenderGlobals.aovList[nextIndex]
 	customAov.rename( customAovName )
 	return mn.Node( customAovName )
+"""
+
+def create( aovName, aovType = None ):
+	"""docstring for create"""
+	inter = aovs.AOVInterface()
+	inter.addAOV( aovName, aovType )
+	return mn.Node( 'aiAOV_' + aovName )
 
 def addAOV( aovName, aovType = None ):
 	"""docstring for addAov"""

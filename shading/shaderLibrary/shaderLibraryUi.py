@@ -51,7 +51,8 @@ class LibraryUI(base, fom):
 
 	def _fillHistory(self):
 		"""add lastest libraries in history"""
-		for h in self.history:
+		for h in reversed( self.history ):
+			print h
 			self._insertLibraryPathInUI( h )
 
 	def _createAccordion(self):

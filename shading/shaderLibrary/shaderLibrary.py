@@ -274,7 +274,12 @@ class Shader(object):
 	def importShader( self ):
 		"""import shader to scene"""
 		impPath = self.shaderPath
-		mc.file( impPath, i = True, type = "mayaAscii", rpr = self.name, options = "v=0", pr = True, loadReferenceDepth = "all" )
+		namespace = self.name
+		shadCount = ''
+		if self.exists:
+			shadCount = len( mc.ls( self.name + '*:' + self.name  ))
+		mc.file( impPath, i = True, type = "mayaAscii", namespace = namespace, options = "v=0", pr = True, loadReferenceDepth = "all" )
+		return shadCount
 
 	@property
 	def shaderPath(self):
@@ -316,16 +321,16 @@ class Shader(object):
 		"""assign shader to selection"""
 		sel = mn.ls( sl = True )
 		if sel:
-			if not self.exists:
-				self.importShader()
+			#if not self.exists:
+			shadCount = self.importShader()
 			mc.select( sel )
-			mc.hyperShade( a = self.name )
+			mc.hyperShade( a = self.name + str( shadCount ) + ':' + self.name )
 
 	#SCENE Tools
 	@property
 	def exists(self):
 		"""return if the shader exists in scene"""
-		return mc.objExists( self.name )
+		return mc.objExists( self.name + ':' + self.name )
 
 	def remove(self):
 		"""remove shader from scene"""
