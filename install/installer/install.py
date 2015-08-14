@@ -1,5 +1,5 @@
 import os
-from PyQt4 import QtGui,QtCore, uic
+from PySide import QtGui,QtCore
 import FaderWidget.FaderWidget as fd
 import installer as ins
 import thanks as insth

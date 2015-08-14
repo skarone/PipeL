@@ -2,7 +2,10 @@ import os
 import pipe.mayaFile.mayaFile as mfl
 import pipe.file.file as fl
 import general.ui.pySideHelper as uiH
-import render.deadline.deadline as dl
+try:
+	import render.deadline.deadline as dl
+except:
+	pass
 reload( dl )
 reload( uiH )
 uiH.set_qt_bindings()
@@ -49,8 +52,9 @@ class PlayblastUi(base,fom):
 		self.setupUi(self)
 		self._makeConnections()
 		self.setObjectName( 'PlayblastUi' )
-		dead = dl.Deadline()
-		self.group_cmb.addItems( dead.groups )
+		if INMAYA:
+			dead = dl.Deadline()
+			self.group_cmb.addItems( dead.groups )
 
 	def _makeConnections(self):
 		"""docstring for _makeConnections"""

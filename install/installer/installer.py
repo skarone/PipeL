@@ -1,20 +1,43 @@
 import os
-from PyQt4 import QtGui,QtCore, uic
 import pyregistry as rg
+from PySide import QtGui,QtCore
+import xml.etree.ElementTree as xml
 from xml.etree.ElementTree import parse, SubElement
+import general.ui.pysideuic as pysideuic
+from cStringIO import StringIO
+
 import client
+import shutil
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
 uifile = QtCore.QFile("ui/install.ui")
-print 'asd',uifile.fileName(), uifile.exists()
-fom, base = uic.loadUiType( uifile.fileName() )
+
+def loadUiType(uiFile):
+	parsed = xml.parse(uiFile)
+	widget_class = parsed.find('widget').get('class')
+	form_class = parsed.find('class').text
+
+	with open(uiFile, 'r') as f:
+		o = StringIO()
+		frame = {}
+
+		pysideuic.compileUi(f, o, indent=0)
+		pyc = compile(o.getvalue(), '<string>', 'exec')
+		exec pyc in frame
+
+		#Fetch the base_class and form class based on their type in the xml from designer
+		form_class = frame['Ui_%s'%form_class]
+		base_class = eval('QtGui.%s'%widget_class)
+	return form_class, base_class
+
+fom, base = loadUiType( uifile.fileName() )
 
 class InstallerUI(base, fom):
 	"""docstring for ProjectCreator"""
-	procStart = QtCore.pyqtSignal(str)
+	procStart = QtCore.Signal(str)
 	def __init__(self, parent  = None ):
-		super(base, self).__init__(parent)
+		super(InstallerUI, self).__init__(parent)
 		self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 		self.setupUi(self)
 		self._makeConnections()
@@ -26,10 +49,11 @@ class InstallerUI(base, fom):
 		self.connect( self.clientInstall_btn, QtCore.SIGNAL("clicked()") , self.clientInstall )
 		self.connect( self.close_btn, QtCore.SIGNAL("clicked()") , self.close )
 
-	@QtCore.pyqtSlot()
+	@QtCore.Slot()
 	def close(self):
 		"""docstring for close"""
 		self.procStart.emit( 'Close' )
+		super(InstallerUI,self).close()
 
 	@property
 	def serverPath(self):
@@ -41,7 +65,7 @@ class InstallerUI(base, fom):
 		"""return serial from ui"""
 		return str( self.serial_le.text() )
 
-	@QtCore.pyqtSlot()
+	@QtCore.Slot()
 	def serverInstall(self):
 		"""copy PipeL files to serverPath and try to do client Install in this machine"""
 		if not self.serverPath or self.serverPath == 'Please Fill ME!':
@@ -56,9 +80,10 @@ class InstallerUI(base, fom):
 		msg.open()
 		"""
 
-	@QtCore.pyqtSlot()
+	@QtCore.Slot()
 	def clientInstall(self):
 		"""add userSetup in maya 2014/2015, add menu in nuke, set PYTHONPATH environment variable to serverPath"""
+		"""
 		if not self.serverPath or self.serverPath == 'Please Fill ME!':
 			self.server_le.setText( 'Please Fill ME!' )
 			return
@@ -76,12 +101,13 @@ class InstallerUI(base, fom):
 		if newData == 'installations-reached':
 			self.message_lbl.setText( 'Number of Installations reached!' )
 			return
-		print newData
-		return
-		res14  = self.setupMaya( '2014' )
-		res15  = self.setupMaya( '2015' )
+		"""
+		versions = ['2014', '2015', '2016']
+		for v in versions:
+			res  = self.setupMaya( v )
 		resNuk = self.setupNuke()
-		print 'installing client', res14, res15, resNuk
+		self.message_lbl.setText( 'Installation Complete :)!' )
+		"""
 		if res14 or res15 or resNuk: 
 			#ADD REGISTER
 			rg.set_reg( 'HKCU', r'Software\Pipel', 'key', newData )
@@ -95,28 +121,35 @@ class InstallerUI(base, fom):
 			if not self.serverPath in pyPath:
 				#ALLREADY INSTALLED
 				rg.set_reg( 'HKLM', r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'PYTHONPATH', path + pyPath )
-			self.procStart.emit( 'Installed' )
-			
+		"""
+		self.procStart.emit( 'Installed' )
 	
 	def setupMaya(self, version = '2014'):
 		"""create userSetup.mel or if exists check if there is pipel installed if not add lines to it"""
 		userDir      = os.path.expanduser( '~' )
-		mayaPath = userDir + '\\Documents\\maya\\' + version + '-x64\\scripts'
-		print mayaPath
+		sufix = '-x64'
+		if version == '2016':
+			sufix = ''
+		mayaPath = userDir + '\\Documents\\maya\\' + version + sufix + '\\scripts'
 		if os.path.exists( mayaPath ): #is maya installed
 			setupFile = mayaPath + '\\userSetup.mel'
 			if os.path.exists( setupFile ):#SETUP FILE EXISTS.. WE NEED TO CHECK IF PIPEL IS INSTALLED
-				with open( setupFile, 'r+' ) as fil:
+				with open( setupFile, 'r' ) as fil:
 					data = fil.read()
-					if 'install.pipelMenu' in data:
-						#PIPEL is installed
-						return True
-					data += '\npython( "import install.pipelMenu;print \'Pipel Loaded\'" );'
-					fil.write( data )
+				if not 'install.pipelMenu' in data:
+					with open( setupFile, 'w' ) as fil:
+							data += '\npython( "import install.pipelMenu;print \'Pipel Loaded\'" );'
+							fil.write( data )
 			else:
 				with open( setupFile, 'w' ) as fil:
 					data = 'python( "import install.pipelMenu;print \'Pipel Loaded\'" );'
 					fil.write( data )
+			#install pipel plugins
+			modPath =  PYFILEDIR + '/modules/PipeL' + version + '.mod'
+			if os.path.exists( modPath ):
+				if not os.path.exists( mayaPath.replace( 'scripts', 'modules' ) ):
+					os.makedirs( mayaPath.replace( 'scripts', 'modules' ) )
+				shutil.copy2( modPath, mayaPath.replace( 'scripts', 'modules' ) + '/PipeL' + version + '.mod'  )
 			return True
 		return False
 

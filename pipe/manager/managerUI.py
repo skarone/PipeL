@@ -43,6 +43,7 @@ reload( tfl )
 import pipe.task.taskUi as tskUi
 reload(tskUi)
 from sys import platform as _platform
+import subprocess
 
 INMAYA = False
 try:
@@ -347,6 +348,14 @@ class ManagerUI(base,fom):
 		self.connect( actionToServer, QtCore.SIGNAL( "triggered()" ), self.copyToServer )
 		menu.addSeparator()
 		if INMAYA:
+			fils = menu.addMenu('Versions')
+			#OPEN IN CURRENT NUKE
+			fls = [ mfl.mayaFile( a.path ) for a in fl.filesInDir( asset.dirPath+'/Versions/', False ) if a.path.endswith('.ma')]
+			for f in fls:
+				nukIcon = QtGui.QIcon( PYFILEDIR + '/icons/maya.png' )
+				actionOpenInCurrent = QtGui.QAction(nukIcon,f.name + ' - ' + f.date, fils)
+				fils.addAction( actionOpenInCurrent )
+				self.connect( actionOpenInCurrent, QtCore.SIGNAL( "triggered()" ), lambda val = f : self.openMayaFile(val) )
 			#OPEN IN CURRENT MAYA
 			mayaIcon = QtGui.QIcon( PYFILEDIR + '/icons/maya.png' )
 			actionOpenInCurrent = QtGui.QAction(mayaIcon,"Open in This Maya", menu)
@@ -394,6 +403,14 @@ class ManagerUI(base,fom):
 	def openHoudiniFile(self, fil):
 		"""open houdini File in current Scene"""
 		fil.open()
+
+	def openMayaFile(self, fil):
+		if fil.isZero:
+			mc.file( new = True, force = True )
+			fil.save()
+		else:
+			fil.open()
+
 
 	def newHoudiniFile(self):
 		"""docstring for fname"""

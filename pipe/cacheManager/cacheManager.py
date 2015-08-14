@@ -19,6 +19,8 @@ import pipe.settings.settings as sti
 reload( sti )
 import pipe.cacheManager.sceneCreator as sc
 reload( sc )
+from sys import platform as _platform
+import subprocess
 
 try:
 	import general.mayaNode.mayaNode as mn
@@ -122,6 +124,7 @@ class CacheManagerUI(base,fom):
 	def _makeConnections(self):
 		"""create connection in the UI"""
 		self.connect( self.refresh_btn             , QtCore.SIGNAL("clicked()") , self.refresh )
+		self.connect( self.exploreFolder_btn       , QtCore.SIGNAL("clicked()") , self.explorePoolFolder )
 		self.connect( self.exportSelectedGeo_btn   , QtCore.SIGNAL("clicked()") , self.exportSelectedGeo )
 		self.connect( self.exportAssetCache_btn    , QtCore.SIGNAL("clicked()") , self.exportAssetCache )
 		self.connect( self.loadExternalCache_btn   , QtCore.SIGNAL("clicked()") , self.loadExternalCache )
@@ -139,6 +142,16 @@ class CacheManagerUI(base,fom):
 		QtCore.QObject.connect( self.shots_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._fillCacheList )
 		QtCore.QObject.connect( self.shots_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._fillFileList )
 		QtCore.QObject.connect( self.useExocortex_chb, QtCore.SIGNAL( "stateChanged  (int)" ), self.setUseExocortex )
+
+	def explorePoolFolder(self):
+		"""explore pool folder for current shot"""
+		poolPath = self._selectedShot.path + '/Pool/'
+		print poolPath
+		if _platform == 'win32':
+			subprocess.Popen(r'explorer "'+ poolPath.replace( '/','\\' ) +'"')
+		else:
+			subprocess.Popen(['nautilus',poolPath])
+
 		
 	def setUseExocortex(self, val):
 		"""docstring for setUseExocortex"""
