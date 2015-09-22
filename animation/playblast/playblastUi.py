@@ -36,6 +36,10 @@ try:
 except:
 	pass
 
+import pipe.settings.settings as sti
+reload( sti )
+
+
 class PlayblastUi(base,fom):
 	"""manager ui class"""
 	def __init__(self, parent = None ):
@@ -55,12 +59,16 @@ class PlayblastUi(base,fom):
 		if INMAYA:
 			dead = dl.Deadline()
 			self.group_cmb.addItems( dead.groups )
+			#set settings icon
+			settIcon = QtGui.QIcon(  ':/cmdWndIcon.png' )
+			self.settings_btn.setIcon(settIcon)
 
 	def _makeConnections(self):
 		"""docstring for _makeConnections"""
 		self.connect( self.playblast_btn , QtCore.SIGNAL("clicked()") , self.playblast )
 		self.connect( self.renderOcc_btn , QtCore.SIGNAL("clicked()") , self.renderOcc )
 		self.connect( self.publish_btn , QtCore.SIGNAL("clicked()") , self.publish )
+		self.connect( self.settings_btn , QtCore.SIGNAL("clicked()") , self.setRenderPath )
 
 	def renderOcc(self):
 		"""render occ for current camera"""
@@ -89,6 +97,24 @@ class PlayblastUi(base,fom):
 			movFil = fl.File( fil.versionPath + fil.name + '_v' + str( fil.version ).zfill( 3 ) + '.mov' )
 		if movFil.exists:
 			movFil.copy( fil.dirPath + fil.name + '.mov' )
+
+	def setRenderPath(self):
+		"""docstring for setRenderPath"""
+		renderPath = 'R:/'
+		settings = sti.Settings()
+		gen = settings.General
+		if gen:
+			renderPath = gen[ "renderpath" ]
+			if not renderPath.endswith( '/' ):
+				renderPath += '/'
+		if gen.has_key( 'greypath' ):
+			basePath = '<RenderPath>/' + gen[ "greypath" ]
+		else:
+			basePath =  '<RenderPath>/<project>' + '/' + '<sequence>' + '/' + '<shot>' + '/Grey/' + '<RenderLayerVersion>' + '/Grey'
+		text, ok = QtGui.QInputDialog.getText(self, 'Render Path', 'Set Render Path', QtGui.QLineEdit.Normal, basePath )
+		if ok:
+			settings.write( 'General', 'greypath', text.replace( '<RenderPath>/', '' ) )
+
 
 def main():
 	try:

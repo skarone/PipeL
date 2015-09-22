@@ -46,7 +46,10 @@ def renderOcc( motionBlur, group ):
 	#TURN CAMERA TO RENDER ON
 	currCam = getCurrentCamera()
 	currCam.shape.a.renderable.v = 1
-
+	#TURN OFF ALL IMAGE PLANES
+	imagePlanes = mn.ls( exactType = 'imagePlane' )
+	for i in imagePlanes:
+		i.a.alphaGain.v = 0
 	#set attributes on for all the meshes
 	attrs = [ 'castsShadows', 'receiveShadows', 'primaryVisibility', 'motionBlur' ]
 
@@ -76,17 +79,22 @@ def renderOcc( motionBlur, group ):
 	renderPath = 'R:/'
 	if gen:
 		renderPath = gen[ "renderpath" ]
-		print renderPath
 		if not renderPath.endswith( '/' ):
 			renderPath += '/'
 	assOrShot = prj.shotOrAssetFromFile( curFile )
 	name = ''
 	filename = ''
 	if assOrShot:
-		if assOrShot.type == 'asset':
-			filePrefix = renderPath + assOrShot.project.name + '/Asset/' + assOrShot.name + '/defaultRenderLayer/' + '<RenderLayerVersion>' + '/defaultRenderLayer'
-		elif assOrShot.type == 'shot':
-			filePrefix = renderPath + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name + '/defaultRenderLayer/' + '<RenderLayerVersion>' + '/defaultRenderLayer'
+		if assOrShot.type == 'shot':
+			if gen.has_key( 'greypath' ):
+				filePrefix = gen[ "greypath" ]
+			else:
+				filePrefix = renderPath + '/<project>' + '/' + '<sequence>' + '/' + '<shot>' + '/Grey/' + '<RenderLayerVersion>' + '/Grey'
+			#replace <tags> to final names
+			filePrefix = getFilePrefixFromTags( filePrefix, assOrShot )
+		else:
+			print 'Cant Detect current shot :(, please save scene if its is a shot'
+			return
 		if '<RenderLayerVersion>' in filePrefix:
 			versionNumber = _getVersionNumber( filePrefix.split( '<RenderLayerVersion>' )[0] )
 			filePrefix = filePrefix.replace( '<RenderLayerVersion>', 'v' + str(versionNumber).zfill( 4 ) )
@@ -105,7 +113,7 @@ def renderOcc( motionBlur, group ):
 					'Comment'         : '',
 					'InitialStatus'   : 'Active',
 					'Whitelist'       : '',
-					'Name'            : name + curFile.name + ' - ' + 'defaultRenderLayer',
+					'Name'            : name + curFile.name + ' - ' + 'Grey',
 					'OutputFilename0' : filename,
 					'Priority'        : 50,
 					'ChunkSize'       : 5,
@@ -119,6 +127,17 @@ def renderOcc( motionBlur, group ):
 					}, curFile )
 	Job.write()
 	dead.runMayaJob( Job )
+	#TURN ON IMAGE PLANES
+	for i in imagePlanes:
+		i.a.alphaGain.v = 1
+
+def getFilePrefixFromTags( filePrefix, shot ):
+	"""return filePrefix Path replacing tags"""
+	filePrefix = filePrefix.replace( '<project>', shot.project.name )
+	filePrefix = filePrefix.replace( '<sequence>', shot.sequence.name )
+	filePrefix = filePrefix.replace( '<shot>', shot.name )
+	return filePrefix
+
 
 def _getVersionNumber( path):
 	"""return version number for render folder"""

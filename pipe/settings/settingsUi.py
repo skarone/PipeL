@@ -46,6 +46,12 @@ class Settings(base, fom):
 			if gen.has_key( 'renderpath' ):
 				renderPath = gen[ "renderpath" ]
 				self.renderPath_le.setText( renderPath )
+			if gen.has_key( 'shotrenderpath' ):
+				renderPath = gen[ "shotrenderpath" ]
+				self.shotRenderPath_le.setText( renderPath )
+			if gen.has_key( 'assetrenderpath' ):
+				renderPath = gen[ "assetrenderpath" ]
+				self.assetRenderPath_le.setText( renderPath )
 			if gen.has_key( 'maketxpath' ):
 				self.makeTxPath_le.setText( gen[ 'maketxpath' ] )
 			if gen.has_key( 'autoload' ):
@@ -115,6 +121,8 @@ class Settings(base, fom):
 		self.settings.write( 'General', 'basepath', str( self.localPath_le.text().replace( '\\', '/' ) ))
 		self.settings.write( 'General', 'serverpath', str( self.serverPath_le.text().replace( '\\', '/' ) ))
 		self.settings.write( 'General', 'renderpath', str( self.renderPath_le.text().replace( '\\', '/' ) ))
+		self.settings.write( 'General', 'assetrenderpath', str( self.assetRenderPath_le.text().replace( '\\', '/' ) ))
+		self.settings.write( 'General', 'shotrenderpath', str( self.shotRenderPath_le.text().replace( '\\', '/' ) ))
 		self.settings.write( 'General', 'localnukepath', str( self.nukeLocalPath_le.text().replace( '\\', '/' ) ))
 		self.settings.write( 'General', 'maketxpath', str( self.makeTxPath_le.text().replace( '\\', '/' ) ))
 		self.settings.write( 'General', 'autoload', self.autoLoadManager_chb.isChecked() )

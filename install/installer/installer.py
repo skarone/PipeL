@@ -83,10 +83,10 @@ class InstallerUI(base, fom):
 	@QtCore.Slot()
 	def clientInstall(self):
 		"""add userSetup in maya 2014/2015, add menu in nuke, set PYTHONPATH environment variable to serverPath"""
-		"""
 		if not self.serverPath or self.serverPath == 'Please Fill ME!':
 			self.server_le.setText( 'Please Fill ME!' )
 			return
+		"""
 		if not self.serial or self.serial == 'Please Fill ME!':
 			self.serial_le.setText( 'Please Fill ME!' )
 			return
@@ -107,21 +107,18 @@ class InstallerUI(base, fom):
 			res  = self.setupMaya( v )
 		resNuk = self.setupNuke()
 		self.message_lbl.setText( 'Installation Complete :)!' )
-		"""
-		if res14 or res15 or resNuk: 
-			#ADD REGISTER
-			rg.set_reg( 'HKCU', r'Software\Pipel', 'key', newData )
-			#SET PYTHONPATH
-			path = self.serverPath + ';'
-			pyPath = ''
-			try:
-				pyPath = rg.queryValue('HKLM', r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'PYTHONPATH')
-			except:
-				pass
-			if not self.serverPath in pyPath:
-				#ALLREADY INSTALLED
-				rg.set_reg( 'HKLM', r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'PYTHONPATH', path + pyPath )
-		"""
+		#ADD REGISTER
+		#rg.set_reg( 'HKCU', r'Software\Pipel', 'key', newData )
+		#SET PYTHONPATH
+		path = self.serverPath.replace( '\\', '/' ) + ';'
+		pyPath = ''
+		try:
+			pyPath = rg.queryValue('HKLM', r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'PYTHONPATH')
+		except:
+			pass
+		if not self.serverPath in pyPath:
+			#ALLREADY INSTALLED
+			rg.set_reg( 'HKLM', r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'PYTHONPATH', path + pyPath )
 		self.procStart.emit( 'Installed' )
 	
 	def setupMaya(self, version = '2014'):
