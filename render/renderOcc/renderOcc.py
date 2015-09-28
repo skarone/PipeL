@@ -33,11 +33,13 @@ def renderOcc( motionBlur, group ):
 	defArnoldRenderOptions.a.motion_blur_enable.v = motionBlur
 	defArnoldRenderOptions.a.motion_steps.v = 3
 	mn.Node( 'defaultArnoldDriver' ).a.aiTranslator.v = 'exr'
-	attrs = [ 'ignoreTextures', 'ignoreAtmosphere', 'ignoreLights', 'ignoreShadows', 'ignoreDisplacement', 'ignoreBump' ]
+	attrs = [ 'ignoreTextures', 'ignoreAtmosphere', 'ignoreLights',
+			'ignoreShadows', 'ignoreDisplacement', 'ignoreBump' ]
 	for a in attrs:
 		defArnoldRenderOptions.attr( a ).v = 1
 	defArnoldRenderOptions.a.AASamples.v = 3
-	attrs = [ 'GIDiffuseSamples', 'GIGlossySamples', 'GIRefractionSamples', 'sssBssrdfSamples', 'volumeIndirectSamples' ]
+	attrs = [ 'GIDiffuseSamples', 'GIGlossySamples',
+			'GIRefractionSamples', 'sssBssrdfSamples', 'volumeIndirectSamples' ]
 	for a in attrs:
 		defArnoldRenderOptions.attr( a ).v = 0
 	#TURN OFF ALL CAMERAS RENDERABLES
@@ -51,8 +53,8 @@ def renderOcc( motionBlur, group ):
 	for i in imagePlanes:
 		i.a.alphaGain.v = 0
 	#set attributes on for all the meshes
-	attrs = [ 'castsShadows', 'receiveShadows', 'primaryVisibility', 'motionBlur' ]
-
+	attrs = [ 'castsShadows', 'receiveShadows',
+			'primaryVisibility', 'motionBlur' ]
 	for n in mn.ls( typ = 'mesh' ):
 		for a in attrs:
 			n.attr( a ).v = 1
@@ -65,14 +67,7 @@ def renderOcc( motionBlur, group ):
 		aovNode = aov.create( aovName = 'Aov_OCC' , aovType = 6 )
 	#Turn On OCC AOV
 	aovNode.a.enabled.v = 1
-	#Create OCC Shader
-	occMat = mn.Node( 'Occ_MAT' )
-	if not mn.Node( 'Occ_MAT' ).exists:
-		occMat = mn.createNode( 'aiAmbientOcclusion' )
-		occMat.name = 'Occ_MAT'
-	#Connect Shader to AOV
-	if not occMat.a.outColor.isConnected( aovNode.a.defaultValue ):
-		occMat.a.outColor >> aovNode.a.defaultValue
+	createShader(aovNode)
 	#write job for render
 	settings = sti.Settings()
 	gen = settings.General
@@ -138,6 +133,58 @@ def getFilePrefixFromTags( filePrefix, shot ):
 	filePrefix = filePrefix.replace( '<shot>', shot.name )
 	return filePrefix
 
+def createShader(aovNode):
+	"""docstring for createShader"""
+	#Create Utility base Shader
+	utilMat = mn.Node( 'OccUtil_MAT')
+	if not utilMat.exists:
+		utilMat = mn.createNode( 'aiUtility' )
+		utilMat.a.shadeMode.v = 2
+		utilMat.name = 'OccUtil_MAT'
+	#Create TripleSwitch
+	tripleSwitch = mn.Node( 'OccTripleSwith_TS')
+	if not tripleSwitch.exists:
+		tripleSwitch = mn.createNode( 'tripleShadingSwitch' )
+		tripleSwitch.name = 'OccTripleSwith_TS'
+	tripleSwitch.a.output >> utilMat.a.color
+	#Create OCC Shader
+	occMat = mn.Node( 'Occ_MAT' )
+	if not occMat.exists:
+		occMat = mn.createNode( 'aiAmbientOcclusion' )
+		occMat.name = 'Occ_MAT'
+	occMat.a.outColor >> tripleSwitch.a.general
+	count = 0
+	#get shapes with customs attributes
+	for sha in mn.ls( typ = 'mesh', ni = True ):
+		if sha.a.iris_Occ.exists:
+			#create Iris for this shape
+			irisMat = mn.Node( 'irisOcc_MAT' )
+			if not irisMat.exists:
+				irisMat = mn.createNode( 'surfaceShader' )
+				irisMat.name = 'irisOcc_MAT'
+			#connect shape with tripleswitch and irisMat
+			sha.attr('instObjGroups[0]') >> tripleSwitch.attr( 'input[' + count +'].inShape')
+			irisMat.a.outColor >> tripleSwitch.attr( 'input[' + count +'].inTriple')
+			count += 1
+			continue
+		if sha.a.texture_Occ.exists:
+			#create Occ with texture for this shape
+			occMat = mn.Node( sha.name + 'Occ_MAT' )
+			if not occMat.exists:
+				occMat = mn.createNode( 'aiAmbientOcclusion' )
+				occMat.name = sha.name + 'Occ_MAT'
+			fileMat = mn.Node( sha.name + 'file_Occ_MAT' )
+			if not fileMat.exists:
+				fileMat = mn.createNode( 'file' )
+				fileMat.name = sha.name + 'file_Occ_MAT'
+			fileMat.a.ftn.v = sha.a.texture_Occ.v
+			fileMat.a.outColor >> occMat.a.white
+			sha.attr('instObjGroups[0]') >> tripleSwitch.attr( 'input[' + count +'].inShape')
+			occMat.a.outColor >> tripleSwitch.attr( 'input[' + count +'].inTriple')
+			count += 1
+	#Connect Shader to AOV
+	if not utilMat.a.outColor.isConnected( aovNode.a.defaultValue ):
+		utilMat.a.outColor >> aovNode.a.defaultValue
 
 def _getVersionNumber( path):
 	"""return version number for render folder"""
