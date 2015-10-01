@@ -32,6 +32,8 @@ class SetupOccUI(base,fom):
 		self.connect(self.removeTextureToOcc_btn, QtCore.SIGNAL("clicked()"), self.removeTextureToOcc)
 		self.connect(self.addIrisToOcc_btn, QtCore.SIGNAL("clicked()"), self.addIrisToOcc)
 		self.connect(self.removeIrisToOcc_btn, QtCore.SIGNAL("clicked()"), self.removeIrisToOcc)
+		self.connect(self.addHideOcc_btn, QtCore.SIGNAL("clicked()"), self.addHideForOcc)
+		self.connect(self.removeHideOcc_btn, QtCore.SIGNAL("clicked()"), self.removeHideForOcc)
 
 	def _getShapes(self):
 		"""docstring for _getShapes"""
@@ -79,6 +81,21 @@ class SetupOccUI(base,fom):
 		for sha in shas:
 			if sha.a.iris_Occ.exists:
 				sha.a.iris_Occ.delete()
+
+	def addHideForOcc(self):
+		"""docstring for addHideForOcc"""
+		shas = self._getShapes()
+		for sha in shas:
+			if not sha.a.hideForOcc.exists:
+				occText = sha.a.hideForOcc.add( at='bool' )
+			sha.a.hideForOcc.v = True
+
+	def removeHideForOcc(self):
+		"""docstring for removeHideForOcc"""
+		shas = self._getShapes()
+		for sha in shas:
+			if sha.a.hideForOcc.exists:
+				sha.a.hideForOcc.delete()
 
 def main():
 	"""use this to create project in maya"""

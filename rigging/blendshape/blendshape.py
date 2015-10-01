@@ -1,4 +1,5 @@
 import general.mayaNode.mayaNode as mn
+reload(mn)
 try:
 	import maya.cmds as mc
 	import maya.OpenMaya as api
@@ -20,7 +21,7 @@ def copyVertexFromLeftToRight():
 			pos = mc.xform( v, q = True, t = True )
 			mc.xform( v.replace( 'dup_', 'r_' ), t = pos )
 		dup.delete()
-		
+
 def resetBlendshape( originalMesh = '', blendToReset = '' ):
 	"""reset blendshape position to original face"""
 	if not isinstance( originalMesh, mn.Node ):
@@ -72,7 +73,6 @@ class BlendShapeMesh( mn.Node ):
 	def __init__(self, name, baseMesh, reflectionTable = {} ):
 		super(BlendShapeMesh, self).__init__(name)
 		self._baseMesh = mn.Node( baseMesh )
-		print reflectionTable
 		self._reflectionTable = reflectionTable
 
 	@property
@@ -155,7 +155,7 @@ class BlendShapeNode( mn.Node ):
 	def create(self, meshes, baseMesh ):
 		"""create blendshape and add meshes as targets"""
 		self.__init__( mc.blendShape( meshes, baseMesh, n = self.name )[0] )
-		
+
 	@property
 	def meshes(self):
 		"""return all the blendshapes that this blendshape node has"""
@@ -174,12 +174,15 @@ class BlendShapeNode( mn.Node ):
 	def getMeshIndex(self, mesh):
 		"""docstring for getMeshIndex"""
 		res = [m.name for m in self.meshes ]
-		print res
 		return res.index( mesh )
 
-	def isMeshTarget(self, mesh):
+	def isMeshTarget(self, mes):
 		"""check if mesh is allready a target for the blendshape"""
-		return mesh in [m.name for m in self.meshes ]
+		for m in self.meshes:
+			if mes == str(m.name):
+				return True
+		return False
+		# return mesh in [m.name for m in self.meshes ]
 
 	@property
 	def baseMesh(self):
@@ -226,7 +229,7 @@ class BlendShapeNode( mn.Node ):
 		self.attr( mesh1 ).v = 0
 		self.attr( mesh2 ).v = 0
 		return dummy, corrective
-		
+
 	def extractTargets(self):
 		"""re generate targets """
 		for m in self.meshes:

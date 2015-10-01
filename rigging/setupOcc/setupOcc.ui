@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>232</width>
-    <height>134</height>
+    <width>350</width>
+    <height>193</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -40,6 +40,20 @@
      <widget class="QPushButton" name="removeIrisToOcc_btn">
       <property name="text">
        <string>Remove Iris from Occ</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="addHideOcc_btn">
+      <property name="text">
+       <string>Add Hide for Occ</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="removeHideOcc_btn">
+      <property name="text">
+       <string>Remove Hide for Occ</string>
       </property>
      </widget>
     </item>

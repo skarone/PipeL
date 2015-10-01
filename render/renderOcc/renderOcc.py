@@ -33,7 +33,7 @@ def renderOcc( motionBlur, group ):
 	defArnoldRenderOptions.a.motion_blur_enable.v = motionBlur
 	defArnoldRenderOptions.a.motion_steps.v = 3
 	mn.Node( 'defaultArnoldDriver' ).a.aiTranslator.v = 'exr'
-	attrs = [ 'ignoreTextures', 'ignoreAtmosphere', 'ignoreLights',
+	attrs = [ 'ignoreAtmosphere', 'ignoreLights',
 			'ignoreShadows', 'ignoreDisplacement', 'ignoreBump' ]
 	for a in attrs:
 		defArnoldRenderOptions.attr( a ).v = 1
@@ -82,7 +82,7 @@ def renderOcc( motionBlur, group ):
 	if assOrShot:
 		if assOrShot.type == 'shot':
 			if gen.has_key( 'greypath' ):
-				filePrefix = gen[ "greypath" ]
+				filePrefix = renderPath + gen[ "greypath" ]
 			else:
 				filePrefix = renderPath + '/<project>' + '/' + '<sequence>' + '/' + '<shot>' + '/Grey/' + '<RenderLayerVersion>' + '/Grey'
 			#replace <tags> to final names
@@ -146,13 +146,15 @@ def createShader(aovNode):
 	if not tripleSwitch.exists:
 		tripleSwitch = mn.createNode( 'tripleShadingSwitch' )
 		tripleSwitch.name = 'OccTripleSwith_TS'
-	tripleSwitch.a.output >> utilMat.a.color
+	if not tripleSwitch.a.output.isConnected( utilMat.a.color ):
+		tripleSwitch.a.output >> utilMat.a.color
 	#Create OCC Shader
 	occMat = mn.Node( 'Occ_MAT' )
 	if not occMat.exists:
 		occMat = mn.createNode( 'aiAmbientOcclusion' )
 		occMat.name = 'Occ_MAT'
-	occMat.a.outColor >> tripleSwitch.a.general
+	if not occMat.a.outColor.isConnected( tripleSwitch.a.default ):
+		occMat.a.outColor >> tripleSwitch.a.default
 	count = 0
 	#get shapes with customs attributes
 	for sha in mn.ls( typ = 'mesh', ni = True ):
@@ -163,8 +165,10 @@ def createShader(aovNode):
 				irisMat = mn.createNode( 'surfaceShader' )
 				irisMat.name = 'irisOcc_MAT'
 			#connect shape with tripleswitch and irisMat
-			sha.attr('instObjGroups[0]') >> tripleSwitch.attr( 'input[' + count +'].inShape')
-			irisMat.a.outColor >> tripleSwitch.attr( 'input[' + count +'].inTriple')
+			if not sha.attr('instObjGroups[0]').isConnected( tripleSwitch.attr( 'input[' + str(count) +'].inShape')):
+				sha.attr('instObjGroups[0]') >> tripleSwitch.attr( 'input[' + str(count) +'].inShape')
+			if not irisMat.a.outColor.isConnected( tripleSwitch.attr( 'input[' + str(count) +'].inTriple') ):
+				irisMat.a.outColor >> tripleSwitch.attr( 'input[' + str(count) +'].inTriple')
 			count += 1
 			continue
 		if sha.a.texture_Occ.exists:
@@ -178,10 +182,16 @@ def createShader(aovNode):
 				fileMat = mn.createNode( 'file' )
 				fileMat.name = sha.name + 'file_Occ_MAT'
 			fileMat.a.ftn.v = sha.a.texture_Occ.v
-			fileMat.a.outColor >> occMat.a.white
-			sha.attr('instObjGroups[0]') >> tripleSwitch.attr( 'input[' + count +'].inShape')
-			occMat.a.outColor >> tripleSwitch.attr( 'input[' + count +'].inTriple')
+			if not fileMat.a.outColor.isConnected( occMat.a.white ):
+				fileMat.a.outColor >> occMat.a.white
+			if not sha.attr('instObjGroups[0]').isConnected( tripleSwitch.attr( 'input[' + str(count) +'].inShape') ):
+				sha.attr('instObjGroups[0]') >> tripleSwitch.attr( 'input[' + str(count) +'].inShape')
+			if not occMat.a.outColor.isConnected( tripleSwitch.attr( 'input[' + str(count) +'].inTriple') ):
+				occMat.a.outColor >> tripleSwitch.attr( 'input[' + str(count) +'].inTriple')
 			count += 1
+		if sha.a.hideForOcc.exists:
+			sha.a.castsShadows.v = False
+			sha.a.primaryVisibility.v = False
 	#Connect Shader to AOV
 	if not utilMat.a.outColor.isConnected( aovNode.a.defaultValue ):
 		utilMat.a.outColor >> aovNode.a.defaultValue
