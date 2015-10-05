@@ -1,6 +1,8 @@
-import pipe.file.file as fl
 import re
 from functools import partial
+
+import pipe.file.file as fl
+
 
 def main():
 	fils = fl.filesInDir( 'D:/PipeL/docs' , True )
@@ -10,10 +12,10 @@ def main():
 		#search for video in file
 		data = f.data
 		expr = '(?:")(?P<Path>.+)(?:\.mp4")'
-		file_str = re.sub( expr, partial( _replaceTexture, './Videos/' ), f.data )
+		file_str = re.sub( expr, partial( _replacePath, './Videos/' ), f.data )
 		f.write( file_str )
 
-def _replaceTexture( newDir, matchobj ):
+def _replacePath( newDir, matchobj ):
 	"""docstring for _replaceTexture"""
 	path = matchobj.group( "Path" )
 	fileName = path.split( '/' )[-1]
