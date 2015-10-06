@@ -74,19 +74,21 @@ class RenderManagerUI(base,fom):
 		self.pools_cmb.addItems( dead.pools ) 
 		renderGlobals = mn.Node( 'defaultRenderGlobals' )
 		self.filePath_le.setText( str( renderGlobals.a.imageFilePrefix.v ))
-		assOrShot = prj.shotOrAssetFromFile( mfl.currentFile() )
+		self.assOrShot = prj.shotOrAssetFromFile( mfl.currentFile() )
 		self.projectPath_le.setText( mc.workspace( q = True, fullName = True ) )
 		self._project = ''
-		if assOrShot:
-			if assOrShot.type == 'asset':
-				#versionNumber = self._getVersionNumber( renderPath + assOrShot.project.name + '/Asset/' + assOrShot.name )
-				pat = renderPath + assOrShot.project.name + '/Asset/' + assOrShot.name + '/<RenderLayer>/' + '<RenderLayerVersion>' + '/<RenderLayer>'
-			elif assOrShot.type == 'shot':
-				#R:\Pony_Halloween_Fantasmas\Terror\s013_T13\Chicos_Beauty
-				#versionNumber = self._getVersionNumber( renderPath + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name )
-				pat = renderPath + assOrShot.project.name + '/' + assOrShot.sequence.name + '/' + assOrShot.name + '/<RenderLayer>/' + '<RenderLayerVersion>' + '/<RenderLayer>'
-				#renderGlobals.a.imageFilePrefix.v = str( pat )
-			self._project = assOrShot.project.name
+		if self.assOrShot:
+			if self.assOrShot.type == 'asset':
+				if gen.has_key( 'assetrenderpath' ):
+					pat = renderPath + gen[ "assetrenderpath" ]
+				else:
+					pat = renderPath + '<project>' + '/Assets/' + '<asset>' + '/Render/<RenderLayer>/' + '<RenderLayerVersion>' + '/<RenderLayer>'
+			elif self.assOrShot.type == 'shot':
+				if gen.has_key( 'shotrenderpath' ):
+					pat = renderPath + gen[ "shotrenderpath" ]
+				else:
+					pat = renderPath + '<project>' + '/' + '<sequence>' + '/' + '<shot>' + '/<RenderLayer>/' + '<RenderLayerVersion>' + '/<RenderLayer>'
+			self._project = self.assOrShot.project.name
 			self.filePath_le.setText( str( pat ))
 		self.frameRange_le.setText( str( int( renderGlobals.a.startFrame.v ) ) + "-" + str( int(  renderGlobals.a.endFrame.v ) ) )
 		self._fillLayers()
@@ -155,7 +157,7 @@ class RenderManagerUI(base,fom):
 		if mc.getAttr( "defaultRenderGlobals.ren" ) == 'mentalRay':
 			plugin = 'MayaCmd'
 		for w in self._getLayersWidgets():
-			filePrefix = str( self.filePath_le.text())
+			filePrefix = self.getFilePrefixFromTags( str(self.filePath_le.text()), self.assOrShot )
 			frames   = str(self.frameRange_le.text())
 			if not w.renderMe_chb.isChecked():
 				continue
@@ -197,6 +199,22 @@ class RenderManagerUI(base,fom):
 							}, curFile )
 			Job.write()
 			dead.runMayaJob( Job )
+		#save asset or shot paths
+		self.saveShotsPaths()
+
+	def saveShotsPaths(self):
+		"""save settings for render paths"""
+		settings = sti.Settings()
+		gen = settings.General
+		gen = settings.General
+		renderPath = 'R:/'
+		if gen:
+			renderPath = gen[ "renderpath" ]
+		if self.assOrShot:
+			if self.assOrShot.type == 'asset':
+				settings.write( 'General', 'assetrenderpath', str(self.filePath_le.text()).replace( renderPath, '' ) )
+			elif self.assOrShot.type == 'shot':
+				settings.write( 'General', 'shotrenderpath', str(self.filePath_le.text()).replace( renderPath, '' ) )
 
 	def _getVersionNumber(self, path):
 		"""return version number for render folder"""
@@ -207,6 +225,18 @@ class RenderManagerUI(base,fom):
 	def _getLayersWidgets(self):
 		"""return the layerswidgets items"""
 		return [self.renderLayers_lay.itemAt(i).widget() for i in range(self.renderLayers_lay.count())] 
+
+	def getFilePrefixFromTags(self, filePrefix, shot ):
+		"""return filePrefix Path replacing tags"""
+		if shot.type == 'asset':
+			filePrefix = filePrefix.replace( '<project>', shot.project.name )
+			filePrefix = filePrefix.replace( '<asset>', shot.name )
+		else:
+			filePrefix = filePrefix.replace( '<project>', shot.project.name )
+			filePrefix = filePrefix.replace( '<sequence>', shot.sequence.name )
+			filePrefix = filePrefix.replace( '<shot>', shot.name )
+		return filePrefix
+
 
 class RenderLayerUI(baseLay,fomLay):
 	def __init__(self, renderLayerNode ):

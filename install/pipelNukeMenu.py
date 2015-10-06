@@ -8,9 +8,12 @@ m.addCommand( 'Project Manager', 'import pipe.manager.managerUI as manUI; reload
 m.addCommand( 'Collect Files', 'import nuk.collect.collectFiles as colFils; reload( colFils ); colFils.collectFiles();' )
 m.addCommand( 'To Do List', 'import general.toDoList.toDoList as todoUi; reload(todoUi); todoUi.main();' )
 m.addCommand( 'Load All Layers', 'import nuk.general.readAllLayers.readAllLayers as readUI; reload( readUI ); readUI.main();' )
+m.addCommand( 'Check Outdated Reads', 'import nuk.general.checkReads.checkReads as checkReads; reload( checkReads ); checkReads.getOutDatedReads();' )
 m.addCommand( 'Turn ON|OFF Heavy Nodes', 'import nuk.utils.utils as ut;reload(ut);ut.turnHeavyNodesOnOff();' )
 m.addSeparator()
 m.addCommand( 'Submit To Deadline', 'import nuk.deadline.SubmitToDeadline as deadline; deadline.main();') 
+m.addSeparator()
+m.addCommand( 'MultiChannelSplit', 'import nuk.MultiChannelSplit.MultiChannelSplit as MultiChannelSplit; MultiChannelSplit.MultiChannelSplit()', 'alt+m') 
 m.addSeparator()
 m.addCommand( 'Reload Menu', 'import install.pipelNukeMenu as pNM; reload( pNM );' )
 

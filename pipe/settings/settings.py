@@ -6,8 +6,11 @@ PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 skinsDir = PYFILEDIR.replace( 'pipe\\settings','general\\ui\\skins' )
 SKINS = sorted([ a.split('.')[0] for a in os.listdir( skinsDir ) if a.endswith( '.stylesheet')])
 SKINS.insert( 0, 'None' )
-
-settingsFile =  str( os.getenv('USERPROFILE') ) + '/pipel_settings.ini'
+from sys import platform as _platform
+if _platform == 'win32':
+	settingsFile =  str( os.getenv('USERPROFILE') ) + '/pipel_settings.ini'
+else:
+	settingsFile =  str( os.path.expanduser( '~' ) ) + '/pipel_settings.ini'
 
 class Settings(fl.File):
 	"""class to handle settings in pipe"""

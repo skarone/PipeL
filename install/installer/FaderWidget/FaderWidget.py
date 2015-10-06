@@ -1,4 +1,4 @@
-from PyQt4 import QtCore, QtGui
+from PySide import QtCore, QtGui
 
 class StackedWidget(QtGui.QStackedWidget):
 	"""Handle the different widgets in the stack of tools dock."""

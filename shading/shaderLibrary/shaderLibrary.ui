@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>DYLON Shader Library</string>
+   <string>Bitt Animation Shader Library</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -73,6 +73,16 @@
            <attribute name="buttonGroup">
             <string>buttonGroup</string>
            </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="refresh_btn">
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(0, 170, 0);</string>
+           </property>
+           <property name="text">
+            <string>Refresh</string>
+           </property>
           </widget>
          </item>
         </layout>
@@ -138,23 +148,30 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="QPushButton" name="exportAll_btn">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Search:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="search_le"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Export Shaders From Scene</string>
+         <string>Previews Scale:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="exportSel_btn">
-        <property name="text">
-         <string>Export Shaders From Selection</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="exportAsset_btn">
-        <property name="text">
-         <string>Export Shaders From Assset </string>
+       <widget class="QSlider" name="previewScale_sld">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
@@ -170,16 +187,36 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="closeCats_btn">
         <property name="text">
          <string>Close Categories</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_6">
+       <widget class="QPushButton" name="openCats_btn">
         <property name="text">
          <string>Open Categories</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="newCategory_btn">
+        <property name="text">
+         <string>New Category</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="makePreview_chb">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Create Preview when export shader&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Auto Preview</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

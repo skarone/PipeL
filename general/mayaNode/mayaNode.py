@@ -1,7 +1,7 @@
 '''
 File: mayaNodes.py
 Author: Ignacio Urruty
-Description: 
+Description:
 	Handle maya nodes, their attributes and namespaces with this module.
 	Also has some maya functions that return mayaNode objects instead of strings
 
@@ -134,7 +134,7 @@ AUTO_OVERRIDE_ATTR       = False # automatically override attribute if you set i
 
 def listHistory( strToSearch = None, **args ):
 	"""same as listHistory but with Nodes
-	
+
 	:param strToSearch: string or mayaNode object to use in list History.. if None use selection
 	:param **args: extra arguments the same as original command
 	:returns: Nodes object( array of mayaNodes  )"""
@@ -159,7 +159,7 @@ def listHistory( strToSearch = None, **args ):
 
 def ls( strToSearch = None, **args ):
 	"""return a list of Nodes
-	
+
 	:param strToSearch: string or mayaNode to filter list
 	:param **args: extra arguments the same as original command
 	:returns: Nodes object( array of mayaNodes  )"""
@@ -205,7 +205,7 @@ def listRelatives( strToSearch = None, **args ):
 
 def createNode( typeOfNode, **args ):
 	"""mayaNode version of create node
-	
+
 	:param typeOfNode: string type of maya node to create
 	:param **args: extra arguments the same as original command
 	:returns: mayaNode object
@@ -282,10 +282,12 @@ class Node(object):
 	def __hash__(self):
 		return hash(str(self.name))
 
-	def __eq__(self, other): 
+	def __eq__(self, other):
+		if isinstance(other, str):
+			return str(self.name) == other
 		return str( self.name ) == str( other.name )
 
-	def __cmp__(self, other): 
+	def __cmp__(self, other):
 		return str( self.name ) == str( other.name )
 
 	def __str__(self):
@@ -592,10 +594,10 @@ class NodeAttribute(object):
 	def __repr__(self):
 		return self.fullname
 
-	def __eq__(self, other): 
+	def __eq__(self, other):
 		return self.uid == other.uid
 
-	def __cmp__(self, other): 
+	def __cmp__(self, other):
 		return self.uid == other.uid
 
 	@property
@@ -625,7 +627,7 @@ class NodeAttribute(object):
 
 	@v.setter
 	def v(self, value):
-		"""Set the attribute value.. 
+		"""Set the attribute value..
 		Handle different types
 		:param value: new value to set"""
 		if not self.exists:
@@ -678,7 +680,7 @@ class NodeAttribute(object):
 
 	@property
 	def exists(self):
-		""":returns: attribute exists? 
+		""":returns: attribute exists?
 		:rtype: bool"""
 		tmpAttr = re.sub( '\[\d+\]$', '' , self._attribute )
 		tmpAttr = tmpAttr[tmpAttr.rfind( '.' )+1:]
@@ -857,9 +859,9 @@ class NodeAttribute(object):
 		if not other.exists:
 			raise AttributeNotFound( self._node.name, self._attribute )
 		if inOrder:
-			return mc.isConnected( self.name, other.name )
+			return mc.isConnected( self.fullname, other.fullname )
 		else:
-			return mc.isConnected( other.name, self.name )
+			return mc.isConnected( other.fullname, self.fullname )
 
 	def delete(self):
 		"""delete attribute"""
@@ -911,7 +913,7 @@ class Namespace(object):
 		if not namespace:
 			self._namespace = mc.namespaceInfo( cur = True )
 		else:
-			self._namespace = namespace 
+			self._namespace = namespace
 		if not self._namespace.startswith( ':' ):
 			self._namespace = ':' + self._namespace
 
@@ -929,7 +931,7 @@ class Namespace(object):
 	def name(self):
 		""":returns: the namespace in string"""
 		return self._namespace
-	
+
 	def create(self):
 		"""create namespace if doesn't exists"""
 		if not self.exists:
@@ -939,7 +941,7 @@ class Namespace(object):
 				for s in names:
 					if not mc.namespace( ex = tmpParent + ':' + s ):
 						mc.namespace( add = s, p = tmpParent + ':' )
-					tmpParent += ':' + s 
+					tmpParent += ':' + s
 
 	@property
 	def exists(self):
@@ -1050,12 +1052,12 @@ class Namespace(object):
 		""":returns: namespace from Node
 		:rtype: Namespace"""
 		p = node.name.rfind( ':' )
-			
+
 		if p == -1:
 			return Namespace( ':' )
 		else:
 			return Namespace( ':'+ node.name[ :p ] )
-	
+
 	@property
 	def first(self):
 		"""return first namespace from current one"""
@@ -1078,7 +1080,7 @@ class AttributeNotFound( Exception ):
 
 class NodeNotFound( Exception ):
 	def __init__(self, node ):
-		self._message = "Node '%s' doesn\'t exists." % ( node ) 
+		self._message = "Node '%s' doesn\'t exists." % ( node )
 		Exception.__init__(self, self._message)
 
 	def __str__(self):
@@ -1090,4 +1092,4 @@ class NamespaceNotFound( Exception ):
 		Exception.__init__(self, self._message)
 
 	def __str__(self):
-		return self._message 
+		return self._message

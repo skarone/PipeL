@@ -90,7 +90,7 @@ class CacheFile(fl.File):
 			objToExport = ",".join( mc.ls( sl = True ) )
 		start = mc.playbackOptions(q = True, min = True )
 		end   = mc.playbackOptions(q = True, max = True )
-		cmd = 'in='+str(start)+';out='+str(end)+';step='+str( steps )+';substep=1;filename=' + self.path + ';objects=' + objToExport + ';ogawa=0;purepointcache=0;uvs=0;facesets=0;useInitShadGrp=0;normals=1;dynamictopology=0;globalspace=0;withouthierarchy=0;transformcache=0'
+		cmd = 'in='+str(start)+';out='+str(end)+';step=1'+';substep='+str( steps )+';filename=' + self.path + ';objects=' + objToExport + ';ogawa=0;purepointcache=0;uvs=0;facesets=0;useInitShadGrp=0;normals=1;dynamictopology=0;globalspace=0;withouthierarchy=0;transformcache=0'
 		print cmd
 		mc.refresh( su = True )
 		mc.ExocortexAlembic_export( j = cmd )

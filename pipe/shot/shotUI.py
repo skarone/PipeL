@@ -62,7 +62,7 @@ class ShotCreator(base, fom):
 		"""fill combo box with sequences"""
 		self.sequences_cmb.clear()
 		projName =  str( self.curProj )
-		self.sequences_cmb.addItems( [ s.name for s in prj.Project( projName ).sequences ] )
+		self.sequences_cmb.addItems( [ s.name for s in prj.Project( projName, prj.BASE_PATH ).sequences ] )
 		index = self.sequences_cmb.findText( self.curSeq )
 		self.sequences_cmb.setCurrentIndex( index )
 

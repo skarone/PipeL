@@ -42,6 +42,8 @@ import pipe.textureFile.textureFile as tfl
 reload( tfl )
 import pipe.task.taskUi as tskUi
 reload(tskUi)
+from sys import platform as _platform
+import subprocess
 
 INMAYA = False
 try:
@@ -328,6 +330,11 @@ class ManagerUI(base,fom):
 		actionSaveScene = QtGui.QAction(folderIcon,"Open Render Folder", menu)
 		menu.addAction( actionSaveScene )
 		self.connect( actionSaveScene, QtCore.SIGNAL( "triggered()" ), self.openRenderFolder )
+		#OPEN RENDER PATH
+		videoIcon = QtGui.QIcon( PYFILEDIR + '/icons/video.png' )
+		actionOpenPlayblast = QtGui.QAction(videoIcon,"Open Playblast", menu)
+		menu.addAction( actionOpenPlayblast )
+		self.connect( actionOpenPlayblast, QtCore.SIGNAL( "triggered()" ), self.openPlayblast )
 		menu.addSeparator()
 		#DOWNLOAD UPLOAD
 		downIcon = QtGui.QIcon( PYFILEDIR + '/icons/download.png' )
@@ -341,6 +348,14 @@ class ManagerUI(base,fom):
 		self.connect( actionToServer, QtCore.SIGNAL( "triggered()" ), self.copyToServer )
 		menu.addSeparator()
 		if INMAYA:
+			fils = menu.addMenu('Versions')
+			#OPEN IN CURRENT NUKE
+			fls = [ mfl.mayaFile( a.path ) for a in fl.filesInDir( asset.dirPath+'/Versions/', False ) if a.path.endswith('.ma')]
+			for f in fls:
+				nukIcon = QtGui.QIcon( PYFILEDIR + '/icons/maya.png' )
+				actionOpenInCurrent = QtGui.QAction(nukIcon,f.name + ' - ' + f.date, fils)
+				fils.addAction( actionOpenInCurrent )
+				self.connect( actionOpenInCurrent, QtCore.SIGNAL( "triggered()" ), lambda val = f : self.openMayaFile(val) )
 			#OPEN IN CURRENT MAYA
 			mayaIcon = QtGui.QIcon( PYFILEDIR + '/icons/maya.png' )
 			actionOpenInCurrent = QtGui.QAction(mayaIcon,"Open in This Maya", menu)
@@ -389,6 +404,14 @@ class ManagerUI(base,fom):
 		"""open houdini File in current Scene"""
 		fil.open()
 
+	def openMayaFile(self, fil):
+		if fil.isZero:
+			mc.file( new = True, force = True )
+			fil.save()
+		else:
+			fil.open()
+
+
 	def newHoudiniFile(self):
 		"""docstring for fname"""
 		tabwid = self._getCurrentTab()
@@ -422,6 +445,7 @@ class ManagerUI(base,fom):
 
 	def dragEnterEvent(self, event): 
 		event.acceptProposedAction()
+
 
 	# 
 	###################################
@@ -494,6 +518,7 @@ class ManagerUI(base,fom):
 				finalAssets.append( a )
 			assets.extend( finalAssets )
 		self.assets_tw.setRowCount( len( assets ) )
+		self.assets_tw.setColumnWidth( 0, 200 )
 		if not assets:
 			return
 		for i,a in enumerate( assets ):
@@ -501,6 +526,11 @@ class ManagerUI(base,fom):
 			#item.setFlags(QtCore.Qt.ItemIsEnabled)
 			item.setCheckState(QtCore.Qt.Unchecked )
 			item.setData(32, a )
+			if a.hasPreviewImage:
+				imagePath = a.previewImagePath.path
+			else:
+				imagePath = PYFILEDIR + '/icons/no_Preview.jpg'
+			item.setData(QtCore.Qt.DecorationRole, QtGui.QPixmap( imagePath ).scaled(56, 56, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation));
 			self.assets_tw.setItem( i, 0, item )
 			files = [
 				a.modelPath,
@@ -789,6 +819,15 @@ class ManagerUI(base,fom):
 		command = 'echo ' + asset.path + '| clip'
 		os.popen(command)
 
+	def openPlayblast(self):
+		"""docstring for fname"""
+		tab = self._getCurrentTab()
+		item = tab.currentItem()
+		if uiH.USEPYQT:
+			asset = item.data(32).toPyObject()
+		else:
+			asset = item.data(32)
+		os.system("start "+ str( asset.path.replace( '.ma', '.mov' ) ) )
 
 	def openFile(self,item):
 		"""open selected Asset"""
@@ -810,7 +849,10 @@ class ManagerUI(base,fom):
 			asset = item.data(32).toPyObject()
 		else:
 			asset = item.data(32)
-		subprocess.Popen(r'explorer /select,"'+ asset.path.replace( '/','\\' ) +'"')
+		if _platform == 'win32':
+			subprocess.Popen(r'explorer /select,"'+ asset.path.replace( '/','\\' ) +'"')
+		else:
+			subprocess.Popen(['nautilus',asset.path])
 
 	def openFileInCurrentMaya(self):
 		"""docstring for openFileInCurrentMaya"""

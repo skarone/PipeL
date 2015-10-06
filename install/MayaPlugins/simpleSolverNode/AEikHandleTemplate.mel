@@ -1183,6 +1183,7 @@ global proc AEikHandleTemplate( string $nodeName )
 		editorTemplate -addControl "startTwist";
 		editorTemplate -addControl "endTwist";
 		AEaddRampControl( $nodeName + ".twistRamp" );
+		AEaddRampControl( $nodeName + ".scaleRamp" );
 		if (`getAttr -silent -size ($nodeName+"."+"twistRamp")` == 0)
 		{
 			setAttr ($nodeName + ".twistRamp[0].twistRamp_FloatValue") 0.0;

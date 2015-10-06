@@ -46,12 +46,12 @@ class mayaFile(fl.File):
 		"""create a new Version File"""
 		if self.exists:
 			super(mayaFile, self).newVersion()
-		
+
 	def save(self):
 		"""save current file"""
 		mc.file( rename = self.path )
 		mc.file( s = True, type='mayaAscii' )
-	
+
 	@property
 	def caches(self):
 		"""return the caches in the scene"""
@@ -181,7 +181,7 @@ class mayaFile(fl.File):
 		"""change all Paths in file but with brut force, instead of search textures or caches, just search paths to replace"""
 		file_str = self.data.replace( srchAndRep[0].replace( '\\', '/' ), srchAndRep[1].replace( '\\', '/' ) )
 		self.write( file_str )
-		
+
 	def changePaths(self,newDir = '', srchAndRep = []):
 		"""change textures, references, and caches to new path"""
 		#TEXTURES
@@ -194,7 +194,9 @@ class mayaFile(fl.File):
 
 	def changeTextures(self, newDir = '', newRes = '', newExtension = '', srchAndRep = []):
 		"""change texture path or resolution or extension.."""
-		file_str = re.sub( '(?:.+".ftn" -type "string" ")(?P<Path>.+)(?:")', partial( self._changeTexture, newDir, newRes, newExtension, srchAndRep ), self.data )
+		file_str = re.sub( '(?:.+".ftn" -type "string" ")(?P<Path>.+)(?:")',
+							partial( self._changeTexture, newDir, newRes,
+							newExtension, srchAndRep ), self.data )
 		# do stuff with file_str
 		self.write( file_str )
 
@@ -243,7 +245,7 @@ class mayaFile(fl.File):
 					continue
 				allreferences.append(a )
 		return allreferences
-	
+
 	def allTextures(self):
 		"""return all the textures from file and references"""
 		textures = self.textures

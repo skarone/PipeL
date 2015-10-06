@@ -66,11 +66,13 @@ mc.setParent('..', menu = True )
 #SHADING
 mc.menuItem( l = 'Shading', sm = True, to = True )
 mc.menuItem( l = 'Texture Manager', c = "import shading.textureManager.textureManagerUi as tmu;reload(tmu);tmu.main()" )
+mc.menuItem( l = 'Shader Library', c = "import shading.shaderLibrary.shaderLibraryUi as shdUi;reload( shdUi );shdUi.main()" )
 mc.menuItem( l = 'Gamma For Selection', c = "import shading.utils.utils as shu;reload(shu);shu.createGammaForSelectedNodes()" )
 mc.setParent('..', menu = True )
 
 #RIGGING
 mc.menuItem( l = 'Rigging', sm = True, to = True )
+mc.menuItem( l = 'Setup Occ Render', c = "import rigging.setupOcc.setupOcc as sO;reload( sO );sO.main()" )
 mc.menuItem( l = 'BlendShapes Tool', c = "import rigging.blendshape.blendshapesUi as bld;reload( bld );bld.main()" )
 mc.menuItem( l = 'Curved-Base Tool', c = "import rigging.curveBased.curveBasedUi as crvBaseUI;reload( crvBaseUI );crvBaseUI.main()" )
 mc.menuItem( l = 'Wrap To Joints', c = "import rigging.utils.wrapToJoints.nmpWrapToJoints as wrpToJ;wrpToJ.nmpWrapToJoints()" )
@@ -110,7 +112,7 @@ mc.setParent('..', menu = True )
 
 #HELP
 mc.menuItem( divider = True )
-mc.menuItem( l = 'Help', c = 'import os;os.system(\'start ' + PYFILEDIR.replace( '\\', '/' ).replace( 'install','docs' ) + '/index.htm\')' ) 
+mc.menuItem( l = 'Help', c = 'import os;os.system(\'start ' + PYFILEDIR.replace( '\\', '/' ).replace( 'install','docs' ) + '/index.htm\')' )
 mc.setParent('..', menu = True )
 
 sett = sti.Settings()
@@ -118,7 +120,7 @@ gen = sett.General
 if gen:
 	if gen.has_key( 'autoload' ):
 		autoLoad = gen[ "autoload" ]
-		if autoLoad == 'True': 
+		if autoLoad == 'True':
 			manUI.main()
 if not sett.exists:
 	manUI.main()

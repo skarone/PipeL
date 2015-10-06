@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>350</width>
+    <height>193</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Occ Render Rig Setup</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QPushButton" name="addTextureToOcc_btn">
+      <property name="text">
+       <string>Add Texture For Occ Render</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="removeTextureToOcc_btn">
+      <property name="text">
+       <string>Remove Texture For Occ Render</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="addIrisToOcc_btn">
+      <property name="text">
+       <string>Add To Iris to Occ</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="removeIrisToOcc_btn">
+      <property name="text">
+       <string>Remove Iris from Occ</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="addHideOcc_btn">
+      <property name="text">
+       <string>Add Hide for Occ</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="removeHideOcc_btn">
+      <property name="text">
+       <string>Remove Hide for Occ</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
