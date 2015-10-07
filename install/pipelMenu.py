@@ -82,6 +82,7 @@ mc.menuItem( l = 'TF Smooth Skin', c = "import rigging.utils.tf_smoothSkinWeight
 mc.menuItem( l = 'BBoxCurve For Selection', c = "import modeling.bBoxToCurve.bBoxToCurve as bbox;reload( bbox );bbox.BBoxToSel();" )
 mc.menuItem( l = 'Rivet On Mesh', c = "import rigging.stickyControl.stickyControl as stk;reload( stk );stk.createRivetOnMesh( name = 'boton' );" )
 mc.menuItem( l = 'Face Rig', c = "import rigging.face.faceUi as fcu;reload( fcu );fcu.main();" )
+mc.menuItem( l = 'Eyes Rig', c = "import rigging.eyes.eyes as ey;reload( ey );ey.main();" )
 mc.menuItem( l = 'Eyelids Rig', c = "import rigging.eyelids.eyelidsUi as eyeLU; reload( eyeLU); eyeLU.main();" )
 mc.menuItem( l = 'Transfer Skin Weights', c = "import rigging.utils.transferSkinWeights.transferSkinWeights as tfw;reload(tfw);tfw.main();" )
 mc.menuItem( l = 'Add Selected Joints To Skin', c = "import rigging.utils.utils as rut;reload(rut);rut.addSelectedJointsToSelectedMesh();" )

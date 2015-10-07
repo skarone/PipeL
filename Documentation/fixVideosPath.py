@@ -22,6 +22,8 @@ def _replacePath( newDir, matchobj ):
 	print fileName
 	return matchobj.group(0).replace(path, newDir + fileName )
 
+#convert avi to mp4 for documentation
+#ffmpeg -i file.avi -c:v libx264 -pix_fmt yuv420p file.mp4
 
 if __name__ == '__main__':
 	main()
