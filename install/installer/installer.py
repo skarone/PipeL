@@ -110,7 +110,7 @@ class InstallerUI(base, fom):
 		#ADD REGISTER
 		#rg.set_reg( 'HKCU', r'Software\Pipel', 'key', newData )
 		#SET PYTHONPATH
-		path = self.serverPath.replace( '\\', '/' ) + ';'
+		path = self.serverPath.replace( '/', '\\') + ';'
 		pyPath = ''
 		try:
 			pyPath = rg.queryValue('HKLM', r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'PYTHONPATH')
@@ -120,7 +120,7 @@ class InstallerUI(base, fom):
 			#ALLREADY INSTALLED
 			rg.set_reg( 'HKLM', r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'PYTHONPATH', path + pyPath )
 		self.procStart.emit( 'Installed' )
-	
+
 	def setupMaya(self, version = '2014'):
 		"""create userSetup.mel or if exists check if there is pipel installed if not add lines to it"""
 		userDir      = os.path.expanduser( '~' )
@@ -154,7 +154,7 @@ class InstallerUI(base, fom):
 		"""add PipeL menu if not installed"""
 		userDir      = os.path.expanduser( '~' )
 		nukePath     = userDir + '\\.nuke'
-		if os.path.exists( nukePath ): #is nuke installed 
+		if os.path.exists( nukePath ): #is nuke installed
 			menuFile = nukePath + '\\menu.py'
 			if os.path.exists( menuFile ):#SETUP FILE EXISTS.. WE NEED TO CHECK IF PIPEL IS INSTALLED
 				with open( menuFile, 'r+' ) as fil:
