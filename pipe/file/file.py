@@ -95,29 +95,29 @@ class File(object):
 			return self.dirPath + '/Versions/'
 		else:
 			return self.dirPath
-	
+
 	@property
 	def version(self):
 		"""return the number of version that the file is"""
 		verPath = self.versionPath
 		if not os.path.exists( verPath ):
 			return 1
-		verFils = [ a for a in os.listdir( verPath ) 
+		verFils = [ a for a in os.listdir( verPath )
 				if ( self.name in a
 					and a.endswith( self.extension )
-					and os.path.isfile( verPath + a ) 
+					and os.path.isfile( verPath + a )
 				) ]
 		return len( verFils ) + 1
 
 	def create(self, path): #TODO
 		"""method to create file if dosen't exists"""
-		if not self.exists: 
+		if not self.exists:
 			print 'creating file in path', path
 			return True
 		else:
 			print 'this file allready exists in', path
 			return False
-	
+
 	"""
 	def copy(self, newPath):
 		newPath = newPath.replace( '//', '/' )
@@ -141,16 +141,17 @@ class File(object):
 			shutil.copy2( self.path, finalFile.path )
 		else:
 			finalFile = File( str( newPath ))
-			if finalFile.exists:
-				finalFile.delete()
+			if not self.path == finalFile.path:
+				if finalFile.exists:
+					finalFile.delete()
 			shutil.copy2( self.path, finalFile.path )
-		return finalFile 
-	
+		return finalFile
+
 	def rename(self, newName):
 		"""rename filename newName"""
 		os.rename( self.path, self.dirPath + newName )
 		self._path = self.dirPath + newName
-		
+
 	def newVersion(self):
 		"""create a new Version of the file"""
 		print self.versionPath + self.name + '_v' + str( self.version ).zfill( File.paddingNum ) + self.extension
