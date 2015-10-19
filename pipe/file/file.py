@@ -136,14 +136,18 @@ class File(object):
 			os.makedirs( os.path.dirname( newPath ) )
 		if os.path.isdir( newPath ):
 			finalFile = File( str( newPath ) + '/' + str ( self.fullName ))
+			if self.path == finalFile.path:
+				return finalFile
 			if finalFile.exists:
 				finalFile.delete()
 			shutil.copy2( self.path, finalFile.path )
+			return finalFile
 		else:
 			finalFile = File( str( newPath ))
-			if not self.path == finalFile.path:
-				if finalFile.exists:
-					finalFile.delete()
+			if self.path == finalFile.path:
+				return finalFile
+			if finalFile.exists:
+				finalFile.delete()
 			shutil.copy2( self.path, finalFile.path )
 		return finalFile
 
