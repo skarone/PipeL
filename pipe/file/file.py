@@ -136,7 +136,7 @@ class File(object):
 			os.makedirs( os.path.dirname( newPath ) )
 		if os.path.isdir( newPath ):
 			finalFile = File( str( newPath ) + '/' + str ( self.fullName ))
-			if self.path == finalFile.path:
+			if self.path.replace( '\\', '/') == finalFile.path.replace('\\', '/'):
 				return finalFile
 			if finalFile.exists:
 				finalFile.delete()
@@ -144,7 +144,7 @@ class File(object):
 			return finalFile
 		else:
 			finalFile = File( str( newPath ))
-			if self.path == finalFile.path:
+			if self.path.replace( '\\', '/') == finalFile.path.replace('\\', '/'):
 				return finalFile
 			if finalFile.exists:
 				finalFile.delete()
@@ -167,8 +167,9 @@ class File(object):
 
 	def move(self, newPath):
 		"""move file to newPath, same as copy but instead it will delete the original file"""
-		self.copy( newPath )
-		self.delete()
+		if not self.path.replace( '/', '\\') == newPath.replace('/', '\\'):
+			self.copy( newPath )
+			self.delete()
 
 	def isOlderThan(self, fileToCompare):
 		"""compare to File objects to see if the current one is older than"""
