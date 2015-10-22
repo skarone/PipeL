@@ -142,6 +142,20 @@ class CacheManagerUI(base,fom):
 		QtCore.QObject.connect( self.shots_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._fillCacheList )
 		QtCore.QObject.connect( self.shots_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._fillFileList )
 		QtCore.QObject.connect( self.useExocortex_chb, QtCore.SIGNAL( "stateChanged  (int)" ), self.setUseExocortex )
+		QtCore.QObject.connect( self.shots_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self._checkCameraInPool )
+
+	def _checkCameraInPool(self):
+		"""docstring for fname"""
+		sht = self._selectedShot
+		if INMAYA:
+			if sht.poolCam.exists:
+				if not sht.poolCam.isZero:
+					self.referenceCamera_btn.setEnabled( True )
+				else:
+					self.referenceCamera_btn.setEnabled( False )
+			else:
+				self.referenceCamera_btn.setEnabled( False )
+
 
 	def explorePoolFolder(self):
 		"""explore pool folder for current shot"""
@@ -152,7 +166,7 @@ class CacheManagerUI(base,fom):
 		else:
 			subprocess.Popen(['nautilus',poolPath])
 
-		
+
 	def setUseExocortex(self, val):
 		"""docstring for setUseExocortex"""
 		cfl.USE_EXOCORTEX = self.useExocortex_chb.isChecked()
@@ -165,8 +179,8 @@ class CacheManagerUI(base,fom):
 			tim = self._selectedShot.animPath.time
 			mc.currentUnit( time=tim['tim'], linear = tim['lin'], angle = tim[ 'angle' ] )
 			mc.playbackOptions( min = tim[ 'min' ],
-								ast = tim[ 'ast' ], 
-								max = tim[ 'max' ], 
+								ast = tim[ 'ast' ],
+								max = tim[ 'max' ],
 								aet = tim[ 'aet' ] )
 		elif INHOU:
 			hu.loadCamera(sht.project.name, sht.sequence.name, sht.name, self.connectToGlobalScale_chb.isChecked() )
@@ -385,11 +399,11 @@ class CacheManagerUI(base,fom):
 		if self.useShotFolder_chb.isChecked() and exportAsset:
 			cacheTab, cacheTabNum = self._getCurrentCacheTab()
 			if cacheTabNum == 0:
-				pathDir = self._selectedShot.animCachesPath 
+				pathDir = self._selectedShot.animCachesPath
 			elif cacheTabNum == 1:
 				pathDir = self._selectedShot.skinFixCachesPath
 			elif cacheTabNum == 2:
-				pathDir = self._selectedShot.simCachesPath 
+				pathDir = self._selectedShot.simCachesPath
 		else:
 			pathDir = QtGui.QFileDialog.getSaveFileName(self, 'Save Cache', self._selectedShot.animCachesPath, selectedFilter='*.abc')
 			pathDir = pathDir[0]

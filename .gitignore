@@ -14,3 +14,6 @@ render/renderOcc/.ropeproject/
 install/.ropeproject/
 animation/playblast/.ropeproject/
 .ropeproject/
+*.sdf
+*.opensdf
+*.filters
