@@ -2,16 +2,17 @@ import maya.OpenMaya as om
 import math
 import maya.cmds as mc
 
-def getMatrixFromParamCurve( curveFn, param, exNormal ):
+def getMatrixFromParamCurve( curveFn, param, twist ):
 	"""docstring for getMatrixFromParamCurve"""
 	pDivPos = om.MPoint()
 	curveFn.getPointAtParam( param, pDivPos, om.MSpace.kWorld );
-	vNormal = om.MVector( curveFn.normal( param, om.MSpace.kObject ).normal() );
 	vTangent = om.MVector( curveFn.tangent( param, om.MSpace.kObject ).normal() );
-	if not exNormal.length() == 0:
-		print ( exNormal + vNormal ).length()
-		if ( exNormal + vNormal ).length() < 1:
-			vNormal = vNormal * -1
+	#Create Paralel Vector to use as base
+	vLocalPos = om.MVector( 0,1,0 )
+	vNormal = vLocalPos ^ vTangent
+	# vNormal = om.MVector( curveFn.normal( param, om.MSpace.kObject ).normal() );
+	qTwist = om.MQuaternion( twist.asRadians(), vTangent )
+	vNormal = vNormal.rotateBy( qTwist )
 	vExtra = vNormal ^ vTangent
 	dTrans =[
 			vNormal.x, vNormal.y, vNormal.z, 0.0,
@@ -20,7 +21,7 @@ def getMatrixFromParamCurve( curveFn, param, exNormal ):
 			pDivPos.x,pDivPos.y,pDivPos.z, 1.0]
 	mTrans = om.MMatrix();
 	om.MScriptUtil.createMatrixFromList(dTrans,mTrans)
-	return mTrans, vNormal
+	return mTrans
 
 def createCirclePoints( pointsCount, bMatrix, points ):
 	"""docstring for createCirclePoints"""
@@ -33,18 +34,16 @@ def createCirclePoints( pointsCount, bMatrix, points ):
 		points.append( om.MFloatPoint( vVector.x, vVector.y, vVector.z, 1.0 ) )
 	return points
 
-def createRopesRings( ropesCount, bMatrix, points, pointsCount = 5 ):
+def createRopesRings( ropesCount, bMatrix, points, pointsCount = 5, ropeStrength = 1 ):
 	"""creates ropes base, create half rope and move them to the final position"""
-	baseVector = om.MPoint( 1,0,0 )
 	angle = om.MAngle(( 180.0 / ropesCount ), om.MAngle.kDegrees)
-	distanceToMoveRope = math.sin(om.MAngle(( 360.0 / ropesCount ), om.MAngle.kDegrees).asRadians() )
+	distanceToMoveRope = math.cos(om.MAngle(( 180.0 / ropesCount ), om.MAngle.kDegrees).asRadians() )
 	singleRopeRadius = math.sin( angle.asRadians() )
-	print "distanceToMoveRope", distanceToMoveRope
 	for d in range( 1, ropesCount + 1 ):
 		ropePoints = createHalfRope( pointsCount, singleRopeRadius )
 		for ropP in range( ropePoints.length() ):
-			ropP = om.MVector( ropePoints[ ropP ] ) + om.MVector( 0,0,-1 ) * distanceToMoveRope
-			basVRot = om.MVector( baseVector ).rotateBy( om.MVector.kYaxis, om.MAngle(( 360.0 / ropesCount * d ), om.MAngle.kDegrees).asRadians() )
+			ropP = ropePoints[ ropP ]
+			ropP = om.MVector( ropP.x, ropP.y, ropP.z * ropeStrength ) + om.MVector( 0,0,-1 ) * distanceToMoveRope
 			ropV = om.MVector( ropP ).rotateBy( om.MVector.kYaxis, om.MAngle(( 360.0 / ropesCount * d ), om.MAngle.kDegrees).asRadians() )
 			ropV = om.MPoint( ropV ) * bMatrix # move vector to final position
 			points.append( om.MFloatPoint( ropV.x, ropV.y, ropV.z, 1.0 ) )
@@ -56,25 +55,29 @@ def createHalfRope( pointsCount = 5, radius = 1 ):
 	baseVector = om.MPoint( 1,0,0 ) * radius
 	points.append( om.MFloatPoint( baseVector.x, baseVector.y, baseVector.z, 1.0 ) )
 	for d in range( 1, pointsCount ):
-		"""
-		if d == 1:
-			d = 0.25
-		elif d == pointsCount - 1:
-			d += 0.75
-		"""
+		if d == 1: #add an extra point to make the rope more marked
+			baseAngle = om.MAngle(( 180.0 / ( pointsCount ) * 0.25 ), om.MAngle.kDegrees)
+			vVector = om.MVector( baseVector ).rotateBy( om.MVector.kYaxis, baseAngle.asRadians() )
+			points.append( om.MFloatPoint( vVector.x, vVector.y, vVector.z, 1.0 ) )
 		baseAngle = om.MAngle(( 180.0 / ( pointsCount ) * d ), om.MAngle.kDegrees)
 		vVector = om.MVector( baseVector ).rotateBy( om.MVector.kYaxis, baseAngle.asRadians() )
 		points.append( om.MFloatPoint( vVector.x, vVector.y, vVector.z, 1.0 ) )
+		if d == pointsCount - 1:
+			baseAngle = om.MAngle(( 180.0 / ( pointsCount ) * (d + 0.75) ), om.MAngle.kDegrees)
+			vVector = om.MVector( baseVector ).rotateBy( om.MVector.kYaxis, baseAngle.asRadians() )
+			points.append( om.MFloatPoint( vVector.x, vVector.y, vVector.z, 1.0 ) )
 	return points
 
 def createTube( obj = 'curveShape1' ):
-	divisions = 15
+	divisions = 30
 	createRope = True
-	ropesCount = 6
-	pointsPerRope = 5
+	ropesCount = 8
+	pointsPerRope = 9
 	pointsCount = 5
+	ropeStrength = 1
+	twist = om.MAngle( 0, om.MAngle.kDegrees )
 	if createRope:
-		pointsCount = pointsPerRope *ropesCount
+		pointsCount = (pointsPerRope + 2 ) *ropesCount
 	sel = om.MSelectionList()
 	dagPath = om.MDagPath()
 	sel.add(obj)
@@ -91,7 +94,6 @@ def createTube( obj = 'curveShape1' ):
 	faceConnects = om.MIntArray()
 	faceCounts = om.MIntArray()
 	baseLeng = lengPerDiv
-	exNormal = om.MVector(0,0,0)
 	for d in range( 0, divisions + 1 ):
 		if d == 0: #Extreme 1
 			param = 0
@@ -118,9 +120,9 @@ def createTube( obj = 'curveShape1' ):
 				for i in range( pointsCount ):
 					faceConnects.append( ( pointsCount *  divisions ) + i )
 			baseLeng += lengPerDiv
-		mTrans, exNormal = getMatrixFromParamCurve( curveFn, param, exNormal )
+		mTrans = getMatrixFromParamCurve( curveFn, param, twist )
 		if createRope:
-			createRopesRings( ropesCount, mTrans, points, pointsPerRope )
+			createRopesRings( ropesCount, mTrans, points, pointsPerRope, ropeStrength )
 		else:
 			createCirclePoints( pointsCount, mTrans, points )
 	print numVerteces, numFaces, points.length(), faceCounts.length(), faceConnects.length()
