@@ -1,0 +1,18 @@
+global proc AEropeGeneratorTemplate( string $nodeName )
+{
+    editorTemplate -beginScrollLayout;
+ 
+        editorTemplate -beginLayout "Twist Attribute" -collapse 0;
+            AEaddRampControl( $nodeName + ".twistRamp" );
+        editorTemplate -endLayout;
+        editorTemplate -beginLayout "Taper Attribute" -collapse 0;
+            AEaddRampControl( $nodeName + ".tapper" );
+        editorTemplate -endLayout;
+ 
+    editorTemplate -addExtraControls;
+    editorTemplate -endScrollLayout;
+
+    setAttr ($nodeName + ".curveRamp[0].curveRamp_FloatValue") 1.0;
+    setAttr ($nodeName + ".curveRamp[0].curveRamp_Position") 0.0;
+    setAttr ($nodeName + ".curveRamp[0].curveRamp_Interp") 1;
+}
