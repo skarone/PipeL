@@ -34,6 +34,20 @@ def createCirclePoints( pointsCount, bMatrix, points ):
 		points.append( om.MFloatPoint( vVector.x, vVector.y, vVector.z, 1.0 ) )
 	return points
 
+def createCircleUvs( pointsCount ):
+	"""docstring for createCircleUvs"""
+	baseVector = om.MPoint( 1,0,0 )
+	uArray = om.MFloatArray()
+	vArray = om.MFloatArray()
+	uArray.append( baseVector.x )
+	vArray.append( baseVector.z )
+	for d in range( 1, pointsCount ):
+		vVector = om.MVector( baseVector ).rotateBy( om.MVector.kYaxis, om.MAngle(( 360.0 / pointsCount * d ), om.MAngle.kDegrees).asRadians() )
+		uArray.append( vVector.x )
+		vArray.append( vVector.z )
+	return uArray, vArray
+
+
 def createRopesRings( ropesCount, bMatrix, points, pointsCount = 5, ropeStrength = 1 ):
 	"""creates ropes base, create half rope and move them to the final position"""
 	angle = om.MAngle(( 180.0 / ropesCount ), om.MAngle.kDegrees)
@@ -69,10 +83,10 @@ def createHalfRope( pointsCount = 5, radius = 1 ):
 	return points
 
 def createTube( obj = 'curveShape1' ):
-	divisions = 30
-	createRope = True
-	ropesCount = 8
-	pointsPerRope = 9
+	divisions = 15
+	createRope = False
+	ropesCount = 5
+	pointsPerRope = 6
 	pointsCount = 5
 	ropeStrength = 1
 	twist = om.MAngle( 0, om.MAngle.kDegrees )
@@ -93,19 +107,35 @@ def createTube( obj = 'curveShape1' ):
 	points = om.MFloatPointArray()
 	faceConnects = om.MIntArray()
 	faceCounts = om.MIntArray()
+	uArray = om.MFloatArray()
+	vArray = om.MFloatArray()
 	baseLeng = lengPerDiv
+	uDivNumber = 1.0 / pointsCount
 	for d in range( 0, divisions + 1 ):
 		if d == 0: #Extreme 1
 			param = 0
 			faceCounts.append( pointsCount )
 			for i in reversed(range( pointsCount )):
 				faceConnects.append( i )
+			if not createRope: #create Uvs for circle
+				uTmpArray,vTmpArray = createCircleUvs( pointsCount )
+				for u in range( uTmpArray.length() ):
+					uArray.append( uTmpArray[u] + 1.0 )
+					vArray.append( vTmpArray[u] )
 		else:
 			param = curveFn.findParamFromLength( baseLeng )
 			for i in range( pointsCount ):
 				faceCounts.append( 4 )
 			for f in range( pointsCount ):
-				if f == pointsCount - 1:
+				uArray.append( uDivNumber * f )
+				uArray.append( uDivNumber * ( f + 1 ) )
+				uArray.append( uDivNumber * ( f + 2 ) )
+				uArray.append( uDivNumber * ( f + 3 ) )
+				vArray.append( uDivNumber * d )
+				vArray.append( uDivNumber * d )
+				vArray.append( uDivNumber * d )
+				vArray.append( uDivNumber * d )
+				if f == pointsCount - 1: #for last face we need to change
 					faceConnects.append( ( f + 1 + ( d * pointsCount ) ) - pointsCount - pointsCount )
 					faceConnects.append( ( f + 1 + ( d * pointsCount ) - pointsCount ) )
 					faceConnects.append( f + 1 + ( d * pointsCount ) - 1 )
@@ -119,6 +149,11 @@ def createTube( obj = 'curveShape1' ):
 				faceCounts.append( pointsCount )
 				for i in range( pointsCount ):
 					faceConnects.append( ( pointsCount *  divisions ) + i )
+				if not createRope: #create Uvs for circle
+					uTmpArray,vTmpArray = createCircleUvs( pointsCount )
+					for u in range( uTmpArray.length() ):
+						uArray.append( uTmpArray[u] + 2.0 )
+						vArray.append( vTmpArray[u] )
 			baseLeng += lengPerDiv
 		mTrans = getMatrixFromParamCurve( curveFn, param, twist )
 		if createRope:
@@ -126,7 +161,9 @@ def createTube( obj = 'curveShape1' ):
 		else:
 			createCirclePoints( pointsCount, mTrans, points )
 	print numVerteces, numFaces, points.length(), faceCounts.length(), faceConnects.length()
-	newMesh = meshFS.create(numVerteces, numFaces, points, faceCounts, faceConnects )
+	newMesh = meshFS.create(numVerteces, numFaces, points, faceCounts,
+						faceConnects, uArray, vArray )
+	meshFS.assignUVs( faceCounts, faceConnects )
 
 createTube()
 
