@@ -60,6 +60,7 @@ def createRopeUvs( ropesCount, pointsCount, ropeStrength ):
 			ropP = ropePoints[ ropP ]
 			ropP = om.MVector( ropP.x, ropP.y, ropP.z * ropeStrength ) + om.MVector( 0,0,-1 ) * distanceToMoveRope
 			ropV = om.MVector( ropP ).rotateBy( om.MVector.kYaxis, om.MAngle(( 360.0 / ropesCount * d ), om.MAngle.kDegrees).asRadians() )
+			ropV = ropV * 0.1
 			uArray.append( ropV.x + 0.5 )
 			vArray.append( ropV.z + 0.5 )
 	return uArray, vArray
@@ -99,12 +100,12 @@ def createHalfRope( pointsCount = 5, radius = 1 ):
 	return points
 
 def createTube( obj = 'curveShape1' ):
-	divisions = 32
+	divisions = 15
 	createRope = True
-	ropesCount = 5
+	ropesCount = 3
 	pointsPerRope = 6
 	pointsCount = 5
-	ropeStrength = 1
+	ropeStrength = 0.1
 	twist = om.MAngle( 0, om.MAngle.kDegrees )
 	if createRope:
 		pointsCount = (pointsPerRope + 2 ) *ropesCount
@@ -135,18 +136,18 @@ def createTube( obj = 'curveShape1' ):
 			faceCounts.append( pointsCount )
 			for i in reversed(range( pointsCount )):
 				faceConnects.append( i )
-				for i in range( pointsCount ):
-					uvIds.append( i )
-					if createRope: #create Uvs for circle first Face
-				uTmpArray,vTmpArray = createRopeUvs( ropesCount, pointsCount, ropeStrength )
+			for i in range( pointsCount ):
+				uvIds.append( i )
+			if createRope: #create Uvs for circle first Face
+				uTmpArray,vTmpArray = createRopeUvs( ropesCount, pointsPerRope, ropeStrength )
 			else:
 				uTmpArray,vTmpArray = createCircleUvs( pointsCount )
-				for u in range( uTmpArray.length() ):
-					uArray.append( uTmpArray[u] + 1.0 )
-					vArray.append( vTmpArray[u] )
-				for i in range( pointsCount + 1 ):
-					uArray.append( uDivNumber * i )
-					vArray.append( vDivNumber * d )
+			for u in range( uTmpArray.length() ):
+				uArray.append( uTmpArray[u] + 1.0 )
+				vArray.append( vTmpArray[u] )
+			for i in range( pointsCount + 1 ):
+				uArray.append( uDivNumber * i )
+				vArray.append( vDivNumber * d )
 		else:
 			param = curveFn.findParamFromLength( baseLeng )
 			for i in range( pointsCount + 1 ):
@@ -164,16 +165,25 @@ def createTube( obj = 'curveShape1' ):
 					faceConnects.append( f + 1  + ( d * pointsCount ) - pointsCount )
 					faceConnects.append( f + 1  + ( d * pointsCount ) )
 					faceConnects.append( ( f + ( d * pointsCount ) ) )
-				uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d - 1 )) + f)
-				uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d - 1 )) + 1 + f )
-				uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d )) + 1 + f)
-				uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d )) + f)
+				if f == pointsCount - 1: #for last face we need to change
+					uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d - 1 )) + 1 + f )
+					uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d )) + 1 + f)
+					uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d )) + f)
+					uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d - 1 )) + f)
+				else:
+					uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d - 1 )) + f)
+					uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d - 1 )) + 1 + f )
+					uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d )) + 1 + f)
+					uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d )) + f)
 			if d == divisions: #Extreme 2
 				faceCounts.append( pointsCount )
 				for i in range( pointsCount ):
 					faceConnects.append( ( pointsCount *  divisions ) + i )
 					uvIds.append( ( pointsCount *  ( divisions + 2 )) + i + divisions + 1 )
-				uTmpArray,vTmpArray = createCircleUvs( pointsCount )
+				if createRope:
+					uTmpArray,vTmpArray = createRopeUvs( ropesCount, pointsPerRope, ropeStrength )
+				else:
+					uTmpArray,vTmpArray = createCircleUvs( pointsCount )
 				for u in range( uTmpArray.length() ):
 					uArray.append( uTmpArray[u] + 2.0 )
 					vArray.append( vTmpArray[u] )
@@ -190,6 +200,7 @@ def createTube( obj = 'curveShape1' ):
 	faceCountsTotal = 0
 	for c in range( faceCounts.length() ):
 		faceCountsTotal += faceCounts[c]
+	print "PointsCount", pointsCount
 	print "NumUvs",meshFS.numUVs()
 	print "uvsIds",uvIds.length()
 	print "faceCountsTotal",faceCountsTotal
