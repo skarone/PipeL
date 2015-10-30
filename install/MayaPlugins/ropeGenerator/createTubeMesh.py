@@ -34,9 +34,9 @@ def createCirclePoints( pointsCount, bMatrix, points ):
 		points.append( om.MFloatPoint( vVector.x, vVector.y, vVector.z, 1.0 ) )
 	return points
 
-def createCircleUvs( pointsCount ):
+def createCircleUvs( pointsCount, uvCapSize ):
 	"""docstring for createCircleUvs"""
-	baseVector = om.MPoint( 0.5,0,0 )
+	baseVector = om.MPoint( 0.5 * uvCapSize,0,0 )
 	uArray = om.MFloatArray()
 	vArray = om.MFloatArray()
 	uArray.append( baseVector.x + 0.5 )
@@ -47,7 +47,7 @@ def createCircleUvs( pointsCount ):
 		vArray.append( vVector.z + 0.5 )
 	return uArray, vArray
 
-def createRopeUvs( ropesCount, pointsCount, ropeStrength ):
+def createRopeUvs( ropesCount, pointsCount, ropeStrength, uvCapSize ):
 	"""docstring for createRopeUvs"""
 	angle = om.MAngle(( 180.0 / ropesCount ), om.MAngle.kDegrees)
 	distanceToMoveRope = math.cos(om.MAngle(( 180.0 / ropesCount ), om.MAngle.kDegrees).asRadians() )
@@ -60,7 +60,7 @@ def createRopeUvs( ropesCount, pointsCount, ropeStrength ):
 			ropP = ropePoints[ ropP ]
 			ropP = om.MVector( ropP.x, ropP.y, ropP.z * ropeStrength ) + om.MVector( 0,0,-1 ) * distanceToMoveRope
 			ropV = om.MVector( ropP ).rotateBy( om.MVector.kYaxis, om.MAngle(( 360.0 / ropesCount * d ), om.MAngle.kDegrees).asRadians() )
-			ropV = ropV * 0.1
+			ropV = ropV * 0.5 * uvCapSize
 			uArray.append( ropV.x + 0.5 )
 			vArray.append( ropV.z + 0.5 )
 	return uArray, vArray
@@ -106,6 +106,9 @@ def createTube( obj = 'curveShape1' ):
 	pointsPerRope = 6
 	pointsCount = 5
 	ropeStrength = 0.1
+	uvWidth = 0.5
+	uvHeight = 1.5
+	uvCapSize = 0.5
 	twist = om.MAngle( 0, om.MAngle.kDegrees )
 	if createRope:
 		pointsCount = (pointsPerRope + 2 ) *ropesCount
@@ -128,8 +131,8 @@ def createTube( obj = 'curveShape1' ):
 	uArray = om.MFloatArray()
 	vArray = om.MFloatArray()
 	baseLeng = lengPerDiv
-	uDivNumber = 1.0 / pointsCount
-	vDivNumber = 1.0 / divisions
+	uDivNumber = uvWidth / pointsCount
+	vDivNumber = uvHeight / divisions
 	for d in range( 0, divisions + 1 ):
 		if d == 0: #Extreme 1
 			param = 0
@@ -139,9 +142,10 @@ def createTube( obj = 'curveShape1' ):
 			for i in range( pointsCount ):
 				uvIds.append( i )
 			if createRope: #create Uvs for circle first Face
-				uTmpArray,vTmpArray = createRopeUvs( ropesCount, pointsPerRope, ropeStrength )
+				uTmpArray,vTmpArray = createRopeUvs( ropesCount, pointsPerRope,
+										ropeStrength, uvCapSize )
 			else:
-				uTmpArray,vTmpArray = createCircleUvs( pointsCount )
+				uTmpArray,vTmpArray = createCircleUvs( pointsCount, uvCapSize )
 			for u in range( uTmpArray.length() ):
 				uArray.append( uTmpArray[u] + 1.0 )
 				vArray.append( vTmpArray[u] )
@@ -160,17 +164,15 @@ def createTube( obj = 'curveShape1' ):
 					faceConnects.append( ( f + 1 + ( d * pointsCount ) - pointsCount ) )
 					faceConnects.append( f + 1 + ( d * pointsCount ) - 1 )
 					faceConnects.append( f + 1 + ( d * pointsCount ) - pointsCount - 1 )
-				else:
-					faceConnects.append( ( f + ( d * pointsCount ) ) - pointsCount )
-					faceConnects.append( f + 1  + ( d * pointsCount ) - pointsCount )
-					faceConnects.append( f + 1  + ( d * pointsCount ) )
-					faceConnects.append( ( f + ( d * pointsCount ) ) )
-				if f == pointsCount - 1: #for last face we need to change
 					uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d - 1 )) + 1 + f )
 					uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d )) + 1 + f)
 					uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d )) + f)
 					uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d - 1 )) + f)
 				else:
+					faceConnects.append( ( f + ( d * pointsCount ) ) - pointsCount )
+					faceConnects.append( f + 1  + ( d * pointsCount ) - pointsCount )
+					faceConnects.append( f + 1  + ( d * pointsCount ) )
+					faceConnects.append( ( f + ( d * pointsCount ) ) )
 					uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d - 1 )) + f)
 					uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d - 1 )) + 1 + f )
 					uvIds.append( pointsCount + (( pointsCount + 1 ) * ( d )) + 1 + f)
@@ -181,9 +183,10 @@ def createTube( obj = 'curveShape1' ):
 					faceConnects.append( ( pointsCount *  divisions ) + i )
 					uvIds.append( ( pointsCount *  ( divisions + 2 )) + i + divisions + 1 )
 				if createRope:
-					uTmpArray,vTmpArray = createRopeUvs( ropesCount, pointsPerRope, ropeStrength )
+					uTmpArray,vTmpArray = createRopeUvs( ropesCount,
+										 pointsPerRope, ropeStrength, uvCapSize )
 				else:
-					uTmpArray,vTmpArray = createCircleUvs( pointsCount )
+					uTmpArray,vTmpArray = createCircleUvs( pointsCount, uvCapSize )
 				for u in range( uTmpArray.length() ):
 					uArray.append( uTmpArray[u] + 2.0 )
 					vArray.append( vTmpArray[u] )
