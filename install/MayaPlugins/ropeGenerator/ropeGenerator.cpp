@@ -26,6 +26,9 @@ MObject ropeGenerator::radius;
 MObject ropeGenerator::taperRamp;
 MObject ropeGenerator::twist;
 MObject ropeGenerator::twistRamp;
+MObject ropeGenerator::uvWidth;
+MObject ropeGenerator::uvHeight;
+MObject ropeGenerator::uvCapSize;
 MObject ropeGenerator::outMesh;
 MTypeId ropeGenerator::id( 0x00348 );
 
@@ -58,6 +61,9 @@ MStatus ropeGenerator::compute( const MPlug& plug, MDataBlock& data )
 		MRampAttribute inRadRamp( thisMObject(), taperRamp );
 		float inTwist = data.inputValue( twist ).asFloat();
 		MRampAttribute inTwistRamp( thisMObject(), twistRamp );
+		float inUvWidth = data.inputValue( uvWidth ).asFloat();
+		float inUvHeight = data.inputValue( uvHeight ).asFloat();
+		float inUvCapSize = data.inputValue( uvCapSize ).asFloat();
 
 		MFnMesh fnMesh;
 		MFnMeshData dataCreator;
@@ -65,7 +71,8 @@ MStatus ropeGenerator::compute( const MPlug& plug, MDataBlock& data )
 		outMeshData = dataCreator.create();
 		MDataHandle outputHandle = data.outputValue(outMesh);
 		//createBase 
-		MIntArray faceCounts, faceConnects;
+		MIntArray faceCounts, faceConnects, uvIds;
+		MFloatArray uArray, vArray;
 		MFloatPointArray points;
 		faceCounts.clear();
 		faceConnects.clear();
@@ -79,6 +86,8 @@ MStatus ropeGenerator::compute( const MPlug& plug, MDataBlock& data )
 		float baseLeng = lengPerDiv;
 		float baseParamForRamp = 0;
 		float paramForRamp = 1.0 / float( inDiv );
+		float uDivNumber = inUvWidth / float( inPointsCount );
+		float vDivNumber = inUvHeight / float( inDiv );
 		for (int d = 0; d < inDiv + 1; d++)
 		{
 			if (d == 0)
@@ -89,25 +98,54 @@ MStatus ropeGenerator::compute( const MPlug& plug, MDataBlock& data )
 				{
 					faceConnects.append( i );
 				}
-			}else{
-				param = curveFn.findParamFromLength( baseLeng );
 				for ( int i = 0; i < inPointsCount; i++ )
 				{
-					faceCounts.append( 4 );
+					uvIds.append( i );
+				}
+				MFloatArray uTmpArray, vTmpArray;
+				if (inCreateRope)
+					createRopesUvs( inRopesCount, inPointsPerRope, inRopesStrength, inUvCapSize, uTmpArray, vTmpArray, 1.0 );
+				else
+					createCircleUvs( inPointsCount, inUvCapSize, uTmpArray, vTmpArray, 1.0 );
+				for ( int u = uTmpArray.length() - 1; u >= 0 ; u-- )
+				{
+					uArray.append( uTmpArray[u] + 1.0 );
+					vArray.append( vTmpArray[u] );
+				}
+				for ( int i = 0; i < inPointsCount + 1; i++ )
+				{
+					uArray.append( uDivNumber * float( i ) );
+					vArray.append( vDivNumber * float( d ) );
+				}
+			}else{
+				param = curveFn.findParamFromLength( baseLeng );
+				for ( int i = 0; i < inPointsCount + 1; i++ )
+				{
+					uArray.append( uDivNumber * float( i ) );
+					vArray.append( vDivNumber * float( d ) );
 				}
 				for ( int f = 0; f < inPointsCount; f++ )
 				{
+					faceCounts.append( 4 );
 					if( f == ( inPointsCount - 1 ))
 					{
 						faceConnects.append( ( f + 1 + ( d * inPointsCount ) ) - inPointsCount - inPointsCount );
 						faceConnects.append( ( f + 1 + ( d * inPointsCount ) - inPointsCount ) );
 						faceConnects.append( f + 1 + ( d * inPointsCount )  - 1 );
 						faceConnects.append( f + 1 + ( d * inPointsCount ) - inPointsCount - 1 );
+						uvIds.append( inPointsCount + (( inPointsCount + 1 ) * float( d - 1 )) + 1 + f );
+						uvIds.append( inPointsCount + (( inPointsCount + 1 ) * float( d )) + 1 + f);
+						uvIds.append( inPointsCount + (( inPointsCount + 1 ) * float( d )) + f);
+						uvIds.append( inPointsCount + (( inPointsCount + 1 ) * float( d - 1 )) + f);
 					}else{
 						faceConnects.append( ( f + ( d * inPointsCount ) ) - inPointsCount );
 						faceConnects.append( f + 1 + ( d * inPointsCount ) - inPointsCount );
 						faceConnects.append( f + 1 + ( d * inPointsCount ) );
 						faceConnects.append( ( f + ( d * inPointsCount )) );
+						uvIds.append( inPointsCount + (( inPointsCount + 1 ) * float( d - 1 )) + f);
+						uvIds.append( inPointsCount + (( inPointsCount + 1 ) * float( d - 1 )) + 1 + f );
+						uvIds.append( inPointsCount + (( inPointsCount + 1 ) * float( d )) + 1 + f);
+						uvIds.append( inPointsCount + (( inPointsCount + 1 ) * float( d )) + f);
 					}
 				}
 				if ( d == inDiv )
@@ -116,6 +154,17 @@ MStatus ropeGenerator::compute( const MPlug& plug, MDataBlock& data )
 					for ( int i = 0; i <  inPointsCount; i++ )
 					{
 						faceConnects.append( ( inPointsCount * inDiv ) + i );
+						uvIds.append( ( inPointsCount * ( inDiv + 2)) + i + inDiv + 1 );
+					}
+					MFloatArray uTmpArray, vTmpArray;
+					if (inCreateRope)
+						createRopesUvs( inRopesCount, inPointsPerRope, inRopesStrength, inUvCapSize, uTmpArray, vTmpArray, -1.0 );
+					else
+						createCircleUvs( inPointsCount, inUvCapSize, uTmpArray, vTmpArray, -1.0 );
+					for ( int u = 0; u < uTmpArray.length(); u++ )
+					{
+						uArray.append( uTmpArray[u] + 2.0 );
+						vArray.append( vTmpArray[u] );
 					}
 				}
 				baseLeng += lengPerDiv;
@@ -134,7 +183,8 @@ MStatus ropeGenerator::compute( const MPlug& plug, MDataBlock& data )
 									getMatrixFromParamCurve( curveFn, param, inTwist, MAngle( divTwist, MAngle::kDegrees ) ),
 									points, inRadius * divTaper );
 		}
-		fnMesh.create( numVertices, numFaces, points, faceCounts, faceConnects, outMeshData );
+		fnMesh.create( numVertices, numFaces, points, faceCounts, faceConnects, uArray, vArray, outMeshData );
+		fnMesh.assignUVs( faceCounts, uvIds );
 		outputHandle.set(outMeshData);
 		outputHandle.setClean();
 	}
@@ -181,6 +231,21 @@ void ropeGenerator::createCriclePoints( int pointsCount, MMatrix bMatrix, MFloat
 		points.append( MFloatPoint( point.x, point.y, point.z, 1.0 ));
 	}
 
+}
+
+void ropeGenerator::createCircleUvs( int pointsCount, float uvCapSize, MFloatArray &uArray, MFloatArray &vArray, float direction)
+{
+	MPoint baseVector( 0.5 * uvCapSize,0,0 );
+	uArray.append( baseVector.x + 0.5 );
+	vArray.append( baseVector.z + 0.5 );
+	for ( int d = 1; d < pointsCount; d++ )
+	{
+		MVector vVector( baseVector );
+		vVector = vVector.rotateBy( MVector::kYaxis, 
+			MAngle(( 360.0 * direction / float( pointsCount )) * float( d ),MAngle::kDegrees).asRadians() );
+		uArray.append( vVector.x + 0.5 );
+		vArray.append( vVector.z + 0.5 );
+	}
 }
 
 void ropeGenerator::createRopesRings( int ropesCount, MMatrix bMatrix, MFloatPointArray &points, int pointsCount, float ropeStrength, float radius )
@@ -237,6 +302,29 @@ MFloatPointArray ropeGenerator::createHalfRope( int pointsCount, float radius )
 	return points;
 }
 
+void ropeGenerator::createRopesUvs( int ropesCount, int pointsCount, float ropeStrength, float uvCapSize,MFloatArray &uArray, MFloatArray &vArray, float direction )
+{
+	MAngle angle( (180.0/ ropesCount ), MAngle::kDegrees );
+	float distanceToMoveRope = cos( angle.asRadians() );
+	float singleRopeRadius = sin( angle.asRadians() );
+	float baseAngle = 360.0f / float( ropesCount ); 
+	for ( int d = 1; d < ropesCount + 1; d++)
+	{
+		MFloatPointArray ropePoints( createHalfRope( pointsCount, singleRopeRadius ) );
+		for ( int ropP = 0; ropP < ropePoints.length(); ropP++)
+		{
+			MFloatPoint ropPoint( ropePoints[ropP] );
+			MVector ropV( ropPoint.x, ropPoint.y, ropPoint.z * ropeStrength );
+			ropV = ropV + MVector( 0,0,-distanceToMoveRope );
+			ropV = ropV.rotateBy( MVector::kYaxis, MAngle( baseAngle * float( d ), MAngle::kDegrees).asRadians() );
+			ropV = ropV * 0.5 * uvCapSize;
+			uArray.append( (( ropV.x * direction) + 0.5 ) );
+			vArray.append( ropV.z + 0.5 );
+		}
+	}
+
+}
+
 void* ropeGenerator::creator()
 {
 	return new ropeGenerator();
@@ -254,6 +342,7 @@ MStatus ropeGenerator::initialize()
 
 	divisions = nAttr.create( "divisions", "divisions", MFnNumericData::kInt, 15 );
 	nAttr.setMin( 2 );
+	nAttr.setSoftMax( 100 );
 	nAttr.setWritable( true );
 	nAttr.setKeyable( true );
 	nAttr.setStorable( true );
@@ -265,12 +354,14 @@ MStatus ropeGenerator::initialize()
 
 	ropesCount = nAttr.create( "ropesCount", "ropesCount", MFnNumericData::kInt, 5 );
 	nAttr.setMin( 3 );
+	nAttr.setSoftMax( 10 );
 	nAttr.setWritable( true );
 	nAttr.setKeyable( true );
 	nAttr.setStorable( true );
 
 	pointsPerRope = nAttr.create( "pointsPerRope", "pointsPerRope", MFnNumericData::kInt, 6 );
 	nAttr.setMin( 3 );
+	nAttr.setSoftMax( 15 );
 	nAttr.setWritable( true );
 	nAttr.setKeyable( true );
 	nAttr.setStorable( true );
@@ -283,12 +374,15 @@ MStatus ropeGenerator::initialize()
 	nAttr.setKeyable( true );
 
 	pointsCount = nAttr.create( "pointsCount", "pointsCount", MFnNumericData::kInt, 5 );
+	nAttr.setMin(3);
+	nAttr.setSoftMax( 20 );
 	nAttr.setWritable( true );
 	nAttr.setKeyable( true );
 	nAttr.setStorable( true );
 
 	radius = nAttr.create( "radius", "radius", MFnNumericData::kFloat, 1.0f );
 	nAttr.setMin( 0.0 );
+	nAttr.setSoftMax( 30.0 );
 	nAttr.setKeyable( true );
 	nAttr.setWritable( true );
 	nAttr.setStorable( true );
@@ -296,11 +390,28 @@ MStatus ropeGenerator::initialize()
 	taperRamp = rAttr.createCurveRamp( "tapper", "tapper" );
 
 	twist = nAttr.create( "twist", "twist", MFnNumericData::kFloat, 0.0f );
+	nAttr.setSoftMin( -3600.0 );
+	nAttr.setSoftMax( 3600.0 );
 	nAttr.setWritable( true );
 	nAttr.setKeyable( true );
 	nAttr.setStorable( true );
 
 	twistRamp = rAttr.createCurveRamp( "twistRamp", "twistRamp" );
+
+	uvWidth = nAttr.create( "uvWidth", "uvWidth", MFnNumericData::kFloat, 1.0f );
+	nAttr.setWritable( true );
+	nAttr.setKeyable( true );
+	nAttr.setStorable( true );
+
+	uvHeight = nAttr.create( "uvHeight", "uvHeight", MFnNumericData::kFloat, 1.0f );
+	nAttr.setWritable( true );
+	nAttr.setKeyable( true );
+	nAttr.setStorable( true );
+
+	uvCapSize = nAttr.create( "uvCapSize", "uvCapSize", MFnNumericData::kFloat, 1.0f );
+	nAttr.setWritable( true );
+	nAttr.setKeyable( true );
+	nAttr.setStorable( true );
 
 	outMesh = tAttr.create( "outMesh", "outMesh", MFnData::kMesh );
 	tAttr.setWritable( false );
@@ -328,6 +439,12 @@ MStatus ropeGenerator::initialize()
 	if (!stat) { stat.perror("addAttribute twist"); return stat;}
 	stat = addAttribute( twistRamp );
 	if (!stat) { stat.perror("addAttribute twistRamp"); return stat;}
+	stat = addAttribute( uvWidth );
+	if (!stat) { stat.perror("addAttribute uvWidth"); return stat;}
+	stat = addAttribute( uvHeight );
+	if (!stat) { stat.perror("addAttribute uvHeight"); return stat;}
+	stat = addAttribute( uvCapSize );
+	if (!stat) { stat.perror("addAttribute uvCapSize"); return stat;}
 	stat = addAttribute( outMesh );
 	if (!stat) { stat.perror("addAttribute outMesh"); return stat;}
 
@@ -353,6 +470,12 @@ MStatus ropeGenerator::initialize()
 	stat = attributeAffects( twist, outMesh );
 	if (!stat) { stat.perror("attributeAffects"); return stat;}
 	stat = attributeAffects( twistRamp, outMesh );
+	if (!stat) { stat.perror("attributeAffects"); return stat;}
+	stat = attributeAffects( uvWidth, outMesh );
+	if (!stat) { stat.perror("attributeAffects"); return stat;}
+	stat = attributeAffects( uvHeight, outMesh );
+	if (!stat) { stat.perror("attributeAffects"); return stat;}
+	stat = attributeAffects( uvCapSize, outMesh );
 	if (!stat) { stat.perror("attributeAffects"); return stat;}
 
 	return MS::kSuccess;
