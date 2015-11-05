@@ -107,7 +107,14 @@ class File(object):
 					and a.endswith( self.extension )
 					and os.path.isfile( verPath + a )
 				) ]
-		return len( verFils ) + 1
+		#get last version number instead of use length
+		lastVersion = 1
+		for v in verFils:
+			vSplit = v.split( '.' )[0]
+			numVer = int( vSplit[vSplit.rindex( '_v' )+2:] )
+			if lastVersion < numVer:
+				lastVersion = numVer
+		return lastVersion + 1
 
 	def create(self, path): #TODO
 		"""method to create file if dosen't exists"""
