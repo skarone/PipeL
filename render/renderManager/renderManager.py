@@ -30,7 +30,7 @@ import pipe.mayaFile.mayaFile as mfl
 reload(mfl)
 
 import maya.cmds as mc
-frameUnits = { 
+frameUnits = {
     'game': 15,
     'film': 24,
     'pal': 25 ,
@@ -52,7 +52,7 @@ class RenderManagerUI(base,fom):
 		self.setObjectName( 'RenderManagerUI' )
 		self._fillUi()
 		uiH.loadSkin( self, 'QTDarkGreen' )
-		
+
 	def _makeConnections(self):
 		"""create connection for ui"""
 		self.connect( self.render_btn, QtCore.SIGNAL("clicked()") , self.render )
@@ -63,7 +63,7 @@ class RenderManagerUI(base,fom):
 	def _fillUi(self):
 		"""fill ui"""
 		dead = dl.Deadline()
-		self.groups_cmb.addItems( dead.groups ) 
+		self.groups_cmb.addItems( dead.groups )
 		settings = sti.Settings()
 		gen = settings.General
 		renderPath = 'R:/'
@@ -71,7 +71,7 @@ class RenderManagerUI(base,fom):
 			renderPath = gen[ "renderpath" ]
 			if not renderPath.endswith( '/' ):
 				renderPath += '/'
-		self.pools_cmb.addItems( dead.pools ) 
+		self.pools_cmb.addItems( dead.pools )
 		renderGlobals = mn.Node( 'defaultRenderGlobals' )
 		self.filePath_le.setText( str( renderGlobals.a.imageFilePrefix.v ))
 		self.assOrShot = prj.shotOrAssetFromFile( mfl.currentFile() )
@@ -220,11 +220,19 @@ class RenderManagerUI(base,fom):
 		"""return version number for render folder"""
 		if not os.path.exists( path ):
 			return 1
-		return len( [a for a in os.listdir( path ) if os.path.isdir( path + '/' + a ) ] ) + 1
+		folders = [a for a in os.listdir( path ) if os.path.isdir( path + '/' + a ) ]
+		lastFolderVersion = 1
+		for f in folders:
+			if not len( f ) == 5:
+				continue
+			numVer = int( f[f.rindex( 'v' )+1:] )
+			if lastFolderVersion < numVer:
+				lastFolderVersion = numVer
+		return lastFolderVersion + 1
 
 	def _getLayersWidgets(self):
 		"""return the layerswidgets items"""
-		return [self.renderLayers_lay.itemAt(i).widget() for i in range(self.renderLayers_lay.count())] 
+		return [self.renderLayers_lay.itemAt(i).widget() for i in range(self.renderLayers_lay.count())]
 
 	def getFilePrefixFromTags(self, filePrefix, shot ):
 		"""return filePrefix Path replacing tags"""
