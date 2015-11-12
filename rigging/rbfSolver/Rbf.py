@@ -115,8 +115,10 @@ class Rbf(object):
 		r2 =  self._function(r)
 		#convert r2 to matrix
 		r2mat = bs.Matrix( bs.make_identity( vectors.length(), self.xi.length() ))
+		count = 0
 		for x in range(vectors.length()):
 			for y in range(self.xi.length()):
-				r2mat[x][y] = r2[x+y]
+				r2mat[x][y] = r2[count]
+				count += 1
 		return r2mat * self.nodes
 
