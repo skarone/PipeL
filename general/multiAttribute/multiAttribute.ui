@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>364</width>
-    <height>745</height>
+    <width>519</width>
+    <height>816</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -234,6 +234,24 @@
          </layout>
         </item>
         <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_13">
+          <item>
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Objects In List:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="fromListCount_lbl">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_10">
           <item>
            <widget class="QLabel" name="label_7">
@@ -322,6 +340,38 @@
          </layout>
         </item>
         <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_14">
+          <item>
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>Objects In List:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="toListCount_lbl">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_15">
+          <item>
+           <widget class="QComboBox" name="listToCreate_cmb"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="createForList_btn">
+            <property name="text">
+             <string>Create</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_11">
           <item>
            <widget class="QLabel" name="label_8">
@@ -357,14 +407,25 @@
      </layout>
     </item>
     <item>
-     <widget class="QLabel" name="label_10">
-      <property name="text">
-       <string>Constraints</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_12">
+      <item>
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>Constraints</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="maintainOffset_chb">
+        <property name="text">
+         <string>Maintain Offset</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_6">

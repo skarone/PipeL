@@ -5,6 +5,7 @@ uiH.set_qt_bindings()
 from Qt import QtGui,QtCore
 
 import maya.cmds as mc
+import maya.mel as mm
 import general.mayaNode.mayaNode as mn
 import pipe.settings.settings as sti
 reload( sti )
@@ -52,15 +53,20 @@ class MultiAttributeUI(base, fom):
 			skin = gen[ "skin" ]
 			if skin:
 				uiH.loadSkin( self, skin )
+		#fill list to create CMB
+		typs = ['cluster', 'polyCube', 'polySphere','polyCylinder','polyCone',
+				'polyPipe','spaceLocator', 'joint']
+		self.listToCreate_cmb.addItems(typs)
+
 
 	def _makeConnections(self):
 		"""docstring for _makeConnections"""
 		QtCore.QObject.connect( self.attribute_le, QtCore.SIGNAL( "textChanged (const QString&)" ), self.text_changed )
-		QtCore.QObject.connect(self.completer, QtCore.SIGNAL('activated(QString)'), self.complete_text) 
+		QtCore.QObject.connect(self.completer, QtCore.SIGNAL('activated(QString)'), self.complete_text)
 		QtCore.QObject.connect( self.fromAttr_le, QtCore.SIGNAL( "textChanged (const QString&)" ), self.from_text_changed )
 		QtCore.QObject.connect( self.toAttr_le, QtCore.SIGNAL( "textChanged (const QString&)" ), self.to_text_changed )
-		QtCore.QObject.connect(self.fromCompleter, QtCore.SIGNAL('activated(QString)'), self.from_complete_text) 
-		QtCore.QObject.connect(self.toCompleter, QtCore.SIGNAL('activated(QString)'), self.to_complete_text) 
+		QtCore.QObject.connect(self.fromCompleter, QtCore.SIGNAL('activated(QString)'), self.from_complete_text)
+		QtCore.QObject.connect(self.toCompleter, QtCore.SIGNAL('activated(QString)'), self.to_complete_text)
 		self.connect(self.select_btn, QtCore.SIGNAL("clicked()"), self.select)
 		self.connect(self.lock_btn, QtCore.SIGNAL("clicked()"), self.lock)
 		self.connect(self.unlock_btn, QtCore.SIGNAL("clicked()"), self.unlock)
@@ -73,6 +79,7 @@ class MultiAttributeUI(base, fom):
 		self.connect(self.removeTo_btn, QtCore.SIGNAL("clicked()"), self.removeTo)
 		self.connect(self.addTo_btn, QtCore.SIGNAL("clicked()"), self.addTo)
 		self.connect(self.setTo_btn, QtCore.SIGNAL("clicked()"), self.setTo)
+		self.connect(self.createForList_btn, QtCore.SIGNAL("clicked()"), self.createForList)
 		#CONSTRAINS
 		self.connect(self.parent_btn, QtCore.SIGNAL("clicked()"), self.parentList)
 		self.connect(self.point_btn, QtCore.SIGNAL("clicked()"), self.point)
@@ -80,8 +87,8 @@ class MultiAttributeUI(base, fom):
 		self.connect(self.scale_btn, QtCore.SIGNAL("clicked()"), self.scale)
 		QtCore.QObject.connect( self.from_lw, QtCore.SIGNAL( "itemClicked( QListWidgetItem* )" ), self.selectItem )
 		QtCore.QObject.connect( self.to_lw, QtCore.SIGNAL( "itemClicked( QListWidgetItem* )" ), self.selectItem )
-		
-	def _getItemsInLists(self):
+
+	def _getItemsInLists(self, check = True):
 		"""return the items in the lists"""
 		fromItems = []
 		for v in xrange( self.from_lw.count()):
@@ -99,10 +106,11 @@ class MultiAttributeUI(base, fom):
 			else:
 				n = i.data( 32 )
 			toItems.append( n )
-		if not len(fromItems) == len(toItems):
-			if not len(fromItems) == 1:
-				QtGui.QMessageBox.critical(self, 'Bad Input' , "IN THE FIRST LIST YOU MUST HAVE ONE NODE OR THE SAME AMOUNTS\n OF NODE THAT YOU HAVE IN THE SECOND ONE", QtGui.QMessageBox.Close)
-			
+		if check:
+			if not len(fromItems) == len(toItems):
+				if not len(fromItems) == 1:
+					QtGui.QMessageBox.critical(self, 'Bad Input' , "IN THE FIRST LIST YOU MUST HAVE ONE NODE OR THE SAME AMOUNTS\n OF NODE THAT YOU HAVE IN THE SECOND ONE", QtGui.QMessageBox.Close)
+
 		return fromItems, toItems
 
 	def connectList(self):
@@ -121,34 +129,39 @@ class MultiAttributeUI(base, fom):
 	def setFrom(self):
 		"""clear and add items to From list"""
 		self.from_lw.clear()
-		for f in mn.ls( sl = True ):
+		for f in mn.ls( sl = True, fl = True ):
 			item = QtGui.QListWidgetItem( f.name )
 			item.setData(32, f )
 			self.from_lw.addItem( item )
+		self._changeListCount( self.from_lw )
 
 	def addFrom(self):
 		"""add itmes to From list without cleaning"""
-		for f in mn.ls( sl = True ):
+		for f in mn.ls( sl = True, fl = True ):
 			item = QtGui.QListWidgetItem( f.name )
 			item.setData(32, f )
 			self.from_lw.addItem( item )
+		self._changeListCount( self.from_lw )
 
 	def removeFrom(self):
 		"""remove selected item from Form list"""
 		for SelectedItem in self.from_lw.selectedItems():
 			self.from_lw.takeItem(self.from_lw.row(SelectedItem))
+		self._changeListCount( self.from_lw )
 
 	def removeTo(self):
 		"""remove selected item from To list"""
 		for SelectedItem in self.to_lw.selectedItems():
 			self.to_lw.takeItem(self.to_lw.row(SelectedItem))
+		self._changeListCount( self.to_lw )
 
 	def addTo(self):
 		"""add itmes to To list without cleaning"""
 		for f in mn.ls( sl = True ):
 			item = QtGui.QListWidgetItem( f.name )
 			item.setData(32, f )
-			self.from_lw.addItem( item )
+			self.to_lw.addItem( item )
+		self._changeListCount( self.to_lw )
 
 	def setTo(self):
 		"""clear and add items to To list"""
@@ -157,20 +170,50 @@ class MultiAttributeUI(base, fom):
 			item = QtGui.QListWidgetItem( f.name )
 			item.setData(32, f )
 			self.to_lw.addItem( item )
+		self._changeListCount( self.to_lw )
+
+	def _changeListCount(self, listWidget):
+		"""docstring for _changeListCount"""
+		if listWidget == self.to_lw:
+			self.toListCount_lbl.setText( str( listWidget.count() ) )
+		else:
+			self.fromListCount_lbl.setText( str( listWidget.count() ) )
+
 
 	def parentList(self):
 		"""make a parent constraint between lists"""
 		fromItems, toItems = self._getItemsInLists()
+		maintainOffset = self.maintainOffset_chb.isChecked()
 		if len( fromItems ) == 1:
 			for toNode in toItems:
-				mc.parentConstraint( fromItems[0].name, toNode.name, mo = True )
+				mc.parentConstraint( fromItems[0].name, toNode.name, mo = maintainOffset )
 		else:
 			for fromNode,toNode in zip( fromItems, toItems ):
-				mc.parentConstraint( fromNode.name, toNode.name, mo = True )
+				mc.parentConstraint( fromNode.name, toNode.name, mo = maintainOffset )
+
+	def createForList(self):
+		"""docstring for createForList"""
+		typSel = self.listToCreate_cmb.currentIndex()
+		typs = ['cluster', 'polyCube', 'polySphere','polyCylinder','polyCone','polyPipe','spaceLocator', 'joint']
+		res = []
+		fromItems, toItems = self._getItemsInLists(False)
+		for o in fromItems:
+			mc.select( cl = True )
+			retVal = 0
+			if typSel == 0: #cluster
+				mc.select( o )
+				retVal = 1
+			ret = mm.eval( typs[typSel] + ';' )
+			if typSel == 7:
+				res.append( ret )
+			else:
+				res.append( ret[retVal] )
+		mc.select( res )
 
 	def point(self):
 		"""make a point constraint between lists"""
 		fromItems, toItems = self._getItemsInLists()
+		maintainOffset = self.maintainOffset_chb.isChecked()
 		if len( fromItems ) == 1:
 			for toNode in toItems:
 				mc.pointConstraint( fromItems[0].name, toNode.name, mo = True )
@@ -181,22 +224,24 @@ class MultiAttributeUI(base, fom):
 	def orient(self):
 		"""make a orient constraint between lists"""
 		fromItems, toItems = self._getItemsInLists()
+		maintainOffset = self.maintainOffset_chb.isChecked()
 		if len( fromItems ) == 1:
 			for toNode in toItems:
-				mc.orientConstraint( fromItems[0].name, toNode.name, mo = True )
+				mc.orientConstraint( fromItems[0].name, toNode.name, mo = maintainOffset )
 		else:
 			for fromNode,toNode in zip( fromItems, toItems ):
-				mc.orientConstraint( fromNode.name, toNode.name, mo = True )
+				mc.orientConstraint( fromNode.name, toNode.name, mo = maintainOffset )
 
 	def scale(self):
 		"""make a scale constraint between lists"""
 		fromItems, toItems = self._getItemsInLists()
+		maintainOffset = self.maintainOffset_chb.isChecked()
 		if len( fromItems ) == 1:
 			for toNode in toItems:
-				mc.scaleConstraint( fromItems[0].name, toNode.name, mo = True )
+				mc.scaleConstraint( fromItems[0].name, toNode.name, mo = maintainOffset )
 		else:
 			for fromNode,toNode in zip( fromItems, toItems ):
-				mc.scaleConstraint( fromNode.name, toNode.name, mo = True )
+				mc.scaleConstraint( fromNode.name, toNode.name, mo = maintainOffset )
 
 	def selectItem(self, item):
 		"""select node when node is selected in list"""
@@ -205,7 +250,7 @@ class MultiAttributeUI(base, fom):
 		else:
 			n = item.data( 32 )
 		n()
- 
+
 	def from_text_changed(self, text):
 		all_text = unicode(text)
 		text = all_text[:self.fromAttr_le.cursorPosition()]
@@ -224,7 +269,7 @@ class MultiAttributeUI(base, fom):
 				n = i.data( 32 )
 			attrs = [a.name for a in n.listAttr( s = True ) ]
 			self.fromCompleter.update( attrs, text_tags, prefix )
-  
+
 	def from_complete_text(self, text):
 		cursor_pos = self.fromAttr_le.cursorPosition()
 		before_text = unicode(self.fromAttr_le.text())[:cursor_pos]
@@ -252,7 +297,7 @@ class MultiAttributeUI(base, fom):
 				n = i.data( 32 )
 			attrs = [a.name for a in n.listAttr( s = True ) ]
 			self.toCompleter.update( attrs, text_tags, prefix )
-  
+
 	def to_complete_text(self, text):
 		cursor_pos = self.toAttr_le.cursorPosition()
 		before_text = unicode(self.toAttr_le.text())[:cursor_pos]
@@ -264,7 +309,7 @@ class MultiAttributeUI(base, fom):
 		all_text = unicode(text)
 		text = all_text[:self.attribute_le.cursorPosition()]
 		prefix = text.split(',')[-1].strip()
- 
+
 		text_tags = []
 		for t in all_text.split(','):
 			t1 = unicode(t).strip()
@@ -274,7 +319,7 @@ class MultiAttributeUI(base, fom):
 		objs = self._getObjects()
 		attrs = [a.name for a in objs[0].listAttr( s = True ) ]
 		self.completer.update( attrs, text_tags, prefix )
-  
+
 	def complete_text(self, text):
 		cursor_pos = self.attribute_le.cursorPosition()
 		before_text = unicode(self.attribute_le.text())[:cursor_pos]
@@ -292,7 +337,7 @@ class MultiAttributeUI(base, fom):
 			self.connect( actionProperties, QtCore.SIGNAL( "triggered()" ), lambda val = a.name : self.attribute_le.setText(val) )
 		menu.popup(self.mapToGlobal(pos))
 		self.attribute_le.setFocus()
-		
+
 	def fillByTypeCMB(self):
 		"""fill combo box with types"""
 		self.type_cmb.clear()
@@ -357,7 +402,7 @@ class MultiAttributeUI(base, fom):
 		for o in self._getObjects():
 			for attr in attrs:
 				o.attr( attr ).locked = False
-		
+
 
 class TagsCompleter(QtGui.QCompleter):
 	def __init__(self, parent):
@@ -376,7 +421,7 @@ class Window(QtGui.QMainWindow):
 		QtGui.QMainWindow.__init__(self)
 		dia = MultiAttributeUI()
 		dia.exec_()
-	
+
 def main():
 	"""use this to create project in maya"""
 	if mc.window( 'multiAttr_WIN', q = 1, ex = 1 ):
