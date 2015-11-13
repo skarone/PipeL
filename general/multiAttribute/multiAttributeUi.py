@@ -68,6 +68,7 @@ class MultiAttributeUI(base, fom):
 		QtCore.QObject.connect(self.fromCompleter, QtCore.SIGNAL('activated(QString)'), self.from_complete_text)
 		QtCore.QObject.connect(self.toCompleter, QtCore.SIGNAL('activated(QString)'), self.to_complete_text)
 		self.connect(self.select_btn, QtCore.SIGNAL("clicked()"), self.select)
+		self.connect(self.selectMatch_btn, QtCore.SIGNAL("clicked()"), self.selectMatch)
 		self.connect(self.lock_btn, QtCore.SIGNAL("clicked()"), self.lock)
 		self.connect(self.unlock_btn, QtCore.SIGNAL("clicked()"), self.unlock)
 		self.connect(self.apply_btn, QtCore.SIGNAL("clicked()"), self.apply)
@@ -112,6 +113,24 @@ class MultiAttributeUI(base, fom):
 					QtGui.QMessageBox.critical(self, 'Bad Input' , "IN THE FIRST LIST YOU MUST HAVE ONE NODE OR THE SAME AMOUNTS\n OF NODE THAT YOU HAVE IN THE SECOND ONE", QtGui.QMessageBox.Close)
 
 		return fromItems, toItems
+
+	def selectMatch(self):
+		"""docstring for selectMatch"""
+		attrs = self._getAttributes()
+		try:
+			value = eval( str( self.value_le.text() ) )
+		except:
+			value =  str( self.value_le.text() )
+		objsToSelect= []
+		for o in self._getObjects():
+			for attr in attrs:
+				if isinstance(value, str):
+					if o.attr(attr).exists:
+						if value in o.attr(attr).v:
+							objsToSelect.append( o )
+				elif abs(o.attr( attr ).v-value)<0.001:
+					objsToSelect.append( o )
+		mc.select( objsToSelect )
 
 	def connectList(self):
 		"""docstring for connect"""
@@ -366,7 +385,10 @@ class MultiAttributeUI(base, fom):
 		override = self.override_chb.isChecked()
 		mn.AUTO_ATTR_OVERRIDE = override
 		attrs = self._getAttributes()
-		value = eval( str( self.value_le.text() ) )
+		try:
+			value = eval( str( self.value_le.text() ) )
+		except:
+			value =  str( self.value_le.text() )
 		for o in self._getObjects():
 			for attr in attrs:
 				o.attr( attr ).overrided = override

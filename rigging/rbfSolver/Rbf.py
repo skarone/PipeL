@@ -58,8 +58,15 @@ class Rbf(object):
 				count += 1
 		#now revert mat
 		AmatInv = Amat.invert()
-		diMat = bs.Matrix( [[di[a]] for a in range( len(di))] )
-		return AmatInv*diMat
+		res = []
+		if isinstance(di[0], list):
+			for d in range(len(di)):
+				diMat = bs.Matrix( [[di[d][a]] for a in range( len(di[d]))] )
+				res.append( AmatInv*diMat )
+		else:
+			diMat = bs.Matrix( [[di[a]] for a in range( len(di))] )
+			res.append( AmatInv*diMat )
+		return res
 
 	def _call_norm(self, x1, x2):
 		"""docstring for _call_norm"""
@@ -128,5 +135,8 @@ class Rbf(object):
 			for y in range(self.xi.length()):
 				r2mat[x][y] = r2[count]
 				count += 1
-		return r2mat * self.nodes
+		res = []
+		for n in range(len(self.nodes)):
+			res.append( r2mat * self.nodes[n] )
+		return res
 
