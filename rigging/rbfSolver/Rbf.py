@@ -22,7 +22,7 @@ class Rbf(object):
 			ximin = self.amin( self.xi ) #min vector
 			edges = ximax - ximin
 			self.epsilon = math.pow( edges.x*edges.y*edges.z/self.N, 1.0/3.0 )
-		self.function = kwargs.pop('function', 'gaussian')
+		self.function = kwargs.pop('function', 'multiquadric')
 		self.A = self._init_function( r )
 		self.nodes = self.linalg( self.A, self.di )
 
@@ -108,6 +108,14 @@ class Rbf(object):
 		for ri in range(r.length()):
 			res.append( math.exp(-(1.0/self.epsilon*r[ri])**2))
 		return res
+
+	def _h_multiquadric(self, r):
+		"""docstring for _h_multiquadric"""
+		res = om.MFloatArray()
+		for ri in range(r.length()):
+			res.append( math.sqrt((1.0/self.epsilon*r[ri])**2 + 1))
+		return res
+
 
 	def __call__(self, vectors):
 		"""docstring for __call__"""
