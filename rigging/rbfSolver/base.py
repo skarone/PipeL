@@ -270,6 +270,7 @@ def invert(X):
         if zero_sum==0:
             if j==cols:
                 return X
+            print "matrices con zero_sum",zero_sum
             raise Exception("Matrix is singular.")
         #If X[i][j] is 0, and there is a nonzero value below it, swap the two rows
         if first_non_zero != i:

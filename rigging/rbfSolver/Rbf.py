@@ -4,6 +4,41 @@ import base as bs
 reload(bs)
 import random
 
+"""
+import general.mayaNode.mayaNode as mn
+import rigging.rbfSolver.Rbf as Rbf
+reload(Rbf)
+import maya.cmds as mc
+import maya.OpenMaya as om
+x = []
+y = []
+z = []
+d = []
+for n in mn.ls(sl = 1):
+    pos = mc.xform( n, q = True, ws = True, rp = True )
+    sha = n.shader.a.surfaceShader.input.node
+    col = sha.a.outColor.v
+    x.append(pos[0])
+    y.append(pos[1])
+    z.append(pos[2])
+    d.append( [col[0][0],col[0][1],col[0][2]] )
+    
+rb = Rbf.Rbf(x,y,z,d)
+def test():
+    vectors = om.MFloatVectorArray()
+    for n in mn.ls(sl = 1):
+        pos = mc.xform( n, q = True, ws = True, rp = True )
+        vectors.append( om.MFloatVector( pos[0], pos[1], pos[2] ) )
+    retCol = rb(vectors)
+    print retCol
+    for n in mn.ls(sl = 1):
+        sha = n.shader.a.surfaceShader.input.node
+        sha.a.outColor.v = [retCol[0][0][0], retCol[1][0][0],retCol[2][0][0]]
+
+mc.scriptJob( attributeChange=['pSphere4.tx', test] )
+
+"""
+
 class Rbf(object):
 	"""docstring for Rbf"""
 	def __init__(self, *args, **kwargs):
@@ -21,7 +56,12 @@ class Rbf(object):
 			ximax = self.amax( self.xi ) #max vector
 			ximin = self.amin( self.xi ) #min vector
 			edges = ximax - ximin
-			self.epsilon = math.pow( edges.x*edges.y*edges.z/self.N, 1.0/3.0 )
+			edgePow = 1
+			for e in range(3):
+				if edges[e] != 0.0:
+					edgePow *= edges[e]
+			self.epsilon = math.pow( edgePow/self.N, 1.0/3.0 )
+			print "epsilon",self.epsilon
 		self.function = kwargs.pop('function', 'multiquadric')
 		self.A = self._init_function( r )
 		self.nodes = self.linalg( self.A, self.di )
@@ -62,6 +102,9 @@ class Rbf(object):
 		if isinstance(di[0], list):
 			for d in range(len(di)):
 				diMat = bs.Matrix( [[di[d][a]] for a in range( len(di[d]))] )
+				print diMat
+				print AmatInv
+				print diMat*AmatInv
 				res.append( AmatInv*diMat )
 		else:
 			diMat = bs.Matrix( [[di[a]] for a in range( len(di))] )
