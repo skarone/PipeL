@@ -22,7 +22,7 @@ for n in mn.ls(sl = 1):
     y.append(pos[1])
     z.append(pos[2])
     d.append( [col[0][0],col[0][1],col[0][2]] )
-    
+
 rb = Rbf.Rbf(x,y,z,d)
 def test():
     vectors = om.MFloatVectorArray()
@@ -100,11 +100,8 @@ class Rbf(object):
 		AmatInv = Amat.invert()
 		res = []
 		if isinstance(di[0], list):
-			for d in range(len(di)):
-				diMat = bs.Matrix( [[di[d][a]] for a in range( len(di[d]))] )
-				print diMat
-				print AmatInv
-				print diMat*AmatInv
+			for d in range( len( di[0] )):
+				diMat = bs.Matrix( [[di[a][d]] for a in range(len(di))] )
 				res.append( AmatInv*diMat )
 		else:
 			diMat = bs.Matrix( [[di[a]] for a in range( len(di))] )
@@ -164,6 +161,24 @@ class Rbf(object):
 		res = om.MFloatArray()
 		for ri in range(r.length()):
 			res.append( math.sqrt((1.0/self.epsilon*r[ri])**2 + 1))
+		return res
+
+	def _h_linear(self, r):
+		"""docstring for _h_linear"""
+		return r
+
+	def _h_cubic(self, r):
+		"""docstring for _h_cubic"""
+		res = om.MFloatArray()
+		for ri in range(r.length()):
+			res.append( r[ri]**3)
+		return res
+
+	def _h_quintic(self, r):
+		"""docstring for _h_cubic"""
+		res = om.MFloatArray()
+		for ri in range(r.length()):
+			res.append( r[ri]**5)
 		return res
 
 
