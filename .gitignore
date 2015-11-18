@@ -19,3 +19,5 @@ animation/playblast/.ropeproject/
 *.filters
 *.swatches
 install/MayaPlugins/ropeGenerator/Release/
+install/MayaPlugins/rbfSolver/Release/
+install/MayaPlugins/rbfSolver/x64/
