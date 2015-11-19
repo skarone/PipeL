@@ -126,6 +126,7 @@
     <ClInclude Include="rbfSolver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="matrix.cpp" />
     <ClCompile Include="pluginMain.cpp" />
     <ClCompile Include="rbfSolver.cpp" />
   </ItemGroup>

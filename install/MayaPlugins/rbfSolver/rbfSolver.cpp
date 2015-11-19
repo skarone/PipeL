@@ -1,9 +1,7 @@
 #include "rbfSolver.h"
-#include "matrix.h"
-
+//#include "matrix.h"
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MFnCompoundAttribute.h>
-#include <maya/MFloatVectorArray.h>
 #include <maya/MStatus.h>
 
 MObject rbfSolver::inPositions;
@@ -43,7 +41,7 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 	MDataHandle eHandle = inValuesH.inputValue(&stats).child(inValue);
 	MArrayDataHandle eArrayHandle(eHandle, &stats);
 	unsigned eCount = eArrayHandle.elementCount();
-	Matrix m( inValCount, eCount );
+	Matrix di( inValCount, eCount );
 
 	for( int i = 0; i < inValCount; i++) {
 		inValuesH.jumpToElement(i);
@@ -53,8 +51,8 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 		for( int j = 0; j < eCount; j++) {
 			eArrayHandle.jumpToElement(j);
 			float val = eArrayHandle.inputValue(&stats).asFloat();
-			m.setValue(i,j,val);
-			fprintf(stderr, "Val = %g\n",m.getValue(i,j));
+			di.setValue(i,j,val);
+			fprintf(stderr, "Val = %g\n",di.getValue(i,j));
 		}
 	}
 	////////////////////////////////////////
@@ -69,7 +67,138 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 		inCentersA.append( pointH.asFloatVector() );
 	}
 	////////////////////////////////////////
+
+	////////////////////////////////////////
+	// Calculate epsilon
+	MFloatVector edges( amax( xi ) - amin( xi ) );
+	float edgePow = 1.0;
+	for (int i = 0; i < 3; i++)
+	{
+		if (edges[i] != 0.0)
+			edgePow = edgePow * edges[i];
+	}
+	epsilon = pow( edgePow/ N, 1.0/3.0 );
+	////////////////////////////////////////
+	MFloatArray r( _euclidean_norm( xi, xi ) );
+	MFloatArray A( _h_multiquadric( r ) );
+	Matrix Amat( xi.length(), xi.length() );
+	int count = 0;
+	for (int x = 0; x < xi.length(); x++)
+	{
+		for (int y = 0; y < xi.length(); y++)
+		{
+			Amat.setValue( x,y, A[count] );
+			count +=1;
+		}
+	}
+	std::vector< Matrix > nodes = linalg( Amat, di );
+	
 	return MS::kSuccess;
+}
+
+MFloatVector rbfSolver::amax( MFloatVectorArray x1 )
+{
+	float xmax = x1[0][0];
+	float ymax = x1[0][1];
+	float zmax = x1[0][2];
+	for (int x = 0; x < x1.length(); x++)
+	{
+		if (xmax < x1[x][0])
+			xmax = x1[x][0];
+		if (ymax < x1[x][1])
+			ymax = x1[x][1];
+		if (zmax < x1[x][2])
+			zmax = x1[x][2];
+	}
+	return MFloatVector( xmax, ymax, zmax );
+}
+
+MFloatVector rbfSolver::amin( MFloatVectorArray x1 )
+{
+	float xmin = x1[0][0];
+	float ymin = x1[0][1];
+	float zmin = x1[0][2];
+	for (int x = 0; x < x1.length(); x++)
+	{
+		if (xmin > x1[x][0])
+			xmin = x1[x][0];
+		if (ymin > x1[x][1])
+			ymin = x1[x][1];
+		if (zmin > x1[x][2])
+			zmin = x1[x][2];
+	}
+	return MFloatVector( xmin, ymin, zmin );
+}
+
+MFloatArray rbfSolver::_euclidean_norm( MFloatVectorArray x1, MFloatVectorArray x2 )
+{
+	MFloatArray res;
+	for (int x = 0; x < x1.length(); x++)
+	{
+		for (int y = 0; y < x2.length(); y++)
+		{
+			res.append( (x1[x] - x2[y]).length() );
+		}
+	}
+	return res;
+}
+
+MFloatArray rbfSolver::_h_gaussian( MFloatArray r )
+{
+	MFloatArray res;
+	for (int ri = 0; ri < r.length(); ri++)
+	{
+		float re = (1.0/epsilon*r[ri]);
+		res.append( exp( -re*re ) );
+	}
+	return res;
+}
+
+MFloatArray rbfSolver::_h_multiquadric( MFloatArray r )
+{
+	MFloatArray res;
+	for (int ri = 0; ri < r.length(); ri++)
+	{
+		float re = (1.0/epsilon*r[ri]);
+		res.append( exp( re*re ) + 1.0 );
+	}
+	return res;
+}
+
+MFloatArray rbfSolver::_h_linear( MFloatArray r )
+{
+	return r;
+}
+
+MFloatArray rbfSolver::_h_cubic( MFloatArray r )
+{
+	MFloatArray res;
+	for (int ri = 0; ri < r.length(); ri++)
+	{
+		res.append( r[ri] * r[ri] * r[ri] );
+	}
+	return res;
+}
+
+MFloatArray rbfSolver::_h_quintic( MFloatArray r )
+{
+	MFloatArray res;
+	for (int ri = 0; ri < r.length(); ri++)
+	{
+		res.append( r[ri] * r[ri] * r[ri] * r[ri] * r[ri] );
+	}
+	return res;
+}
+
+std::vector< Matrix > rbfSolver::linalg( Matrix A, Matrix di )
+{
+	std::vector< Matrix > nodes;
+	Matrix Ainverted = A.invert();
+	for (int d = 0; d < di.rowsCount; d++)
+	{
+		Matrix diTmp( 1, di.getRow);
+	}
+	return nodes;
 }
 
 MStatus rbfSolver::initialize()
