@@ -3,6 +3,7 @@
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MFnCompoundAttribute.h>
 #include <maya/MStatus.h>
+#include <maya/MArrayDataBuilder.h>
 
 MObject rbfSolver::inPositions;
 MObject rbfSolver::inValue;
@@ -37,6 +38,8 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 	//Get InputValues
 	MArrayDataHandle inValuesH = data.inputArrayValue( inValues, &stats );
 	unsigned inValCount = inValuesH.elementCount();
+	if (inValCount == 0)
+		return MS::kSuccess;
 	inValuesH.jumpToElement(0);
 	MDataHandle eHandle = inValuesH.inputValue(&stats).child(inValue);
 	MArrayDataHandle eArrayHandle(eHandle, &stats);
@@ -52,7 +55,6 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 			eArrayHandle.jumpToElement(j);
 			float val = eArrayHandle.inputValue(&stats).asFloat();
 			di.setValue(i,j,val);
-			fprintf(stderr, "Val = %g\n",di.getValue(i,j));
 		}
 	}
 	////////////////////////////////////////
@@ -68,6 +70,7 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 	}
 	////////////////////////////////////////
 
+	/*
 	////////////////////////////////////////
 	// Calculate epsilon
 	MFloatVector edges( amax( xi ) - amin( xi ) );
@@ -79,8 +82,9 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 	}
 	epsilon = pow( edgePow/ N, 1.0/3.0 );
 	////////////////////////////////////////
+	//Calculate RBF!
 	MFloatArray r( _euclidean_norm( xi, xi ) );
-	MFloatArray A( _h_multiquadric( r ) );
+	MFloatArray A( _h_multiquadric( r ) ); //TODO---> change this so we can change function by attribute!!!!!
 	Matrix Amat( xi.length(), xi.length() );
 	int count = 0;
 	for (int x = 0; x < xi.length(); x++)
@@ -93,6 +97,36 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 	}
 	std::vector< Matrix > nodes = linalg( Amat, di );
 	
+	MFloatArray rCenters( _euclidean_norm( inCentersA, xi ) );
+	MFloatArray r2Centers( _h_multiquadric( rCenters ) );
+
+	Matrix r2Mat( inCentersA.length(), xi.length() );
+	count = 0;
+	for (int x = 0; x < inCentersA.length(); x++)
+	{
+		for (int y = 0; y < xi.length(); y++)
+		{
+			r2Mat.setValue( x, y, r2Centers[count] );
+			count += 1;
+		}
+	}
+	////////////////////////////////////////
+	// Write Output :)
+	for(int i = 0; i < nodes.size(); i++) {
+            stats = wPlug.selectAncestorLogicalIndex( i, outValues );
+            MDataHandle wHandle = wPlug.constructHandle(data);
+            MArrayDataHandle arrayHandle(wHandle, &stats);
+            MArrayDataBuilder arrayBuilder = arrayHandle.builder(&stats);
+			Matrix finalMat( r2Mat.mult( nodes[i] ) );
+			for( int j = 0; j < finalMat.colsCount; j++) {
+                MDataHandle handle = arrayBuilder.addElement(j,&stats);
+				handle.set(finalMat.getValue( j, 0 ));
+            }
+            stats = arrayHandle.set(arrayBuilder);
+            wPlug.setValue(wHandle);
+            wPlug.destructHandle(wHandle);
+        }
+		*/
 	return MS::kSuccess;
 }
 
@@ -196,7 +230,12 @@ std::vector< Matrix > rbfSolver::linalg( Matrix A, Matrix di )
 	Matrix Ainverted = A.invert();
 	for (int d = 0; d < di.rowsCount; d++)
 	{
-		Matrix diTmp( 1, di.getRow);
+		Matrix diTmp( di.getRow( d ).size(), 1 );
+		for (int i = 0; i < di.getRow(d).size(); i++)
+		{
+			diTmp.setValue( i, 0, di.getRow(d)[i] );
+		}
+		nodes.push_back( Ainverted.mult( diTmp ) );
 	}
 	return nodes;
 }
