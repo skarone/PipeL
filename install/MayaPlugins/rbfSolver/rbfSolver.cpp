@@ -28,6 +28,8 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 	//Get Input Positions
 	MArrayDataHandle inPositionsH = data.inputArrayValue( inPositions, &stats );
 	unsigned inPosCount = inPositionsH.elementCount();
+	if (inPosCount == 0)
+		return MS::kSuccess;
 	for( int i = 0; i < inPosCount; i++) {
 		inPositionsH.jumpToElement(i);
 		MDataHandle pointH = inPositionsH.inputValue(&stats);
@@ -55,6 +57,7 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 			eArrayHandle.jumpToElement(j);
 			float val = eArrayHandle.inputValue(&stats).asFloat();
 			di.setValue(i,j,val);
+			//fprintf(stderr, "di[%u][%u] = %g\n",i,j,val );
 		}
 	}
 	////////////////////////////////////////
@@ -62,6 +65,8 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 	//Get Input Centers
 	MArrayDataHandle inCentersH = data.inputArrayValue( inCenters, &stats );
 	unsigned inCentCount = inCentersH.elementCount();
+	if (inCentCount == 0)
+		return MS::kSuccess;
 	MFloatVectorArray inCentersA;
 	for( int i = 0; i < inCentCount; i++) {
 		inCentersH.jumpToElement(i);
@@ -70,7 +75,6 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 	}
 	////////////////////////////////////////
 
-	/*
 	////////////////////////////////////////
 	// Calculate epsilon
 	MFloatVector edges( amax( xi ) - amin( xi ) );
@@ -91,6 +95,7 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 	{
 		for (int y = 0; y < xi.length(); y++)
 		{
+			fprintf(stderr, "Amat[%u][%u] = %g\n",x,y, A[count]);
 			Amat.setValue( x,y, A[count] );
 			count +=1;
 		}
@@ -106,10 +111,28 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 	{
 		for (int y = 0; y < xi.length(); y++)
 		{
+			//fprintf(stderr, "r2Centers = %g\n",r2Centers[count]);
 			r2Mat.setValue( x, y, r2Centers[count] );
 			count += 1;
 		}
 	}
+	/*
+	//Calculate Matrix per Node
+	for (int i = 0; i < nodes.size(); i++)
+	{
+		Matrix tmpMat = r2Mat.mult( nodes[i] );
+		fprintf(stderr, "finalMat RowsCount = %g\n",tmpMat.rowsCount );
+		fprintf(stderr, "finalMat RowsCount = %g\n",tmpMat.colsCount );
+		for (int r = 0; r < tmpMat.rowsCount; r++)
+		{
+			for (int c = 0; c < tmpMat.colsCount; c++)
+			{
+				fprintf(stderr, "finalMat[%u][%u] = %g\n",r,c,tmpMat.getValue(r, c) );
+			}
+		}
+
+	}
+
 	////////////////////////////////////////
 	// Write Output :)
 	for(int i = 0; i < nodes.size(); i++) {
@@ -228,15 +251,36 @@ std::vector< Matrix > rbfSolver::linalg( Matrix A, Matrix di )
 {
 	std::vector< Matrix > nodes;
 	Matrix Ainverted = A.invert();
+	for (int i = 0; i < Ainverted.rowsCount; i++)
+	{
+		for (int d = 0; d < Ainverted.colsCount; d++)
+		{
+			fprintf(stderr, "Ainverted[%u][%u] = %g\n",i,d,Ainverted.getValue(i, d) );
+		}
+
+	}
+	for (int d = 0; d < di.getRow(0).size(); d++)
+	{
+		Matrix diTmp( di.rowsCount, 1 );
+		for (int a = 0; a < di.rowsCount; a++)
+		{
+			//fprintf(stderr, "diTmp[%u][0] = %g\n",a,di.getValue(a, d) );
+			diTmp.setValue( a,0, di.getValue(a, d) );
+		}
+		nodes.push_back( Ainverted.mult( diTmp ) );
+	}
+	/*
 	for (int d = 0; d < di.rowsCount; d++)
 	{
 		Matrix diTmp( di.getRow( d ).size(), 1 );
 		for (int i = 0; i < di.getRow(d).size(); i++)
 		{
+			//fprintf(stderr, "diTmpVal = %g\n",di.getRow(d)[i]);
 			diTmp.setValue( i, 0, di.getRow(d)[i] );
 		}
 		nodes.push_back( Ainverted.mult( diTmp ) );
 	}
+	*/
 	return nodes;
 }
 

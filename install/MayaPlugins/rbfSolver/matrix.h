@@ -4,7 +4,7 @@ class Matrix
 {
 public:
 	 Matrix(int rows, int cols);
-	 Matrix(std::vector< std::vector<float> >& m); 
+	 Matrix(std::vector< std::vector<float> > m); 
 	 ~Matrix();
 	float getValue(int row, int col);
 	void setValue(int row, int col, float val);
