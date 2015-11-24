@@ -255,7 +255,7 @@ std::vector< Matrix > rbfSolver::linalg( Matrix A, Matrix di )
 	{
 		for (int d = 0; d < Ainverted.colsCount; d++)
 		{
-			fprintf(stderr, "Ainverted[%u][%u] = %g\n",i,d,Ainverted.getValue(i, d) );
+			fprintf(stderr, "Ainverted[%u][%u] = %g\n",i,d,Ainverted.mat[i][d] );
 		}
 
 	}

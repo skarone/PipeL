@@ -78,7 +78,7 @@ Matrix Matrix::invert()
 	int i = 0;
 	for (int j = 0; j < colsCount; j++)
 	{
-		int first_non_zero = 0;
+		int first_non_zero = -1;
 		float zero_sum = check_for_all_zeros( X, i, j, first_non_zero );
 
 		if (zero_sum == 0.0)
@@ -101,12 +101,14 @@ Matrix Matrix::invert()
 				std::vector< float > scaled_row;
 				for (int m = 0; m < X.mat[i].size() ; m++)
 				{
-					scaled_row.push_back( X.getValue(q, j) * X.mat[i][m] );
+					scaled_row.push_back( X.mat[q][j] * X.mat[i][m] );
+					fprintf(stderr, "ScaledRow[%u] = %g\n",q,X.mat[q][j] * X.mat[i][m] );
 				}
 				std::vector< float > temp_row;
 				for (int m = 0; m < scaled_row.size(); m++)
 				{
 					temp_row.push_back( X.mat[q][m] - scaled_row[m] );
+					fprintf(stderr, "TEMPROW[%u] = %g\n",q,X.mat[q][m] - scaled_row[m] );
 				}
 				X.mat[q] = temp_row;
 			}
@@ -149,7 +151,7 @@ float Matrix::check_for_all_zeros(Matrix X, int i, int j, int &first_non_zero)
 	first_non_zero = -1;
 	for (int m = i; m < X.mat.size(); m++)
 	{
-		bool non_zero = X.getValue(m,j)!=0.0;
+		bool non_zero = X.mat[m][j]!=0.0;
 		if (non_zero) zero_sum +=1.0;
 		if ((first_non_zero == -1) && (non_zero))
 		{
