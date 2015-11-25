@@ -266,7 +266,6 @@ def invert(X):
     for j in xrange(0,cols):
         #Check to see if there are any nonzero values below the current row in the current column
         zero_sum, first_non_zero = check_for_all_zeros(X,i,j)
-        print 'firstNonZero', first_non_zero, 'i', i
         #If everything is zero, increment the columns
         if zero_sum==0:
             if j==cols:
@@ -282,9 +281,7 @@ def invert(X):
         for q in xrange(0,rows):
             if q!=i:
                 scaled_row = [X[q][j] * m for m in X[i]]
-                print 'Scaled_row',scaled_row
                 X[q]= [X[q][m] - scaled_row[m] for m in xrange(0,len(scaled_row))]
-                print 'X[q]',X[q]
         #If either of these is true, we have iterated through the matrix, and are done
         if i==rows or j==cols:
             break

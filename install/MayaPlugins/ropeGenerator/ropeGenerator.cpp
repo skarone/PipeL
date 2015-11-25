@@ -83,6 +83,7 @@ MStatus ropeGenerator::compute( const MPlug& plug, MDataBlock& data )
 		int numFaces = ( inPointsCount * inDiv ) + 2;
 		float param;
 		float lengPerDiv = curveFn.length() / inDiv;
+		PrevNormal = MVector( curveFn.normal( 0.0, MSpace::kWorld ).normal() );
 		float baseLeng = lengPerDiv;
 		float baseParamForRamp = 0;
 		float paramForRamp = 1.0 / float( inDiv );
@@ -193,13 +194,23 @@ MStatus ropeGenerator::compute( const MPlug& plug, MDataBlock& data )
 
 MMatrix ropeGenerator::getMatrixFromParamCurve( MFnNurbsCurve &curveFn, float param, float twist, MAngle divTwist )
 {
-
 	MPoint pDivPos;
 	curveFn.getPointAtParam( param, pDivPos, MSpace::kWorld );
-	MVector vTangent( curveFn.tangent( param, MSpace::kObject ).normal() );
-	//vTangent = vTangent - MVector( pDivPos );
+	MVector vTangent( curveFn.tangent( param, MSpace::kWorld ).normal() );
 	MVector vBase(0,1,0);
-	MVector vNormal( vBase ^ vTangent );
+	//MVector vNormal( vTangent ^ vBase );
+	/*
+	if ( MAngle( vBase.angle( vTangent ) ).asDegrees() < 45 )
+		vNormal = vNormal * -1;
+	*/
+	MVector vNormal( curveFn.normal( param, MSpace::kWorld ).normal() );
+	
+	//vTangent = vTangent - MVector( pDivPos );
+	if ( MAngle( PrevNormal.angle( vNormal ) ).asDegrees() > 90 )
+		//fprintf(stderr, "Angle = %g\n",MAngle( PrevNormal.angle( vNormal )).asDegrees());
+		vNormal = vNormal * -1;
+	PrevNormal = vNormal;
+	//if ( vNormal.angle(  ) )
 	MQuaternion qTwist( twist * divTwist.asRadians(), vTangent );
 	vNormal = vNormal.rotateBy( qTwist );
 	MVector vExtra( vNormal ^ vTangent );

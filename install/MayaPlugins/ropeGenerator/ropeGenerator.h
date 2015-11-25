@@ -11,6 +11,7 @@
 #include <maya/MFloatPointArray.h>
 #include <maya/MFnNurbsCurve.h>
 #include <maya/MFloatArray.h>
+#include <maya/MVector.h>
 
 class ropeGenerator: public MPxNode
 {
@@ -27,11 +28,11 @@ public:
 	static void createRopesRings( int ropesCount, MMatrix bMatrix, MFloatPointArray &points, int pointsCount, float ropeStrength, float radius );
 	static void createRopesUvs( int ropesCount, int pointsCount, float ropeStrength, float uvCapSize,MFloatArray &uArray, MFloatArray &vArray, float direction );
 	static MFloatPointArray createHalfRope( int pointsCount, float radius );
-	static MMatrix getMatrixFromParamCurve( MFnNurbsCurve &curveFn, float param, float twist, MAngle divTwist );
+	MMatrix getMatrixFromParamCurve( MFnNurbsCurve &curveFn, float param, float twist, MAngle divTwist );
 	static MTypeId id;
 
-
 public:
+	MVector PrevNormal;
 	//Attributes for node
 	static MObject inCurve;
 	static MObject createRope;

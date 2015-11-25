@@ -17,6 +17,5 @@ public:
 	int rowsCount;
 	int colsCount;
 	std::vector< std::vector<float> > mat;
-	std::vector< float > row;
 };
 

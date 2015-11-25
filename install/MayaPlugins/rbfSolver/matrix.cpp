@@ -6,7 +6,15 @@ Matrix::Matrix(std::vector< std::vector<float> > m)
 {
 	rowsCount = m.size();
 	colsCount = m[0].size();
-	mat = m;
+	for (int i = 0; i < rowsCount; i++)
+	{
+		std::vector< float > tmpRow;
+		for (int j = 0; j < colsCount; j++)
+		{
+			tmpRow.push_back( m[i][j] ); 
+		}
+		mat.push_back(tmpRow);
+	}
 }
 
 Matrix::Matrix(int rows, int cols)
@@ -15,23 +23,23 @@ Matrix::Matrix(int rows, int cols)
 	colsCount = cols;
 	for(int i = 0;i <rows;i++)
 	{
+		std::vector< float > row;
 		for (int j = 0;j<cols; j++)
 		{
 			row.push_back(float(j));
 		}
 		mat.push_back( row );
 	}
-	//mat(row, std::vector<float>(col));
 }
 
-std::vector<float> Matrix::getRow( int row )
+std::vector<float> Matrix::getRow( int rowNum )
 {
-	return mat[row];
+	return mat[rowNum];
 }
 
-void Matrix::setValue(int row, int col, float val)
+void Matrix::setValue(int rowNum, int colNum, float val)
 {
-	mat[row][col] = val;
+	mat[rowNum][colNum] = val;
 }
 
 float Matrix::getValue(int row, int col)
@@ -67,18 +75,15 @@ Matrix Matrix::invert()
 {
 	Matrix X( mat );
 	Matrix identity = make_identity(rowsCount, colsCount);
-	for (int i = 0; i < rowsCount; i++)
+	for (int i = 0; i < identity.mat.size(); i++)
 	{
-		for (int j = 0; j < colsCount; j++)
-		{
-			//fprintf(stderr, "identity[%u][%u] = %g\n",i,j,identity.getValue(i,j) );
-			X.mat[i].push_back( identity.getValue( i, j ) );
-		}
+		X.mat[i].insert(X.mat[i].end(), identity.mat[i].begin(), identity.mat[i].end());
 	}
 	int i = 0;
 	for (int j = 0; j < colsCount; j++)
 	{
 		int first_non_zero = -1;
+		
 		float zero_sum = check_for_all_zeros( X, i, j, first_non_zero );
 
 		if (zero_sum == 0.0)
@@ -87,7 +92,7 @@ Matrix Matrix::invert()
 		}
 		if (first_non_zero != i)
 			X = swap_row( X, i, first_non_zero );
-
+		
 		std::vector< float > divX;
 		for (int m = 0; m < X.mat[i].size(); m++)
 		{
@@ -102,13 +107,11 @@ Matrix Matrix::invert()
 				for (int m = 0; m < X.mat[i].size() ; m++)
 				{
 					scaled_row.push_back( X.mat[q][j] * X.mat[i][m] );
-					fprintf(stderr, "ScaledRow[%u] = %g\n",q,X.mat[q][j] * X.mat[i][m] );
 				}
 				std::vector< float > temp_row;
 				for (int m = 0; m < scaled_row.size(); m++)
 				{
 					temp_row.push_back( X.mat[q][m] - scaled_row[m] );
-					fprintf(stderr, "TEMPROW[%u] = %g\n",q,X.mat[q][m] - scaled_row[m] );
 				}
 				X.mat[q] = temp_row;
 			}
@@ -130,7 +133,6 @@ Matrix Matrix::invert()
 		X.mat[i] = temp_row;
 	}
 	
-	//fprintf(stderr, "returning ok" );
 	return X;
 }
 
@@ -169,8 +171,8 @@ Matrix Matrix::make_identity( int rows, int cols )
 		std::vector< float > rowTmp;
 		for (int j = 0;j<cols; j++)
 		{
-			float elem = 0.0;
-			if (i == j) elem = 1.0;
+			float elem = 0.0f;
+			if (i == j) elem = 1.0f;
 			rowTmp.push_back( elem );
 		}
 		matTmp.push_back( rowTmp );

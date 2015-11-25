@@ -251,14 +251,6 @@ std::vector< Matrix > rbfSolver::linalg( Matrix A, Matrix di )
 {
 	std::vector< Matrix > nodes;
 	Matrix Ainverted = A.invert();
-	for (int i = 0; i < Ainverted.rowsCount; i++)
-	{
-		for (int d = 0; d < Ainverted.colsCount; d++)
-		{
-			fprintf(stderr, "Ainverted[%u][%u] = %g\n",i,d,Ainverted.mat[i][d] );
-		}
-
-	}
 	for (int d = 0; d < di.getRow(0).size(); d++)
 	{
 		Matrix diTmp( di.rowsCount, 1 );
@@ -269,18 +261,6 @@ std::vector< Matrix > rbfSolver::linalg( Matrix A, Matrix di )
 		}
 		nodes.push_back( Ainverted.mult( diTmp ) );
 	}
-	/*
-	for (int d = 0; d < di.rowsCount; d++)
-	{
-		Matrix diTmp( di.getRow( d ).size(), 1 );
-		for (int i = 0; i < di.getRow(d).size(); i++)
-		{
-			//fprintf(stderr, "diTmpVal = %g\n",di.getRow(d)[i]);
-			diTmp.setValue( i, 0, di.getRow(d)[i] );
-		}
-		nodes.push_back( Ainverted.mult( diTmp ) );
-	}
-	*/
 	return nodes;
 }
 
