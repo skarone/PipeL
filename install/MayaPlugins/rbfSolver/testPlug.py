@@ -7,8 +7,8 @@ sha = baseSphere.shader.a.surfaceShader.input.node
 distance = 30
 samples = mn.createNode( 'transform' )
 samples.name = 'samples'
-samplesCount = 5
-centersCount = 2
+samplesCount = 30
+centersCount = 5
 for n in range(samplesCount):
     newSphere = baseSphere.duplicate()
     newSha = sha.duplicate()
@@ -34,9 +34,13 @@ for n in range(centersCount):
     newSphere.a.t.v = [rd.uniform( -(distance),distance ),
                         rd.uniform( -(distance),distance ),
                         rd.uniform( -(distance),distance )]
+    newSphere.a.s.v = [2.5,2.5,2.5]
     mc.select( newSphere )
     mc.hyperShade( a = newSha )
     newSphere.parent = centers
     newSphere.a.t >> rbfNode.attr( "inCenter[" + str( n ) + "]" )
+    rbfNode.attr( "outValues[" + str( n ) + "].outValue[0]" ) >> newSha.a.outColorR
+    rbfNode.attr( "outValues[" + str( n ) + "].outValue[1]" ) >> newSha.a.outColorG
+    rbfNode.attr( "outValues[" + str( n ) + "].outValue[2]" ) >> newSha.a.outColorB
 rbfNode()
-rbfNode.a.outValues.v
+

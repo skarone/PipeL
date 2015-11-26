@@ -22,11 +22,12 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 {
 	MStatus stats;
     MObject thisNode = thisMObject();
-    MPlug wPlug(thisNode, inValues);
+    MPlug wPlug(thisNode, outValue);
 	
 	////////////////////////////////////////
 	//Get Input Positions
 	MArrayDataHandle inPositionsH = data.inputArrayValue( inPositions, &stats );
+	MFloatVectorArray xi;
 	unsigned inPosCount = inPositionsH.elementCount();
 	if (inPosCount == 0)
 		return MS::kSuccess;
@@ -95,7 +96,6 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 	{
 		for (int y = 0; y < xi.length(); y++)
 		{
-			fprintf(stderr, "Amat[%u][%u] = %g\n",x,y, A[count]);
 			Amat.setValue( x,y, A[count] );
 			count +=1;
 		}
@@ -107,49 +107,43 @@ MStatus rbfSolver::compute( const MPlug& plug, MDataBlock& data )
 
 	Matrix r2Mat( inCentersA.length(), xi.length() );
 	count = 0;
+	std::vector< Matrix > finalMatrixData; //Result
 	for (int x = 0; x < inCentersA.length(); x++)
 	{
+		finalMatrixData.push_back( Matrix( 1, eCount ) ); //Create Base Matrices for final Result
 		for (int y = 0; y < xi.length(); y++)
 		{
-			//fprintf(stderr, "r2Centers = %g\n",r2Centers[count]);
 			r2Mat.setValue( x, y, r2Centers[count] );
 			count += 1;
 		}
 	}
-	/*
 	//Calculate Matrix per Node
 	for (int i = 0; i < nodes.size(); i++)
 	{
 		Matrix tmpMat = r2Mat.mult( nodes[i] );
-		fprintf(stderr, "finalMat RowsCount = %g\n",tmpMat.rowsCount );
-		fprintf(stderr, "finalMat RowsCount = %g\n",tmpMat.colsCount );
-		for (int r = 0; r < tmpMat.rowsCount; r++)
+		for (int r = 0; r < tmpMat.mat.size(); r++)
 		{
-			for (int c = 0; c < tmpMat.colsCount; c++)
-			{
-				fprintf(stderr, "finalMat[%u][%u] = %g\n",r,c,tmpMat.getValue(r, c) );
-			}
+				finalMatrixData[r].mat[0][i] = tmpMat.mat[r][0];
 		}
 
 	}
-
 	////////////////////////////////////////
 	// Write Output :)
-	for(int i = 0; i < nodes.size(); i++) {
+	for(int i = 0; i < finalMatrixData.size(); i++) {
             stats = wPlug.selectAncestorLogicalIndex( i, outValues );
             MDataHandle wHandle = wPlug.constructHandle(data);
             MArrayDataHandle arrayHandle(wHandle, &stats);
             MArrayDataBuilder arrayBuilder = arrayHandle.builder(&stats);
-			Matrix finalMat( r2Mat.mult( nodes[i] ) );
-			for( int j = 0; j < finalMat.colsCount; j++) {
+			for( int j = 0; j < finalMatrixData[i].mat[0].size(); j++) {
                 MDataHandle handle = arrayBuilder.addElement(j,&stats);
-				handle.set(finalMat.getValue( j, 0 ));
+				//fprintf(stderr, "[%u]di[%u][%u] = %g\n",i,0,j,finalMatrixData[i].mat[0][j] );
+				handle.set(finalMatrixData[i].mat[0][j] );
+				//handle.set(float( i+j ));
             }
             stats = arrayHandle.set(arrayBuilder);
             wPlug.setValue(wHandle);
             wPlug.destructHandle(wHandle);
         }
-		*/
 	return MS::kSuccess;
 }
 
@@ -217,7 +211,7 @@ MFloatArray rbfSolver::_h_multiquadric( MFloatArray r )
 	for (int ri = 0; ri < r.length(); ri++)
 	{
 		float re = (1.0/epsilon*r[ri]);
-		res.append( exp( re*re ) + 1.0 );
+		res.append( sqrt( re*re ) + 1.0 );
 	}
 	return res;
 }
@@ -256,7 +250,6 @@ std::vector< Matrix > rbfSolver::linalg( Matrix A, Matrix di )
 		Matrix diTmp( di.rowsCount, 1 );
 		for (int a = 0; a < di.rowsCount; a++)
 		{
-			//fprintf(stderr, "diTmp[%u][0] = %g\n",a,di.getValue(a, d) );
 			diTmp.setValue( a,0, di.getValue(a, d) );
 		}
 		nodes.push_back( Ainverted.mult( diTmp ) );
@@ -278,20 +271,29 @@ MStatus rbfSolver::initialize()
 	nAttr.setStorable(true);
 	nAttr.setUsesArrayDataBuilder(true);
 
+	stat = addAttribute( inPositions );
+	if (!stat) { stat.perror("addAttribute inPositions"); return stat;}
+
 	inValue = nAttr.create( "inValue", "inValue", MFnNumericData::kFloat );
 	nAttr.setArray(true);
 	nAttr.setKeyable(true);
 	nAttr.setReadable(true);
 	nAttr.setStorable(true);
 	nAttr.setUsesArrayDataBuilder(true);
-
-
+	/*
+	stat = addAttribute( inValue );
+	if (!stat) { stat.perror("addAttribute inValue"); return stat;}
+	*/
 	//input ND Values Array
 	inValues = cmpAttr.create( "inValues", "inValues");
 	cmpAttr.setArray(true);
 	cmpAttr.addChild( inValue );
+	cmpAttr.setReadable(true);
 	cmpAttr.setStorable(true);
 	cmpAttr.setUsesArrayDataBuilder(true);
+
+	stat = addAttribute( inValues );
+	if (!stat) { stat.perror("addAttribute inValues"); return stat;}
 
 	//input Centers Array
 	inCenters = nAttr.createPoint( "inCenter","inCenter");
@@ -301,25 +303,28 @@ MStatus rbfSolver::initialize()
 	nAttr.setStorable(true);
 	nAttr.setUsesArrayDataBuilder(true);
 
+	stat = addAttribute( inCenters );
+	if (!stat) { stat.perror("addAttribute inCenters"); return stat;}
+
 	outValue = nAttr.create( "outValue", "outValue", MFnNumericData::kFloat );
 	nAttr.setArray(true);
 	nAttr.setReadable(true);
+	nAttr.setHidden(true);
 	nAttr.setStorable(false);
 	nAttr.setUsesArrayDataBuilder(true);
-
+	/*
+	stat = addAttribute( outValue );
+	if (!stat) { stat.perror("addAttribute outValue"); return stat;}
+	*/
 	//output ND Values Array
 	outValues = cmpAttr.create( "outValues", "outValues");
 	cmpAttr.setArray(true);
 	cmpAttr.addChild( outValue );
+	cmpAttr.setHidden(true);
+	cmpAttr.setReadable(true);
 	cmpAttr.setStorable(false);
 	cmpAttr.setUsesArrayDataBuilder(true);
 
-	stat = addAttribute( inPositions );
-	if (!stat) { stat.perror("addAttribute inPositions"); return stat;}
-	stat = addAttribute( inValues );
-	if (!stat) { stat.perror("addAttribute inValues"); return stat;}
-	stat = addAttribute( inCenters );
-	if (!stat) { stat.perror("addAttribute inCenters"); return stat;}
 	stat = addAttribute( outValues );
 	if (!stat) { stat.perror("addAttribute outValues"); return stat;}
 

@@ -195,17 +195,10 @@ MStatus ropeGenerator::compute( const MPlug& plug, MDataBlock& data )
 MMatrix ropeGenerator::getMatrixFromParamCurve( MFnNurbsCurve &curveFn, float param, float twist, MAngle divTwist )
 {
 	MPoint pDivPos;
+	//Here we control the tangent of the rope
 	curveFn.getPointAtParam( param, pDivPos, MSpace::kWorld );
 	MVector vTangent( curveFn.tangent( param, MSpace::kWorld ).normal() );
-	MVector vBase(0,1,0);
-	//MVector vNormal( vTangent ^ vBase );
-	/*
-	if ( MAngle( vBase.angle( vTangent ) ).asDegrees() < 45 )
-		vNormal = vNormal * -1;
-	*/
 	MVector vNormal( curveFn.normal( param, MSpace::kWorld ).normal() );
-	
-	//vTangent = vTangent - MVector( pDivPos );
 	if ( MAngle( PrevNormal.angle( vNormal ) ).asDegrees() > 90 )
 		//fprintf(stderr, "Angle = %g\n",MAngle( PrevNormal.angle( vNormal )).asDegrees());
 		vNormal = vNormal * -1;

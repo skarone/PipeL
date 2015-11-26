@@ -33,7 +33,6 @@ public:
 	static MObject outValue;
 	static MObject outValues;
 
-	MFloatVectorArray xi;
 	float epsilon;
 	int N;
 };

@@ -54,15 +54,15 @@ Matrix::~Matrix()
 Matrix Matrix::mult( Matrix m )
 {
 	std::vector< std::vector<float> > mRes;
-	for (int i = 0; i< rowsCount; i++)
+	for (int i = 0; i< mat.size(); i++)
 	{
 		std::vector< float > mRow;
-		for (int j = 0; j< m.colsCount;j++)
+		for (int j = 0; j< m.mat[0].size();j++)
 		{
 			float res = 0;
 			for( int y = 0; y < mat[i].size(); y++ )
 			{
-				res = res + ( mat[i][y]*m.mat[j][y] );
+				res = res + ( mat[i][y]*m.mat[y][j] );
 			}
 			mRow.push_back( res );
 		}
