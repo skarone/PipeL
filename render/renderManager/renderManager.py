@@ -184,6 +184,7 @@ class RenderManagerUI(base,fom):
 							'Frames'          : frames,
 							'Comment'         : comments,
 							'InitialStatus'   : InitialStatus,
+							'UserName'        : os.getenv('username'),
 							'Whitelist'       : whiteList,
 							'Name'            : name + curFile.name + ' - ' + w.layer.name,
 							'OutputFilename0' : filename,

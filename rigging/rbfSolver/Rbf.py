@@ -37,6 +37,15 @@ def test():
 
 mc.scriptJob( attributeChange=['pSphere4.tx', test] )
 
+sel = mc.ls(sl = True, fl = True)
+for n in sel:
+    mc.select(n)
+    pos = mc.xform(n, q = True, ws = True, t = True )
+    vectors = om.MFloatVectorArray()
+    vectors.append( om.MFloatVector( pos[0], pos[1], pos[2] ) )
+    retCol = rb(vectors)
+	mc.polyColorPerVertex( rgb=(retCol[0][0][0], retCol[1][0][0], retCol[2][0][0]),cdo = True )
+
 """
 
 class Rbf(object):
@@ -100,7 +109,7 @@ class Rbf(object):
 		AmatInv = Amat.invert()
 		res = []
 		if isinstance(di[0], list):
-			for d in range( len( di[0] )):
+			for d in range( len( di[0] )): #get cols count in di[0]
 				diMat = bs.Matrix( [[di[a][d]] for a in range(len(di))] )
 				res.append( AmatInv*diMat )
 		else:

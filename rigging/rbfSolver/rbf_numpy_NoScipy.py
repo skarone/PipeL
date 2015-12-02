@@ -161,10 +161,8 @@ class Rbf(object):
                            for a in args[:-1]])
         self.N = self.xi.shape[-1]
         self.di = np.asarray(args[-1]).flatten()
-        """
         if not all([x.size == self.di.size for x in self.xi]):
             raise ValueError("All arrays must be equal length.")
-        """
 
         self.norm = kwargs.pop('norm', self._euclidean_norm)
         r = self._call_norm(self.xi, self.xi)
@@ -187,8 +185,9 @@ class Rbf(object):
         #  to save on the object returned.
         for item, value in kwargs.items():
             setattr(self, item, value)
-
         self.A = self._init_function(r) - np.eye(self.N)*self.smooth
+        # print self._function( r )
+        # print "A " + self.A
         self.nodes = np.linalg.solve(self.A, self.di)
 
     def _call_norm(self, x1, x2):

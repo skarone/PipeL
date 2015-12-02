@@ -50,6 +50,8 @@ class Job(object):
 				'InitialStatus'                      : "Suspended"
 				}
 		version = mc.about( version=True )
+		if version == '2016':
+			version  = '2013'
 		if version == '2015':
 			version  = '2011'
 		if version == '2014':
