@@ -276,14 +276,15 @@ MFloatVector rbfSolver::amin( MFloatVectorArray x1 )
 	return MFloatVector( xmin, ymin, zmin );
 }
 
-MFloatArray rbfSolver::_euclidean_norm( MFloatVectorArray x1, MFloatVectorArray x2 )
+MFloatArray rbfSolver::_euclidean_norm( MFloatVectorArray x1, MFloatVectorArray x2)
 {
 	MFloatArray res;
 	for (int x = 0; x < x1.length(); x++)
 	{
 		for (int y = 0; y < x2.length(); y++)
 		{
-			res.append( (x1[x] - x2[y]).length() );
+			float len = (x1[x] - x2[y]).length();
+			res.append( len );
 		}
 	}
 	return res;
@@ -294,6 +295,7 @@ MFloatArray rbfSolver::_h_gaussian( MFloatArray r )
 	MFloatArray res;
 	for (int ri = 0; ri < r.length(); ri++)
 	{
+		//res.append( exp( 1.0/r[ri] * r[ri] * -epsilon ) );
 		float re = (1.0/epsilon*r[ri]);
 		res.append( exp( -re*re ) );
 	}
@@ -305,6 +307,7 @@ MFloatArray rbfSolver::_h_multiquadric( MFloatArray r )
 	MFloatArray res;
 	for (int ri = 0; ri < r.length(); ri++)
 	{
+		//res.append( sqrt( r[ri] * r[ri] + epsilon * epsilon ) );
 		float re = (1.0/epsilon*r[ri]);
 		res.append( sqrt( ( re*re ) + 1.0 ) );
 	}
@@ -321,7 +324,7 @@ MFloatArray rbfSolver::_h_cubic( MFloatArray r )
 	MFloatArray res;
 	for (int ri = 0; ri < r.length(); ri++)
 	{
-		res.append( r[ri] * r[ri] * r[ri] );
+		res.append( (r[ri] * r[ri] * r[ri] ));
 	}
 	return res;
 }
@@ -331,7 +334,7 @@ MFloatArray rbfSolver::_h_quintic( MFloatArray r )
 	MFloatArray res;
 	for (int ri = 0; ri < r.length(); ri++)
 	{
-		res.append( r[ri] * r[ri] * r[ri] * r[ri] * r[ri] );
+		res.append( (r[ri] * r[ri] * r[ri] * r[ri] * r[ri] ));
 	}
 	return res;
 }

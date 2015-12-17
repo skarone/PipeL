@@ -57,7 +57,7 @@ class ShotCreator(base, fom):
 		"""fill combo box with projects"""
 		self.projects_cmb.clear()
 		self.projects_cmb.addItems( prj.projects( prj.BASE_PATH ) )
-	
+
 	def fillSequencesCMB(self):
 		"""fill combo box with sequences"""
 		self.sequences_cmb.clear()
@@ -70,28 +70,31 @@ class ShotCreator(base, fom):
 		"""create New Asset Based on new project name"""
 		projName =  str( self.projects_cmb.currentText() )
 		seqName =  str( self.sequences_cmb.currentText() )
-		assetName = self.shot_le.text()
+		assetName = str( self.shot_le.text() )
 		se = seq.Sequence( seqName, prj.Project( projName, prj.BASE_PATH ) )
-		#get last s number
-		shots = se.shots
-		lastShotNumber = 0
-		if len(shots):
-			lastShot = shots[-1].name
-			lastShotNumber = int( lastShot.split( '_' )[0][1:] )
-		newAsset = sh.Shot( 's' + str(lastShotNumber + 1 ).zfill( 3 ) + '_' + seqName + '_'  + str( assetName ),  se )
-		if not newAsset.exists:
-			newAsset.create()
-			print 'New Shot Created : ', newAsset.name, ' for ',  projName
-			QtGui.QDialog.accept(self)
-		else:
-			QtGui.QDialog.reject(self)
+		shotsCount = self.shotsCount_sp.value()
+		for s in range(1, shotsCount + 1 ):
+			#get last s number
+			shots = se.shots
+			lastShotNumber = 0
+			if len(shots):
+				lastShot = shots[-1].name
+				lastShotNumber = int( lastShot.split( '_' )[0][1:] )
+			if '#' in assetName:
+				finalAssetName = assetName.replace( '#'*assetName.count('#'), str( s ).zfill( assetName.count( '#' ) ))
+			else:
+				finalAssetName = assetName
+			newAsset = sh.Shot( 's' + str(lastShotNumber + 1 ).zfill( 3 ) + '_' + seqName + '_'  + finalAssetName ,  se )
+			if not newAsset.exists:
+				newAsset.create()
+				print 'New Shot Created : ', newAsset.name, ' for ',  projName
 
 class Window(QtGui.QMainWindow):
 	def __init__(self):
 		QtGui.QMainWindow.__init__(self)
 		dia = ShotCreator()
 		dia.exec_()
-	
+
 def main():
 	"""use this to create project in maya"""
 	pass
