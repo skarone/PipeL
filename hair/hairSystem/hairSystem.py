@@ -54,11 +54,11 @@ full_path = os.path.realpath(__file__)
 #Y:\PipeL\hair\hairSystem
 #Y:\PipeL\install\MayaPlugins
 
-mc.loadPlugin( os.path.dirname(full_path).replace( 'hair/hairSystem', 'install/MayaPlugins' ) + '/'+ mc.about( version = True ) +  '/curvesFromMesh.mll' )
+mc.loadPlugin( 'curvesFromMesh.mll' )
 
 
 def hairSystemAutomator( sysName = '', scalp = None ):
-	"""creates a hair system based on selected lock meshes, 
+	"""creates a hair system based on selected lock meshes,
 	if you specify a scalp it will use that to place follicles"""
 	hair_polygons = mn.ls(sl=1)
 	all_grp = mn.Node( mc.group( n = sysName + '_hair_grp', em = True ) )
@@ -159,18 +159,18 @@ class HairLock(object):
 		self._curveMesh.name = self.mesh.name + '_curveMesh'
 		self.mesh.shape.a.outMesh     >> self._curveMesh.a.inMesh
 		self.mesh.shape.a.worldMatrix >> self._curveMesh.a.inWorldMatrix
-		for i in range(5):	
+		for i in range(5):
 			hairCurve = mn.createNode('nurbsCurve' )
 			hairCurveParent = hairCurve.parent
 			hairCurveParent.name = self.mesh.name + '_%i'%i + '_crv'
 			hairCurve = hairCurveParent.shape
 			self._curveMesh.attr( 'outCurve[%i'%i + ']' ) >> hairCurve.a.create
-			
+
 			follicle = mn.createNode('follicle')
 			folliclePar = follicle.parent
 			folliclePar.name = self.mesh.name + '_%i'%i + '_foll'
 			follicle = folliclePar.shape
-			hairSustemOutHairSize = self.hairSystem.a.outputHair.size 
+			hairSustemOutHairSize = self.hairSystem.a.outputHair.size
 			follicle.a.outHair >> self.hairSystem.attr( 'inputHair[%i'%hairSustemOutHairSize + ']' )
 			#follicle.a.outHair >> self.hairSystem.attr( 'inputHair[%i'%i + ']' )
 			hairCurve.a.worldSpace >> follicle.a.startPosition
@@ -202,7 +202,7 @@ class HairLock(object):
 		"""return the closest uv coord for the follicle based on first cv of the curve"""
 		if not self.scalp:
 			print 'There is no scalp mesh for this process'
-			return 
+			return
 		clos = mn.createNode( 'closestPointOnMesh' )
 		self.scalp.shape.a.worldMesh >> clos.a.inMesh
 		pos = mc.xform( curve.name + '.cv[0]', q = True, ws = True, t = True )

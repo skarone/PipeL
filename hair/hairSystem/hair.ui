@@ -85,6 +85,13 @@
      </layout>
     </item>
     <item>
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Every Polygon Mesh must be a tube shape, like a cube with multiple&lt;/p&gt;&lt;p&gt;height subdivisions and the face in contact with the scalp deleted.&lt;/p&gt;&lt;p&gt;The Name of each group must end with _lock_grp.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QListWidget" name="groups_lw"/>
     </item>
     <item>

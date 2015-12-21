@@ -1,0 +1,99 @@
+1
+ Bitt Documentation
+ bitt_documentation.htm
+2
+ Pipeline
+ pipeline.htm
+3
+ Project Manager
+ project_manager.htm
+4
+  menu bar
+ _menu_bar.htm
+5
+ Right Click Menu
+ right_click_menu.htm
+6
+ Cache Manager
+ cache_manager.htm
+7
+ Animation To Lighting Workflow
+ animation_to_lighting_workflow.htm
+8
+ Export Animation Data
+ export_animation_data.htm
+9
+ Import Animation Data
+ import_animation_data.htm
+10
+ Shading
+ shading.htm
+11
+ Modeling Scene Check
+ modeling_scene_check.htm
+12
+ General Tools
+ general_tools.htm
+13
+ Multi-Attribute
+ multi_attribute.htm
+14
+ Apply a New Value to group of nodes
+ apply_a_new_value_to_group_of_nodes.htm
+15
+ Connect attributes between lists of nodes
+ connect_attributes_between_lists_of_nodes.htm
+16
+ Rename Tools
+ rename_tools.htm
+17
+ References
+ references.htm
+18
+ Lighting
+ lighting.htm
+19
+ Lighting Helper
+ lighting_helper.htm
+20
+ Objects Tab
+ objects_tab.htm
+21
+ Objects Quality
+ objects_quality.htm
+22
+ toolBar
+ toolbar.htm
+23
+ Render Manager window
+ render_manager_window.htm
+24
+ Animation
+ animation.htm
+25
+ Playblast
+ playblast.htm
+26
+ Rigging
+ rigging.htm
+27
+ BlendShapes Helper
+ blendshapes_helper.htm
+28
+ Occ Render Rig Setup
+ occ_render_rig_setup.htm
+29
+ WrapToSkinCluster
+ wraptoskincluster.htm
+30
+ Copy Soft Weights to Joint
+ copy_soft_weights_to_joint.htm
+31
+ Control For Selection
+ control_for_selection.htm
+32
+ Face Rigger
+ face_rigger.htm
+33
+ Eye Lids Rig Helper 
+ eye_lids_rig_helper_.htm

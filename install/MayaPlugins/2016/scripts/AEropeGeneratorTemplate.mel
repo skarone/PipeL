@@ -1,0 +1,30 @@
+global proc AEropeGeneratorTemplate( string $nodeName )
+{
+    editorTemplate -beginScrollLayout;
+        editorTemplate -beginLayout "General" -collapse 0;
+		editorTemplate -addControl "divisions";
+		editorTemplate -addControl "pointsCount";
+		editorTemplate -addControl "radius";
+        editorTemplate -endLayout;
+        editorTemplate -beginLayout "Rope Attributes" -collapse 0;
+		editorTemplate -addControl "createRope";
+		editorTemplate -addControl "ropesCount";
+		editorTemplate -addControl "pointsPerRope";
+		editorTemplate -addControl "ropesStrength";
+        editorTemplate -endLayout;
+        editorTemplate -beginLayout "Twist Attribute" -collapse 0;
+		editorTemplate -addControl "twist";
+		AEaddRampControl( $nodeName + ".twistRamp" );
+        editorTemplate -endLayout;
+        editorTemplate -beginLayout "Taper Attribute" -collapse 0;
+            AEaddRampControl( $nodeName + ".tapper" );
+        editorTemplate -endLayout;
+        editorTemplate -beginLayout "UVs Attribute" -collapse 0;
+		editorTemplate -addControl "uvWidth";
+		editorTemplate -addControl "uvHeight";
+		editorTemplate -addControl "uvCapSize";
+        editorTemplate -endLayout;
+ 
+    editorTemplate -addExtraControls;
+    editorTemplate -endScrollLayout;
+}

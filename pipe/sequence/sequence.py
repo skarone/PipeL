@@ -11,6 +11,7 @@ Description:
 import pipe.shot.shot as sht
 reload( sht )
 import os
+STUDIO_NAME = 'Bitt'
 
 class Sequence(object):
 	"""main sequence object"""
@@ -51,7 +52,21 @@ class Sequence(object):
 		struc = [
 				'/Assets',
 				'/Shots',
-				'/Data'
+				'/Data',
+				'/Production',
+				'/Production/Feedback',
+				'/Production/Shooting',
+				'/Production/Audio',
+				'/Production/WS_Conforming',
+				'/To_Client/WIPS',
+				'/To_Client/Delivery',
+				'/To_Client/Delivery/Versions',
+				'/Materials/References',
+				'/Materials/References/From_Client',
+				'/Materials/References/From_' + STUDIO_NAME,
+				'/Materials/References/From_' + STUDIO_NAME + '/Concepts',
+				'/Materials/Offline',
+				'/Materials/Story'
 				]
 		for s in struc:
 			s = self.path + s
@@ -68,7 +83,7 @@ class Sequence(object):
 		sh = sht.Shot( shotName, self )
 		sh.create()
 		return sh
-		
+
 	@property
 	def shots(self):
 		"""return the shots in the sequence"""

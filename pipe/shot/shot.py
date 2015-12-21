@@ -37,7 +37,7 @@ class Shot(object):
 	def name(self):
 		"""return name of the shot"""
 		return self._name
-	
+
 	@property
 	def sequence(self):
 		"""return sequence of the shot"""
@@ -141,7 +141,7 @@ class Shot(object):
 			1  : updated
 			2  : not Updated
 			3  : not exists"""
-		depFiles = [ 
+		depFiles = [
 				[dp.Node( self.layPath      ),[]],
 				[dp.Node( self.animPath     ),[ 0 ]],
 				[dp.Node( self.skinFixPath  ),[ 1 ]],
@@ -186,7 +186,7 @@ class Shot(object):
 	def hasSkin(self):
 		"""docstring for hasSkin"""
 		return os.path.getsize( self.skinFixPath.path ) != 0
-	
+
 	def renderedLayersPath(self, basePath):
 		path = basePath + '/' + self.project.name + '/' + self.sequence.name + '/' + self.name + '/'
 		return path
@@ -266,8 +266,12 @@ class Shot(object):
 				#COMP
 				'/Comp',
 				'/Comp/Versions',
-				'/Comp/Data',
-				'/Comp/' + self.name + '_COMP.nk',
+				'/Comp/VFX_ART',
+				'/Comp/Elements',
+				'/Comp/Footage_HIGH',
+				'/Comp/3D',
+				'/Comp/VFX_Render',
+				'/Comp/Workspaces/' + self.name + '_COMP.nk',
 				#HRS
 				'/Hrs',
 				'/Hrs/Versions',
@@ -358,7 +362,7 @@ class Shot(object):
 	def breakdown(self):
 		"""docstring for breakdown"""
 		data = []
-		with open(self.breakdownPath) as data_file:    
+		with open(self.breakdownPath) as data_file:
 			data = json.load(data_file)
 		return data
 

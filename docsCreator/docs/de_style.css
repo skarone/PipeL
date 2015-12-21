@@ -1,0 +1,90 @@
+.detbl
+{
+direction:ltr; border-spacing:0px;
+border-collapse: collapse;
+border: 0px none black;
+}
+.de_list
+{
+margin: 0;
+}
+div.p
+{
+margin-top:0px;
+margin-bottom:0px;
+font-weight:normal;
+}
+
+div.description_on_page div.p
+{font-family:"Arial";
+font-size: 11pt;color:#000000;
+font-style:normal;
+text-decoration:none;
+font-weight:normal;
+}
+h1
+{
+font-family:"Arial";
+font-size: 13pt;color:#000000;
+font-style:normal;
+text-decoration:none;
+font-weight:normal;
+display:inline-block;
+margin:0;
+padding:0;
+}
+h2
+{
+font-family:"Arial";
+font-size: 11pt;color:#000000;
+font-style:normal;
+text-decoration:none;
+font-weight:normal;
+display:inline-block;
+margin:0;
+padding:0;
+}
+span.code
+{
+font-family:"Courier New";
+font-size: 11pt;color:#000000;
+font-style:normal;
+text-decoration:none;
+font-weight:normal;
+}
+span.quote
+{
+font-family:"Georgia";
+font-size: 11pt;color:#000000;
+font-style:italic;
+text-decoration:none;
+font-weight:normal;
+}
+img.de_780D01ADE8
+{
+margin-top: 0px; margin-right: 0px; margin-bottom: 0px; margin-left: 0px;}
+span.de_2B94C39861
+{
+	color:#0000ff;
+	text-decoration:underline;
+}
+span.de_4539019894
+{
+	color:#da4b25;
+}
+span.de_476D3D315E
+{
+	text-decoration:underline;
+}
+span.de_51752156DC
+{
+	color:#000000;
+}
+span.de_542C360C74
+{
+	color:#b5c837;
+}
+span.de_8875473D98
+{
+	color:#ff3600;
+}

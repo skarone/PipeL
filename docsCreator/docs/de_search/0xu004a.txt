@@ -1,0 +1,4 @@
+JOB; 23;
+JOINT; 30;
+JOINTS; 29;
+JUST; 33,17,11;
