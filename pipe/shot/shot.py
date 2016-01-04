@@ -96,7 +96,7 @@ class Shot(object):
 	@property
 	def compPath(self):
 		"""return the anim file"""
-		return nfl.nukeFile( self.path + '/Comp/' + self.name + '_COMP.nk' )
+		return nfl.nukeFile( self.path + '/Comp/Workspaces/' + self.name + '_COMP.nk' )
 
 	@property
 	def hasComp(self):
@@ -254,78 +254,78 @@ class Shot(object):
 		"""create folder structure"""
 		struc = [
 				'/' + self.name + '.breakdown',
-				'/Assets',
 				#ANIM
-				'/Anim',
-				'/Anim/Versions',
-				'/Anim/Data',
+				'/Anim/',
+				'/Anim/Versions/',
+				'/Anim/Data/',
 				'/Anim/' + self.name + '_ANIM.mov',
 				'/Anim/' + self.name + '_ANIM.ma',
 				#ASSETS
-				'/Assets',
+				'/Assets/',
 				#COMP
-				'/Comp',
-				'/Comp/Versions',
-				'/Comp/VFX_ART',
-				'/Comp/Elements',
-				'/Comp/Footage_HIGH',
-				'/Comp/3D',
-				'/Comp/VFX_Render',
+				'/Comp/',
+				'/Comp/Versions/',
+				'/Comp/VFX_ART/',
+				'/Comp/Elements/',
+				'/Comp/Footage_HIGH/',
+				'/Comp/3D/',
+				'/Comp/VFX_Render/',
 				'/Comp/Workspaces/' + self.name + '_COMP.nk',
 				#HRS
 				'/Hrs',
-				'/Hrs/Versions',
-				'/Hrs/Data',
+				'/Hrs/Versions/',
+				'/Hrs/Data/',
 				'/Hrs/' + self.name + '_HRS.ma',
 				#LAY
 				'/Lay',
-				'/Lay/Versions',
-				'/Lay/Data',
+				'/Lay/Versions/',
+				'/Lay/Data/',
 				'/Lay/' + self.name + '_LAY.ma',
 				#LIT
 				'/Lit',
-				'/Lit/Versions',
-				'/Lit/Data',
+				'/Lit/Versions/',
+				'/Lit/Data/',
 				'/Lit/' + self.name + '_LIT.ma',
 				#SKINFIX
 				'/SkinFix',
-				'/SkinFix/Versions',
-				'/SkinFix/Data',
+				'/SkinFix/Versions/',
+				'/SkinFix/Data/',
 				'/SkinFix/' + self.name + '_SKIN.ma',
 				#POOL
 				'/Pool',
-				'/Pool/Anim',
-				'/Pool/Anim/Versions',
-				'/Pool/Cam',
-				'/Pool/Cam/Versions',
+				'/Pool/Anim/',
+				'/Pool/Anim/Versions/',
+				'/Pool/Cam/',
+				'/Pool/Cam/Versions/',
 				'/Pool/Cam/' + self.name + '_CAM.ma',
 				'/Pool/Hrs',
-				'/Pool/Hrs/Versions',
-				'/Pool/Sim',
-				'/Pool/Sim/Versions',
+				'/Pool/Hrs/Versions/',
+				'/Pool/Sim/',
+				'/Pool/Sim/Versions/',
 				'/Pool/Vfx',
-				'/Pool/Vfx/Versions',
+				'/Pool/Vfx/Versions/',
 				'/Pool/Sets',
-				'/Pool/Sets/Versions',
+				'/Pool/Sets/Versions/',
 				#SIM
 				'/Sim',
-				'/Sim/Versions',
-				'/Sim/Data',
+				'/Sim/Versions/',
+				'/Sim/Data/',
 				'/Sim/' + self.name + '_SIM.ma',
 				#VFX
 				'/Vfx',
-				'/Vfx/Versions',
-				'/Vfx/Data',
+				'/Vfx/Versions/',
+				'/Vfx/Data/',
 				'/Vfx/' + self.name + '_VFX.ma',
 				#CROWD
 				'/Crowd',
-				'/Crowd/Versions',
-				'/Crowd/Data',
+				'/Crowd/Versions/',
+				'/Crowd/Data/',
 				'/Crowd/' + self.name + '_CROWD.ma'
 				]
 		for s in struc:
 			s = self.path + s
 			basedir = os.path.dirname( s )
+			print basedir
 			if not os.path.exists(basedir):
 				os.makedirs(basedir)
 			if '.' in s:
