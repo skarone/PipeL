@@ -72,9 +72,8 @@ class Sequence(object):
 			s = self.path + s
 			basedir = os.path.dirname( s )
 			print s, basedir
-			if not os.path.exists(s):
-				if not '.' in s:
-					os.makedirs(s)
+			if not os.path.exists( basedir ):
+				os.makedirs(basedir)
 			if '.' in s:
 				open(s, 'a').close()
 

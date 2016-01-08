@@ -1,7 +1,7 @@
 '''
 File: project.py
 Author: Ignacio Urruty
-Description: 
+Description:
 	Project object( system level ):
 		-Create folders and files for the project
 		-Query information about project
@@ -21,7 +21,7 @@ for a in dog.assets:
         if not t.hasTx:
             print t.path, 'no tiene tx!'
             t.createVersions()
-            t.toTx().copy( r'D:/Projects/DogMendoncaFarm/Textures/' )   
+            t.toTx().copy( r'D:/Projects/DogMendoncaFarm/Textures/' )
 
 """
 
@@ -50,6 +50,7 @@ def shotOrAssetFromFile(mayaFile):
 		basePath = gen[ "basepath" ]
 		if basePath:
 			BASE_PATH = basePath.replace( '\\', '/' )
+		usemayasubfolder = gen[ "usemayasubfolder" ]
 	split = mayaFile.path.replace( BASE_PATH, '' ).split( '/' )
 	print split
 	if 'Assets' in mayaFile.path:
@@ -57,12 +58,25 @@ def shotOrAssetFromFile(mayaFile):
 		area = split[-1].split( '.' )[0][ split[-1].rindex( '_' )+1:]
 		index = [ass.AREAS.index(i) for i in ass.AREAS if i.lower() in area.lower()]
 		print index, 'index', area, 'area'
-		return ass.Asset( split[3], Project(split[0], BASE_PATH), index[0] )
+		if usemayasubfolder == 'True':
+			assName = split[3]
+		else:
+			assName = split[2]
+		return ass.Asset( assName, Project(split[0], BASE_PATH), index[0] )
 	elif 'Shots' in mayaFile.path:
 		#P:\Sprite_Gallo\Maya\Sequences\Entrevista\Shots\s001_T01\Anim\s001_T01_ANIM.ma
-		area = split[6]
-		index = [sh.AREAS.index(i) for i in sh.AREAS if i in area]
-		return sh.Shot( split[5], seq.Sequence( split[3], Project( split[0],BASE_PATH ) ), index[0] )
+		if usemayasubfolder == 'True':
+			area    = split[6]
+			seqName = split[3]
+			shotName = split[5]
+		else:
+		#P:\Sprite_Gallo\Sequences\Entrevista\Shots\s001_T01\Anim\s001_T01_ANIM.ma
+			area = split[5]
+			seqName = split[2]
+			shotName = split[4]
+		index = [sh.AREAS.index(i) for i in sh.AREAS if i.lower() in area.lower()]
+		print shotName, seqName, split[0], index[0]
+		return sh.Shot( shotName, seq.Sequence( seqName, Project( split[0],BASE_PATH ) ), index[0] )
 	else:
 		return None
 
@@ -77,7 +91,7 @@ class Project(object):
 	def __init__(self, name, basePath = BASE_PATH ):
 		self._name = name
 		self._basePath = basePath
-	
+
 	@property
 	def name(self):
 		"""return the name of the project"""

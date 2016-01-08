@@ -320,13 +320,18 @@ class Shot(object):
 				'/Crowd',
 				'/Crowd/Versions/',
 				'/Crowd/Data/',
-				'/Crowd/' + self.name + '_CROWD.ma'
+				'/Crowd/' + self.name + '_CROWD.ma',
+				'/Footage_LOW/',
+				'/Track/',
+				'/3D_Render/Beauty/',
+				'/3D_Render/Tmps/',
 				]
 		for s in struc:
 			s = self.path + s
 			basedir = os.path.dirname( s )
-			print basedir
+			print s,basedir
 			if not os.path.exists(basedir):
+				print 'created dir', s
 				os.makedirs(basedir)
 			if '.' in s:
 				open(s, 'a').close()

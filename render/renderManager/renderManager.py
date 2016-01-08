@@ -12,6 +12,7 @@ reload( dl )
 import pipe.mayaFile.mayaFile as mfl
 reload(mfl)
 import pipe.project.project as prj
+reload(prj)
 import general.mayaNode.mayaNode as mn
 import pipe.settings.settings as sti
 reload( sti )
