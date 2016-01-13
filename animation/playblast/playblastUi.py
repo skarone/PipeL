@@ -38,7 +38,9 @@ except:
 
 import pipe.settings.settings as sti
 reload( sti )
-
+import pipe.project.project as prj
+import pipe.mail.mail as ml
+reload( ml )
 
 class PlayblastUi(base,fom):
 	"""manager ui class"""
@@ -97,6 +99,22 @@ class PlayblastUi(base,fom):
 			movFil = fl.File( fil.versionPath + fil.name + '_v' + str( fil.version ).zfill( 3 ) + '.mov' )
 		if movFil.exists:
 			movFil.copy( fil.dirPath + fil.name + '.mov' )
+			settings = sti.Settings()
+			gen = settings.General
+			if gen:
+				self.sendMail = gen[ "sendmail" ]
+				self.mailServer = gen[ "mailserver" ]
+				self.mailPort = gen[ "mailport" ]
+				self.mailsPath = gen[ "departmentspath" ]
+				AssOrShot = prj.shotOrAssetFromFile( movFil )
+				ml.mailFromTool( 'new_playblast',
+					{ '<ProjectName>': AssOrShot.project.name,
+					'<SequenceName>': AssOrShot.sequence.name,
+					'<ShotName>': AssOrShot.name,
+					'<UserName>': os.getenv('username')},
+					os.getenv('username') + '@bitt.com',
+					self.mailsPath , self.mailServer, self.mailPort  )
+
 
 	def setRenderPath(self):
 		"""docstring for setRenderPath"""

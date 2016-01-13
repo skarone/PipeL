@@ -1,9 +1,25 @@
 import smtplib
+import pipe.file.file as fl
 
 # Import the email modules we'll need
 from email.mime.text import MIMEText
 
-def sendMail( sender, recipient, message, subject, ip = '192.168.0.200', port= 25 ):
+MAIL_MESSAGES = {
+	'new_cache':{
+		'message':'\bNew Cache\nAsset: <AssetName>\nSequence: <SequenceName>\nShot: <ShotName>\nUser: <UserName>',
+		'departments':['animation', 'lighting', 'production'],
+		'subject':'[CACHE] [<ProjectName>] [<SequenceName>] [<ShotName>] [<AssetName>]'},
+	'new_playblast':{
+		'message':'New Playblast\nSequence: <SequenceName>\nShot: <ShotName>\nUser: <UserName>',
+		'departments':['animation','production'],
+		'subject':'[PLAYBLAST] [<ProjectName>] [<SequenceName>] [<ShotName>]'},
+	'new_render':{
+		'message':'New Render\nRenderlayer: <RenderLayer>\nSequence: <SequenceName>\nShot: <ShotName>\nUser: <UserName>',
+		'departments':['compo', 'lighting', 'production'],
+		'subject':'[RENDER] [<ProjectName>] [<SequenceName>] [<ShotName>] [<RenderLayer>]'}
+}
+
+def sendMail( sender, recipient, message, subject, ip = '192.168.0.1', port= 25 ):
 	msg = MIMEText(message)
 	msg['Subject'] = subject
 	msg['From'] = sender
@@ -13,30 +29,31 @@ def sendMail( sender, recipient, message, subject, ip = '192.168.0.200', port= 2
 	s.sendmail(sender, recipient, msg.as_string())
 	s.quit()
 
-MAIL_MESSAGES = {
-	'new_cache':{ 'message':'New Cache of Asset <AssetName> for Shot <ShotName>, by <UserName>','departments':['animation', 'lighting', 'producction']},
-	'new_playblast':{'message':'New Playblast from Shot <ShotName> in Sequence <SequenceName>, by <UserName>','departments':['animation','producction']},
-	'new_render':{'message':'New Render of layer <RenderLayer> for Shot <ShotName>, by <UserName>','departments':['composition', 'lighting', 'production']}
-}
-
 def replaceDataForMessage( message, data ):
 	"""docstring for replaceDataForMessage"""
+	mes = message['message']
+	subject = message['subject']
 	for d in data.keys():
-		message = message.replace( d, data[d] )
-	return message
+		mes = mes.replace( d, data[d] )
+		subject = subject.replace( d, data[d] )
+	return mes, subject
 
-def getUsersInDepartments( departments ):
+def getUsersInDepartments( departments, departmentsFilesPaths ):
 	"""docstring for getUsersInDepartments"""
-	pass
+	fils = [a for a in fl.filesInDir( departmentsFilesPaths, True, '.mails' ) if any( [ a.name == d for d in departments ] )]
+	mails = []
+	for f in fils:
+		mails += f.data.replace( '\r\n','' ).split( ',' )
+	mails += ['iurruty@bitt.com']
+	return list(set(mails))
 
-
-def mailFromTool( mailMessageType, dataInMessageDict, sender, ip = '192.168.0.200', port= 25 ):
+def mailFromTool( mailMessageType, dataInMessageDict, sender, departmentsFilesPaths, ip = '192.168.0.1', port= 25 ):
 	"""mailMessageType: string corresponding to one of the MAIL_MESSAGES key values
 	   dataInMessageDict: dict with AssetName, ShotName, UserName, SequenceName, RenderLayer
 	   sender: string email of the person how send the mail
 	   recipient: string array mails of person how will recieve mail"""
-	message = replaceDataForMessage( MAIL_MESSAGES[ mailMessageType ][ 'message' ], dataInMessageDict )
-	recipient = getUsersInDepartments( MAIL_MESSAGES[ mailMessageType ]['departments'] )
-	sendMail( sender, recipient, message, mailMessageType, ip, port )
+	message, subject = replaceDataForMessage( MAIL_MESSAGES[ mailMessageType ], dataInMessageDict )
+	recipient = getUsersInDepartments( MAIL_MESSAGES[ mailMessageType ]['departments'], departmentsFilesPaths )
+	sendMail( sender, recipient, message, subject, ip, port )
 
 

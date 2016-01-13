@@ -21,6 +21,8 @@ import pipe.cacheManager.sceneCreator as sc
 reload( sc )
 from sys import platform as _platform
 import subprocess
+import pipe.mail.mail as ml
+reload( ml )
 
 try:
 	import general.mayaNode.mayaNode as mn
@@ -83,6 +85,10 @@ class CacheManagerUI(base,fom):
 			else:
 				prj.USE_MAYA_SUBFOLDER = False
 			self.serverPath = gen[ "serverpath" ]
+			self.sendMail = gen[ "sendmail" ]
+			self.mailServer = gen[ "mailserver" ]
+			self.mailPort = gen[ "mailport" ]
+			self.mailsPath = gen[ "departmentspath" ]
 		self._fillUi()
 		self._loadConfig()
 		self.setObjectName( 'cacheManager_WIN' )
@@ -192,6 +198,16 @@ class CacheManagerUI(base,fom):
 		sel = mc.ls( sl = True )
 		cacheFile = cfl.CacheFile( self._selectedShot.poolCam.path.replace( '.ma', '.abc' ), sel )
 		cacheFile.export()
+		selShot = self._selectedShot
+		if self.sendMail:
+			ml.mailFromTool( 'new_cache',
+							{ '<ProjectName>': selShot.project.name,
+							'<SequenceName>': selShot.sequence.name,
+							'<ShotName>': selShot.name,
+							'<AssetName>': 'CAMERA',
+							'<Username>': os.getenv('username')},
+							os.getenv('username') + '@bitt.com',
+							self.mailsPath , self.mailServer, self.mailPort  )
 
 	def refresh(self):
 		"""docstring for refresh"""
@@ -201,10 +217,21 @@ class CacheManagerUI(base,fom):
 	def exportSelectedGeo(self):
 		"""docstring for exp"""
 		sel = mc.ls( sl = True )
-		cacheFile = cfl.CacheFile( self.fileNameForCache(), sel )
+		fileName = self.fileNameForCache()
+		cacheFile = cfl.CacheFile( fileName, sel )
 		cacheFile.export()
 		if self.copyToServer_chb.isChecked():
 			cacheFile.copy( cacheFile.path.replace( prj.BASE_PATH, self.serverPath ) )
+		selShot = self._selectedShot
+		if self.sendMail:
+			ml.mailFromTool( 'new_cache',
+							{ '<ProjectName>': selShot.project.name,
+							'<SequenceName>': selShot.sequence.name,
+							'<ShotName>': selShot.name,
+							'<AssetName>': fileName,
+							'<UserName>': os.getenv('username')},
+							os.getenv('username') + '@bitt.com',
+							self.mailsPath , self.mailServer, self.mailPort  )
 		self._fillCacheList()
 
 	def exportAssetCache(self):
@@ -225,6 +252,16 @@ class CacheManagerUI(base,fom):
 				serverFile = cfl.CacheFile( cacFile.path.replace( prj.BASE_PATH, self.serverPath ) )
 				serverFile.newVersion()
 				cacFile.copy( serverFile.path )
+		selShot = self._selectedShot
+		if self.sendMail:
+			ml.mailFromTool( 'new_cache',
+							{ '<ProjectName>': selShot.project.name,
+							'<SequenceName>': selShot.sequence.name,
+							'<ShotName>': selShot.name,
+							'<AssetName>': ','.join( exportedAsset ),
+							'<UserName>': os.getenv('username')},
+							os.getenv('username') + '@bitt.com',
+							self.mailsPath , self.mailServer, self.mailPort  )
 		self._fillCacheList()
 
 	def exportSet(self):
@@ -243,6 +280,16 @@ class CacheManagerUI(base,fom):
 	def exportAnimationScene(self):
 		"""docstring for exportAnimationScene"""
 		sc.exportAllFromAnim( str ( self.projects_cmb.currentText() ), str( self.sequences_cmb.currentText() ), str( self.shots_cmb.currentText() ), self.serverPath, self.useExocortex_chb.isChecked() )
+		selShot = self._selectedShot
+		if self.sendMail:
+			ml.mailFromTool( 'new_cache',
+							{ '<ProjectName>': selShot.project.name,
+							'<SequenceName>': selShot.sequence.name,
+							'<ShotName>': selShot.name,
+							'<AssetName>': 'ALL',
+							'<UserName>': os.getenv('username')},
+							os.getenv('username') + '@bitt.com',
+							self.mailsPath , self.mailServer, self.mailPort  )
 
 	def createLitScene(self):
 		"""docstring for createLitScene"""

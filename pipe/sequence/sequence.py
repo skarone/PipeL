@@ -50,23 +50,23 @@ class Sequence(object):
 	def create(self):
 		"""create folders structure for sequence"""
 		struc = [
-				'/Assets',
-				'/Shots',
-				'/Data',
-				'/Production',
-				'/Production/Feedback',
-				'/Production/Shooting',
-				'/Production/Audio',
-				'/Production/WS_Conforming',
-				'/To_Client/WIPS',
-				'/To_Client/Delivery',
-				'/To_Client/Delivery/Versions',
-				'/Materials/References',
-				'/Materials/References/From_Client',
+				'/Assets/',
+				'/Shots/',
+				'/Data/',
+				'/Production/',
+				'/Production/Feedback/',
+				'/Production/Shooting/',
+				'/Production/Audio/',
+				'/Production/WS_Conforming/',
+				'/To_Client/WIPS/',
+				'/To_Client/Delivery/',
+				'/To_Client/Delivery/Versions/',
+				'/Materials/References/',
+				'/Materials/References/From_Client/',
 				'/Materials/References/From_' + STUDIO_NAME,
-				'/Materials/References/From_' + STUDIO_NAME + '/Concepts',
-				'/Materials/Offline',
-				'/Materials/Story'
+				'/Materials/References/From_' + STUDIO_NAME + '/Concepts/',
+				'/Materials/Offline/',
+				'/Materials/Story/'
 				]
 		for s in struc:
 			s = self.path + s

@@ -6,7 +6,7 @@ import time
 #	check os... methods
 #
 
-def filesInDir(root, scanSubFolders = True):
+def filesInDir(root, scanSubFolders = True, filter = None):
 	"""return the files that are in the directory"""
 	fils = []
 	count = 0
@@ -14,7 +14,11 @@ def filesInDir(root, scanSubFolders = True):
 		if not scanSubFolders and count > 0:
 			break
 		for name in files:
-			fils.append( File( os.path.join(path, name) ) )
+			if filter:
+				if filter in name:
+					fils.append( File( os.path.join(path, name) ) )
+			else:
+				fils.append( File( os.path.join(path, name) ) )
 		count += 1
 	return fils
 
