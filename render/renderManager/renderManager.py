@@ -161,7 +161,7 @@ class RenderManagerUI(base,fom):
 		#MAIL
 		mails = ''
 		mailNoti = 'false'
-		if gen[ "sendmail" ]:
+		if gen[ "sendmail" ] == 'True':
 			mails = ','.join( ml.getUsersInDepartments( ['compo', 'lighting', 'production'], gen[ "departmentspath" ] ) )
 			mailNoti = 'true'
 		for w in self._getLayersWidgets():
