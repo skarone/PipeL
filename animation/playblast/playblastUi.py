@@ -111,7 +111,8 @@ class PlayblastUi(base,fom):
 					{ '<ProjectName>': AssOrShot.project.name,
 					'<SequenceName>': AssOrShot.sequence.name,
 					'<ShotName>': AssOrShot.name,
-					'<UserName>': os.getenv('username')},
+					'<UserName>': os.getenv('username'),
+					'<Path>':fil.dirPath + fil.name + '.mov'},
 					os.getenv('username') + '@bitt.com',
 					self.mailsPath , self.mailServer, self.mailPort  )
 

@@ -3,24 +3,35 @@ import pipe.file.file as fl
 
 # Import the email modules we'll need
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 MAIL_MESSAGES = {
 	'new_cache':{
-		'message':'\bNew Cache\nAsset: <AssetName>\nSequence: <SequenceName>\nShot: <ShotName>\nUser: <UserName>',
+		'message':'New Cache<br>Asset: <AssetName><br>Sequence: <SequenceName><br>Shot: <ShotName><br>User: <UserName>',
 		'departments':['animation', 'lighting', 'production','vfx'],
 		'subject':'[CACHE] [<ProjectName>] [<SequenceName>] [<ShotName>] [<AssetName>]'},
 	'new_playblast':{
-		'message':'New Playblast\nSequence: <SequenceName>\nShot: <ShotName>\nUser: <UserName>',
+		'message':'New Playblast<br>Sequence: <SequenceName><br>Shot: <ShotName><br>User: <UserName><br>File: <a href="<Path>"><Path></a>',
 		'departments':['animation','production'],
 		'subject':'[PLAYBLAST] [<ProjectName>] [<SequenceName>] [<ShotName>]'},
 	'new_render':{
-		'message':'New Render\nRenderlayer: <RenderLayer>\nSequence: <SequenceName>\nShot: <ShotName>\nUser: <UserName>',
+		'message':'New Render<br>Renderlayer: <RenderLayer><br>Sequence: <SequenceName><br>Shot: <ShotName><br>User: <UserName>',
 		'departments':['compo', 'lighting', 'production'],
 		'subject':'[RENDER] [<ProjectName>] [<SequenceName>] [<ShotName>] [<RenderLayer>]'}
 }
 
 def sendMail( sender, recipient, message, subject, ip = '192.168.0.1', port= 25 ):
-	msg = MIMEText(message)
+
+	html = """\
+	<html>
+	<head></head>
+	<body>
+		<p>""" + message + """
+		</p>
+	</body>
+	</html>
+	"""
+	msg = MIMEText(html, 'html')
 	msg['Subject'] = subject
 	msg['From'] = sender
 	msg['To'] = ','.join(map(str, recipient))
@@ -31,6 +42,7 @@ def sendMail( sender, recipient, message, subject, ip = '192.168.0.1', port= 25 
 
 def replaceDataForMessage( message, data ):
 	"""docstring for replaceDataForMessage"""
+
 	mes = message['message']
 	subject = message['subject']
 	for d in data.keys():
