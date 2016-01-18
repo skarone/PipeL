@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 MAIL_MESSAGES = {
 	'new_cache':{
 		'message':'\bNew Cache\nAsset: <AssetName>\nSequence: <SequenceName>\nShot: <ShotName>\nUser: <UserName>',
-		'departments':['animation', 'lighting', 'production'],
+		'departments':['animation', 'lighting', 'production','vfx'],
 		'subject':'[CACHE] [<ProjectName>] [<SequenceName>] [<ShotName>] [<AssetName>]'},
 	'new_playblast':{
 		'message':'New Playblast\nSequence: <SequenceName>\nShot: <ShotName>\nUser: <UserName>',

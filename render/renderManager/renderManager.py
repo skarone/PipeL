@@ -16,6 +16,7 @@ reload(prj)
 import general.mayaNode.mayaNode as mn
 import pipe.settings.settings as sti
 reload( sti )
+import pipe.mail.mail as ml
 
 import socket
 
@@ -129,10 +130,10 @@ class RenderManagerUI(base,fom):
 		priority   = str( self.priority_spb.value() )
 		taskSize   = str( self.taskSize_spb.value() )
 		projPath   = str( self.projectPath_le.text() )
+		settings = sti.Settings()
+		gen = settings.General
 		if self.useServerPaths_chb.isChecked(): #IF USE PATH FROM SERVER... WE NEED TO CHANGE INTERNAL PATHS SO MATCH SERVER
 			curFile = mfl.mayaFile( curFile.copy( dead.userHomeDirectory + '/' + curFile.fullName ).path )
-			settings = sti.Settings()
-			gen = settings.General
 			if gen:
 				basePath = gen[ "basepath" ]
 				if basePath:
@@ -157,6 +158,12 @@ class RenderManagerUI(base,fom):
 		plugin = 'MayaBatch'
 		if mc.getAttr( "defaultRenderGlobals.ren" ) == 'mentalRay':
 			plugin = 'MayaCmd'
+		#MAIL
+		mails = ''
+		mailNoti = 'false'
+		if gen[ "sendmail" ]:
+			mails = ','.join( ml.getUsersInDepartments( ['compo', 'lighting', 'production'], gen[ "departmentspath" ] ) )
+			mailNoti = 'true'
 		for w in self._getLayersWidgets():
 			filePrefix = self.getFilePrefixFromTags( str(self.filePath_le.text()), self.assOrShot )
 			frames   = str(self.frameRange_le.text())
@@ -191,7 +198,10 @@ class RenderManagerUI(base,fom):
 							'OutputFilename0' : filename,
 							'Priority'        : priority,
 							'ChunkSize'       : taskSize,
-							'OutputDirectory0': filename
+							'OutputDirectory0': filename,
+							'NotificationEmails': mails,
+							'OverrideNotificationMethod': 'true',
+							'EmailNotification': mailNoti
 							},{'CommandLineOptions' : '-rl ' + w.layer.name + ' -mr:art ',
 								'UsingRenderLayers' : 1,
 								#'ProjectPath'       : projPath,

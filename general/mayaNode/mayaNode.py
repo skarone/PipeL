@@ -544,8 +544,15 @@ class Node(object):
 			self()
 			mc.isolateSelect( currPanel, state = 1 )
 
+	def freeze(self):
+		"""freeze current node"""
+		if self.istype( 'transform' ):
+			mc.makeIdentity( apply = True, t = 1,r = 1,s = 1,n = 0,pn = 1 )
+
+
 ##################################################
 # ATTRIBUTES CLASS
+
 
 class NodesAttributes(list):
 	"""manage a list of attributes"""

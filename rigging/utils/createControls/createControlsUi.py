@@ -36,8 +36,10 @@ class ControlsUi(base,fom):
 		shape = str( self.shape_cmb.currentText())
 		childsAlso = self.recursive_chb.isChecked()
 		lastAlso = self.last_chb.isChecked()
-		constraint = self.constraint_chb.isChecked()
-		ctls.createControlsForSelection(shape ,childsAlso, None, lastAlso, constraint )
+		constraint = self.constraint_rb.isChecked()
+		connect = self.connect_rb.isChecked()
+		offsetGroup = self.offsetGroup_chb.isChecked()
+		ctls.createControlsForSelection(shape ,childsAlso, None, lastAlso, constraint, connect, offsetGroup )
 
 def main():
 	"""use this to create project in maya"""
@@ -46,4 +48,4 @@ def main():
 		mc.deleteUI( 'ControlsUi' )
 	PyForm=ControlsUi()
 	PyForm.show()
-		
+
