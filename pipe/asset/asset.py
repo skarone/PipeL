@@ -1,7 +1,7 @@
 '''
 File: asset.py
 Author: Ignacio Urruty
-Description: 
+Description:
 	Asset object( system level ):
 		-Create folders and files structure inside a project
 		-Query states of production
@@ -45,7 +45,7 @@ def getAssetFromNode(s, project):
 	index = [AREAS.index(i) for i in AREAS if i.lower() in area.lower()]
 	if not index:
 		index.append(0)
-	return Asset( assetName[ :assetName.rindex( '_' )], project, index[0] ) 
+	return Asset( assetName[ :assetName.rindex( '_' )], project, index[0] )
 
 
 class Asset(object):
@@ -64,7 +64,7 @@ class Asset(object):
 	def name(self):
 		"""return the name of the asset"""
 		return self._name
-	
+
 	@property
 	def project(self):
 		"""get the project of the asset"""
@@ -136,6 +136,8 @@ class Asset(object):
 			"/Animation/" + self.name + '_ANIM.ma',
 			"/Animation/" + self.name + '_ANIM.ass',
 			"/Animation/Versions/",
+			#Art
+			"/Art/"
 			]
 		for s in struc:
 			s = self.path + s
@@ -145,6 +147,12 @@ class Asset(object):
 			if '.' in s:
 				open(s, 'a').close()
 		#Add asset to database
+
+	@property
+	def artPath(self):
+		"""docstring for artPath"""
+		return self.path + '/Art/'
+
 
 	def addToDatabase(self):
 		"""add asset to database"""
@@ -216,7 +224,7 @@ class Asset(object):
 	@property
 	def textures(self):
 		"""return the textures of the asset"""
-		return [ tfl.textureFile( self.texturesPath + a ) for a in os.listdir( self.texturesPath ) if os.path.isfile( self.texturesPath + a ) ] 
+		return [ tfl.textureFile( self.texturesPath + a ) for a in os.listdir( self.texturesPath ) if os.path.isfile( self.texturesPath + a ) ]
 
 	@property
 	def finalPath(self):
@@ -244,7 +252,7 @@ class Asset(object):
 			1  : updated
 			2  : not Updated
 			3  : not exists"""
-		depFiles = [ 
+		depFiles = [
 				[dp.Node( self.modelPath   ),[]],
 				[dp.Node( self.shadingPath ),[ 0 ]],
 				[dp.Node( self.hairPath    ),[ 0 ]],

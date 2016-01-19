@@ -42,6 +42,8 @@ import pipe.textureFile.textureFile as tfl
 reload( tfl )
 import pipe.task.taskUi as tskUi
 reload(tskUi)
+import pipe.materialDist.materialDist as mtlDist
+reload( mtlDist )
 from sys import platform as _platform
 import subprocess
 
@@ -109,7 +111,7 @@ class ManagerUI(base,fom):
 		self.serverHelp_wg.hide()
 		self.assets_tw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.assets_tw.customContextMenuRequested.connect(self.showMenu)
-		
+
 		self.shots_tw.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 		self.shots_tw.customContextMenuRequested.connect(self.showMenu)
 		self.setObjectName( 'ManagerUI' )
@@ -211,6 +213,12 @@ class ManagerUI(base,fom):
 			self.fillProjectsCombo()
 			self.updateUi()
 
+	def loadMaterialDist(self):
+		"""docstring for fname"""
+		setUi = mtlDist.MaterailDist( self )
+		setUi.show()
+		res = setUi.exec_()
+
 	def loadSettingsUi(self):
 		"""docstring for fname"""
 		setUi = stiUi.Settings( self )
@@ -220,7 +228,6 @@ class ManagerUI(base,fom):
 			self.loadProjectsPath()
 			self.updateFullUi()
 			self._loadConfig()
-
 	#
 	###################################
 	#UI STUFF
@@ -250,7 +257,8 @@ class ManagerUI(base,fom):
 
 	def _makeConnections(self):
 		"""create the connections in the ui"""
-		self.connect( self.refresh_btn            , QtCore.SIGNAL("clicked()") , self.updateUi )		
+		self.connect( self.refresh_btn            , QtCore.SIGNAL("clicked()") , self.updateUi )
+		self.connect( self.matDist_btn            , QtCore.SIGNAL("clicked()") , self.loadMaterialDist )
 		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "activated( const QString& )" ), self.updateUi )
 		QtCore.QObject.connect( self.actionNew_Project, QtCore.SIGNAL( "triggered()" ), self._newProject )
 		QtCore.QObject.connect( self.actionNew_Asset, QtCore.SIGNAL( "triggered()" ), self._newAsset )
@@ -443,11 +451,11 @@ class ManagerUI(base,fom):
 	def closeEvent(self, event):
 		self._saveConfig()
 
-	def dragEnterEvent(self, event): 
+	def dragEnterEvent(self, event):
 		event.acceptProposedAction()
 
 
-	# 
+	#
 	###################################
 	#FILL UI
 	def updateUi(self):
@@ -498,7 +506,7 @@ class ManagerUI(base,fom):
 			return
 		assets = proj.assets
 		color = [QtGui.QColor( "#CACAD4" ),
-				QtGui.QColor( "green" ),    
+				QtGui.QColor( "green" ),
 				QtGui.QColor( "red" ),
 				QtGui.QColor( "#000000" )    #FILE NOT EXISTS
 				]
@@ -622,7 +630,7 @@ class ManagerUI(base,fom):
 		if not seqs:
 			return
 		self.sequences_lw.addItems( [s.name for s in seqs ])
-		
+
 	def fillShotsTable(self):
 		"""fill the tables with the shots of the selected sequence"""
 		proj = prj.Project( str( self.projects_cmb.currentText()), prj.BASE_PATH )
@@ -883,7 +891,7 @@ class ManagerUI(base,fom):
 			print asset.name
 			asset.newVersion()
 			asset.save()
-	
+
 	def openRenderFolder(self):
 		"""docstring for openRenderFolder"""
 		tab = self._getCurrentTab()
@@ -925,8 +933,8 @@ class ManagerUI(base,fom):
 		tim = asset.time
 		mc.currentUnit( time=tim['tim'], linear = tim['lin'], angle = tim[ 'angle' ] )
 		mc.playbackOptions( min = tim[ 'min' ],
-							ast = tim[ 'ast' ], 
-							max = tim[ 'max' ], 
+							ast = tim[ 'ast' ],
+							max = tim[ 'max' ],
 							aet = tim[ 'aet' ] )
 
 	def reference(self):
@@ -952,7 +960,7 @@ class ManagerUI(base,fom):
 		"""reference selected items"""
 		for a in self._getSelectedItemsInCurrentTab():
 			a.reference()
-		
+
 	def properties(self):
 		"""get ui with properties of asset"""
 		tab = self._getCurrentTab()
@@ -978,13 +986,13 @@ class ManagerUI(base,fom):
 		root = nuke.root()
 		if not root.knob( 'pipPorject' ):
 			pipProj = nuke.String_Knob( 'pipPorject', 'Project' )
-			root.addKnob( pipProj ) 
+			root.addKnob( pipProj )
 		if not root.knob( 'pipSequence' ):
 			pipSeq = nuke.String_Knob( 'pipSequence', 'Sequence' )
-			root.addKnob( pipSeq ) 
+			root.addKnob( pipSeq )
 		if not root.knob( 'pipShot' ):
 			pipShot = nuke.String_Knob( 'pipShot', 'Shot' )
-			root.addKnob( pipShot ) 
+			root.addKnob( pipShot )
 		root[ 'pipPorject' ].setValue( str( self.projects_cmb.currentText() ) )
 		root[ 'pipSequence' ].setValue( str( self.sequences_lw.selectedItems()[0].text() ) )
 		row = item.row()
@@ -1143,7 +1151,7 @@ class ManagerUI(base,fom):
 		result.extend( textures )
 		result.extend( caches )
 		return result, textures
-		
+
 	def copyAssetToServer(self, asset):
 		"""main function to copy asset to server"""
 		filePath = str( asset.path )
@@ -1199,4 +1207,4 @@ if __name__=="__main__":
 	PyForm=ManagerUI()
 	PyForm.show()
 	sys.exit(a.exec_())
-		
+

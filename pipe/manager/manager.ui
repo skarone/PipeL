@@ -55,6 +55,20 @@
        </spacer>
       </item>
       <item>
+       <widget class="QPushButton" name="matDist_btn">
+        <property name="text">
+         <string>Material Distribution Tool</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QCheckBox" name="compareServer_chb">
         <property name="enabled">
          <bool>true</bool>

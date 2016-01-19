@@ -77,6 +77,31 @@ class Sequence(object):
 			if '.' in s:
 				open(s, 'a').close()
 
+	@property
+	def clientRefPath(self):
+		"""docstring for clientRefPath"""
+		return self.path + '/Materials/References/From_Client/'
+
+	@property
+	def studioRefPath(self):
+		"""docstring for studioRefPath"""
+		return self.path + '/Materials/References/From_' + STUDIO_NAME + '/'
+
+	@property
+	def offlinePath(self):
+		"""docstring for offlinePath"""
+		return self.path + '/Materials/Offline/'
+
+	@property
+	def storyPath(self):
+		"""docstring for storyPath"""
+		return self.path + '/Materials/Story/'
+
+	@property
+	def feedbackPath(self):
+		"""docstring for feedbackPath"""
+		return self.path + '/Production/Feedback/'
+
 	def addShot(self, shotName):
 		"""add shot to sequence"""
 		sh = sht.Shot( shotName, self )

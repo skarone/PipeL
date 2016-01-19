@@ -337,6 +337,26 @@ class Shot(object):
 				open(s, 'a').close()
 
 	@property
+	def footageHighPath(self):
+		"""docstring for footageHighPath"""
+		return self.path + '/Comp/Footage_HIGH/'
+
+	@property
+	def footageLowPath(self):
+		"""docstring for footageLowPath"""
+		return self.path + '/Footage_LOW/'
+
+	@property
+	def compElementsPath(self):
+		"""docstring for compElementsPath"""
+		return self.path + '/Comp/Elements/'
+
+	@property
+	def lipSyncPath(self):
+		"""docstring for lipSyncPath"""
+		return self.path + '/Anim/Data/'
+
+	@property
 	def setsPath(self):
 		"""return sets path of the pool"""
 		return self.path + '/Pool/Sets/'
