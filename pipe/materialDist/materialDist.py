@@ -6,6 +6,7 @@ PYFILEDIR = os.path.dirname( os.path.abspath(__file__) )
 uifile = PYFILEDIR + '/materialDist.ui'
 fom, base = uiH.loadUiType( uifile )
 import shutil
+import subprocess
 
 import pipe.project.project   as prj
 reload( prj )
@@ -23,6 +24,8 @@ import pipe.shot.shot as sh
 reload( sh )
 import pipe.sequence.sequence as sq
 reload( sq )
+import pipe.asset.asset as ass
+reload( ass )
 
 class MaterailDist(base,fom):
 	"""docstring for MaterailDist"""
@@ -66,6 +69,7 @@ class MaterailDist(base,fom):
 		self.sequences_cmb.clear()
 		seqs = proj.sequences
 		self.sequences_cmb.addItems([s.name for s in seqs] )
+		self.fillShotsCombo()
 
 	def fillShotsCombo(self):
 		"""fill the tables with the shots of the selected sequence"""
@@ -98,6 +102,17 @@ class MaterailDist(base,fom):
 		self.connect( self.addElement_btn, QtCore.SIGNAL( "clicked()" ), lambda val = self.elements_le : self.addFiles(val) )
 		self.connect( self.addLipSync_btn, QtCore.SIGNAL( "clicked()" ), lambda val = self.lipSync_le : self.addFiles(val) )
 		self.connect( self.addArt_btn, QtCore.SIGNAL( "clicked()" ), lambda val = self.art_le : self.addFiles(val) )
+
+		self.connect( self.browseRefClient_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'seq.clientRefPath' : self.exploreFolder(val) )
+		self.connect( self.browseRefStudio_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'seq.studioRefPath' : self.exploreFolder(val) )
+		self.connect( self.browseOffline_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'seq.offlinePath' : self.exploreFolder(val) )
+		self.connect( self.browseStory_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'seq.storyPath' : self.exploreFolder(val) )
+		self.connect( self.browseFeedback_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'seq.feedbackPath' : self.exploreFolder(val) )
+		self.connect( self.browseFootHigh_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'sht.footageHighPath' : self.exploreFolder(val) )
+		self.connect( self.browseFootLow_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'sht.footageLowPath' : self.exploreFolder(val) )
+		self.connect( self.browseElement_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'sht.compElementsPath' : self.exploreFolder(val) )
+		self.connect( self.browseLipSync_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'sht.lipSyncPath' : self.exploreFolder(val) )
+		self.connect( self.browseArt_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'asset.artPath' : self.exploreFolder(val) )
 		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "activated( const QString& )" ), self.updateUi )
 		QtCore.QObject.connect( self.sequences_cmb, QtCore.SIGNAL( "activated( const QString& )" ), self.fillShotsCombo )
 
@@ -166,6 +181,15 @@ class MaterailDist(base,fom):
 		for l in les.keys():
 			self.copyFiles( l, les[l] )
 
+	def exploreFolder(self, path):
+		"""docstring for exploreFolder"""
+		proj = prj.Project( str( self.projects_cmb.currentText()), prj.BASE_PATH )
+		seq = sq.Sequence( str( self.sequences_cmb.currentText()), proj )
+		sht = sh.Shot( str( self.shots_cmb.currentText()), seq )
+		asset = ass.Asset( str( self.assets_cmb.currentText()), proj )
+		path = eval( path )
+		subprocess.Popen(r'explorer "'+ path.replace( '/','\\' ) +'"')
+
 	def copyFiles( self, le, dst ):
 		"""docstring for copyFiles"""
 		for f in le.Text().split( ',' ):
@@ -179,12 +203,11 @@ class MaterailDist(base,fom):
 						else:
 							shutil.copy2(s, d)
 
-class lineEdit_ = self.feedback_le :dragFile_injector():
-	def __init_ = self.footHigh_le :_(self, lineEdit, auto_inject = True):
-		self.li= self.footLow_le : sneEdit = lineEdit
-		if auto= self.elements_le : _inject:
-			sel= self.lipSync_le : sf.inject_dragFile()
-               lf.art_le : self.addF
+class lineEdit_dragFile_injector():
+	def __init__(self, lineEdit, auto_inject = True):
+		self.lineEdit = lineEdit
+		if auto_inject:
+			self.inject_dragFile()
 	def inject_dragFile( self ):
 		self.lineEdit.setDragEnabled(True)
 		self.lineEdit.dragEnterEvent = self._dragEnterEvent
