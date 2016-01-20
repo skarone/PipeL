@@ -179,7 +179,8 @@ class MaterailDist(base,fom):
 				self.lipSync_le : sht.lipSyncPath,
 				self.art_le : asset.artPath}
 		for l in les.keys():
-			self.copyFiles( l, les[l] )
+			if not str( l.text() ) == '':
+				self.copyFiles( l, les[l] )
 
 	def exploreFolder(self, path):
 		"""docstring for exploreFolder"""
@@ -192,16 +193,15 @@ class MaterailDist(base,fom):
 
 	def copyFiles( self, le, dst ):
 		"""docstring for copyFiles"""
-		for f in le.Text().split( ',' ):
-			for item in os.listdir(f):
-				s = os.path.join(f, item)
-				d = os.path.join(dst, item)
-				if os.path.exists(d):
-					if os.path.exists( s ):
-						if os.path.isdir(s):
-							shutil.copytree(s, d)
-						else:
-							shutil.copy2(s, d)
+		if not os.path.exists(dst):
+			os.makedirs(dst)
+		for f in str(le.text()).split( ',' ):
+			if os.path.exists( dst ):
+				if os.path.isdir(f):
+					shutil.copytree(f, dst + os.path.split( f )[-1] )
+				else:
+					d = os.path.join(dst, os.path.split( f )[-1] )
+					shutil.copy2(f, d)
 
 class lineEdit_dragFile_injector():
 	def __init__(self, lineEdit, auto_inject = True):
