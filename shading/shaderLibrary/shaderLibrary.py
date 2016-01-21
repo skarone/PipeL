@@ -1,10 +1,10 @@
 '''
 File: shaderLibrary.py
 Author: Ignacio Urruty
-Description: 
+Description:
 	work with shaders =)
 	handle shaders library
-	TODO: 
+	TODO:
 		Save settings and libraries path
 		Save preview image
 		UI
@@ -229,7 +229,7 @@ class Shader(object):
 		#get all files in path and move it to a folder inside the folder versions with the name of the shader + _v000 in it
 		files = [a for a in os.listdir( self.path ) if not 'Versions' == a ]
 		if os.path.exists( self.path + 'Versions' ):
-			versionsNum = len( os.listdir( self.path + 'Versions' ) ) + 1 
+			versionsNum = len( os.listdir( self.path + 'Versions' ) ) + 1
 		else:
 			versionsNum = 1
 		versionsFolder = self.path + 'Versions/' + self.name + '_v' + str( versionsNum ).zfill( 3 ) + '/'
@@ -295,7 +295,7 @@ class Shader(object):
 	def createPreviewMayaFile(self):
 		"""docstring for createPreviewMayaFile"""
 		createPrevScript = os.path.dirname(os.path.abspath(__file__)) + '/createPreview.py'
-		cmd = 'C:/"Program Files"/Autodesk/Maya2015/bin/' + 'mayapy.exe ' + createPrevScript + ' ' + self.path + self.name + '.ma'
+		cmd = 'C:/"Program Files"/Autodesk/Maya' + mc.about(v = True)  + '/bin/' + 'mayapy.exe ' + createPrevScript + ' ' + self.path + self.name + '.ma'
 		print cmd
 		#create preview scene
 		os.popen( cmd )

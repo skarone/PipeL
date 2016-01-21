@@ -4,7 +4,7 @@ import maya.standalone as std
 std.initialize(name='python')
 import maya.cmds as mc
 import general.mayaNode.mayaNode as mn
-sys.path.append('C:/solidangle/mtoadeploy/2015/scripts')
+sys.path.append('C:/solidangle/mtoadeploy/' + mc.about( v = True ) + '/scripts')
 
 def createPreview( shaderPath ):
 	"""open shader template, import and assing shader and render preview"""
@@ -22,5 +22,6 @@ def createPreview( shaderPath ):
 	mc.file(save=True, force=True, type = "mayaAscii")
 
 shaderPath = sys.argv[1]
+mc.loadPlugin( 'mtoa' )
 createPreview( shaderPath )
-	
+
