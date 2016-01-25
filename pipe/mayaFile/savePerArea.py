@@ -3,6 +3,7 @@ reload(mfl);
 import general.utils.utils as gutils
 import maya.cmds as mc
 import shading.textureManager.textureManager as tm
+import pipe.settings.settings as sti
 reload(tm)
 
 def customSavePerArea():
@@ -22,6 +23,18 @@ def customSavePerArea():
 	if not result == 'Ok':
 		curFile.newVersion();
 		curFile.save()
+		if '_final' in curFile.name.lower():# send mail to lighting department
+			gen = sti.Settings().General
+			sendMail = gen[ "sendmail" ]
+			mailServer = gen[ "mailserver" ]
+			mailPort = gen[ "mailport" ]
+			mailsPath = gen[ "departmentspath" ]
+			if sendMail:
+				ml.mailFromTool( 'new_asset_publish',{
+						'<AssetName>': ','.join( exportedAsset ),
+						'<UserName>': os.getenv('username')},
+						os.getenv('username') + '@bitt.com',
+						mailsPath , mailServer, mailPort  )
 
 
 def showMessage( msg ):

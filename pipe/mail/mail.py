@@ -18,6 +18,10 @@ MAIL_MESSAGES = {
 		'message':'New Render<br>Renderlayer: <RenderLayer><br>Sequence: <SequenceName><br>Shot: <ShotName><br>User: <UserName>',
 		'departments':['compo', 'lighting', 'production'],
 		'subject':'[RENDER] [<ProjectName>] [<SequenceName>] [<ShotName>] [<RenderLayer>]'}
+	'new_asset_publish':{
+		'message':'New Asset Published<br>Asset: <AssetName><br>User: <UserName>',
+		'departments':['lighting', 'production','vfx'],
+		'subject':'[ASSET] [FINAL] [<AssetName>]'},
 }
 
 def sendMail( sender, recipient, message, subject, ip = '192.168.0.1', port= 25 ):
