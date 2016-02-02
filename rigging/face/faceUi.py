@@ -34,7 +34,23 @@ class faceRigUi(base, fom):
 		self.connect(self.fillMeshToSkin_btn, QtCore.SIGNAL("clicked()"), self.fillMeshToSkin)
 		self.connect(self.fillSkin_btn, QtCore.SIGNAL("clicked()"), self.fillSkin)
 		self.connect(self.createSofts_btn, QtCore.SIGNAL("clicked()"), self.createSofts)
+		self.connect(self.mirrorSoftRtoL_btn, QtCore.SIGNAL("clicked()"), lambda val = 'r' : self.mirrorSofts( val ))
+		self.connect(self.mirrorSoftLtoR_btn, QtCore.SIGNAL("clicked()"), lambda val = 'l' : self.mirrorSofts(val))
 		uiH.loadSkin( self, 'QTDarkGreen' )
+
+	def mirrorSofts(self, origSide):
+		"""mirror softs from origSide to opposite side"""
+		baseSFMGrp = mn.Node( 'face_SFM_grp' )
+		oppSide = 'l' if origSide == 'r' else 'r'
+		for n in baseSFMGrp.children:
+			n = mn.Node( n.name.split( '|' )[-1] )
+			if n.name.lower().startswith( origSide ):
+				nOppName = n.name.replace( origSide + '_', oppSide + '_', 1 )
+				nOppName = nOppName.replace(':' + origSide + '_', ':' + oppSide + '_' )
+				nOpp = mn.Node( nOppName )
+				nOpp.a.falloffMode.v = n.a.falloffMode.v
+				nOpp.a.falloffRadius.v = n.a.falloffRadius.v
+
 
 	def fillMeshToDeform(self):
 		"""docstring for fname"""

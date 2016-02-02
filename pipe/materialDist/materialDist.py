@@ -33,8 +33,8 @@ class MaterailDist(base,fom):
 		super(MaterailDist, self).__init__(parent)
 		self.setupUi(self)
 		self.setObjectName( 'MaterailDist' )
-		self._makeConnections()
 		self.fillProjectsCombo()
+		self._makeConnections()
 		lineEdit_dragFile_injector(self.refClient_le)
 		lineEdit_dragFile_injector(self.refStudio_le)
 		lineEdit_dragFile_injector(self.offline_le)
@@ -45,6 +45,31 @@ class MaterailDist(base,fom):
 		lineEdit_dragFile_injector(self.elements_le)
 		lineEdit_dragFile_injector(self.lipSync_le)
 		lineEdit_dragFile_injector(self.art_le)
+		self.setCurrentFile()
+
+	def setCurrentFile(self):
+		"""docstring for fname"""
+		import pipe.mayaFile.mayaFile as mfl
+		curFile = mfl.currentFile()
+		sht = prj.shotOrAssetFromFile( curFile )
+		if sht:
+			print 'FindProject',sht.project.name
+			index = self.projects_cmb.findText( sht.project.name )
+			if not index == -1:
+				self.projects_cmb.setCurrentIndex(index)
+			if str( type(sht) ) == "<class 'pipe.shot.shot.Shot'>":
+				index = self.sequences_cmb.findText( sht.sequence.name )
+				if not index == -1:
+					self.sequences_cmb.setCurrentIndex(index)
+				index = self.shots_cmb.findText( sht.name )
+				if not index == -1:
+					self.shots_cmb.setCurrentIndex(index)
+			else:
+				print 'FindAsset',sht.name
+				index = self.assets_cmb.findText( sht.name )
+				if not index == -1:
+					self.assets_cmb.setCurrentIndex(index)
+
 
 	def fillProjectsCombo(self):
 		"""fill projects combo with projects in local disc"""
@@ -59,6 +84,7 @@ class MaterailDist(base,fom):
 		if not proj.name:
 			return
 		assets = proj.assets
+		print assets
 		self.assets_cmb.addItems( [a.name for a in assets ] )
 
 	def fillSequenceCombo(self):
@@ -113,8 +139,9 @@ class MaterailDist(base,fom):
 		self.connect( self.browseElement_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'sht.compElementsPath' : self.exploreFolder(val) )
 		self.connect( self.browseLipSync_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'sht.lipSyncPath' : self.exploreFolder(val) )
 		self.connect( self.browseArt_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'asset.artPath' : self.exploreFolder(val) )
-		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "activated( const QString& )" ), self.updateUi )
-		QtCore.QObject.connect( self.sequences_cmb, QtCore.SIGNAL( "activated( const QString& )" ), self.fillShotsCombo )
+		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self.updateUi )
+		QtCore.QObject.connect( self.sequences_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self.fillShotsCombo )
+
 
 	def addFiles(self, le):
 		"""add files or folders to specific line edit"""

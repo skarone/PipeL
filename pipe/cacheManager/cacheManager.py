@@ -205,7 +205,7 @@ class CacheManagerUI(base,fom):
 							'<SequenceName>': selShot.sequence.name,
 							'<ShotName>': selShot.name,
 							'<AssetName>': 'CAMERA',
-							'<Username>': os.getenv('username')},
+							'<UserName>': os.getenv('username')},
 							os.getenv('username') + '@bitt.com',
 							self.mailsPath , self.mailServer, self.mailPort  )
 
