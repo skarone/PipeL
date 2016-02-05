@@ -78,6 +78,12 @@ class Sequence(object):
 				open(s, 'a').close()
 
 	@property
+	def wipsPath(self):
+		"""docstring for wipsPath"""
+		return self.path + '/To_Client/WIPS/'
+
+
+	@property
 	def clientRefPath(self):
 		"""docstring for clientRefPath"""
 		return self.path + '/Materials/References/From_Client/'

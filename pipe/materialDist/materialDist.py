@@ -128,6 +128,7 @@ class MaterailDist(base,fom):
 		self.connect( self.addElement_btn, QtCore.SIGNAL( "clicked()" ), lambda val = self.elements_le : self.addFiles(val) )
 		self.connect( self.addLipSync_btn, QtCore.SIGNAL( "clicked()" ), lambda val = self.lipSync_le : self.addFiles(val) )
 		self.connect( self.addArt_btn, QtCore.SIGNAL( "clicked()" ), lambda val = self.art_le : self.addFiles(val) )
+		self.connect( self.addWips_btn, QtCore.SIGNAL( "clicked()" ), lambda val = self.wips_le : self.addFiles(val) )
 
 		self.connect( self.browseRefClient_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'seq.clientRefPath' : self.exploreFolder(val) )
 		self.connect( self.browseRefStudio_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'seq.studioRefPath' : self.exploreFolder(val) )
@@ -139,6 +140,7 @@ class MaterailDist(base,fom):
 		self.connect( self.browseElement_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'sht.compElementsPath' : self.exploreFolder(val) )
 		self.connect( self.browseLipSync_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'sht.lipSyncPath' : self.exploreFolder(val) )
 		self.connect( self.browseArt_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'asset.artPath' : self.exploreFolder(val) )
+		self.connect( self.browseWips_btn, QtCore.SIGNAL( "clicked()" ), lambda val = 'seq.wipsPath' : self.exploreFolder(val) )
 		QtCore.QObject.connect( self.projects_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self.updateUi )
 		QtCore.QObject.connect( self.sequences_cmb, QtCore.SIGNAL( "currentIndexChanged( const QString& )" ), self.fillShotsCombo )
 

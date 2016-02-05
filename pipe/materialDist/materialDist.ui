@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>526</width>
-    <height>543</height>
+    <width>440</width>
+    <height>574</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -216,6 +216,34 @@
          </item>
          <item>
           <widget class="QPushButton" name="browseFeedback_btn">
+           <property name="text">
+            <string>Open</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_14">
+         <item>
+          <widget class="QLabel" name="label_15">
+           <property name="text">
+            <string>WIPS:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="wips_le"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="addWips_btn">
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="browseWips_btn">
            <property name="text">
             <string>Open</string>
            </property>
