@@ -5,6 +5,10 @@ import maya.cmds as mc
 import shading.textureManager.textureManager as tm
 import pipe.settings.settings as sti
 reload(tm)
+import pipe.mail.mail as ml
+reload( ml)
+import os
+import pipe.project.project as prj
 
 def customSavePerArea():
 	"""docstring for customSavePerArea"""
@@ -29,9 +33,11 @@ def customSavePerArea():
 			mailServer = gen[ "mailserver" ]
 			mailPort = gen[ "mailport" ]
 			mailsPath = gen[ "departmentspath" ]
+			asse = prj.shotOrAssetFromFile( curFile )
 			if sendMail:
 				ml.mailFromTool( 'new_asset_publish',{
-						'<AssetName>': ','.join( exportedAsset ),
+						'<ProjectName>' : asse.project.name,
+						'<AssetName>': asse.name,
 						'<UserName>': os.getenv('username')},
 						os.getenv('username') + '@bitt.com',
 						mailsPath , mailServer, mailPort  )

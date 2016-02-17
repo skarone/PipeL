@@ -7,7 +7,7 @@ shdUi.main()
 
 import general.ui.pySideHelper as uiH
 reload( uiH )
-uiH.set_qt_bindings()
+
 from Qt import QtGui,QtCore
 
 import shading.shaderLibrary.shaderLibrary as sh

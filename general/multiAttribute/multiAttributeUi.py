@@ -1,7 +1,7 @@
 import os
 import general.ui.pySideHelper as uiH
 reload( uiH )
-uiH.set_qt_bindings()
+
 from Qt import QtGui,QtCore
 
 import maya.cmds as mc
@@ -294,7 +294,6 @@ class MultiAttributeUI(base, fom):
 		before_text = unicode(self.fromAttr_le.text())[:cursor_pos]
 		after_text = unicode(self.fromAttr_le.text())[cursor_pos:]
 		self.fromAttr_le.setText('%s' % (text))
-		print text
 		self.fromAttr_le.setCursorPosition(cursor_pos + len(text) + 1)
 
 

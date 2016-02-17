@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<using package='std'/>
+	<template name='NEcocoon'>
+		<attribute name='active' type='maya.bool'>
+			<label>Active</label>
+		</attribute>
+		<attribute name='alpha' type='maya.float'>
+			<label>Alpha</label>
+		</attribute>
+		<attribute name='boundingBox' type='maya.TdataCompound'>
+			<label>Bounding Box</label>
+		</attribute>
+		<attribute name='color' type='maya.float3'>
+			<label>Color</label>
+		</attribute>
+		<attribute name='inPositionPP' type='maya.vectorArray'>
+			<label>In Position PP</label>
+		</attribute>
+		<attribute name='inverseMatrix' type='maya.matrix'>
+			<label>Inverse Matrix</label>
+		</attribute>
+		<attribute name='localPosition' type='maya.double3'>
+			<label>Local Position</label>
+		</attribute>
+		<attribute name='localScale' type='maya.double3'>
+			<label>Local Scale</label>
+		</attribute>
+		<attribute name='matrix' type='maya.matrix'>
+			<label>Matrix</label>
+		</attribute>
+		<attribute name='maxDistance' type='maya.double'>
+			<label>Max Distance</label>
+		</attribute>
+		<attribute name='maxLinesPerPoint' type='maya.long'>
+			<label>Max Lines Per Point</label>
+		</attribute>
+		<attribute name='minDistance' type='maya.double'>
+			<label>Min Distance</label>
+		</attribute>
+		<attribute name='objectColorRGB' type='maya.float3'>
+			<label>Object Color RGB</label>
+		</attribute>
+		<attribute name='outMesh' type='maya.mesh'>
+			<label>Out Mesh</label>
+		</attribute>
+		<attribute name='outPositionPP' type='maya.vectorArray'>
+			<label>Out Position PP</label>
+		</attribute>
+		<attribute name='outRgbaPP' type='maya.doubleArray'>
+			<label>Out Rgba PP</label>
+		</attribute>
+		<attribute name='outThicknessPP' type='maya.doubleArray'>
+			<label>Out Thickness PP</label>
+		</attribute>
+		<attribute name='parentInverseMatrix' type='maya.matrix'>
+			<label>Parent Inverse Matrix</label>
+		</attribute>
+		<attribute name='parentMatrix' type='maya.matrix'>
+			<label>Parent Matrix</label>
+		</attribute>
+		<attribute name='segments' type='maya.short'>
+			<label>Segments</label>
+		</attribute>
+		<attribute name='smooth' type='maya.bool'>
+			<label>Smooth</label>
+		</attribute>
+		<attribute name='visibility' type='maya.bool'>
+			<label>Visibility</label>
+		</attribute>
+		<attribute name='worldInverseMatrix' type='maya.matrix'>
+			<label>World Inverse Matrix</label>
+		</attribute>
+		<attribute name='worldMatrix' type='maya.matrix'>
+			<label>World Matrix</label>
+		</attribute>
+		<attribute name='worldPosition' type='maya.double3'>
+			<label>World Position</label>
+		</attribute>
+		<attribute name='inRefPositionPP' type='maya.vectorArray'>
+			<label>In Ref Position PP</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NEcocoon'>
+		<property name='active'/>
+		<property name='alpha'/>
+		<property name='boundingBox'/>
+		<property name='color'/>
+		<property name='inPositionPP'/>
+		<property name='inverseMatrix'/>
+		<property name='localPosition'/>
+		<property name='localScale'/>
+		<property name='matrix'/>
+		<property name='maxDistance'/>
+		<property name='maxLinesPerPoint'/>
+		<property name='minDistance'/>
+		<property name='objectColorRGB'/>
+		<property name='outMesh'/>
+		<property name='outPositionPP'/>
+		<property name='outRgbaPP'/>
+		<property name='outThicknessPP'/>
+		<property name='parentInverseMatrix'/>
+		<property name='parentMatrix'/>
+		<property name='segments'/>
+		<property name='smooth'/>
+		<property name='visibility'/>
+		<property name='worldInverseMatrix'/>
+		<property name='worldMatrix'/>
+		<property name='worldPosition'/>
+		<property name='inRefPositionPP'/>
+	</view>
+</templates>

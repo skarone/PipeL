@@ -37,6 +37,7 @@ from general.ui.pysideuic.properties import Properties
 
 
 logger = logging.getLogger(__name__)
+logger.propagate = False
 DEBUG = logger.debug
 
 if sys.version_info < (2,4,0):

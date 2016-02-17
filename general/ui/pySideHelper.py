@@ -17,6 +17,7 @@ try:
 except:
 	from PyQt4 import QtGui,QtCore, uic
 	import sip
+	USEPYQT = True
 import os
 
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
@@ -37,23 +38,6 @@ def set_qt_bindings():
 		return __import__(name, globals, locals, fromlist, level)
 	__builtin__.__import__ = hook
 
-"""
-def set_qt_bindings():
-	if USEPYQT:
-		package = 'PyQt4'
-	else:
-		package = 'PySide'
-	if package not in ('PyQt4', 'PySide'):
-		raise ValueError('Unknown Qt Bindings: %s' % package)
-	import __builtin__
-	__import__ = __builtin__.__import__
-	def hook(name, globals=None, locals=None, fromlist=None, level=-1):
-		root, sep, other = name.partition('.')
-		if root == 'Qt':
-			name = package + sep + other
-		return __import__(name, globals, locals, fromlist, level)
-	__builtin__.__import__ = hook
-"""
 
 def getMayaWindow():
 	"""

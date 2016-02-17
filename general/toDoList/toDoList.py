@@ -7,7 +7,7 @@ A simple todo-list application written in Python + PySide
 import os
 import general.ui.pySideHelper as uiH
 reload( uiH )
-uiH.set_qt_bindings()
+
 from Qt import QtGui,QtCore
 
 INMAYA = False

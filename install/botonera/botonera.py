@@ -1,6 +1,6 @@
 import os
 import general.ui.pySideHelper as uiH
-uiH.set_qt_bindings()
+
 from Qt import QtGui,QtCore
 from PySide.phonon import Phonon
 #load UI FILE

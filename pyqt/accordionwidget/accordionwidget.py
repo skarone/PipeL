@@ -4,7 +4,7 @@
 import os
 import general.ui.pySideHelper as uiH
 reload( uiH )
-uiH.set_qt_bindings()
+
 
 from Qt.QtCore import Qt, QRect, QMimeData, QEvent, QPoint
 from Qt.QtGui import QDrag, QPixmap, QScrollArea, QGroupBox, QVBoxLayout, QPainter, QPainterPath, QPalette, QPen

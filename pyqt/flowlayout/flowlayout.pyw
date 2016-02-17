@@ -45,7 +45,7 @@
 import os
 import general.ui.pySideHelper as uiH
 reload( uiH )
-uiH.set_qt_bindings()
+
 from Qt import QtGui,QtCore
 
 
