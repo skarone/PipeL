@@ -199,6 +199,7 @@ class CacheManagerUI(base,fom):
 		cacheFile = cfl.CacheFile( self._selectedShot.poolCam.path.replace( '.ma', '.abc' ), sel )
 		cacheFile.export()
 		selShot = self._selectedShot
+		cacheFile.copy( selShot.compElementsPath )
 		if self.sendMail:
 			ml.mailFromTool( 'new_cache',
 							{ '<ProjectName>': selShot.project.name,
