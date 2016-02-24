@@ -1,0 +1,19 @@
+package: PipeL
+author: Ignacio Urruty
+organization: PipeL
+contact: esperala@gg.com
+version: 1.0
+requires: ''
+rv: 6.2.4
+url: http://www.404.com
+
+modes: 
+  - file: rvPipeL.py
+    menu: 'Tools/PipeL Render Manager'
+    load: immediate
+
+description: |
+    <p>
+    Handle Renders From PipeL
+    </p>
+

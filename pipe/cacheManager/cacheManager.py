@@ -172,7 +172,6 @@ class CacheManagerUI(base,fom):
 		else:
 			subprocess.Popen(['nautilus',poolPath])
 
-
 	def setUseExocortex(self, val):
 		"""docstring for setUseExocortex"""
 		cfl.USE_EXOCORTEX = self.useExocortex_chb.isChecked()

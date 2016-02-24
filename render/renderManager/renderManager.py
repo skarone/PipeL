@@ -162,7 +162,7 @@ class RenderManagerUI(base,fom):
 		mails = ''
 		mailNoti = 'false'
 		if gen[ "sendmail" ] == 'True':
-			mails = ','.join( ml.getUsersInDepartments( ['compo', 'lighting', 'production'], gen[ "departmentspath" ] ) )
+			mails = ','.join( ml.getUsersInDepartments( ['lighting', 'production'], gen[ "departmentspath" ] ) )
 			mailNoti = 'true'
 		for w in self._getLayersWidgets():
 			filePrefix = self.getFilePrefixFromTags( str(self.filePath_le.text()), self.assOrShot )
@@ -217,7 +217,6 @@ class RenderManagerUI(base,fom):
 	def saveShotsPaths(self):
 		"""save settings for render paths"""
 		settings = sti.Settings()
-		gen = settings.General
 		gen = settings.General
 		renderPath = 'R:/'
 		if gen:

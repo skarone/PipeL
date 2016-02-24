@@ -15,8 +15,8 @@ MAIL_MESSAGES = {
 		'departments':['animation','production'],
 		'subject':'[PLAYBLAST] [<ProjectName>] [<SequenceName>] [<ShotName>]'},
 	'new_render':{
-		'message':'New Render<br>Renderlayer: <RenderLayer><br>Sequence: <SequenceName><br>Shot: <ShotName><br>User: <UserName>',
-		'departments':['compo', 'lighting', 'production'],
+		'message':'New Render Publish<br>Renderlayer: <RenderLayer><br>Sequence: <SequenceName><br>Shot: <ShotName><br>User: <UserName><br>File: <a href="<Path>"><Path></a>',
+		'departments':['compo','lighting','production'],
 		'subject':'[RENDER] [<ProjectName>] [<SequenceName>] [<ShotName>] [<RenderLayer>]'},
 	'new_asset_publish':{
 		'message':'New Final Asset Published<br>Asset: <AssetName><br>User: <UserName>',

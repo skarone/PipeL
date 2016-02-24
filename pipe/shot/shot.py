@@ -99,6 +99,11 @@ class Shot(object):
 		return nfl.nukeFile( self.path + '/Comp/Workspaces/' + self.name + '_COMP.nk' )
 
 	@property
+	def publish3DPath(self):
+		"""docstring for publish3DPath"""
+		return self.path + '/Comp/3D/'
+
+	@property
 	def hasComp(self):
 		"""return if there is layout file"""
 		return os.path.getsize( self.compPath.path ) != 0
