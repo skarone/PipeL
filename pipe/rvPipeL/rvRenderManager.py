@@ -17,44 +17,19 @@ import pipe.sequenceFile.sequenceFile as sqf
 import pipe.mail.mail as ml
 reload( ml)
 
-
 PYFILEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 
-uifile = PYFILEDIR.replace( 'Python', 'SupportFiles/rvPipeL' ) + '/rvRenderManager.ui'
+uifile = PYFILEDIR + '/rvRenderManager.ui'
 # uifile = 'D:/PipeL/pipe/rv' + '/rvRenderManager.ui'
 fom, base = uiH.loadUiType( uifile )
-
-class PyQtExample(rvtypes.MinorMode):
-
-	def __init__(self):
-		rvtypes.MinorMode.__init__(self)
-		self.dialog = RenderManager()
-		widgets = QtGui.QApplication.topLevelWidgets()
-		for w in widgets:
-			if "QMainWindow" in str(w):
-				w.addDockWidget(QtCore.Qt.RightDockWidgetArea,self.dialog)
-
-		self.init("rvPipeL", None, [("key-down--X", self.toggleDialog, ""),
-			("before-session-deletion", self.shutdown, "")],
-			[("PipeL", [("Render Selector", self.toggleDialog, "", None)])])
-		self.dialog.hide()
-
-	def shutdown(self, event):
-		self.deactivate()
-
-	def toggleDialog(self, event):
-		if self.dialog.isVisible():
-			self.dialog.hide()
-		else:
-			self.dialog.show()
 
 class RenderManager(base,fom):
 	"""manager ui class"""
 	def __init__(self, parent = None):
 		super(RenderManager, self).__init__(parent)
 		self.setupUi(self)
-		settings = sti.Settings()
-		self.gen = settings.General
+		self.settings = sti.Settings()
+		self.gen = self.settings.General
 		self.serverPath = self.gen[ "serverpath" ]
 		useMayaSubFolder = self.gen[ "usemayasubfolder" ]
 		if useMayaSubFolder == 'True':
@@ -63,6 +38,7 @@ class RenderManager(base,fom):
 			prj.USE_MAYA_SUBFOLDER = False
 		self._makeConnections()
 		self._fillUi()
+		self._loadConfig()
 
 	def _makeConnections(self):
 		"""create connection in the UI"""
@@ -120,6 +96,24 @@ class RenderManager(base,fom):
 	def _fillUi(self):
 		"""fill ui based on current scene or selected shot"""
 		self._fillProyects()
+
+	def _loadConfig(self):
+		"""docstring for _loadConfig"""
+		his = self.settings.History
+		if his:
+			if 'lastproject' in his:
+				lastProject = his[ "lastproject" ]
+				if lastProject:
+					index = self.projects_cmb.findText( lastProject )
+					if not index == -1:
+						self.projects_cmb.setCurrentIndex(index)
+						self._fillSequences()
+			if 'lastsequence' in his:
+				lastSequence = his[ "lastsequence" ]
+				if lastSequence:
+					index = self.sequences_cmb.findText( lastSequence )
+					if not index == -1:
+						self.sequences_cmb.setCurrentIndex(index)
 
 	def _fillProyects(self):
 		"""docstring for _fillProyects"""
@@ -226,6 +220,4 @@ class RenderManager(base,fom):
 
 
 
-def createMode():
-	return PyQtExample()
 

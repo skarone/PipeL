@@ -20,7 +20,7 @@ def filesInDir(root, scanSubFolders = True, filter = None):
 			else:
 				fils.append( File( os.path.join(path, name) ) )
 		count += 1
-	return fils
+	return sorted( fils, key=lambda s: s.name )
 
 class File(object):
 	versInFolds = True #the versions are collected in a folder
