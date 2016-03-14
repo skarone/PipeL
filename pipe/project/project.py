@@ -66,14 +66,14 @@ def shotOrAssetFromFile(mayaFile):
 	elif 'Shots' in mayaFile.path:
 		#P:\Sprite_Gallo\Maya\Sequences\Entrevista\Shots\s001_T01\Anim\s001_T01_ANIM.ma
 		if usemayasubfolder == 'True':
-			area    = split[6]
-			seqName = split[3]
-			shotName = split[5]
+			area    = split[7]
+			seqName = split[4]
+			shotName = split[6]
 		else:
 		#P:\Sprite_Gallo\Sequences\Entrevista\Shots\s001_T01\Anim\s001_T01_ANIM.ma
-			area = split[5]
-			seqName = split[2]
-			shotName = split[4]
+			area = split[6]
+			seqName = split[3]
+			shotName = split[5]
 		index = [sh.AREAS.index(i) for i in sh.AREAS if i.lower() in area.lower()]
 		print shotName, seqName, split[0], index[0]
 		return sh.Shot( shotName, seq.Sequence( seqName, Project( split[0],BASE_PATH ) ), index[0] )

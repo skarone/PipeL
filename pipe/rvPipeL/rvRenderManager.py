@@ -146,8 +146,9 @@ class RenderManager(base,fom):
 		"""docstring for fname"""
 		layer = self._selectedRender
 		self.versions_lw.clear()
-		for a in sorted(os.listdir( layer )):
+		for a in sorted(os.listdir( layer ), reverse=True):
 			self.versions_lw.addItem( a )
+		self.versions_lw.setCurrentItem( self.versions_lw.item( 0 ) )
 
 	def getRenderPathForShot(self, sho):
 		"""docstring for getRenderPathForShot"""
@@ -215,8 +216,8 @@ class RenderManager(base,fom):
 						'<Path>' : sho.publish3DPath + '/' + layer + '/' + version + '/' },
 						os.getenv('username') + '@bitt.com',
 						self.gen[ "departmentspath" ] , self.gen[ "mailserver" ], self.gen[ "mailport" ]  )
-		msgBox = QMessageBox()
-		msgBox.setText("All renderlayers have been published.")
+		msgBox = QtGui.QMessageBox()
+		msgBox.setText( "All renderlayers have been published.")
 		msgBox.exec_()
 
 
