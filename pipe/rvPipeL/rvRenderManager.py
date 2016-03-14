@@ -215,6 +215,9 @@ class RenderManager(base,fom):
 						'<Path>' : sho.publish3DPath + '/' + layer + '/' + version + '/' },
 						os.getenv('username') + '@bitt.com',
 						self.gen[ "departmentspath" ] , self.gen[ "mailserver" ], self.gen[ "mailport" ]  )
+		msgBox = QMessageBox()
+		msgBox.setText("All renderlayers have been published.")
+		msgBox.exec_()
 
 
 
