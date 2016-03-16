@@ -58,7 +58,7 @@ class LighterHelperUI(base,fom):
 		self.isolatedLights = [] #lights that are beign turn off when we want to isolate others!
 		self.isolatedObjects = [] #objects that are beign turn off when we one to isolate others!
 		uiH.loadSkin( self, 'QTDarkGreen' )
-		
+
 	def _makeConnections(self):
 		"""make the connections from the controls to de methods"""
 		#OBJECTS
@@ -106,18 +106,18 @@ class LighterHelperUI(base,fom):
 		self.connect( self.overridesOff_btn         , QtCore.SIGNAL("clicked()") , lambda state=False: self.setOverrides(state) )
 		self.connect( self.overridesOn_btn          , QtCore.SIGNAL("clicked()") , lambda state=True: self.setOverrides(state) )
 		arnoldSettings = mn.Node( 'defaultArnoldRenderOptions' )
-		#SPINBOXES  
-		spinBoxes = [ 
-				self.AASamples_sb,              
-				self.GIDiffuseSamples_sb,       
-				self.GIGlossySamples_sb,        
-				self.GIRefractionSamples_sb,    
-				self.GITotalDepth_sb,           
-				self.GIDiffuseDepth_sb,         
-				self.GIGlossyDepth_sb,          
-				self.GIReflectionDepth_sb,      
-				self.GIRefractionDepth_sb,      
-				self.autoTransparencyDepth_sb  
+		#SPINBOXES
+		spinBoxes = [
+				self.AASamples_sb,
+				self.GIDiffuseSamples_sb,
+				self.GIGlossySamples_sb,
+				self.GIRefractionSamples_sb,
+				self.GITotalDepth_sb,
+				self.GIDiffuseDepth_sb,
+				self.GIGlossyDepth_sb,
+				self.GIReflectionDepth_sb,
+				self.GIRefractionDepth_sb,
+				self.autoTransparencyDepth_sb
 				]
 		for s in spinBoxes:
 			att = arnoldSettings.attr( str( s.objectName() ).replace( '_sb', '' ) )
@@ -125,19 +125,19 @@ class LighterHelperUI(base,fom):
 			self.connect( s, QtCore.SIGNAL("valueChanged(int)") , partial( self.renderSettingsSpinBoxApply, s ) )
 		#CHECBOXES stateChanged
 		chBoxes = [
-				self.ignoreTextures_chb,    
-				self.ignoreAtmosphere_chb,  
-				self.ignoreShadows_chb,     
+				self.ignoreTextures_chb,
+				self.ignoreAtmosphere_chb,
+				self.ignoreShadows_chb,
 				self.ignoreDisplacement_chb,
-				self.ignoreSmoothing_chb,   
-				self.ignoreSss_chb,         
-				self.ignoreDof_chb,         
-				self.ignoreShaders_chb,     
-				self.ignoreLights_chb,      
+				self.ignoreSmoothing_chb,
+				self.ignoreSss_chb,
+				self.ignoreDof_chb,
+				self.ignoreShaders_chb,
+				self.ignoreLights_chb,
 				self.ignoreSubdivision_chb,
-				self.ignoreBump_chb,        
-				self.ignoreMotionBlur_chb,  
-				#self.ignoreMis_chb,         
+				self.ignoreBump_chb,
+				self.ignoreMotionBlur_chb,
+				#self.ignoreMis_chb,
 				]
 		for c in chBoxes:
 			att = arnoldSettings.attr( str( c.objectName() ).replace( '_chb', '' ) )
@@ -167,9 +167,9 @@ class LighterHelperUI(base,fom):
 		aovs = aov.aovsInScene()
 		for ao in aovs:
 			item = QtGui.QListWidgetItem( ao.a.name.v )
-			if ao.a.enabled.v: 
-				state = QtCore.Qt.Checked 
-			else: 
+			if ao.a.enabled.v:
+				state = QtCore.Qt.Checked
+			else:
 				state = QtCore.Qt.Unchecked
 			item.setCheckState( state )
 			item.setData(32, ao )
@@ -179,35 +179,35 @@ class LighterHelperUI(base,fom):
 		"""update Ui based on render layer"""
 		with undo.Undo():
 			arnoldSettings = mn.Node( 'defaultArnoldRenderOptions' )
-			spinBoxes = [ 
-					self.AASamples_sb,              
-					self.GIDiffuseSamples_sb,       
-					self.GIGlossySamples_sb,        
-					self.GIRefractionSamples_sb,    
-					self.GITotalDepth_sb,           
-					self.GIDiffuseDepth_sb,         
-					self.GIGlossyDepth_sb,          
-					self.GIReflectionDepth_sb,      
-					self.GIRefractionDepth_sb,      
-					self.autoTransparencyDepth_sb  
+			spinBoxes = [
+					self.AASamples_sb,
+					self.GIDiffuseSamples_sb,
+					self.GIGlossySamples_sb,
+					self.GIRefractionSamples_sb,
+					self.GITotalDepth_sb,
+					self.GIDiffuseDepth_sb,
+					self.GIGlossyDepth_sb,
+					self.GIReflectionDepth_sb,
+					self.GIRefractionDepth_sb,
+					self.autoTransparencyDepth_sb
 					]
 			for s in spinBoxes:
 				s.setValue( arnoldSettings.attr( str( s.objectName() ).replace( '_sb', '' ) ).v )
 
 			chBoxes = [
-					self.ignoreTextures_chb,    
-					self.ignoreAtmosphere_chb,  
-					self.ignoreShadows_chb,     
+					self.ignoreTextures_chb,
+					self.ignoreAtmosphere_chb,
+					self.ignoreShadows_chb,
 					self.ignoreDisplacement_chb,
-					self.ignoreSmoothing_chb,   
-					self.ignoreSss_chb,         
-					self.ignoreDof_chb,         
-					self.ignoreShaders_chb,     
-					self.ignoreLights_chb,      
+					self.ignoreSmoothing_chb,
+					self.ignoreSss_chb,
+					self.ignoreDof_chb,
+					self.ignoreShaders_chb,
+					self.ignoreLights_chb,
 					self.ignoreSubdivision_chb,
-					self.ignoreBump_chb,        
-					self.ignoreMotionBlur_chb,  
-					#self.ignoreMis_chb,         
+					self.ignoreBump_chb,
+					self.ignoreMotionBlur_chb,
+					#self.ignoreMis_chb,
 					]
 			for c in chBoxes:
 				c.setChecked( arnoldSettings.attr( str( c.objectName() ).replace( '_chb', '' ) ).v )
@@ -256,19 +256,19 @@ class LighterHelperUI(base,fom):
 	def toLow(self):
 		manager = tm.Manager()
 		manager.toLow( self.getTexturesForSelection() )
-	
+
 	def toMid(self):
 		manager = tm.Manager()
 		manager.toMid( self.getTexturesForSelection() )
-		
+
 	def toHigh(self):
 		manager = tm.Manager()
 		manager.toHigh( self.getTexturesForSelection() )
-		
+
 	def dispOff(self):
 		for n in mn.ls( sl = True ):
 			n.shape.a.aiDispHeight.v = 0
-		
+
 	def dispOn(self):
 		for n in mn.ls( sl = True ):
 			n.shape.a.aiDispHeight.v = 1
@@ -277,11 +277,11 @@ class LighterHelperUI(base,fom):
 		for n in mn.ls( sl = True ):
 			n.shape.a.aiSubdivType.v = 1
 			n.shape.a.aiSubdivIterations.v = 1 + n.shape.a.aiSubdivIterations.v
-		
+
 	def zeroSub(self):
 		for n in mn.ls( sl = True ):
 			n.shape.a.aiSubdivType.v = 0
-		
+
 	def minusSub(self):
 		for n in mn.ls( sl = True ):
 			if not n.shape.a.aiSubdivIterations.v == 0:
@@ -308,7 +308,7 @@ class LighterHelperUI(base,fom):
 		alph = mc.checkBox( 'customAlpha_chb', q = True, v = True )
 		mc.layoutDialog( dismiss="Cancel" )
 		self.assignNewMateColor( col, alph )
-	
+
 	def assignNewMateColor(self, col = (0,0,0), alph = 1):
 		"""turn On Mate for Arnold and set color! for selected objects"""
 		for n in mn.ls( sl = True ):
@@ -370,7 +370,7 @@ class LighterHelperUI(base,fom):
 		shaderColor = shader[1]
 		shaderNode = mn.Node( shaderName )
 		if not shaderNode.exists:
-			shaderNode = mn.createNode( 'surfaceShader', n = shaderName )
+			shaderNode = mn.Node( mc.shadingNode( 'surfaceShader', asShader = True,  n = shaderName ) )
 			shaderNode.a.outColor.v = [shaderColor[0], shaderColor[1], shaderColor[2]]
 			shaderNode.a.outMatteOpacity.v = [shaderColor[3],shaderColor[3],shaderColor[3]]
 		self.applyShaderToSel( shaderNode, sels )
@@ -380,7 +380,7 @@ class LighterHelperUI(base,fom):
 		sels = mn.ls( sl = True )
 		shaderNode = mn.Node( 'OCC_MAT' )
 		if not shaderNode.exists:
-			shaderNode = mn.createNode( 'aiAmbientOcclusion', n = 'OCC_MAT' )
+			shaderNode = mn.Node( mc.shadingNode( 'aiAmbientOcclusion', asShader = True,  n = 'OCC_MAT' ) )
 		self.applyShaderToSel( shaderNode, sels )
 
 	def createAssignAiStandard(self):
@@ -388,7 +388,7 @@ class LighterHelperUI(base,fom):
 		sels = mn.ls( sl = True )
 		shaderNode = mn.Node( 'aiStandard_MAT' )
 		if not shaderNode.exists:
-			shaderNode = mn.createNode( 'aiStandard', n = 'aiStandard_MAT' )
+			shaderNode = mn.Node( mc.shadingNode( 'aiStandard', asShader = True,  n = 'aiStandard_MAT' ) )
 		self.applyShaderToSel( shaderNode, sels )
 
 	def applyShaderToSel( self, shader, sels ):
@@ -411,7 +411,7 @@ class LighterHelperUI(base,fom):
 			#sels.select()
 			#mc.hyperShade( a = shader.name )
 		self.applyShaderToHair( shader, sels )
-	
+
 	def applyShaderToHair(self,shader, sels):
 		"""docstring for applyShaderToHair"""
 		hairSel = []
@@ -446,7 +446,7 @@ class LighterHelperUI(base,fom):
 		sels = mn.ls( sl = True )
 		shaderNode = mn.Node( 'UV_MAT' )
 		if not shaderNode.exists:
-			shaderNode = mn.createNode( 'aiUtility', n = 'UV_MAT' )
+			shaderNode = mn.Node( mc.shadingNode( 'aiUtility', asShader = True,  n = 'UV_MAT' ) )
 			shaderNode.a.colorMode.v = 5
 			shaderNode.a.shadeMode.v = 2
 		self.applyShaderToSel( shaderNode, sels )
@@ -456,7 +456,7 @@ class LighterHelperUI(base,fom):
 		sels = mn.ls( sl = True )
 		shaderNode = mn.Node( 'SHADOW_MAT' )
 		if not shaderNode.exists:
-			shaderNode = mn.createNode( 'aiShadowCatcher', n = 'SHADOW_MAT' )
+			shaderNode = mn.Node( mc.shadingNode( 'aiShadowCatcher', asShader = True,  n = 'SHADOW_MAT' ) )
 		self.applyShaderToSel( shaderNode, sels )
 
 	def createAssignZdepth(self):
@@ -465,11 +465,11 @@ class LighterHelperUI(base,fom):
 		shaderNode = mn.Node( 'ZDEPTH_MAT' )
 		if not shaderNode.exists:
 			with undo.Undo():
-				shaderNode = mn.createNode( 'surfaceShader'  , n = 'ZDEPTH_MAT' )
-				rangeNode  = mn.createNode( 'setRange'       , n = 'range_ZDEPTH_RNG' )
-				multyNode  = mn.createNode( 'multiplyDivide' , n = 'multy_ZDEPTH_MUL' )
-				rampNode   = mn.createNode( 'ramp'           , n = 'ramp_ZDEPTH_RMP' )
-				sampleNode = mn.createNode( 'samplerInfo'    , n = 'ramp_ZDEPTH_RMP' )
+				shaderNode = mn.Node( mc.shadingNode( 'surfaceShader', asShader = True,  n = 'ZDEPTH_MAT' ) )
+				rangeNode = mn.Node( mc.shadingNode( 'setRange', asUtility = True,  n = 'range_ZDEPTH_RNG' ) )
+				multyNode = mn.Node( mc.shadingNode( 'multiplyDivide', asUtility = True,  n = 'multy_ZDEPTH_MUL' ) )
+				rampNode = mn.Node( mc.shadingNode( 'ramp', asTexture = True,  n = 'ramp_ZDEPTH_RMP' ) )
+				sampleNode = mn.Node( mc.shadingNode( 'samplerInfo', asUtility = True,  n = 'ramp_ZDEPTH_RMP' ) )
 				#make connections
 				sampleNode.a.pointCameraZ   >> multyNode.a.input1X
 				multyNode.a.output          >> rangeNode.a.value
@@ -511,7 +511,7 @@ class LighterHelperUI(base,fom):
 		sel = mn.ls( sl = True )
 		if not sel:
 			return
-		items = [self.shapeOverrides_01_lay.itemAt(i) for i in range(self.shapeOverrides_01_lay.count())] 
+		items = [self.shapeOverrides_01_lay.itemAt(i) for i in range(self.shapeOverrides_01_lay.count())]
 		items.extend( [self.shapeOverrides_02_lay.itemAt(i) for i in range(self.shapeOverrides_02_lay.count())] )
 		valsDict = {}
 		for w in items:
@@ -598,7 +598,7 @@ class LighterHelperUI(base,fom):
 		if cam:
 			cons = mn.Node( mc.parentConstraint( cam.name, lit.name )[0] )
 			cons.delete()
-		
+
 	def openRenderSettings(self):
 		"""open render settings ui"""
 		mm.eval( 'unifiedRenderGlobalsWindow' )
@@ -645,23 +645,23 @@ class LighterHelperUI(base,fom):
 	def setOverrides(self, state ):
 		"""turn all checkboxes on"""
 		chBoxes = [
-				self.ignoreTextures_chb,    
-				self.ignoreAtmosphere_chb,  
-				self.ignoreShadows_chb,     
+				self.ignoreTextures_chb,
+				self.ignoreAtmosphere_chb,
+				self.ignoreShadows_chb,
 				self.ignoreDisplacement_chb,
-				self.ignoreSmoothing_chb,   
-				self.ignoreSss_chb,         
-				self.ignoreDof_chb,         
-				self.ignoreShaders_chb,     
-				self.ignoreLights_chb,      
+				self.ignoreSmoothing_chb,
+				self.ignoreSss_chb,
+				self.ignoreDof_chb,
+				self.ignoreShaders_chb,
+				self.ignoreLights_chb,
 				self.ignoreSubdivision_chb,
-				self.ignoreBump_chb,        
-				self.ignoreMotionBlur_chb,  
-				#self.ignoreMis_chb,         
+				self.ignoreBump_chb,
+				self.ignoreMotionBlur_chb,
+				#self.ignoreMis_chb,
 				]
 		for c in chBoxes:
 			c.setChecked( state )
-	
+
 	def renderSettingsSpinBoxApply(self, spinbox):
 		"""change settings for spinBox"""
 		over = self.overrideRenderSettings_chb.isChecked()
@@ -710,7 +710,7 @@ class LighterHelperUI(base,fom):
 		print 'custom close'
 		self.desisolateLight()
 		event.accept()
-	
+
 	def loadArnold(self):
 		version = mc.about(v = True).split()[0]
 		if mc.pluginInfo('mtoa', q=1, l=1):
@@ -742,8 +742,8 @@ class LighterHelperUI(base,fom):
 		except:
 			pass
 		"""
-		
-		
+
+
 
 	def getCurrentCamera(self):
 		pan = mc.getPanel(wf=1)
@@ -763,7 +763,7 @@ class LighterHelperUI(base,fom):
 		if not os.path.exists( pathDir ):
 			os.makedirs( pathDir )
 		rlExporter = rlExp.RenderLayerExporter( pathDir )
-		rlExporter.export(  self.renderLayersOpt_chb.isChecked(), 
+		rlExporter.export(  self.renderLayersOpt_chb.isChecked(),
 							self.lightsOpt_chb.isChecked(),
 							self.aovsOpt_chb.isChecked(),
 							self.shadersOpt_chb.isChecked(),
@@ -782,7 +782,7 @@ class LighterHelperUI(base,fom):
 				if ':' in sel[0]:
 					asset = sel[0][ : -len( sel[0].split( ':' )[-1] ) ]
 		rlExporter = rlExp.RenderLayerExporter( pathDir )
-		rlExporter.importAll(  self.renderLayersOpt_chb.isChecked(), 
+		rlExporter.importAll(  self.renderLayersOpt_chb.isChecked(),
 							self.lightsOpt_chb.isChecked(),
 							self.shadersOpt_chb.isChecked(),
 							self.aovsOpt_chb.isChecked(),
@@ -790,7 +790,7 @@ class LighterHelperUI(base,fom):
 							asset,
 							searchAndReplace
 							)
-	
+
 	def getDirForRenderData(self):
 		"""get the directory for the render layer data"""
 		if self.useSceneForlder_chb.isChecked():
@@ -798,7 +798,7 @@ class LighterHelperUI(base,fom):
 		else:
 			pathDir = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory"))
 		return pathDir
-		
+
 
 	def lookThroughSelected(self):
 		"""look Through To selected object"""
