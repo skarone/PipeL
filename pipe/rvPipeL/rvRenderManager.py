@@ -39,6 +39,7 @@ class RenderManager(base,fom):
 		self._makeConnections()
 		self._fillUi()
 		self._loadConfig()
+		self.viewLayers_lw.setDragDropMode( QtGui.QAbstractItemView.InternalMove )
 
 	def _makeConnections(self):
 		"""create connection in the UI"""
@@ -53,6 +54,7 @@ class RenderManager(base,fom):
 		QtCore.QObject.connect( self.layers_lw, QtCore.SIGNAL( "itemActivated( QListWidgetItem* )" ), self.fillVersionsList )
 		QtCore.QObject.connect( self.layers_lw, QtCore.SIGNAL( "itemPressed( QListWidgetItem* )" ), self.fillVersionsList )
 		QtCore.QObject.connect( self.viewLayers_lw, QtCore.SIGNAL( "itemChanged( QListWidgetItem* )" ), self.changeLayerVis )
+		self.viewLayers_lw.installEventFilter(self)
 
 	@property
 	def _selectedProject(self):
@@ -183,6 +185,22 @@ class RenderManager(base,fom):
 		self.viewLayers_lw.takeItem( self.viewLayers_lw.row( lay ) )
 		assGroup = commands.nodeGroup(lay.data(32)[0])
 		commands.deleteNode( assGroup )
+
+	def eventFilter(self, sender, event):
+		# this is the function that processes internal drop in notesList
+		if event.type() == QtCore.QEvent.ChildRemoved:
+			self.changeOrder() # do something
+		return False # don't actually interrupt anything
+
+	def changeOrder(self):
+		"""docstring for changeOrder"""
+		sources = []
+		for i in range( self.viewLayers_lw.count() ):
+			item = self.viewLayers_lw.item( i )
+			sourNode = item.data(32)[0]
+			assGroup = commands.nodeGroup(sourNode)
+			sources.append( str( assGroup ) )
+		commands.setNodeInputs("defaultStack", sources)
 
 	def changeLayerVis(self, item):
 		"""docstring for changeLayerVis(self, item"""
