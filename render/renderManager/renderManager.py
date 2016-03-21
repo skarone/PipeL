@@ -212,7 +212,7 @@ class RenderManagerUI(base,fom):
 			Job.write()
 			dead.runMayaJob( Job )
 		#save asset or shot paths
-		self.saveShotsPaths()
+		#self.saveShotsPaths()
 
 	def saveShotsPaths(self):
 		"""save settings for render paths"""
